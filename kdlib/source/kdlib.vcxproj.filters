@@ -71,7 +71,6 @@
     <ClInclude Include="..\include\kdlib\dbgio.h">
       <Filter>include/kdlib</Filter>
     </ClInclude>
-    <ClInclude Include="dbgioimp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">
@@ -110,6 +109,6 @@
     <ClCompile Include="windbg\windbg.cpp">
       <Filter>windbg</Filter>
     </ClCompile>
-    <ClCompile Include="..\include\kdlib\dbgio.cpp" />
+    <ClCompile Include="dbgio.cpp" />
   </ItemGroup>
 </Project>
