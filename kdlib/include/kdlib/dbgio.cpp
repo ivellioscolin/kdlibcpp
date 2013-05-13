@@ -13,7 +13,12 @@ namespace kdlib {
 class DbgStdOut: public DbgOut
 {
 public:
-    virtual void write( const std::wstring& str, bool dml )
+    virtual void write( const std::wstring& str )
+    {
+        std::wcout << str;
+    }
+
+    virtual void writedml( const std::wstring& str )
     {
         std::wcout << str;
     }
@@ -26,7 +31,12 @@ DbgStdOut  dbgstdout;
 class DbgStdErr : public DbgOut
 {
 public:
-    virtual void write( const std::wstring& str, bool dml )
+    virtual void write( const std::wstring& str)
+    {
+        std::wcerr << str;
+    }
+
+    virtual void writedml( const std::wstring& str )
     {
         std::wcerr << str;
     }
@@ -66,7 +76,7 @@ void dprintln( const std::wstring &str, bool dml  )
 
 void dprint( const std::wstring &str, bool dml  )
 {
-    dbgout->write( str, dml );
+    dml ? dbgout->writedml(str) : dbgout->write( str );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

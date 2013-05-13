@@ -8,10 +8,8 @@
 
 #include "kdlib/dbgengine.h"
 #include "kdlib/windbg.h"
+#include "kdlib/dbgio.h"
 #include "win/dbgmgr.h"
-
-#include "dbgioimp.h"
-
 
 static volatile LONG g_initCount = 0;
 
@@ -24,11 +22,22 @@ namespace windbg {
 
 class WindbgOut : public DbgOut
 {
-    virtual void write( const std::wstring& str, bool dml )
+    virtual void write( const std::wstring& str )
     {
 
         g_dbgMgr->control->ControlledOutputWide(  
-            dml ? DEBUG_OUTCTL_AMBIENT_DML : DEBUG_OUTCTL_AMBIENT_TEXT,
+            DEBUG_OUTCTL_AMBIENT_TEXT,
+            DEBUG_OUTPUT_NORMAL, 
+            L"%ws",
+            str.c_str()
+            );
+    }
+
+    virtual void writedml( const std::wstring& str )
+    {
+
+        g_dbgMgr->control->ControlledOutputWide(  
+            DEBUG_OUTCTL_AMBIENT_DML,
             DEBUG_OUTPUT_NORMAL, 
             L"%ws",
             str.c_str()
@@ -42,9 +51,17 @@ WindbgOut  windbgOut;
 
 class WindbgErr : public DbgOut
 {
-    virtual void write( const std::wstring& str, bool dml )
+    virtual void write( const std::wstring& str )
     {
+        g_dbgMgr->control->OutputWide(  
+            DEBUG_OUTPUT_ERROR, 
+            L"%ws",
+            str.c_str()
+            );
+    }
 
+    virtual void writedml( const std::wstring& str )
+    {
         g_dbgMgr->control->OutputWide(  
             DEBUG_OUTPUT_ERROR, 
             L"%ws",
@@ -114,11 +131,11 @@ DebugExtensionInitialize(
     {
         kdlib::initialize();
 
-        WinDbgExt->setUp();
-
         kdlib::dbgout =&kdlib::windbg::windbgOut;
         kdlib::dbgerr = &kdlib::windbg::windbgErr;
         kdlib::dbgin = &kdlib::windbg::windbgIn;
+
+        WinDbgExt->setUp();
     }
 
     return S_OK;

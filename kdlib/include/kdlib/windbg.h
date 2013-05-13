@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 
+#include <atlcomcli.h>
+#include <DbgEng.h>
+
 #include "kdlib/exceptions.h"
 
 namespace kdlib {
@@ -11,8 +14,6 @@ namespace windbg {
 ///////////////////////////////////////////////////////////////////////////////
 
 class WindbgExtension {
-
-    typedef std::vector< std::string > ArgsList;
 
 public:
 
@@ -23,11 +24,13 @@ public:
     virtual void tearDown() {}
     virtual void parseArgs(const char* args);
 
+protected:
+
+    typedef std::vector< std::string > ArgsList;
+
     const ArgsList& getArgs() const {
         return  m_argsList;
     }
-
-protected:
 
     ArgsList  m_argsList;
 
@@ -57,15 +60,22 @@ METHOD_NAME ( __in PDEBUG_CLIENT client,  __in_opt PCSTR args)               \
     ULONG  mask;                                                             \
     client->GetOutputMask( &mask );                                          \
     client->SetOutputMask( mask & ~DEBUG_OUTPUT_PROMPT );                    \
+    CComQIPtr<IDebugControl4> ctrl = client;                                 \
     try  {                                                                   \
         KdlibExtImpl->parseArgs(args);                                       \
         KdlibExtImpl->METHOD_NAME();                                         \
-    } catch( kdlib::DbgException& )                                          \
-    {}                                                                       \
+    }                                                                        \
+    catch( kdlib::DbgException& de )                                         \
+    {                                                                        \
+        ctrl->OutputWide( DEBUG_OUTPUT_ERROR,  L"Kdlib exception: %ws", de.getDesc().c_str() ); \
+    }                                                                        \
+    catch(...)                                                               \
+    {                                                                        \
+        ctrl->OutputWide( DEBUG_OUTPUT_ERROR,  L"Unknown pykd exception" );  \
+    }                                                                        \
     client->SetOutputMask( mask );                                           \
     return S_OK;                                                             \
 }                                                                            \
 void CLASS_NAME::METHOD_NAME()
-
 
 ///////////////////////////////////////////////////////////////////////////////
