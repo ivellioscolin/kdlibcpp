@@ -129,8 +129,6 @@ DebugExtensionInitialize(
 
     if ( 1 == InterlockedIncrement( &g_initCount ) )
     {
-        kdlib::initialize();
-
         kdlib::dbgout =&kdlib::windbg::windbgOut;
         kdlib::dbgerr = &kdlib::windbg::windbgErr;
         kdlib::dbgin = &kdlib::windbg::windbgIn;
@@ -150,8 +148,6 @@ DebugExtensionUninitialize()
     if ( 0 == InterlockedDecrement( &g_initCount ) )
     {
         WinDbgExt->tearDown();
-
-        kdlib::uninitialize();
     }
 }
 
