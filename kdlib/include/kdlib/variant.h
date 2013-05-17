@@ -235,7 +235,7 @@ public:
         return cast( longT ).m_longVal;
     }
 
-    long asULong() {
+    unsigned long asULong() {
         return cast( ulongT ).m_ulongVal;
     }
 
@@ -313,7 +313,70 @@ public:
 
     bool isSigned() {
         return NumVariant(-1).cast( m_numType ) < 0;
+    }
 
+    void setChar(char val) {
+        m_numType = charT;
+        m_charVal = val;
+    }
+
+    void setBool(bool val) {
+        setChar(val);
+    }
+
+    void setUChar( unsigned char val) {
+        m_numType = ucharT;
+        m_ucharVal = val;
+    }
+
+    void setShort(short val) {
+        m_numType = shortT;
+        m_shortVal = val;
+    }
+
+    void setUShort(unsigned short val) {
+        m_numType = ushortT;
+        m_ushortVal = val;
+    }
+
+    void setLong(long val) {
+        m_numType = longT;
+        m_longVal = val;
+    }
+
+    void setULong(unsigned long val) {
+        m_numType = ulongT;
+        m_ulongVal = val;
+    }
+
+    void setLongLong(long long val) {
+        m_numType = longlongT;
+        m_longlongVal = val;
+    }
+
+    void setULongLong(unsigned long long val) {
+        m_numType = ulonglongT;
+        m_ulonglongVal = val;
+    }
+
+    void setInt(int val) {
+        m_numType = intT;
+        m_intVal = val;
+    }
+
+    void setUInt(unsigned int val) {
+        m_numType = uintT;
+        m_uintVal = val;
+    }
+
+    void setFloat(float val) {
+        m_numType = floatT;
+        m_floatVal = val;
+    }
+
+    void setDouble(double val) {
+        m_numType = doubleT;
+        m_doubleVal = val;
     }
 
     friend bool operator==(const NumVariant& v1, const NumVariant& v2)
