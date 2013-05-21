@@ -723,6 +723,40 @@ private:
     }
 };
 
+class NumVariantGetter
+{
+public:
+
+    operator NumVariant() const {
+        return getValue();
+    }
+
+    operator NumVariant() {
+        return getValue();
+    }
+    
+    operator long() const {
+        return getValue().asLong();
+    }
+
+    operator unsigned long() const {
+        return getValue().asULong();
+    }
+
+    operator long long() const {
+        return getValue().asLongLong();
+    }
+
+    operator unsigned long long() const {
+        return getValue().asULongLong();
+    }
+
+protected:
+
+    virtual NumVariant getValue() const  = 0;
+
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end kdlib namespace

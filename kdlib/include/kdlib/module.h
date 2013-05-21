@@ -22,7 +22,7 @@ typedef boost::shared_ptr<Module>  ModulePtr;
 ModulePtr loadModule( const std::wstring &name );
 ModulePtr loadModule( MEMOFFSET_64 offset );
 
-class Module : private boost::noncopyable {
+class Module : private boost::noncopyable, public NumVariantGetter {
     
 public:
 
@@ -68,9 +68,9 @@ public:
     SymbolPtr getSymbolByName( const std::wstring &symbolName );
     SymbolPtr getSymbolScope();
 
-    operator MEMOFFSET_64() const  {
-        return m_base;
-    }
+    //operator MEMOFFSET_64() const  {
+    //    return m_base;
+    //}
 
     TypeInfoPtr getTypeByName( const std::wstring &typeName ) {
         return loadType( getSymbolScope(), typeName );
@@ -83,6 +83,10 @@ protected:
     Module( MEMOFFSET_64 offset );
 
     SymbolSessionPtr& getSymSession();
+
+    virtual NumVariant getValue() const {
+        return NumVariant( m_base );
+    }
 
     std::wstring  m_name;
     std::wstring  m_imageName;
