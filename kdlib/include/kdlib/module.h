@@ -22,6 +22,10 @@ typedef boost::shared_ptr<Module>  ModulePtr;
 ModulePtr loadModule( const std::wstring &name );
 ModulePtr loadModule( MEMOFFSET_64 offset );
 
+
+typedef std::pair< std::wstring, MEMOFFSET_64 > SymbolOffset;
+typedef std::list< SymbolOffset > SymbolOffsetList;
+
 class Module : private boost::noncopyable, public NumBehavior {
     
 public:
@@ -68,13 +72,12 @@ public:
     SymbolPtr getSymbolByName( const std::wstring &symbolName );
     SymbolPtr getSymbolScope();
 
-    //operator MEMOFFSET_64() const  {
-    //    return m_base;
-    //}
 
     TypeInfoPtr getTypeByName( const std::wstring &typeName ) {
         return loadType( getSymbolScope(), typeName );
     }
+       
+    SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" );
 
 protected:
 

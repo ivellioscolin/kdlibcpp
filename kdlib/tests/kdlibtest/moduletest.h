@@ -1,9 +1,12 @@
 #pragma once
 
-#include "processtest.h"
+#include <boost/bind.hpp>
+
 #include "kdlib/module.h"
 #include "kdlib/memaccess.h"
 #include "kdlib/exceptions.h"
+
+#include "processtest.h"
 
 using namespace kdlib;
 
@@ -67,6 +70,24 @@ TEST_F( ModuleTest, getTypeByName )
 {
     EXPECT_EQ( L"structTest", m_targetModule->getTypeByName(L"structTest")->getName() );
     EXPECT_EQ( L"structTest", m_targetModule->getTypeByName(L"g_structTest")->getName() );
+}
+
+TEST_F( ModuleTest, enumSymbol )
+{
+    SymbolOffsetList  symLst = m_targetModule->enumSymbols();
+    EXPECT_NE( 0, symLst.size() );
+    EXPECT_FALSE( symLst.end() == std::find_if( symLst.begin(), symLst.end(), boost::bind( &SymbolOffset::first, _1 ) == L"helloStr" ) );
+
+    symLst = m_targetModule->enumSymbols(L"g_*");
+    EXPECT_NE( 0, symLst.size() );
+    EXPECT_FALSE( symLst.end() == std::find_if( symLst.begin(), symLst.end(), boost::bind( &SymbolOffset::first, _1 ) == L"g_structTest" ) );
+    EXPECT_TRUE( symLst.end() == std::find_if( symLst.begin(), symLst.end(), boost::bind( &SymbolOffset::first, _1 ) == L"helloStr" ) );
+
+    symLst = m_targetModule->enumSymbols(L"g_structTest");
+    EXPECT_EQ( 1, symLst.size() );
+
+    symLst = m_targetModule->enumSymbols(L"structTest");
+    EXPECT_EQ( 0, symLst.size() );
 }
 
 
