@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "kdlib/dbgtypedef.h"
 #include "kdlib/dbgengine.h"
 
 namespace kdlib {
