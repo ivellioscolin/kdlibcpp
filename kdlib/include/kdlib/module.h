@@ -22,7 +22,7 @@ typedef boost::shared_ptr<Module>  ModulePtr;
 ModulePtr loadModule( const std::wstring &name );
 ModulePtr loadModule( MEMOFFSET_64 offset );
 
-class Module : private boost::noncopyable, public NumVariantGetter {
+class Module : private boost::noncopyable, public NumBehavior {
     
 public:
 

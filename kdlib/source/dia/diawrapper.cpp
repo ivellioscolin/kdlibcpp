@@ -317,7 +317,7 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
         m_symbol->findChildren(
             ::SymTagNull,
             _bstr_t(name.c_str()),
-            nsfCaseSensitive | nsfUndecoratedName,
+            nsfCaseSensitive,
             &symbols);
 
     LONG count;

@@ -20,7 +20,7 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr );
 TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
 
 
-class TypedVar : private boost::noncopyable {
+class TypedVar : private boost::noncopyable, public NumBehavior {
 
     friend TypedVarPtr loadTypedVar( const std::wstring &varName );
 
@@ -40,14 +40,6 @@ public:
     virtual std::wstring getElementName( size_t index ) = 0;
 
     virtual NumVariant getValue() const = 0;
-
-    operator NumVariant() const {
-        return getValue();
-    }
-
-    operator NumVariant() {
-        return getValue();
-    }
 
 protected:
 

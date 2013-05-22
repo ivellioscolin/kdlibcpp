@@ -115,3 +115,10 @@ TEST_F( TypedVarTest, GetElementByIndex )
     EXPECT_EQ( g_testArray[0].m_field1, *loadTypedVar(L"g_testArray")->getElement(0)->getElement(1) );
     EXPECT_THROW( loadTypedVar(L"g_testArray")->getElement( ARRAYSIZE(g_testArray) ), TypeException  );
 }
+
+
+TEST_F( TypedVarTest, ArithmOp )
+{
+    EXPECT_EQ( ucharVar + 20, *loadTypedVar(L"ucharVar") + 20);
+}
+

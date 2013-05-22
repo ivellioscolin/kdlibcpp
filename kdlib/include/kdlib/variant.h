@@ -114,6 +114,7 @@ struct rshift_op {
 };
 
 
+
 class NumVariant : boost::operators<NumVariant>, boost::left_shiftable<NumVariant>, boost::right_shiftable<NumVariant>
 {
 
@@ -491,6 +492,74 @@ public:
         return NumVariant::op<NumVariant, sub_op >( NumVariant(0), v1 );
     }
 
+    template< typename RetT, template<class> class FuncT>
+    static
+    RetT op( const NumVariant& v1, const NumVariant& v2 )
+    {
+        NumVariant::NumType  t = maxType( v1, v2 );
+        NumVariant v3 = v1.cast( t );
+        NumVariant v4 = v2.cast( t );
+
+        switch( t )
+        {
+        case floatT:
+            return FuncT<float>()(v3.m_floatVal, v4.m_floatVal);
+
+        case doubleT:
+            return FuncT<double>()(v3.m_doubleVal, v4.m_doubleVal);
+        }
+
+        return whole_op<RetT, FuncT>( v3, v4 );
+    }
+
+    template< typename RetT, template<class> class FuncT>
+    static
+    RetT whole_op( const NumVariant& v1, const NumVariant& v2 )
+    {
+        NumVariant::NumType  t = maxType( v1, v2 );
+        NumVariant v3 = v1.cast( t );
+        NumVariant v4 = v2.cast( t );
+
+        switch( t )
+        {
+        case charT:
+            return FuncT<char>()(v3.m_charVal, v4.m_charVal);
+
+        case ucharT:
+            return FuncT<unsigned char>()(v3.m_ucharVal, v4.m_ucharVal);
+        
+        case shortT:
+            return FuncT<short>()(v3.m_shortVal, v4.m_shortVal);
+
+        case ushortT:
+            return FuncT<unsigned short>()(v3.m_ushortVal, v4.m_ushortVal);
+
+        case longT:
+            return FuncT<long>()(v3.m_longVal, v4.m_longVal);
+
+        case ulongT:
+            return FuncT<unsigned long>()(v3.m_ulongVal, v4.m_ulongVal);
+
+        case longlongT:
+            return FuncT<long long>()(v3.m_longlongVal, v4.m_longlongVal);
+
+        case ulonglongT:
+            return FuncT<unsigned long long>()(v3.m_ulonglongVal, v4.m_ulonglongVal);
+
+        case intT:
+            return FuncT<int>()(v3.m_intVal, v4.m_intVal);
+
+        case uintT:
+            return FuncT<unsigned int>()(v3.m_uintVal, v4.m_uintVal);
+            
+        case floatT:
+        case doubleT:
+             throw NumVariantError();
+        }
+
+        throw NumVariantError();
+    }
+
 
 private:
 
@@ -653,78 +722,13 @@ private:
             break;
         }
     }
-
-    template< typename RetT, template<class> class FuncT>
-    static
-    RetT op( const NumVariant& v1, const NumVariant& v2 )
-    {
-        NumVariant::NumType  t = maxType( v1, v2 );
-        NumVariant v3 = v1.cast( t );
-        NumVariant v4 = v2.cast( t );
-
-        switch( t )
-        {
-        case floatT:
-            return FuncT<float>()(v3.m_floatVal, v4.m_floatVal);
-
-        case doubleT:
-            return FuncT<double>()(v3.m_doubleVal, v4.m_doubleVal);
-        }
-
-        return whole_op<RetT, FuncT>( v3, v4 );
-    }
-
-    template< typename RetT, template<class> class FuncT>
-    static
-    RetT whole_op( const NumVariant& v1, const NumVariant& v2 )
-    {
-        NumVariant::NumType  t = maxType( v1, v2 );
-        NumVariant v3 = v1.cast( t );
-        NumVariant v4 = v2.cast( t );
-
-        switch( t )
-        {
-        case charT:
-            return FuncT<char>()(v3.m_charVal, v4.m_charVal);
-
-        case ucharT:
-            return FuncT<unsigned char>()(v3.m_ucharVal, v4.m_ucharVal);
-        
-        case shortT:
-            return FuncT<short>()(v3.m_shortVal, v4.m_shortVal);
-
-        case ushortT:
-            return FuncT<unsigned short>()(v3.m_ushortVal, v4.m_ushortVal);
-
-        case longT:
-            return FuncT<long>()(v3.m_longVal, v4.m_longVal);
-
-        case ulongT:
-            return FuncT<unsigned long>()(v3.m_ulongVal, v4.m_ulongVal);
-
-        case longlongT:
-            return FuncT<long long>()(v3.m_longlongVal, v4.m_longlongVal);
-
-        case ulonglongT:
-            return FuncT<unsigned long long>()(v3.m_ulonglongVal, v4.m_ulonglongVal);
-
-        case intT:
-            return FuncT<int>()(v3.m_intVal, v4.m_intVal);
-
-        case uintT:
-            return FuncT<unsigned int>()(v3.m_uintVal, v4.m_uintVal);
-            
-        case floatT:
-        case doubleT:
-             throw NumVariantError();
-        }
-
-        throw NumVariantError();
-    }
 };
 
-class NumVariantGetter
+
+
+class NumBehavior : boost::operators<NumBehavior>, boost::left_shiftable<NumBehavior>, boost::right_shiftable<NumBehavior>
 {
+
 public:
 
     operator NumVariant() const {
@@ -734,28 +738,13 @@ public:
     operator NumVariant() {
         return getValue();
     }
-    
-    operator long() const {
-        return getValue().asLong();
-    }
-
-    operator unsigned long() const {
-        return getValue().asULong();
-    }
-
-    operator long long() const {
-        return getValue().asLongLong();
-    }
-
-    operator unsigned long long() const {
-        return getValue().asULongLong();
-    }
 
 protected:
 
     virtual NumVariant getValue() const  = 0;
 
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

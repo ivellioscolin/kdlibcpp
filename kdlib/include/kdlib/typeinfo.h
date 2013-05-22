@@ -19,7 +19,7 @@ TypeInfoPtr loadType( const std::wstring &symName );
 TypeInfoPtr loadType( SymbolPtr &symbol );
 TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
 
-class TypeInfo : private boost::noncopyable {
+class TypeInfo : private boost::noncopyable, public NumBehavior {
 
     friend TypeInfoPtr loadType( const std::wstring &symName );
     friend TypeInfoPtr loadType( SymbolPtr &symbol );
@@ -58,13 +58,6 @@ public:
 
     virtual NumVariant getValue() const = 0;
 
-    operator NumVariant() const {
-        return getValue();
-    }
-
-    operator NumVariant() {
-        return getValue();
-    }
 
 protected:
 
