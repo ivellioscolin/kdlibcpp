@@ -193,7 +193,7 @@ TEST_F( TypeInfoTest, BitField )
     EXPECT_TRUE( bitField->isBitField() );
     EXPECT_EQ( 5, bitField->getBitOffset() );
     EXPECT_EQ( 1, bitField->getBitWidth() );
-    EXPECT_EQ( 2, bitFieldStruct->getElement(L"m_bit6_7")->getBitWidth() );
+    EXPECT_EQ( 3, bitFieldStruct->getElement(L"m_bit6_8")->getBitWidth() );
 }
 
 TEST_F( TypeInfoTest, StaticField )
