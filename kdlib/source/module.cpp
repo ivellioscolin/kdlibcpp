@@ -195,6 +195,17 @@ SymbolOffsetList Module::enumSymbols( const std::wstring  &mask )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring Module::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
+{
+    displacement = 0;
+    
+    SymbolPtr  sym = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base ), SymTagNull, &displacement );
+
+    return sym->getName();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 {
     std::vector<MEMOFFSET_64>   moduleList = getModuleBasesList();
@@ -218,5 +229,7 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+
 
 }; // kdlib namespace end

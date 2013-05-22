@@ -90,4 +90,17 @@ TEST_F( ModuleTest, enumSymbol )
     EXPECT_EQ( 0, symLst.size() );
 }
 
+TEST_F( ModuleTest, findSymbol )
+{
+    std::wstring  name;
+    MEMDISPLACEMENT  displacement;
+    EXPECT_NO_THROW( name = m_targetModule->findSymbol( m_targetModule->getSymbolVa(L"g_structTest"), displacement ) );
+    EXPECT_EQ( L"g_structTest", name );
+    EXPECT_EQ( 0, displacement );
 
+    EXPECT_NO_THROW( name = m_targetModule->findSymbol( m_targetModule->getSymbolVa(L"g_structTest") + 1, displacement ) );
+    EXPECT_EQ( L"g_structTest", name );
+    EXPECT_EQ( 1, displacement );
+
+    EXPECT_THROW( m_targetModule->findSymbol( m_targetModule->getSymbolVa(L"g_structTestAAAA"), displacement ), SymbolException );
+}

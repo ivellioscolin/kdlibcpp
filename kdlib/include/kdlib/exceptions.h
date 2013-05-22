@@ -16,7 +16,8 @@ class DbgException : public std::exception
 public:
 
     DbgException( const std::wstring  &desc ) :
-      m_desc(desc)
+        m_desc(desc),
+        std::exception( "KDLIBCPP Exception" )
         {}
 
     const  std::wstring& getDesc() const {

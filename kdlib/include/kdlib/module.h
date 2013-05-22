@@ -79,6 +79,8 @@ public:
        
     SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" );
 
+    std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
+
 protected:
 
     Module( const std::wstring &name );
