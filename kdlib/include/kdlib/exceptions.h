@@ -119,7 +119,8 @@ private:
 #define WIDEN(x) L#x
 #define __WFILE__ WIDEN(__FILE__)
 
-#define NOT_IMPLEMENTED()   throw ImplementException( __WFILE__, __LINE__, L"Not Implemented" );  
+#define NOT_IMPLEMENTED()   throw ImplementException( __WFILE__, __LINE__, L"Not Implemented" );
+#define TODO(x) throw ImplementException( __WFILE__, __LINE__, WIDEN(x) );
 
 ///////////////////////////////////////////////////////////////////////////////
 

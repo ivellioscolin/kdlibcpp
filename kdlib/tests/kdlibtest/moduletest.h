@@ -104,3 +104,18 @@ TEST_F( ModuleTest, findSymbol )
 
     EXPECT_THROW( m_targetModule->findSymbol( m_targetModule->getSymbolVa(L"g_structTestAAAA"), displacement ), SymbolException );
 }
+
+TEST_F( ModuleTest, getTypedVar )
+{
+    MEMOFFSET_64 offset;
+    ASSERT_TRUE( 0 != (offset = m_targetModule->getSymbolVa(L"helloStr") ) );
+    EXPECT_NO_THROW( m_targetModule->getTypedVarByAddr( offset ) );
+    EXPECT_NO_THROW( m_targetModule->getTypedVarByName(L"helloStr") ) ;
+    EXPECT_NO_THROW( m_targetModule->getTypedVarByTypeName(L"structTest", offset) ) ;
+
+    EXPECT_THROW( m_targetModule->getTypedVarByAddr( 0 ), SymbolException );
+    EXPECT_THROW( m_targetModule->getTypedVarByName(L"helloStr1111"), SymbolException ); 
+    EXPECT_THROW( m_targetModule->getTypedVarByTypeName( L"", 1),  SymbolException);
+    EXPECT_THROW( m_targetModule->getTypedVarByTypeName( L"structTest", m_targetModule->getEnd() ), SymbolException );
+}
+

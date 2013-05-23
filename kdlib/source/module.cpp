@@ -206,6 +206,54 @@ std::wstring Module::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacem
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr Module::getTypedVarByAddr( MEMOFFSET_64 offset )
+{
+    offset = addr64(offset);
+
+    if ( offset < m_base || offset >= m_base + m_size )
+        throw SymbolException(L"offset dont has to module");
+
+    SymbolPtr symVar = getSymSession()->findByRva( (MEMOFFSET_32)(offset - m_base ) );
+
+    TypeInfoPtr typeInfo = loadType( symVar->getType() );
+
+    return loadTypedVar( typeInfo, offset );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr Module::getTypedVarByName( const std::wstring &symName )
+{
+    SymbolPtr  symVar = getSymbolScope()->getChildByName( symName );
+
+    TypeInfoPtr typeInfo = loadType( symVar->getType() );
+
+    if ( LocIsConstant != symVar->getLocType() )
+    {
+        MEMOFFSET_64  offset = getSymbolVa( symName );
+
+        return loadTypedVar( typeInfo, offset );
+    }
+
+    TODO( "constant support");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr Module::getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 offset )
+{
+    offset = addr64(offset);
+
+    if ( offset < m_base || offset >= m_base + m_size )
+        throw SymbolException(L"offset dont has to module");
+
+    TypeInfoPtr typeInfo = getTypeByName( typeName );
+
+    return loadTypedVar(typeInfo, offset );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 {
     std::vector<MEMOFFSET_64>   moduleList = getModuleBasesList();

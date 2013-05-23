@@ -11,6 +11,7 @@
 #include "kdlib/symengine.h"
 #include "kdlib/typeinfo.h"
 #include "kdlib/variant.h"
+#include "kdlib/typedvar.h"
 
 namespace kdlib {
 
@@ -76,6 +77,10 @@ public:
     TypeInfoPtr getTypeByName( const std::wstring &typeName ) {
         return loadType( getSymbolScope(), typeName );
     }
+
+    TypedVarPtr getTypedVarByAddr( MEMOFFSET_64 offset );
+    TypedVarPtr getTypedVarByName( const std::wstring &symName );
+    TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr );
        
     SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" );
 
