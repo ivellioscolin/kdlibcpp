@@ -7,38 +7,6 @@
 
 #include "typedvarimp.h"
 
-namespace {
-
-///////////////////////////////////////////////////////////////////////////////
-
-static const boost::wregex moduleSymMatch(L"^(?:([^!]*)!)?([^!]+)$"); 
-
-void splitSymName( const std::wstring &fullName, std::wstring &moduleName, std::wstring &symbolName )
-{
-    boost::wsmatch   matchResult;
-
-    if ( !boost::regex_match( fullName, matchResult, moduleSymMatch ) )
-    {
-        std::wstringstream   sstr;
-        sstr << L"invalid symbol name: " << fullName;
-        throw kdlib::SymbolException( sstr.str() );
-    }
-
-    symbolName = std::wstring( matchResult[2].first, matchResult[2].second );
-
-    if ( matchResult[1].matched )
-    {
-        moduleName = std::wstring( matchResult[1].first, matchResult[1].second );
-    }
-    else
-    {
-        moduleName = L"";
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}
 
 namespace kdlib {
 

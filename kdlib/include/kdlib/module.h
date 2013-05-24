@@ -23,6 +23,9 @@ typedef boost::shared_ptr<Module>  ModulePtr;
 ModulePtr loadModule( const std::wstring &name );
 ModulePtr loadModule( MEMOFFSET_64 offset );
 
+void splitSymName( const std::wstring &fullName, std::wstring &moduleName, std::wstring &symbolName );
+
+size_t getSymbolSize( const std::wstring &name );
 
 typedef std::pair< std::wstring, MEMOFFSET_64 > SymbolOffset;
 typedef std::list< SymbolOffset > SymbolOffsetList;

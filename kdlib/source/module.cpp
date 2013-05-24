@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <boost/regex.hpp>
+
 #include "kdlib/module.h"
 #include "kdlib/memaccess.h"
 #include "kdlib/exceptions.h"
@@ -288,8 +290,58 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
     throw SymbolException( sstr.str() );
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
+static const boost::wregex moduleSymMatch(L"^(?:([^!]*)!)?([^!]+)$"); 
 
+void splitSymName( const std::wstring &fullName, std::wstring &moduleName, std::wstring &symbolName )
+{
+    boost::wsmatch   matchResult;
+
+    if ( !boost::regex_match( fullName, matchResult, moduleSymMatch ) )
+    {
+        std::wstringstream   sstr;
+        sstr << L"invalid symbol name: " << fullName;
+        throw kdlib::SymbolException( sstr.str() );
+    }
+
+    symbolName = std::wstring( matchResult[2].first, matchResult[2].second );
+
+    if ( matchResult[1].matched )
+    {
+        moduleName = std::wstring( matchResult[1].first, matchResult[1].second );
+    }
+    else
+    {
+        moduleName = L"";
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t getSymbolSize( const std::wstring &fullName )
+{
+    std::wstring     moduleName;
+    std::wstring     symName;
+
+    splitSymName( fullName, moduleName, symName );
+
+    ModulePtr  module;
+
+    if ( moduleName.empty() )
+    {
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
+        module = loadModule( moduleOffset );
+    }
+    else
+    {
+        module = loadModule( moduleName );
+    }
+
+    return module->getSymbolSize( symName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 }; // kdlib namespace end

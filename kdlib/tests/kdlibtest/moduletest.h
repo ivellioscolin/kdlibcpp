@@ -128,4 +128,7 @@ TEST_F( ModuleTest, getSymbolSize )
     EXPECT_EQ( sizeof(structNullSize), m_targetModule->getSymbolSize(L"structNullSize") );
 
     EXPECT_THROW(m_targetModule->getSymbolSize(L"1"), SymbolException );
+
+    EXPECT_EQ( sizeof(structTest), getSymbolSize(L"structTest") );
+    EXPECT_EQ( sizeof(structTest), getSymbolSize(L"targetapp!structTest") );
 }
