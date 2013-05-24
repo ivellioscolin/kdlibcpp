@@ -22,6 +22,8 @@ TEST_F( TypedVarTest, Ctor )
     EXPECT_NO_THROW( loadTypedVar(L"ucharVar") );
     EXPECT_NO_THROW( loadTypedVar(L"UInt1B", m_targetModule->getSymbolVa(L"ucharVar") ) );
     EXPECT_NO_THROW( loadTypedVar( loadType(L"UInt1B"),  m_targetModule->getSymbolVa(L"ucharVar") ) );
+
+    EXPECT_THROW( loadTypedVar( TypeInfoPtr(),  m_targetModule->getSymbolVa(L"ucharVar") ), DbgException );
 }
 
 TEST_F( TypedVarTest, BaseTypeVars )

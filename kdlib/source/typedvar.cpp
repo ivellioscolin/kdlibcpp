@@ -90,6 +90,9 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
 
 TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
 {
+    if ( !varType )
+        throw DbgException( L"type info is null");
+
     return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
 }
 
