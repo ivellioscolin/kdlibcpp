@@ -6,6 +6,8 @@
 #include "kdlib/memaccess.h"
 #include "kdlib/exceptions.h"
 
+#include "test/testvars.h"
+
 #include "processtest.h"
 
 using namespace kdlib;
@@ -119,3 +121,11 @@ TEST_F( ModuleTest, getTypedVar )
     EXPECT_THROW( m_targetModule->getTypedVarByTypeName( L"structTest", m_targetModule->getEnd() ), SymbolException );
 }
 
+TEST_F( ModuleTest, getSymbolSize )
+{
+    EXPECT_EQ( sizeof(structTest), m_targetModule->getSymbolSize(L"structTest") );
+    EXPECT_EQ( sizeof(g_structTest), m_targetModule->getSymbolSize(L"g_structTest") );
+    EXPECT_EQ( sizeof(structNullSize), m_targetModule->getSymbolSize(L"structNullSize") );
+
+    EXPECT_THROW(m_targetModule->getSymbolSize(L"1"), SymbolException );
+}

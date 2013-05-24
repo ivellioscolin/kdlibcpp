@@ -73,6 +73,8 @@ public:
     SymbolPtr getSymbolByName( const std::wstring &symbolName );
     SymbolPtr getSymbolScope();
 
+    size_t getSymbolSize( const std::wstring &symName );
+
 
     TypeInfoPtr getTypeByName( const std::wstring &typeName ) {
         return loadType( getSymbolScope(), typeName );

@@ -169,6 +169,18 @@ SymbolPtr Module::getSymbolByName( const std::wstring &symbolName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t Module::getSymbolSize( const std::wstring &symName )
+{
+    SymbolPtr  symPtr = getSymbolByName( symName );
+
+    if ( symPtr->getSymTag() == SymTagData )
+        return symPtr->getType()->getSize();
+
+    return symPtr->getSize();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 SymbolOffsetList Module::enumSymbols( const std::wstring  &mask )
 {
     SymbolOffsetList offsetLst;
