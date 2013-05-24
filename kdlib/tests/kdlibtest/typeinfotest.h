@@ -128,7 +128,7 @@ TEST_F( TypeInfoTest, UdtGetField )
     structType = loadType( L"structTest" );
     EXPECT_EQ( L"UInt4B", structType->getElement(L"m_field0")->getName() );
 
-    structType = loadType( L"StructWithNested" );
+    structType = loadType( L"structWithNested" );
     EXPECT_NO_THROW( structType->getElement(L"m_field")->getName() );
     EXPECT_THROW( structType->getElement(L"m_nestedFiled")->getName(), TypeException );
     EXPECT_NO_THROW( structType->getElement(L"m_field3")->getName() );
@@ -220,14 +220,14 @@ TEST_F( TypeInfoTest, GetElement )
 {
     EXPECT_THROW( loadType(L"Int1B")->getElement(L"nofiled"), TypeException );
     EXPECT_EQ( L"UInt4B", loadType(L"structTest")->getElement(L"m_field0")->getName() );
-    EXPECT_EQ( L"Int4B", loadType(L"StructWithNested")->getElement(L"m_unnameStruct.m_field2")->getName() );
+    EXPECT_EQ( L"Int4B", loadType(L"structWithNested")->getElement(L"m_unnameStruct.m_field2")->getName() );
 }
 
 TEST_F( TypeInfoTest, GetElementOffset )
 {
     EXPECT_THROW( loadType(L"Int1B")->getElementOffset(L"nofiled"), TypeException );
     EXPECT_EQ( FIELD_OFFSET( structTest, m_field3 ), loadType(L"structTest")->getElementOffset(L"m_field3") );
-    EXPECT_EQ( FIELD_OFFSET( StructWithNested, m_unnameStruct.m_field2 ), loadType(L"StructWithNested")->getElementOffset(L"m_unnameStruct.m_field2") );
+    EXPECT_EQ( FIELD_OFFSET( structWithNested, m_unnameStruct.m_field2 ), loadType(L"structWithNested")->getElementOffset(L"m_unnameStruct.m_field2") );
 }
 
 TEST_F( TypeInfoTest, GetPtrSize )
