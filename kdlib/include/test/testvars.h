@@ -1,5 +1,7 @@
 #pragma once
 
+#pragma pack( push, 4 )
+
 extern char  helloStr[];
 extern wchar_t  helloWStr[];
 extern char  helloStr1[];
@@ -69,7 +71,7 @@ extern int (*arrIntMatrixPtrs[4])[2][3];
 extern char  bigCStr[];
 extern wchar_t  bigWStr[];
 
-struct StructWithNested {
+struct structWithNested {
 
     struct Nested 
     {
@@ -90,8 +92,8 @@ struct StructWithNested {
     } ;
 };
 
-extern StructWithNested g_structWithNested;
-extern StructWithNested::Nested g_structNested;
+extern structWithNested g_structWithNested;
+extern structWithNested::Nested g_structNested;
 
 enum enumType {
     ONE = 1,
@@ -119,6 +121,13 @@ struct structWithSignBits {
 extern structWithSignBits g_structWithSignBits;
 
 
+struct structWithArray {
+    int   m_arrayField[2];
+    int   m_noArrayField;
+};
+
+extern structWithArray  g_structWithArray;
+
 class classChild 
 {
 public:
@@ -127,4 +136,22 @@ public:
 };
 
 extern classChild  g_classChild;
+
+union unionTest {
+    long m_value;
+    double m_doubleValue;
+    structTest m_structValue;
+};
+
+extern unionTest  g_unionTest;
+
+struct structNullSize {};
+extern structNullSize* g_nullSizeArray;
+
+struct structAbstract;
+typedef struct structAbstract  *pstructAbstract;
+extern pstructAbstract g_structAbstract;
+
+
+#pragma pack ( pop )
 
