@@ -152,6 +152,5 @@ struct structAbstract;
 typedef struct structAbstract  *pstructAbstract;
 extern pstructAbstract g_structAbstract;
 
-
 #pragma pack ( pop )
 

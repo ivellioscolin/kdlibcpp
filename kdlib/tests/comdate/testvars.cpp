@@ -97,5 +97,13 @@ structNullSize* g_nullSizeArray = 0;
 
 pstructAbstract g_structAbstract = 0;
 
+struct {
+    struct {
+        int m_fieldNestedStruct;
+    };
+    int m_fieldOfUnNamed;
+} g_unNamedStruct = { { 4 }, 5 };
+
+
 #pragma pack(pop)
 
