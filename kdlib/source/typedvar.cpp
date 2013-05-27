@@ -83,6 +83,9 @@ TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varDat
     if ( typeInfo->isBitField() )
         return TypedVarPtr( new TypedVarBitField( typeInfo, varData ) );
 
+    if ( typeInfo->isEnum() )
+        return TypedVarPtr( new TypedVarEnum( typeInfo, varData ) );
+
     NOT_IMPLEMENTED();
 }
 

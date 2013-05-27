@@ -176,10 +176,6 @@ protected:
         return m_name;
     }
 
-    virtual bool isUserDefined() {
-        return true;
-    }
-
     virtual size_t getElementCount();
 
     virtual  MEMOFFSET_64 getElementVa( const std::wstring &name );
@@ -230,12 +226,16 @@ public:
 protected:
 
 
-    size_t getSize() {
+    virtual size_t getSize() {
         return  m_symbol->getSize();
     }
 
-    size_t getPtrSize() {
+    virtual size_t getPtrSize() {
         return getPtrSizeBySymbol( m_symbol );
+    }
+
+    virtual bool isUserDefined() {
+        return true;
     }
 
 protected:

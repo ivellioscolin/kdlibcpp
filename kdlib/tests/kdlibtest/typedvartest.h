@@ -124,3 +124,13 @@ TEST_F( TypedVarTest, ArithmOp )
     EXPECT_EQ( ucharVar + 20, *loadTypedVar(L"ucharVar") + 20);
 }
 
+TEST_F( TypedVarTest, Enum )
+{
+    TypedVarPtr  enumVar;
+    ASSERT_NO_THROW( enumVar = loadTypedVar(L"g_constEnumThree") );
+    EXPECT_EQ( g_constEnumThree, *enumVar );
+}
+
+
+
+

@@ -281,4 +281,18 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class TypedVarEnum : public TypedVarImp
+{
+public:
+    TypedVarEnum( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData ) :
+      TypedVarImp( typeInfo, varData )
+      {}
+
+    virtual NumVariant getValue() const {
+        return NumVariant( m_varData->readDWord() );
+    }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // namespace kdlib
