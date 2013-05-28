@@ -22,8 +22,7 @@ inline size_t getPtrSizeBySymbol( SymbolPtr &typeSym )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-
-class TypeInfoImp : public TypeInfo
+class TypeInfoImp : public TypeInfo, public boost::enable_shared_from_this<TypeInfoImp>
 {
 protected:
 
@@ -38,6 +37,8 @@ protected:
     virtual size_t getPtrSize() {
         NOT_IMPLEMENTED();
     }
+
+    virtual TypeInfoPtr ptrTo();
 
     virtual bool isArray() {
         return false;
@@ -272,6 +273,10 @@ protected:
     virtual bool isEnum() 
     {
         return true;
+    }
+
+    virtual size_t getPtrSize() {
+        return getPtrSizeBySymbol( m_symbol );
     }
 
     virtual void getFields();

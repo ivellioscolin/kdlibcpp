@@ -248,3 +248,14 @@ TEST_F( TypeInfoTest, GetElementCount )
     EXPECT_EQ( 3, loadType( L"enumType" )->getElementCount() );
 }
 
+TEST_F( TypeInfoTest, PtrTo )
+{
+    TypeInfoPtr typeInfo;
+    EXPECT_NO_THROW( typeInfo = loadType( L"UInt1B" )->ptrTo() );
+    EXPECT_EQ( L"UInt1B*", typeInfo->getName() );
+    EXPECT_NO_THROW( typeInfo = loadType( L"g_structTestPtr" )->ptrTo() );
+    EXPECT_EQ( L"structTest**", typeInfo->getName() );
+    EXPECT_NO_THROW( typeInfo = loadType( L"g_constEnumThree" )->ptrTo() );
+    EXPECT_EQ( L"enumType*", typeInfo->getName() );
+}
+

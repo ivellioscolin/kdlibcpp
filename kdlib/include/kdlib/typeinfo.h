@@ -30,6 +30,7 @@ public:
     virtual std::wstring getName() = 0;
     virtual size_t getSize() = 0;
     virtual size_t getPtrSize() = 0;
+    virtual TypeInfoPtr ptrTo() = 0;
 
     virtual bool isArray() = 0;
     virtual bool isPointer() = 0;
@@ -57,7 +58,6 @@ public:
     virtual bool isStaticMember( size_t index ) = 0;
 
     virtual NumVariant getValue() const = 0;
-
 
 protected:
 
