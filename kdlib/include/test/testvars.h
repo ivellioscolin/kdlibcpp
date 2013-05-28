@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #pragma pack( push, 4 )
 
 extern char  helloStr[];
@@ -68,6 +70,9 @@ extern int intMatrix4[2][3];
 extern int (*ptrIntMatrix)[2][3];
 extern int (*arrIntMatrixPtrs[4])[2][3];
 
+extern char* strArray[];
+extern char *(*ptrStrArray)[2];
+
 extern char  bigCStr[];
 extern wchar_t  bigWStr[];
 
@@ -128,14 +133,6 @@ struct structWithArray {
 
 extern structWithArray  g_structWithArray;
 
-class classChild 
-{
-public:
-    static const int  m_staticConst = 100;
-    static int  m_staticField;
-};
-
-extern classChild  g_classChild;
 
 union unionTest {
     long m_value;
@@ -151,6 +148,58 @@ extern structNullSize* g_nullSizeArray;
 struct structAbstract;
 typedef struct structAbstract  *pstructAbstract;
 extern pstructAbstract g_structAbstract;
+
+
+class classBase1 {
+public:
+    int m_baseField;
+    void baseMethod() const {}
+    virtual void virtMethod1() =  0;
+    virtual void virtMethod2() =  0;
+
+    classBase1() :
+        m_baseField( -100 )
+        {}
+};
+
+
+class classBase2 {
+    static std::string   m_stdstr;
+    long    m_count;
+    int     m_baseField;
+public:
+    classBase2() : 
+        m_count( 1234 ),
+        m_baseField( 100 )
+        {}
+};
+
+
+
+class classChild : public classBase1, public classBase2 {
+
+public:
+
+    static const int  m_staticConst = 100;
+
+    static int  m_staticField;
+
+public:
+    int m_childField;
+    int m_childField2;
+    structTest m_childField3;
+    enumType m_enumField;
+    void childMethod() const {}
+    virtual void virtMethod1() {}
+    virtual void virtMethod2() {}
+
+    classChild() :
+        m_enumField( THREE )
+        {}
+};
+
+extern classChild  g_classChild;
+
 
 #pragma pack ( pop )
 

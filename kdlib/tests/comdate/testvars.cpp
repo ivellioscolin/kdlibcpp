@@ -58,6 +58,8 @@ int intMatrix3[2][3] = { { 0, 1, 2}, { 3, 4, 5 } };
 int intMatrix4[2][3] = { { 0, 1, 2}, { 3, 4, 5 } };
 int (*ptrIntMatrix)[2][3] = &intMatrix;
 int (* arrIntMatrixPtrs[4])[2][3] = { &intMatrix, &intMatrix2, &intMatrix3, &intMatrix4 };
+char* strArray[] = { "Hello", "Bye" };
+char *(*ptrStrArray)[2] = &strArray;
 
 
 template<typename T>
@@ -104,6 +106,7 @@ struct {
     int m_fieldOfUnNamed;
 } g_unNamedStruct = { { 4 }, 5 };
 
+std::string   classBase2::m_stdstr = "hello";
 
 #pragma pack(pop)
 
