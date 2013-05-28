@@ -364,7 +364,11 @@ protected:
     }
 
     virtual std::wstring getName();
-    
+
+    virtual size_t getSize() {
+        return m_bitType->getSize();
+    }
+
     virtual BITOFFSET getBitOffset() {
         return m_bitPos;
     }

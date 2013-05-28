@@ -221,6 +221,7 @@ TEST_F( TypeInfoTest, GetElement )
     EXPECT_THROW( loadType(L"Int1B")->getElement(L"nofiled"), TypeException );
     EXPECT_EQ( L"UInt4B", loadType(L"structTest")->getElement(L"m_field0")->getName() );
     EXPECT_EQ( L"Int4B", loadType(L"structWithNested")->getElement(L"m_unnameStruct.m_field2")->getName() );
+    EXPECT_THROW( loadType(L"structWithNested")->getElement(L"m_nestedFiled"), TypeException);
 }
 
 TEST_F( TypeInfoTest, GetElementOffset )
