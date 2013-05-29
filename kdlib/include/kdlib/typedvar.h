@@ -39,6 +39,7 @@ public:
     virtual size_t getElementCount() = 0;
     virtual std::wstring getElementName( size_t index ) = 0;
 
+    virtual TypeInfoPtr getType() const = 0;
     virtual NumVariant getValue() const = 0;
 
 protected:

@@ -131,6 +131,16 @@ TEST_F( TypedVarTest, Enum )
     EXPECT_EQ( g_constEnumThree, *enumVar );
 }
 
+TEST_F( TypedVarTest, getType )
+{
+    TypedVarPtr  var;
+
+    ASSERT_NO_THROW( var = loadTypedVar(L"g_constEnumThree") );
+    EXPECT_EQ( L"enumType", var->getType()->getName() );
+
+    ASSERT_NO_THROW( var = loadTypedVar(L"strArray") );
+    EXPECT_EQ( L"Char*[2]", var->getType()->getName() );
+}
 
 
 
