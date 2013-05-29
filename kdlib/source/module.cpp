@@ -278,7 +278,8 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
         ModulePtr  module = loadModule( *it );
 
         try {
-            SymbolPtr  symbolPtr = module->getSymbolByName( symbolName );
+
+            TypeInfoPtr typeInfo = module->getTypeByName( symbolName );
             return *it;
         } 
         catch( SymbolException& )

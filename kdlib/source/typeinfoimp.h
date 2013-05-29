@@ -40,6 +40,10 @@ protected:
 
     virtual TypeInfoPtr ptrTo();
 
+    virtual TypeInfoPtr deref() {
+        throw TypeException( getName(), L"type can not be dereffered" );
+    }
+
     virtual bool isArray() {
         return false;
     }
@@ -422,7 +426,7 @@ public:
         m_ptrSize = symbol->getSize();
     }
 
-    TypeInfoPtr getDerefType() {
+    virtual TypeInfoPtr deref() {
         return m_derefType;
     }
 

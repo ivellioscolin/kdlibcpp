@@ -456,7 +456,7 @@ std::wstring TypeInfoReference::getName()
                 break;
             }*/
 
-            typeInfo = ptrTypeInfo->getDerefType().get();
+            typeInfo = ptrTypeInfo->deref().get();
 
             continue;
         }
