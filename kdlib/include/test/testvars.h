@@ -201,5 +201,21 @@ public:
 extern classChild  g_classChild;
 
 
+struct listEntry {
+    listEntry  *flink;
+    listEntry  *blink;
+};
+
+
+struct listStruct {
+    int             num;
+    listEntry       next;
+
+    listStruct(int n) : num(n) {}
+};
+
+extern listEntry  g_listHead;
+
+
 #pragma pack ( pop )
 

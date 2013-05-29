@@ -108,5 +108,30 @@ struct {
 
 std::string   classBase2::m_stdstr = "hello";
 
+template<int itemNum>
+class ListCreator
+{
+public:
+    ListCreator( listEntry &listHead ) {
+        
+        listHead.flink = &listHead;
+        listHead.blink = &listHead;
+
+        for ( int i = 0; i < itemNum; ++i )
+        {
+            listStruct  *s = new listStruct(i);
+            listEntry  *entry = &s->next;
+
+            listHead.blink->flink = entry;
+            entry->blink = listHead.blink;
+            entry->flink = &listHead;
+            listHead.blink = entry;
+        }
+    }
+};
+
+listEntry  g_listHead;
+ListCreator<5> list1( g_listHead );
+
 #pragma pack(pop)
 
