@@ -265,6 +265,31 @@ TypedVarPtr Module::getTypedVarByTypeName( const std::wstring &typeName, MEMOFFS
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring Module::getSourceFile( MEMOFFSET_64 offset )
+{
+    std::wstring  fileName;
+    unsigned long  lineno;
+    long  displacement;
+
+    getSourceLine( offset, fileName, lineno, displacement );
+
+    return fileName;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Module::getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement )
+{
+    offset = addr64(offset);
+
+    if ( offset < m_base || offset >= m_base + m_size )
+        throw SymbolException(L"offset dont has to module");
+
+    getSymSession()->getSourceLine( offset, fileName, lineno, displacement );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 {
     std::vector<MEMOFFSET_64>   moduleList = getModuleBasesList();
@@ -288,6 +313,33 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
     throw SymbolException( sstr.str() );
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring getSourceFile( MEMOFFSET_64 offset )
+{
+    //if ( offset == 0 )
+    //    offset = getRegInstructionPointer();
+    //else
+    //    offset = addr64( offset );
+
+    ModulePtr module = loadModule( offset );
+    
+    return module->getSourceFile( offset );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset )
+{
+    //if ( offset == 0 )
+    //    offset = getRegInstructionPointer();
+    //else
+    //    offset = addr64( offset );
+
+    ModulePtr module = loadModule( offset );
+    
+    module->getSourceLine( offset, fileName, lineno, displacement );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

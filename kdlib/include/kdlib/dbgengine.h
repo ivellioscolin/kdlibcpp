@@ -51,11 +51,13 @@ unsigned long getModuleTimeStamp( MEMOFFSET_64 baseOffset );
 unsigned long getModuleCheckSum( MEMOFFSET_64 baseOffset );
 std::wstring getModuleSymbolFileName( MEMOFFSET_64 baseOffset );
 
-
 // Symbol path
 std::wstring getSymbolPath();
 void setSymbolPath(const std::wstring &symPath);
 void appendSymbolPath(const std::wstring &symPath);
+
+std::wstring getSourceFile( MEMOFFSET_64 offset = 0);
+void getSourceLine( std::wstring &fileName, unsigned long &lineno, int &displacement, MEMOFFSET_64 offset = 0 );
 
 ///////////////////////////////////////////////////////////////////////////////
 

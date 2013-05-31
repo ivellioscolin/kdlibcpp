@@ -13,7 +13,10 @@ void
 __cdecl
 CdeclFunc( int a, float b)
 {
-   LocalStaticFunc(a,b);
+   int c = a*10;
+   int d = b/10;
+
+   LocalStaticFunc(c,d);
 }
 
 void

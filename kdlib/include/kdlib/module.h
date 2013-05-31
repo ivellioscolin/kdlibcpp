@@ -89,6 +89,11 @@ public:
 
     std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 
+
+    std::wstring getSourceFile( MEMOFFSET_64 offset );
+
+    void getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement );
+
 protected:
 
     Module( const std::wstring &name );
