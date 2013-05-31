@@ -222,6 +222,37 @@ std::wstring loadWChars( MEMOFFSET_64 offset, unsigned long number, bool phyAddr
     return std::wstring( buffer.begin(), buffer.end() );
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long number )
+{
+    offset = addr64( offset );
+
+    std::vector<MEMOFFSET_64>   ptrs(number);
+
+    for ( unsigned long i = 0; i < number; ++i )
+        ptrs.push_back( ptrPtr( offset + i*ptrSize() ) );
+
+    return ptrs;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset )
+{
+    offset = addr64( offset );
+
+    std::vector<MEMOFFSET_64>   ptrs(100);
+
+    MEMOFFSET_64     entryAddress = 0;
+    
+    for( entryAddress = ptrPtr( offset ); entryAddress != offset && entryAddress != 0; entryAddress = ptrPtr( entryAddress ) )
+       ptrs.push_back( entryAddress );
+    
+    return ptrs;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool compareMemory( MEMOFFSET_64 addr1, MEMOFFSET_64 addr2, size_t length, bool phyAddr )

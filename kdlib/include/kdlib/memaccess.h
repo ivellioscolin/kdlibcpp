@@ -48,6 +48,9 @@ std::wstring loadWChars( MEMOFFSET_64 offset, unsigned long  number, bool phyAdd
 std::string loadCStr( MEMOFFSET_64 offset );
 std::wstring loadWStr( MEMOFFSET_64 offset );
 
+std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long count );
+std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset );
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end
