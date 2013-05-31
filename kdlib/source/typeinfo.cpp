@@ -412,6 +412,13 @@ TypeInfoPtr TypeInfoImp::ptrTo()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr TypeInfoImp::arrayOf( size_t size )
+{
+    return TypeInfoPtr( new TypeInfoArray( shared_from_this(), size ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring TypeInfoReference::getName()
 {
     std::wstring       name;

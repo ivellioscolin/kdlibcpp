@@ -270,3 +270,16 @@ TEST_F( TypeInfoTest, Deref )
     EXPECT_EQ( L"enumType", typeInfo->getName() );
 }
 
+
+TEST_F( TypeInfoTest, ArrayOf )
+{
+    TypeInfoPtr typeInfo;
+    EXPECT_NO_THROW( typeInfo = loadType( L"UInt1B" )->arrayOf(10) );
+    EXPECT_EQ( L"UInt1B[10]", typeInfo->getName() );
+    EXPECT_NO_THROW( typeInfo = loadType( L"g_structTestPtr" )->arrayOf(1) );
+    EXPECT_EQ( L"structTest*[1]", typeInfo->getName() );
+    EXPECT_NO_THROW( typeInfo = loadType( L"enumType*" )->arrayOf(0) );
+    EXPECT_EQ( L"enumType*[0]", typeInfo->getName() );
+}
+
+

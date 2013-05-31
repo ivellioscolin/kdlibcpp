@@ -44,6 +44,8 @@ protected:
         throw TypeException( getName(), L"type can not be dereffered" );
     }
 
+    virtual TypeInfoPtr arrayOf( size_t size );
+
     virtual bool isArray() {
         return false;
     }

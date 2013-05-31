@@ -33,6 +33,7 @@ public:
 
     virtual TypeInfoPtr ptrTo() = 0;
     virtual TypeInfoPtr deref() = 0;
+    virtual TypeInfoPtr arrayOf( size_t size ) = 0;
 
     virtual bool isArray() = 0;
     virtual bool isPointer() = 0;
