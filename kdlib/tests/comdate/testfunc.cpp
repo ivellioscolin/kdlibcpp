@@ -14,7 +14,7 @@ __cdecl
 CdeclFunc( int a, float b)
 {
    int c = a*10;
-   int d = b/10;
+   float d = b/10;
 
    LocalStaticFunc(c,d);
 }

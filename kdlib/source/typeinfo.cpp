@@ -137,6 +137,30 @@ size_t getSymbolSize( const std::wstring &fullName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+MEMOFFSET_64 getSymbolOffset( const std::wstring &fullName )
+{
+    std::wstring     moduleName;
+    std::wstring     symName;
+
+    splitSymName( fullName, moduleName, symName );
+
+    ModulePtr  module;
+
+    if ( moduleName.empty() )
+    {
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
+        module = loadModule( moduleOffset );
+    }
+    else
+    {
+        module = loadModule( moduleName );
+    }
+
+    return module->getSymbolVa( symName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoPtr loadType( const std::wstring &typeName )
 {
     std::wstring     moduleName;

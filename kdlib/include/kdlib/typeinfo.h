@@ -20,6 +20,7 @@ TypeInfoPtr loadType( SymbolPtr &symbol );
 TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
 
 size_t getSymbolSize( const std::wstring &name );
+MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
 
 class TypeInfo : private boost::noncopyable, public NumBehavior {
 
