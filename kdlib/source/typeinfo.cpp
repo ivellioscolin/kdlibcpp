@@ -110,6 +110,33 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t getSymbolSize( const std::wstring &fullName )
+{
+    if ( TypeInfo::isBaseType( fullName ) )
+        return TypeInfo::getBaseTypeInfo( fullName, ptrSize() )->getSize();
+
+    std::wstring     moduleName;
+    std::wstring     symName;
+
+    splitSymName( fullName, moduleName, symName );
+
+    ModulePtr  module;
+
+    if ( moduleName.empty() )
+    {
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
+        module = loadModule( moduleOffset );
+    }
+    else
+    {
+        module = loadModule( moduleName );
+    }
+
+    return module->getSymbolSize( symName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoPtr loadType( const std::wstring &typeName )
 {
     std::wstring     moduleName;

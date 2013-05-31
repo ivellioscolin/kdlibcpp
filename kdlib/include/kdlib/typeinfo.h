@@ -19,11 +19,14 @@ TypeInfoPtr loadType( const std::wstring &symName );
 TypeInfoPtr loadType( SymbolPtr &symbol );
 TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
 
+size_t getSymbolSize( const std::wstring &name );
+
 class TypeInfo : private boost::noncopyable, public NumBehavior {
 
     friend TypeInfoPtr loadType( const std::wstring &symName );
     friend TypeInfoPtr loadType( SymbolPtr &symbol );
     friend TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
+    friend size_t getSymbolSize( const std::wstring &name );
 
 public:
 

@@ -283,3 +283,12 @@ TEST_F( TypeInfoTest, ArrayOf )
 }
 
 
+TEST_F( TypeInfoTest, SizeOf )
+{
+    EXPECT_EQ( sizeof(ucharVar), getSymbolSize(L"ucharVar") );
+    EXPECT_EQ( sizeof(unsigned long)*10, getSymbolSize(L"ULong[10]") );
+    EXPECT_EQ( sizeof(float*), getSymbolSize(L"Float*") );
+    EXPECT_EQ( sizeof(structTest), getSymbolSize(L"structTest") );
+    EXPECT_EQ( sizeof(structTest), getSymbolSize(L"targetapp!structTest") );
+}
+

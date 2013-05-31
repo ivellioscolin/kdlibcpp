@@ -173,12 +173,9 @@ SymbolPtr Module::getSymbolByName( const std::wstring &symbolName )
 
 size_t Module::getSymbolSize( const std::wstring &symName )
 {
-    SymbolPtr  symPtr = getSymbolByName( symName );
+    TypeInfoPtr typeInfo = getTypeByName( symName );
 
-    if ( symPtr->getSymTag() == SymTagData )
-        return symPtr->getType()->getSize();
-
-    return symPtr->getSize();
+    return typeInfo->getSize();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -317,30 +314,6 @@ void splitSymName( const std::wstring &fullName, std::wstring &moduleName, std::
     {
         moduleName = L"";
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-size_t getSymbolSize( const std::wstring &fullName )
-{
-    std::wstring     moduleName;
-    std::wstring     symName;
-
-    splitSymName( fullName, moduleName, symName );
-
-    ModulePtr  module;
-
-    if ( moduleName.empty() )
-    {
-        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
-        module = loadModule( moduleOffset );
-    }
-    else
-    {
-        module = loadModule( moduleName );
-    }
-
-    return module->getSymbolSize( symName );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
