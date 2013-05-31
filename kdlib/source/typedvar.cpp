@@ -201,6 +201,8 @@ NumVariant TypedVarBitField::getValue() const
         {
             var &= ( 1ULL << width ) - 1;
         }
+
+        var = var.asLongLong();
     }
     else
     {     
