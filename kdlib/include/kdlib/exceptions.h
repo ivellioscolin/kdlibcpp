@@ -97,15 +97,13 @@ private:
 /////////////////////////////////////////////////////////////////////////////////
 
 
-class IndexException : public DbgException 
+class IndexException 
 {
 public:
 
-    IndexException( size_t index ) :
-         DbgException( buildDesc(index) )
-         {}
+    IndexException( size_t index ) {}
 
-private:
+/*private:
 
     static std::wstring buildDesc( size_t index )
     {
@@ -113,7 +111,7 @@ private:
         sstr << L"index is out of range";
         return sstr.str();
     }
-
+*/
 };
 
 /////////////////////////////////////////////////////////////////////////////////

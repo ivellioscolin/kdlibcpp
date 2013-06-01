@@ -232,7 +232,7 @@ std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long number )
     std::vector<MEMOFFSET_64>   ptrs(number);
 
     for ( unsigned long i = 0; i < number; ++i )
-        ptrs.push_back( ptrPtr( offset + i*ptrSize() ) );
+        ptrs[i] =ptrPtr( offset + i*ptrSize() );
 
     return ptrs;
 }
@@ -243,7 +243,8 @@ std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset )
 {
     offset = addr64( offset );
 
-    std::vector<MEMOFFSET_64>   ptrs(100);
+    std::vector<MEMOFFSET_64>   ptrs;
+    ptrs.reserve(100);
 
     MEMOFFSET_64     entryAddress = 0;
     
