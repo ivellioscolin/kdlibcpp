@@ -174,7 +174,7 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
 TypedVarPtr TypedVarArray::getElement( size_t index )
 {
     if ( index >= m_typeInfo->getElementCount() )
-        throw TypeException( m_typeInfo->getName(),  L"index is out of the elements range" );
+        throw IndexException( index );
 
     TypeInfoPtr     elementType = m_typeInfo->getElement(0);
 

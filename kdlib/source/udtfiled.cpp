@@ -39,7 +39,7 @@ UdtFieldPtr& FieldCollection::lookup(const std::wstring &name)
 const UdtFieldPtr& FieldCollection::lookup(size_t index) const
 {
     if ( index >= m_fields.size() )
-        throw TypeException( m_name, L"index is out of the elements range" );
+        throw IndexException( index );
 
     return m_fields[index];
 }

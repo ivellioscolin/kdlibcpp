@@ -96,6 +96,28 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////////
 
+
+class IndexException : public DbgException 
+{
+public:
+
+    IndexException( size_t index ) :
+         DbgException( buildDesc(index) )
+         {}
+
+private:
+
+    static std::wstring buildDesc( size_t index )
+    {
+        std::wstringstream   sstr;
+        sstr << L"index is out of range";
+        return sstr.str();
+    }
+
+};
+
+/////////////////////////////////////////////////////////////////////////////////
+
 class ImplementException : public DbgException
 {
 public:

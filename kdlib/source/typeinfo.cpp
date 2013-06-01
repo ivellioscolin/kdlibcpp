@@ -534,7 +534,7 @@ std::wstring TypeInfoReference::getName()
 TypeInfoPtr TypeInfoArray::getElement( size_t index )
 {
     if ( index >= m_count )
-        throw TypeException( getName(),  L"index is out of the elements range" );
+        throw IndexException( index );
 
     return m_derefType;
 }
