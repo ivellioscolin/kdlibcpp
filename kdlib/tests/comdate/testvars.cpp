@@ -133,5 +133,7 @@ public:
 listEntry  g_listHead;
 ListCreator<5> list1( g_listHead );
 
+virtualChild       g_virtChild;
+
 #pragma pack(pop)
 

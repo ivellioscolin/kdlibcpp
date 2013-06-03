@@ -149,6 +149,7 @@ struct structAbstract;
 typedef struct structAbstract  *pstructAbstract;
 extern pstructAbstract g_structAbstract;
 
+////////////////////////////////////////////////////////////////////////////////
 
 class classBase1 {
 public:
@@ -201,6 +202,42 @@ public:
 extern classChild  g_classChild;
 
 
+////////////////////////////////////////////////////////////////////////////////
+
+class virtualBase1 : public virtual classBase1 {
+
+    int     m_member;
+
+public:
+    virtualBase1() : m_member(123){}
+
+    virtual void virtMethod1() {}
+    virtual void virtMethod2() {}
+};
+
+
+class virtualBase2 : public virtual classBase1
+{
+    int     m_member;
+
+public:
+    virtualBase2() : m_member(345){}
+
+    virtual void virtMethod1() {}
+};
+
+class virtualChild : public virtualBase1, public  virtualBase2
+{
+    virtual void virtMethod1() {}
+    virtual void virtMethod2() {}
+    virtual void virtMethod3() {}
+};
+
+extern virtualChild       g_virtChild;
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 struct listEntry {
     listEntry  *flink;
     listEntry  *blink;
@@ -215,6 +252,8 @@ struct listStruct {
 };
 
 extern listEntry  g_listHead;
+
+////////////////////////////////////////////////////////////////////////////////
 
 
 #pragma pack ( pop )
