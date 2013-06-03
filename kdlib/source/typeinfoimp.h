@@ -362,6 +362,23 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class TypeInfoVtbl: public TypeInfoImp
+{
+public:
+    TypeInfoVtbl( SymbolPtr &symbol ) : m_symbol( symbol ) {}
+
+
+protected:
+
+    virtual std::wstring getName() {
+        return m_symbol->getName();
+    }
+
+    SymbolPtr   m_symbol;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 class TypeInfoBitField : public TypeInfoImp 
 {
 public:

@@ -245,9 +245,13 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
     case SymTagPointerType:
         return TypeInfoPtr( new TypeInfoPointer( symbol ) );
 
-    //case SymTagVTable:
-    //    ptr = TypeInfoPtr( new PointerTypeInfo( typeSym->getType() ) );
-    //    break;
+    case SymTagVTable:
+        ptr = TypeInfoPtr( new TypeInfoPointer( symbol->getType() ) );
+        break;
+
+    case SymTagVTableShape:
+        ptr = TypeInfoPtr( new TypeInfoVtbl( symbol ) );
+        break;
 
     case SymTagEnum:
         ptr = TypeInfoPtr( new TypeInfoEnum( symbol ) );

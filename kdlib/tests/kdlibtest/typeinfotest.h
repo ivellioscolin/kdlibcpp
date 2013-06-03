@@ -274,11 +274,11 @@ TEST_F( TypeInfoTest, Deref )
 TEST_F( TypeInfoTest, ArrayOf )
 {
     TypeInfoPtr typeInfo;
-    EXPECT_NO_THROW( typeInfo = loadType( L"UInt1B" )->arrayOf(10) );
+    ASSERT_NO_THROW( typeInfo = loadType( L"UInt1B" )->arrayOf(10) );
     EXPECT_EQ( L"UInt1B[10]", typeInfo->getName() );
-    EXPECT_NO_THROW( typeInfo = loadType( L"g_structTestPtr" )->arrayOf(1) );
+    ASSERT_NO_THROW( typeInfo = loadType( L"g_structTestPtr" )->arrayOf(1) );
     EXPECT_EQ( L"structTest*[1]", typeInfo->getName() );
-    EXPECT_NO_THROW( typeInfo = loadType( L"enumType*" )->arrayOf(0) );
+    ASSERT_NO_THROW( typeInfo = loadType( L"enumType*" )->arrayOf(0) );
     EXPECT_EQ( L"enumType*[0]", typeInfo->getName() );
 }
 
@@ -290,5 +290,15 @@ TEST_F( TypeInfoTest, SizeOf )
     EXPECT_EQ( sizeof(float*), getSymbolSize(L"Float*") );
     EXPECT_EQ( sizeof(structTest), getSymbolSize(L"structTest") );
     EXPECT_EQ( sizeof(structTest), getSymbolSize(L"targetapp!structTest") );
+}
+
+TEST_F( TypeInfoTest, VTBL )
+{
+    TypeInfoPtr typeInfo;
+    ASSERT_NO_THROW( typeInfo = loadType( L"g_virtChild" ) );
+    size_t  fieldCount;
+    ASSERT_NO_THROW( fieldCount = typeInfo->getElementCount() );
+    for ( size_t i = 0; i < fieldCount; ++i )
+        EXPECT_NO_THROW( typeInfo->getElement(i) );
 }
 
