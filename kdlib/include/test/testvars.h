@@ -21,6 +21,9 @@ extern float floatVar;
 extern double doubleVar;
 extern bool boolVar;
 
+extern const bool boolConst;
+extern const unsigned long ulongConst;
+extern const unsigned long long ulonglongConst;
 
 #define TEST_ARRAY_SIZE  5
 extern unsigned char ucharArray[TEST_ARRAY_SIZE];
@@ -229,9 +232,14 @@ public:
 
 class virtualChild : public virtualBase1, public  virtualBase2
 {
+    int     m_member;
+
     virtual void virtMethod1() {}
     virtual void virtMethod2() {}
     virtual void virtMethod3() {}
+
+public:
+    virtualChild() : m_member(678) {}
 };
 
 extern virtualChild       g_virtChild;

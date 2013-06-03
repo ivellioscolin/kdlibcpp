@@ -20,6 +20,11 @@ float floatVar = -5.99f;
 double doubleVar = 6.00000001;
 bool boolVar = true;
 
+
+const unsigned long ulongConst = 0x5555;
+const unsigned long long ulonglongConst = 0xffffff000000;
+const bool boolConst = true;
+
 char  helloStr[] = "Hello";
 wchar_t  helloWStr[] = L"Hello";
 char  helloStr1[] = "Hello";
