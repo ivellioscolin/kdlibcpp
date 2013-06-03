@@ -135,6 +135,11 @@ protected:
        return m_typeInfo;
     }
 
+    virtual TypedVarPtr deref() 
+    {
+        throw TypeException( m_typeInfo->getName(), L"object can not be derefernced" );
+    }
+
     virtual TypedVarPtr getElement( const std::wstring& fieldName ) 
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
@@ -243,6 +248,8 @@ public:
     virtual NumVariant getValue() const {
         return NumVariant( getSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8() );
     }
+
+    virtual TypedVarPtr deref();
 
 };
 

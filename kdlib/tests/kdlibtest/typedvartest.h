@@ -132,7 +132,7 @@ TEST_F( TypedVarTest, Enum )
     EXPECT_EQ( g_constEnumThree, *enumVar );
 }
 
-TEST_F( TypedVarTest, getType )
+TEST_F( TypedVarTest, GetType )
 {
     TypedVarPtr  var;
 
@@ -141,6 +141,13 @@ TEST_F( TypedVarTest, getType )
 
     ASSERT_NO_THROW( var = loadTypedVar(L"strArray") );
     EXPECT_EQ( L"Char*[2]", var->getType()->getName() );
+}
+
+TEST_F( TypedVarTest, Deref )
+{
+    TypedVarPtr  var;
+    ASSERT_NO_THROW( var = loadTypedVar(L"pbigValue") );
+    EXPECT_EQ( bigValue, *var->deref() );
 }
 
 

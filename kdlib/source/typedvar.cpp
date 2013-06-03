@@ -174,6 +174,15 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr TypedVarPointer::deref()
+{
+    return loadTypedVar( 
+                m_typeInfo->deref(), 
+                m_typeInfo->getPtrSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr TypedVarArray::getElement( size_t index )
 {
     if ( index >= m_typeInfo->getElementCount() )
