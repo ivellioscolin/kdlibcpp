@@ -485,20 +485,23 @@ std::wstring DiaSymbol::getName()
 
         std::wstring  retStr;
         if ( bstrName )
-            retStr = _bstr_t( bstrName );
-
-        if ( !retStr.empty() )
         {
-            boost::wsmatch  matchResult;
-
-            if ( boost::regex_match( retStr, matchResult, stdcallMatch ) )
-                return std::wstring( matchResult[1].first, matchResult[1].second );
-
-            if ( boost::regex_match( retStr, matchResult, fastcallMatch ) )
-                return std::wstring( matchResult[1].first, matchResult[1].second );
-    
-            return retStr; 
+            retStr = _bstr_t( bstrName );
+            return retStr;
         }
+
+        //if ( !retStr.empty() )
+        //{
+        //    boost::wsmatch  matchResult;
+
+        //    if ( boost::regex_match( retStr, matchResult, stdcallMatch ) )
+        //        return std::wstring( matchResult[1].first, matchResult[1].second );
+
+        //    if ( boost::regex_match( retStr, matchResult, fastcallMatch ) )
+        //        return std::wstring( matchResult[1].first, matchResult[1].second );
+    
+        //    return retStr; 
+        //}
     }
 
     bstrName = callSymbol(get_name);
