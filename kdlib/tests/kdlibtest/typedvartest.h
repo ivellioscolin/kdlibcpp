@@ -40,6 +40,7 @@ TEST_F( TypedVarTest, BaseTypeVars )
     EXPECT_EQ( longlongVar, *loadTypedVar(L"longlongVar") );
     EXPECT_EQ( floatVar, *loadTypedVar(L"floatVar") );
     EXPECT_EQ( doubleVar, *loadTypedVar(L"doubleVar") );
+    EXPECT_EQ( boolVar, *loadTypedVar(L"boolVar") );
 }
 
 TEST_F( TypedVarTest, TypedVarPtr )

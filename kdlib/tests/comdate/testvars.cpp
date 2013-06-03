@@ -18,6 +18,7 @@ long longVar = -1002000;
 long long longlongVar = -1234567890;
 float floatVar = -5.99f;
 double doubleVar = 6.00000001;
+bool boolVar = true;
 
 char  helloStr[] = "Hello";
 wchar_t  helloWStr[] = L"Hello";

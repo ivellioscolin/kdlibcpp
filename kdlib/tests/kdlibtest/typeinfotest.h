@@ -47,6 +47,8 @@ TEST_F( TypeInfoTest, BaseTypeNames )
     EXPECT_EQ( L"Bool", loadType( L"Bool")->getName() );
     EXPECT_EQ( L"Float", loadType( L"Float")->getName() );
     EXPECT_EQ( L"Double", loadType( L"Double")->getName() );
+
+    EXPECT_EQ( L"Bool", loadType(L"Bool")->getName() );
 }
 
 TEST_F( TypeInfoTest, BaseTypeSizes)
@@ -80,6 +82,7 @@ TEST_F( TypeInfoTest, BaseTypeVars)
     EXPECT_EQ( L"UInt2B", loadType( L"ushortVar" )->getName() );
     EXPECT_EQ( L"UInt4B", loadType( L"ulongVar" )->getName() );
     EXPECT_EQ( L"UInt8B", loadType( L"ulonglongVar" )->getName() );
+    EXPECT_EQ( L"Bool", loadType( L"boolVar" )->getName() );
 }
 
 TEST_F( TypeInfoTest, BaseTypeArray )

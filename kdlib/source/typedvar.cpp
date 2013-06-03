@@ -129,6 +129,9 @@ NumVariant TypedVarBase::getValue() const
     if ( m_typeInfo->getName() == L"Double" )
         return NumVariant( m_varData->readDouble() );
 
+    if ( m_typeInfo->getName() == L"Bool" )
+        return NumVariant( m_varData->readByte() );
+
     NOT_IMPLEMENTED();
 }
 

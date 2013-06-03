@@ -19,6 +19,7 @@ extern long longVar;
 extern long long longlongVar;
 extern float floatVar;
 extern double doubleVar;
+extern bool boolVar;
 
 
 #define TEST_ARRAY_SIZE  5
