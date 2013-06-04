@@ -84,6 +84,8 @@ public:
     TypedVarPtr getTypedVarByAddr( MEMOFFSET_64 offset );
     TypedVarPtr getTypedVarByName( const std::wstring &symName );
     TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr );
+
+    TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,  const std::wstring &fieldName );
        
     SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" );
 

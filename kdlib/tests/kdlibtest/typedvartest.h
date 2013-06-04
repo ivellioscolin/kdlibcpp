@@ -150,5 +150,13 @@ TEST_F( TypedVarTest, Deref )
     EXPECT_EQ( bigValue, *var->deref() );
 }
 
+TEST_F( TypedVarTest, ContainingRecord )
+{
+    TypedVarPtr   entry;
+    ASSERT_NO_THROW( entry = loadTypedVar(L"g_listHead")->getElement(L"flink") );
 
+    TypedVarPtr   liststr;
+    ASSERT_NO_THROW( liststr = containingRecord( entry->getAddress(), L"listStruct", L"next.flink" ) );
 
+    EXPECT_EQ( 0, *liststr->getElement(L"num") );
+}

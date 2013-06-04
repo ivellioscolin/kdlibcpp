@@ -19,6 +19,9 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr );
 
 TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
 
+TypedVarPtr containingRecord( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
+
+TypedVarPtr containingRecord( MEMOFFSET_64 addr, TypeInfoPtr &typeInfo, const std::wstring &fieldName );
 
 class TypedVar : private boost::noncopyable, public NumBehavior {
 

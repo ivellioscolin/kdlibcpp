@@ -91,6 +91,44 @@ TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varDat
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName )
+{
+    std::wstring     moduleName;
+    std::wstring     symName;
+
+    splitSymName( typeName, moduleName, symName );
+
+     ModulePtr  module;
+
+    if ( moduleName.empty() )
+    {
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
+        module = loadModule( moduleOffset );
+    }
+    else
+    {
+        module = loadModule( moduleName );
+    }
+
+    TypeInfoPtr typeInfo = module->getTypeByName( symName );
+
+    return containingRecord( offset, typeInfo, fieldName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr containingRecord( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const std::wstring &fieldName )
+{
+    if ( !typeInfo )
+        throw DbgException( L"type info is null");
+
+    offset = addr64( offset );
+
+    return loadTypedVar( typeInfo, offset - typeInfo->getElementOffset( fieldName ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 NumVariant TypedVarBase::getValue() const
 {
     if ( m_typeInfo->getName() == L"Char" )
