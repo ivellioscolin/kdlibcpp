@@ -167,7 +167,7 @@ protected:
     
     virtual std::wstring getElementName( size_t index ) 
     {
-         NOT_IMPLEMENTED();
+        throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
    
 protected:
@@ -228,6 +228,10 @@ protected:
 
     virtual size_t getElementCount() {
         return m_typeInfo->getElementCount();
+    }
+
+    virtual std::wstring getElementName( size_t index ) {
+        return m_typeInfo->getElementName( index );
     }
 };
 

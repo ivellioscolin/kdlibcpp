@@ -179,6 +179,10 @@ protected:
 
     virtual MEMOFFSET_32 getElementOffset( size_t index );
 
+    virtual std::wstring getElementName( size_t index );
+
+    virtual size_t getElementIndex( const std::wstring &name );
+
     virtual std::wstring getName() {
         return m_name;
     }

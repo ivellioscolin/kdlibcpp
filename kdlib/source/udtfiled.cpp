@@ -54,6 +54,20 @@ UdtFieldPtr& FieldCollection::lookup(size_t index)
 
 //////////////////////////////////////////////////////////////////////////////
 
+size_t FieldCollection::getIndex(const std::wstring &name) const
+{
+    size_t  index = 0;
+
+    FieldList::const_iterator it;
+    for ( it = m_fields.begin(); it != m_fields.end(); ++it, ++index )
+    {
+        if ( (*it)->getName() == name )
+            return index;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 TypeInfoPtr SymbolUdtField::getTypeInfo()
 {
     return loadType(m_symbol);

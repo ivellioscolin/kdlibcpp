@@ -177,6 +177,8 @@ public:
     UdtFieldPtr &lookup(size_t index);
     UdtFieldPtr &lookup(const std::wstring &name);
 
+    size_t getIndex(const std::wstring &name) const; 
+
     void push_back( const UdtFieldPtr& field ) {
         m_fields.push_back( field );
     }

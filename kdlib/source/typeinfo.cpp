@@ -599,6 +599,24 @@ MEMOFFSET_32 TypeInfoFields::getElementOffset( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypeInfoFields::getElementName( size_t index )
+{
+    checkFields();
+
+    return m_fields.lookup( index )->getName();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoFields::getElementIndex( const std::wstring &name )
+{
+    checkFields();
+
+    return m_fields.getIndex(name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 size_t TypeInfoFields::getElementCount()
 {
     checkFields();
