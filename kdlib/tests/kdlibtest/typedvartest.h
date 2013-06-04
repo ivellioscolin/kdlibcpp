@@ -160,3 +160,13 @@ TEST_F( TypedVarTest, ContainingRecord )
 
     EXPECT_EQ( 0, *liststr->getElement(L"num") );
 }
+
+TEST_F( TypedVarTest, StaticMember )
+{
+    TypedVarPtr   var;
+    ASSERT_NO_THROW( var = loadTypedVar(L"g_classChild") );
+
+    EXPECT_EQ( g_classChild.m_staticField, *var->getElement(L"m_staticField") );
+    EXPECT_EQ( g_classChild.m_staticConst, *var->getElement(L"m_staticConst") );
+}
+

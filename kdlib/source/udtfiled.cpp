@@ -64,6 +64,11 @@ size_t FieldCollection::getIndex(const std::wstring &name) const
         if ( (*it)->getName() == name )
             return index;
     }
+
+    std::wstringstream   sstr;
+    sstr << L"field \"" << name << L" not found";
+
+    throw TypeException( m_name, sstr.str() );
 }
 
 //////////////////////////////////////////////////////////////////////////////

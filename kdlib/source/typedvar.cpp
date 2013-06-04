@@ -179,15 +179,15 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 {
     TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
 
-    //if ( m_typeInfo->isStaticMember(fieldName) )
-    //{
-    //    ULONG64  staticOffset = m_typeInfo->getStaticOffsetByName( fieldName );
+    if ( m_typeInfo->isStaticMember(fieldName) )
+    {
+        MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
 
-    //    if ( staticOffset == 0 )
-    //        throw ImplementException( __FILE__, __LINE__, "Fix ME");
+        if ( staticOffset == 0 )
+           NOT_IMPLEMENTED();
 
-    //    return  TypedVar::getTypedVar( fieldType, VarDataMemory::factory(staticOffset) );
-    //}
+        return  loadTypedVar( fieldType, staticOffset );
+    }
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
 
