@@ -41,17 +41,17 @@ public:
 
     bool isVirtualMember() const 
     {
-        return m_virtualBasePtr != 0;
+        return m_virtualMember;
     }
 
     bool isStaticMember() const
     {
-        return m_staticOffset != 0;
+        return m_staticMember;
     }
 
     MEMOFFSET_64 getStaticOffset() const
     {
-        if ( m_staticOffset == 0 )
+        if ( !m_staticMember )
             throw TypeException( m_name, L"this is not a static field" );
 
         return m_staticOffset;
@@ -59,6 +59,9 @@ public:
 
     void getVirtualDisplacement( MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
     {
+        if ( !m_virtualMember )
+            throw TypeException( m_name, L"this is not a virtual member" );
+
        virtualBasePtr = m_virtualBasePtr;
        virtualDispIndex = m_virtualDispIndex;
        virtualDispSize = m_virtualDispSize;
@@ -74,7 +77,9 @@ protected:
          m_staticOffset( 0 ),
          m_virtualBasePtr( 0 ),
          m_virtualDispIndex( 0 ),
-         m_virtualDispSize( 0 )
+         m_virtualDispSize( 0 ),
+         m_staticMember( false ),
+         m_virtualMember( false )
          {}
 
     std::wstring  m_name;
@@ -89,6 +94,9 @@ protected:
     size_t  m_virtualDispIndex;
     size_t  m_virtualDispSize;
 
+    bool  m_staticMember;
+
+    bool  m_virtualMember;
 
 };
 
@@ -101,16 +109,10 @@ public:
     static UdtFieldPtr getField( 
         const SymbolPtr &sym, 
         const std::wstring& name,
-        MEMOFFSET_32 offset,
-        MEMOFFSET_32 virtualBasePtr, 
-        size_t virtualDispIndex, 
-        size_t virtualDispSize )
+        MEMOFFSET_32 offset )
     {
         SymbolUdtField *p = new SymbolUdtField( sym, name );
         p->m_offset = offset;
-        p->m_virtualBasePtr = virtualBasePtr;
-        p->m_virtualDispIndex = virtualDispIndex;
-        p->m_virtualDispSize = virtualDispSize;
         return UdtFieldPtr(p);
     }
 
@@ -121,6 +123,24 @@ public:
     {
         SymbolUdtField *p = new SymbolUdtField( sym, name );
         p->m_staticOffset = offset;
+        p->m_staticMember = true;
+        return UdtFieldPtr(p);
+    }
+
+    static UdtFieldPtr getVirtualField(
+        const SymbolPtr &sym, 
+        const std::wstring& name,
+        MEMOFFSET_32 offset,
+        MEMOFFSET_32 virtualBasePtr, 
+        size_t virtualDispIndex, 
+        size_t virtualDispSize )
+    {
+        SymbolUdtField *p = new SymbolUdtField( sym, name );
+        p->m_offset = offset;
+        p->m_virtualBasePtr = virtualBasePtr;
+        p->m_virtualDispIndex = virtualDispIndex;
+        p->m_virtualDispSize = virtualDispSize;
+        p->m_virtualMember = true;
         return UdtFieldPtr(p);
     }
 

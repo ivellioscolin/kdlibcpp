@@ -680,6 +680,45 @@ bool TypeInfoFields::isStaticMember( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool TypeInfoFields::isVirtualMember( const std::wstring &name )
+{
+    checkFields();
+
+    size_t  pos = name.find_first_of( L'.');
+
+    UdtFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
+
+    if ( pos == std::wstring::npos )
+        return fieldPtr->isVirtualMember();
+
+    TypeInfoPtr  fieldType = fieldPtr->getTypeInfo();
+
+    return fieldType->isVirtualMember( std::wstring( name, pos + 1 ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoFields::isVirtualMember( size_t index )
+{ 
+    checkFields();
+
+    return m_fields.lookup( index )->isVirtualMember();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypeInfoUdt::getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
+{
+    UdtFieldPtr  fieldPtr = m_fields.lookup( fieldName );
+
+    if ( !fieldPtr->isVirtualMember() )
+        throw TypeException( getName(), L"field is not a virtual member" );
+
+    fieldPtr->getVirtualDisplacement( virtualBasePtr, virtualDispIndex, virtualDispSize );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoUdt::getFields()
 {
     getFields( m_symbol, SymbolPtr() );
@@ -719,7 +758,14 @@ void TypeInfoUdt::getFields(
             switch ( childSym->getDataKind() )
             {
             case DataIsMember:
-                fieldPtr = SymbolUdtField::getField( childSym, childSym->getName(), startOffset + childSym->getOffset(), virtualBasePtr, virtualDispIndex, virtualDispSize );
+                if ( baseVirtualSym )
+                {
+                    fieldPtr = SymbolUdtField::getVirtualField( childSym, childSym->getName(), startOffset + childSym->getOffset(), virtualBasePtr, virtualDispIndex, virtualDispSize );
+                }
+                else
+                {
+                    fieldPtr = SymbolUdtField::getField( childSym, childSym->getName(), startOffset + childSym->getOffset() );
+                }
                 break;
             case DataIsStaticMember:
                 fieldPtr = SymbolUdtField::getStaticField( childSym, childSym->getName(),childSym->getVa() );
@@ -731,7 +777,16 @@ void TypeInfoUdt::getFields(
         else
         if ( symTag == SymTagVTable )
         {
-            UdtFieldPtr  fieldPtr = SymbolUdtField::getField(  childSym, L"__VFN_table", startOffset + childSym->getOffset(), virtualBasePtr, virtualDispIndex, virtualDispSize );
+            UdtFieldPtr  fieldPtr;
+
+            if ( baseVirtualSym )
+            {
+                fieldPtr = SymbolUdtField::getVirtualField( childSym,  L"__VFN_table", startOffset + childSym->getOffset(), virtualBasePtr, virtualDispIndex, virtualDispSize );
+            }
+            else
+            {
+                fieldPtr = SymbolUdtField::getField( childSym, L"__VFN_table", startOffset + childSym->getOffset() );
+            }
 
             m_fields.push_back( fieldPtr );
         }

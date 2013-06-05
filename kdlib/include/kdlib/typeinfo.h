@@ -61,10 +61,16 @@ public:
     virtual size_t getElementCount() = 0;
     virtual  MEMOFFSET_64 getElementVa( const std::wstring &name ) = 0;
     virtual  MEMOFFSET_64 getElementVa( size_t index ) = 0;
+    
     virtual bool isStaticMember( const std::wstring &name ) = 0;
     virtual bool isStaticMember( size_t index ) = 0;
 
+    virtual bool isVirtualMember( const std::wstring &name ) = 0;
+    virtual bool isVirtualMember( size_t index ) = 0;
+
     virtual NumVariant getValue() const = 0;
+
+    virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
 
 protected:
 

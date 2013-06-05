@@ -191,10 +191,10 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
 
-    //if ( m_typeInfo->isVirtualMember( fieldName ) )
-    //{
-    //    fieldOffset += getVirtualBaseDisplacement( fieldName );
-    //}
+    if ( m_typeInfo->isVirtualMember( fieldName ) )
+    {
+        fieldOffset += getVirtualBaseDisplacement( fieldName );
+    }
 
     return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
 }
@@ -208,6 +208,23 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(index);
 
     return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMDISPLACEMENT TypedVarUdt::getVirtualBaseDisplacement( const std::wstring &fieldName )
+{
+    MEMOFFSET_32 virtualBasePtr = 0;
+    size_t  virtualDispIndex = 0;
+    size_t  virtualDispSize = 0;
+    m_typeInfo->getVirtualDisplacement( fieldName, virtualBasePtr, virtualDispIndex, virtualDispSize );
+
+    MEMOFFSET_64 vfnptr = m_varData->getAddress() + virtualBasePtr;
+    MEMOFFSET_64 vtbl = m_typeInfo->getPtrSize() == 4 ? ptrDWord( vfnptr ) : ptrQWord(vfnptr);
+
+    MEMDISPLACEMENT     displacement =  ptrSignDWord( vtbl + virtualDispIndex*virtualDispSize );
+
+    return virtualBasePtr + displacement;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

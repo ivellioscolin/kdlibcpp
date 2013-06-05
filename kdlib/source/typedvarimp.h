@@ -233,6 +233,8 @@ protected:
     virtual std::wstring getElementName( size_t index ) {
         return m_typeInfo->getElementName( index );
     }
+
+    MEMDISPLACEMENT getVirtualBaseDisplacement( const std::wstring &fieldName );
 };
 
 
@@ -254,7 +256,6 @@ public:
     }
 
     virtual TypedVarPtr deref();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

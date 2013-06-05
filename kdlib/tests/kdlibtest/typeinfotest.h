@@ -305,3 +305,11 @@ TEST_F( TypeInfoTest, VTBL )
         EXPECT_NO_THROW( typeInfo->getElement(i) );
 }
 
+TEST_F( TypeInfoTest, VirtualMember )
+{
+    TypeInfoPtr typeInfo;
+    ASSERT_NO_THROW( typeInfo = loadType( L"g_virtChild" ) );
+
+    EXPECT_TRUE( typeInfo->isVirtualMember(L"m_baseField") );
+}
+
