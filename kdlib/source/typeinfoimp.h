@@ -146,6 +146,10 @@ protected:
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
+    virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
+        throw TypeException( getName(), L"type is not a struct" ); 
+    }
+
 public:
 
     void setConstant( const NumVariant& constVal )
@@ -270,6 +274,8 @@ protected:
     virtual void getFields();
 
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
+
+    virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
 
     void getFields( 
         SymbolPtr &rootSym, 

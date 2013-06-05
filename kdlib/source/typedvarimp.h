@@ -235,6 +235,7 @@ protected:
     }
 
     MEMDISPLACEMENT getVirtualBaseDisplacement( const std::wstring &fieldName );
+    MEMDISPLACEMENT getVirtualBaseDisplacement( size_t index );
 };
 
 

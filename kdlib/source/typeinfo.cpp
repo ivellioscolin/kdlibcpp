@@ -719,6 +719,18 @@ void TypeInfoUdt::getVirtualDisplacement( const std::wstring& fieldName, MEMOFFS
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void TypeInfoUdt::getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
+{
+    UdtFieldPtr  fieldPtr = m_fields.lookup( fieldIndex );
+
+    if ( !fieldPtr->isVirtualMember() )
+        throw TypeException( getName(), L"field is not a virtual member" );
+
+    fieldPtr->getVirtualDisplacement( virtualBasePtr, virtualDispIndex, virtualDispSize );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoUdt::getFields()
 {
     getFields( m_symbol, SymbolPtr() );

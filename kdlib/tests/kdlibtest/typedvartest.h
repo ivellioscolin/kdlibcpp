@@ -174,8 +174,12 @@ TEST_F( TypedVarTest, StaticMember )
 TEST_F( TypedVarTest, VirtualMember )
 {
     TypedVarPtr   var;
-    ASSERT_NO_THROW( var = loadTypedVar(L"g_virtChild") );
 
+    ASSERT_NO_THROW( var = loadTypedVar(L"g_virtChild") );
     EXPECT_EQ( -100, *var->getElement(L"m_baseField") );
+    EXPECT_EQ( -100, *var->getElement(5) );
+
+    ASSERT_NO_THROW( var = loadTypedVar(L"g_classChild") );
+    EXPECT_EQ( g_classChild.m_staticField, *var->getElement(6) );
 }
 

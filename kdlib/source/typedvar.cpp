@@ -205,7 +205,22 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
 {
     TypeInfoPtr fieldType = m_typeInfo->getElement( index );
 
+    if ( m_typeInfo->isStaticMember(index) )
+    {
+        MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(index);
+
+        if ( staticOffset == 0 )
+           NOT_IMPLEMENTED();
+
+        return  loadTypedVar( fieldType, staticOffset );
+    }
+
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(index);
+
+    if ( m_typeInfo->isVirtualMember( index ) )
+    {
+        fieldOffset += getVirtualBaseDisplacement( index );
+    }
 
     return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
 }
@@ -218,6 +233,23 @@ MEMDISPLACEMENT TypedVarUdt::getVirtualBaseDisplacement( const std::wstring &fie
     size_t  virtualDispIndex = 0;
     size_t  virtualDispSize = 0;
     m_typeInfo->getVirtualDisplacement( fieldName, virtualBasePtr, virtualDispIndex, virtualDispSize );
+
+    MEMOFFSET_64 vfnptr = m_varData->getAddress() + virtualBasePtr;
+    MEMOFFSET_64 vtbl = m_typeInfo->getPtrSize() == 4 ? ptrDWord( vfnptr ) : ptrQWord(vfnptr);
+
+    MEMDISPLACEMENT     displacement =  ptrSignDWord( vtbl + virtualDispIndex*virtualDispSize );
+
+    return virtualBasePtr + displacement;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMDISPLACEMENT TypedVarUdt::getVirtualBaseDisplacement( size_t index )
+{
+    MEMOFFSET_32 virtualBasePtr = 0;
+    size_t  virtualDispIndex = 0;
+    size_t  virtualDispSize = 0;
+    m_typeInfo->getVirtualDisplacement( index, virtualBasePtr, virtualDispIndex, virtualDispSize );
 
     MEMOFFSET_64 vfnptr = m_varData->getAddress() + virtualBasePtr;
     MEMOFFSET_64 vtbl = m_typeInfo->getPtrSize() == 4 ? ptrDWord( vfnptr ) : ptrQWord(vfnptr);
