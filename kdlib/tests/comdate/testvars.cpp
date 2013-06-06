@@ -96,7 +96,7 @@ structWithSignBits g_structWithSignBits = { 4, 1, 5 }; // high bit is sign exten
 
 structWithArray  g_structWithArray = { { 0, 2 }, 3 };
 
-int classChild::m_staticField = 100;
+int classChild::m_staticField = 200;
 classChild  g_classChild;
 
 unionTest  g_unionTest = { 123456 };
