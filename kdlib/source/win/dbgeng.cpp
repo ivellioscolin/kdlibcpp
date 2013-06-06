@@ -360,6 +360,34 @@ ULONG getCurrentTime()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+PROCESS_ID getCurrentProcessId()
+{
+    HRESULT      hres;
+    ULONG        pid;
+
+    hres = g_dbgMgr->system->GetCurrentProcessSystemId( &pid );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentProcessSystemId", hres ); 
+
+    return  PROCESS_ID(pid);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+THREAD_ID getCurrentThreadId()
+{
+    HRESULT      hres;
+    ULONG        tid;
+
+    hres = g_dbgMgr->system->GetCurrentThreadSystemId( &tid );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentThreadSystemId", hres ); 
+        
+     return THREAD_ID(tid);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end 
 
 

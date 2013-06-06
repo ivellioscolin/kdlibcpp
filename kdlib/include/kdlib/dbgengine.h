@@ -59,6 +59,10 @@ void appendSymbolPath(const std::wstring &symPath);
 std::wstring getSourceFile( MEMOFFSET_64 offset = 0);
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset = 0 );
 
+// processes end threads
+PROCESS_ID getCurrentProcessId();
+THREAD_ID getCurrentThreadId();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end
