@@ -183,3 +183,18 @@ TEST_F( TypedVarTest, VirtualMember )
     EXPECT_EQ( g_classChild.m_staticField, *var->getElement(6) );
 }
 
+TEST_F( TypedVarTest, LoadTypedVarList )
+{
+    TypedVarList   lst;
+    ASSERT_NO_THROW( lst = loadTypedVarList( m_targetModule->getSymbolVa(L"g_listHead"), L"listStruct", L"next.flink" ) );
+    EXPECT_EQ( 5, lst.size() );
+    EXPECT_EQ( 2, *lst[2]->getElement(L"num") );
+}
+
+TEST_F( TypedVarTest, LoadTypedVarArray )
+{
+    TypedVarList   lst;
+    ASSERT_NO_THROW( lst = loadTypedVarArray( m_targetModule->getSymbolVa(L"g_testArray"), L"listStruct", 2 ));
+    EXPECT_EQ( 2, lst.size() );
+}
+

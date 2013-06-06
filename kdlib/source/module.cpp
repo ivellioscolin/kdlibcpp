@@ -279,6 +279,34 @@ TypedVarPtr Module::containingRecord( MEMOFFSET_64 offset, const std::wstring &t
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarList Module::loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName )
+{
+    offset = addr64(offset);
+
+    if ( offset < m_base || offset >= m_base + m_size )
+        throw SymbolException(L"offset dont has to module");
+
+    TypeInfoPtr typeInfo = getTypeByName( typeName );
+
+    return kdlib::loadTypedVarList( offset, typeName, fieldName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarList Module::loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring &typeName, size_t count )
+{
+    offset = addr64(offset);
+
+    if ( offset < m_base || offset >= m_base + m_size )
+        throw SymbolException(L"offset dont has to module");
+
+    TypeInfoPtr typeInfo = getTypeByName( typeName );
+
+    return kdlib::loadTypedVarArray( offset, typeName, count );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring Module::getSourceFile( MEMOFFSET_64 offset )
 {
     std::wstring  fileName;

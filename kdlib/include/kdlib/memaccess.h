@@ -28,7 +28,6 @@ short ptrSignWord( MEMOFFSET_64 offset );
 long ptrSignDWord( MEMOFFSET_64 offset );
 long long ptrSignQWord( MEMOFFSET_64 offset );
 long long ptrSignMWord( MEMOFFSET_64 offset );
-MEMOFFSET_64 ptrPtr( MEMOFFSET_64 offset );
 float ptrSingleFloat( MEMOFFSET_64 offset );
 double ptrDoubleFloat( MEMOFFSET_64 offset );
 
@@ -48,8 +47,9 @@ std::wstring loadWChars( MEMOFFSET_64 offset, unsigned long  number, bool phyAdd
 std::string loadCStr( MEMOFFSET_64 offset );
 std::wstring loadWStr( MEMOFFSET_64 offset );
 
-std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long count );
-std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset );
+MEMOFFSET_64 ptrPtr( MEMOFFSET_64 offset, size_t psize = 0 );
+std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long count, size_t psize = 0 );
+std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset, size_t psize = 0 );
 
 ///////////////////////////////////////////////////////////////////////////////
 

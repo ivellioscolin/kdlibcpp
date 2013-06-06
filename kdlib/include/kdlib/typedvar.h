@@ -12,6 +12,7 @@ namespace kdlib {
 
 class TypedVar;
 typedef boost::shared_ptr<TypedVar>  TypedVarPtr;
+typedef std::vector<TypedVarPtr> TypedVarList;
 
 TypedVarPtr loadTypedVar( const std::wstring &varName );
 
@@ -22,6 +23,15 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
 TypedVarPtr containingRecord( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
 
 TypedVarPtr containingRecord( MEMOFFSET_64 addr, TypeInfoPtr &typeInfo, const std::wstring &fieldName );
+
+TypedVarList loadTypedVarList( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
+
+TypedVarList loadTypedVarList( MEMOFFSET_64 addr, TypeInfoPtr &typeInfo, const std::wstring &fieldName );
+
+TypedVarList loadTypedVarArray( MEMOFFSET_64 addr, const std::wstring &typeName, size_t count );
+
+TypedVarList loadTypedVarArray( MEMOFFSET_64 addr, TypeInfoPtr &typeInfo, size_t count );
+
 
 class TypedVar : private boost::noncopyable, public NumBehavior {
 

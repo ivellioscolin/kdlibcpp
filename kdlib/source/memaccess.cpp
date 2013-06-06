@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "kdlib/memaccess.h"
+#include "kdlib/exceptions.h"
 
 namespace kdlib {
 
@@ -51,14 +52,6 @@ unsigned long long  ptrQWord( MEMOFFSET_64 offset )
 unsigned long long ptrMWord( MEMOFFSET_64 offset )
 {
     return ptrSize() == 8 ? ptrQWord( offset ) : ptrDWord(offset );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-MEMOFFSET_64 ptrPtr( MEMOFFSET_64 offset )
-{
-    unsigned long long  ptr = ptrMWord( offset );
-    return addr64( ptr );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -222,33 +215,51 @@ std::wstring loadWChars( MEMOFFSET_64 offset, unsigned long number, bool phyAddr
     return std::wstring( buffer.begin(), buffer.end() );
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 ptrPtr( MEMOFFSET_64 offset, size_t psize)
+{
+    psize = psize == 0 ? ptrSize() : psize;
+
+    if ( psize == 4 )
+        return addr64(ptrDWord(offset) );
+
+    if ( psize == 8 )
+        return addr64(ptrQWord(offset) );
+
+    throw DbgException(L"unknown pointer size");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long number )
+std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long number, size_t psize )
 {
     offset = addr64( offset );
+
+    psize = psize == 0 ? ptrSize() : psize;
 
     std::vector<MEMOFFSET_64>   ptrs(number);
 
     for ( unsigned long i = 0; i < number; ++i )
-        ptrs[i] =ptrPtr( offset + i*ptrSize() );
+        ptrs[i] =ptrPtr( offset + i*psize, psize );
 
     return ptrs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset )
+std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset, size_t psize )
 {
     offset = addr64( offset );
+
+    psize = psize == 0 ? ptrSize() : psize;
 
     std::vector<MEMOFFSET_64>   ptrs;
     ptrs.reserve(100);
 
     MEMOFFSET_64     entryAddress = 0;
     
-    for( entryAddress = ptrPtr( offset ); entryAddress != offset && entryAddress != 0; entryAddress = ptrPtr( entryAddress ) )
+    for( entryAddress = ptrPtr( offset, psize ); entryAddress != offset && entryAddress != 0; entryAddress = ptrPtr( entryAddress, psize ) )
        ptrs.push_back( entryAddress );
     
     return ptrs;

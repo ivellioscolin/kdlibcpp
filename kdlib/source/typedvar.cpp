@@ -129,6 +129,106 @@ TypedVarPtr containingRecord( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const 
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarList loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName )
+{
+    std::wstring     moduleName;
+    std::wstring     symName;
+
+    splitSymName( typeName, moduleName, symName );
+
+     ModulePtr  module;
+
+    if ( moduleName.empty() )
+    {
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
+        module = loadModule( moduleOffset );
+    }
+    else
+    {
+        module = loadModule( moduleName );
+    }
+
+    TypeInfoPtr typeInfo = module->getTypeByName( symName );
+
+    return loadTypedVarList( offset, typeInfo, fieldName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarList loadTypedVarList( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const std::wstring &fieldName )
+{
+    if ( !typeInfo )
+        throw DbgException( L"type info is null" );
+
+    offset = addr64(offset);
+
+    TypedVarList  lst;
+    lst.reserve(100);
+
+    MEMOFFSET_64  entryAddress = 0;
+    TypeInfoPtr  fieldTypeInfo = typeInfo->getElement( fieldName );
+    size_t  psize = fieldTypeInfo->getPtrSize();
+
+    if ( fieldTypeInfo->getName() == ( typeInfo->getName() + L"*" ) )
+    {
+        for( entryAddress = ptrPtr(offset, psize); addr64(entryAddress) != offset && entryAddress != NULL; entryAddress = ptrPtr( entryAddress + typeInfo->getElementOffset(fieldName), psize ) )
+            lst.push_back( loadTypedVar( typeInfo, entryAddress ) );
+    }
+    else
+    {
+        for( entryAddress = ptrPtr( offset, psize ); addr64(entryAddress) != offset && entryAddress != NULL; entryAddress = ptrPtr( entryAddress, psize ) )
+            lst.push_back( containingRecord( entryAddress, typeInfo, fieldName ) );
+    }
+
+    return lst;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring &typeName, size_t number )
+{
+    std::wstring     moduleName;
+    std::wstring     symName;
+
+    splitSymName( typeName, moduleName, symName );
+
+     ModulePtr  module;
+
+    if ( moduleName.empty() )
+    {
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
+        module = loadModule( moduleOffset );
+    }
+    else
+    {
+        module = loadModule( moduleName );
+    }
+
+    TypeInfoPtr typeInfo = module->getTypeByName( symName );
+
+    return loadTypedVarArray( offset, typeInfo, number );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, size_t number )
+{
+   if ( !typeInfo )
+        throw DbgException( L"type info is null" );
+
+    offset = addr64(offset); 
+
+    TypedVarList  lst;
+    lst.reserve(100);
+
+    for( size_t i = 0; i < number; ++i )
+        lst.push_back( loadTypedVar( typeInfo, offset + i * typeInfo->getSize() ) );
+   
+    return lst;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 NumVariant TypedVarBase::getValue() const
 {
     if ( m_typeInfo->getName() == L"Char" )
