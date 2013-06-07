@@ -134,6 +134,8 @@ DebugExtensionInitialize(
         kdlib::dbgin = &kdlib::windbg::windbgIn;
 
         WinDbgExt->setUp();
+
+        WinDbgExt->setInit(true);
     }
 
     return S_OK;
@@ -147,6 +149,7 @@ DebugExtensionUninitialize()
 {
     if ( 0 == InterlockedDecrement( &g_initCount ) )
     {
+        WinDbgExt->setInit(false);
         WinDbgExt->tearDown();
     }
 }

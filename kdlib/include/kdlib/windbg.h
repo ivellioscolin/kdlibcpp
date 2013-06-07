@@ -17,12 +17,20 @@ class WindbgExtension {
 
 public:
 
-    WindbgExtension() {}
+    WindbgExtension() : m_init(false) {}
     virtual ~WindbgExtension() {}
 
     virtual void setUp() {}
     virtual void tearDown() {}
     virtual void parseArgs(const char* args);
+
+    bool isInit() {
+        return m_init;
+    }
+
+    void setInit( bool state ) {
+        m_init = state;
+    }
 
 protected:
 
@@ -34,6 +42,7 @@ protected:
 
     ArgsList  m_argsList;
 
+    bool m_init;
 
 };
 
@@ -47,7 +56,6 @@ protected:
 #define KDLIB_WINDBG_EXTENSION_INIT(X)                                       \
 X* KdlibExtImpl = new X();                                                   \
 kdlib::windbg::WindbgExtension  *WinDbgExt = KdlibExtImpl
-
 
 #define KDLIB_EXT_COMMAND_METHOD(METHOD_NAME)  void METHOD_NAME(void)
 
