@@ -74,10 +74,14 @@ protected:
         return false;
     }
 
+    virtual bool isFunction() {
+        return false;
+    }
+
     virtual bool isConstant() {
         return m_constant;
     }
-
+    
     virtual TypeInfoPtr getElement( const std::wstring &name ) {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
@@ -315,6 +319,27 @@ protected:
     virtual void getFields();
 
     SymbolPtr  m_symbol;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoFunc : public TypeInfoImp 
+{
+public:
+
+    TypeInfoFunc( SymbolPtr& symbol ) :
+        m_symbol( symbol )
+        {}
+
+protected:
+
+    virtual bool isFunction() 
+    {
+        return true;
+    }
+
+    SymbolPtr  m_symbol;
+    
 };
 
 ///////////////////////////////////////////////////////////////////////////////

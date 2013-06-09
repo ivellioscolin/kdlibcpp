@@ -198,3 +198,9 @@ TEST_F( TypedVarTest, LoadTypedVarArray )
     EXPECT_EQ( 2, lst.size() );
 }
 
+TEST_F( TypedVarTest, FuncPtr )
+{
+    TypedVarPtr  funcptr;
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncPtr" ) );
+}
+
