@@ -38,3 +38,7 @@ _UnderscoreFunc( int a, float b )
 {
    LocalStaticFunc(a,b);
 }
+
+
+void ( *CdeclFuncPtr)( int a, float b) = &CdeclFunc;
+

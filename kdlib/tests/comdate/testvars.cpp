@@ -141,5 +141,7 @@ ListCreator<5> list1( g_listHead );
 
 virtualChild       g_virtChild;
 
+listEntry deadlockEntry = { &deadlockEntry, &deadlockEntry };
+
 #pragma pack(pop)
 
