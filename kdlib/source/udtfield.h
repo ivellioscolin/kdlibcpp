@@ -13,10 +13,10 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class UdtField;
-typedef boost::shared_ptr<UdtField>  UdtFieldPtr;
+class TypeField;
+typedef boost::shared_ptr<TypeField>  TypeFieldPtr;
 
-class UdtField
+class TypeField
 {
 
 public:
@@ -71,7 +71,7 @@ public:
 
 protected:
 
-    UdtField( const std::wstring  &name ) :
+    TypeField( const std::wstring  &name ) :
          m_name( name ),
          m_offset( 0 ),
          m_staticOffset( 0 ),
@@ -102,21 +102,21 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-class SymbolUdtField : public UdtField 
+class SymbolUdtField : public TypeField 
 {
 public:
 
-    static UdtFieldPtr getField( 
+    static TypeFieldPtr getField( 
         const SymbolPtr &sym, 
         const std::wstring& name,
         MEMOFFSET_32 offset )
     {
         SymbolUdtField *p = new SymbolUdtField( sym, name );
         p->m_offset = offset;
-        return UdtFieldPtr(p);
+        return TypeFieldPtr(p);
     }
 
-    static UdtFieldPtr getStaticField(
+    static TypeFieldPtr getStaticField(
         const SymbolPtr &sym, 
         const std::wstring& name,
         MEMOFFSET_64 offset )
@@ -124,10 +124,10 @@ public:
         SymbolUdtField *p = new SymbolUdtField( sym, name );
         p->m_staticOffset = offset;
         p->m_staticMember = true;
-        return UdtFieldPtr(p);
+        return TypeFieldPtr(p);
     }
 
-    static UdtFieldPtr getVirtualField(
+    static TypeFieldPtr getVirtualField(
         const SymbolPtr &sym, 
         const std::wstring& name,
         MEMOFFSET_32 offset,
@@ -141,7 +141,7 @@ public:
         p->m_virtualDispIndex = virtualDispIndex;
         p->m_virtualDispSize = virtualDispSize;
         p->m_virtualMember = true;
-        return UdtFieldPtr(p);
+        return TypeFieldPtr(p);
     }
 
 public:
@@ -153,7 +153,7 @@ public:
 private:
 
     SymbolUdtField( const SymbolPtr &sym, const std::wstring& name ) :
-        UdtField( name ),
+        TypeField( name ),
         m_symbol( sym )
         {}
 
@@ -164,11 +164,11 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class EnumField : public UdtField 
+class EnumField : public TypeField 
 {
 public:
     EnumField( const SymbolPtr &sym ) :
-        UdtField( sym->getName() ),
+        TypeField( sym->getName() ),
         m_symbol( sym )
         {}
 
@@ -176,6 +176,25 @@ private:
 
     virtual TypeInfoPtr getTypeInfo() {
         return loadType(m_symbol);
+    }
+
+    SymbolPtr  m_symbol;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class FunctionField : public TypeField 
+{
+public:
+    FunctionField( const SymbolPtr &sym ) :
+        TypeField(L""),
+        m_symbol( sym )
+        {}
+
+private:
+
+    virtual TypeInfoPtr getTypeInfo() {
+        return loadType(m_symbol->getType());
     }
 
     SymbolPtr  m_symbol;
@@ -191,15 +210,15 @@ public:
       m_name( name )
       {}
 
-    const UdtFieldPtr &lookup(size_t index) const;
-    const UdtFieldPtr &lookup(const std::wstring &name) const;
+    const TypeFieldPtr &lookup(size_t index) const;
+    const TypeFieldPtr &lookup(const std::wstring &name) const;
 
-    UdtFieldPtr &lookup(size_t index);
-    UdtFieldPtr &lookup(const std::wstring &name);
+    TypeFieldPtr &lookup(size_t index);
+    TypeFieldPtr &lookup(const std::wstring &name);
 
     size_t getIndex(const std::wstring &name) const; 
 
-    void push_back( const UdtFieldPtr& field ) {
+    void push_back( const TypeFieldPtr& field ) {
         m_fields.push_back( field );
     }
 
@@ -209,7 +228,7 @@ public:
 
 private:
 
-    typedef std::vector<UdtFieldPtr>  FieldList;
+    typedef std::vector<TypeFieldPtr>  FieldList;
     FieldList  m_fields;
     std::wstring  m_name;
 };

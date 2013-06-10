@@ -10,7 +10,7 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const UdtFieldPtr& FieldCollection::lookup(const std::wstring &name) const
+const TypeFieldPtr& FieldCollection::lookup(const std::wstring &name) const
 {
     FieldList::const_reverse_iterator it;
     for ( it = m_fields.rbegin(); it !=  m_fields.rend(); ++it )
@@ -27,16 +27,16 @@ const UdtFieldPtr& FieldCollection::lookup(const std::wstring &name) const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UdtFieldPtr& FieldCollection::lookup(const std::wstring &name)
+TypeFieldPtr& FieldCollection::lookup(const std::wstring &name)
 {
-    const UdtFieldPtr &filedPtr = const_cast<const FieldCollection&>(*this).lookup(name);
-    return const_cast<UdtFieldPtr&>(filedPtr);
+    const TypeFieldPtr &filedPtr = const_cast<const FieldCollection&>(*this).lookup(name);
+    return const_cast<TypeFieldPtr&>(filedPtr);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const UdtFieldPtr& FieldCollection::lookup(size_t index) const
+const TypeFieldPtr& FieldCollection::lookup(size_t index) const
 {
     if ( index >= m_fields.size() )
         throw IndexException( index );
@@ -46,10 +46,10 @@ const UdtFieldPtr& FieldCollection::lookup(size_t index) const
 
 //////////////////////////////////////////////////////////////////////////////
 
-UdtFieldPtr& FieldCollection::lookup(size_t index)
+TypeFieldPtr& FieldCollection::lookup(size_t index)
 {
-    const UdtFieldPtr &filedPtr = const_cast<const FieldCollection&>(*this).lookup(index);
-    return const_cast<UdtFieldPtr&>(filedPtr);
+    const TypeFieldPtr &filedPtr = const_cast<const FieldCollection&>(*this).lookup(index);
+    return const_cast<TypeFieldPtr&>(filedPtr);
 }
 
 //////////////////////////////////////////////////////////////////////////////

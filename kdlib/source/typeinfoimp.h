@@ -323,13 +323,38 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoFunc : public TypeInfoImp 
+class TypeInfoFuncPrototype : public TypeInfoFields
 {
 public:
 
-    TypeInfoFunc( SymbolPtr& symbol ) :
+    TypeInfoFuncPrototype( SymbolPtr& symbol ) :
+        TypeInfoFields( L"function" ),
         m_symbol( symbol )
         {}
+
+protected:
+
+    virtual std::wstring getName() {
+       return m_symbol->getName();
+    }
+
+    virtual void getFields();
+
+    SymbolPtr  m_symbol;
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoFunc : public TypeInfoImp
+{
+public:
+
+    TypeInfoFunc( SymbolPtr& symbol )
+    {
+        m_symbol = symbol;
+        m_prototype = loadType( symbol->getType() );
+    }
 
 protected:
 
@@ -338,9 +363,39 @@ protected:
         return true;
     }
 
+    virtual std::wstring getName() {
+       return m_symbol->getName();
+    }
+
+    virtual NumVariant getValue() const {
+        return m_symbol->getVa();
+    }
+
+    virtual TypeInfoPtr getElement( const std::wstring &name ) {
+        return m_prototype->getElement(name);
+    }
+
+    virtual TypeInfoPtr getElement( size_t index ) {
+        return m_prototype->getElement(index);
+    }
+
+    virtual std::wstring getElementName( size_t index ) {
+        return m_prototype->getElementName(index);
+    }
+
+    virtual size_t getElementIndex( const std::wstring &name ) {
+        return m_prototype->getElementIndex(name);
+    }
+
+    virtual size_t getElementCount() {
+        return m_prototype->getElementCount();
+    }
+
+    TypeInfoPtr m_prototype;
+
     SymbolPtr  m_symbol;
-    
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

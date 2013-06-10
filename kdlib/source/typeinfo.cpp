@@ -257,8 +257,12 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
         ptr = TypeInfoPtr( new TypeInfoEnum( symbol ) );
         break;
 
-    case SymTagFunctionType:
+    case SymTagFunction:
         ptr = TypeInfoPtr( new TypeInfoFunc( symbol ) );
+        break;
+
+    case SymTagFunctionType:
+        ptr = TypeInfoPtr( new TypeInfoFuncPrototype( symbol ) );
         break;
 
     case SymTagTypedef:
@@ -636,7 +640,7 @@ MEMOFFSET_64 TypeInfoFields::getElementVa( const std::wstring &name )
 
     size_t  pos = name.find_first_of( L'.');
 
-    UdtFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
+    TypeFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
 
     if ( pos == std::wstring::npos )
         return fieldPtr->getStaticOffset();
@@ -663,7 +667,7 @@ bool TypeInfoFields::isStaticMember( const std::wstring &name )
 
     size_t  pos = name.find_first_of( L'.');
 
-    UdtFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
+    TypeFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
 
     if ( pos == std::wstring::npos )
         return fieldPtr->isStaticMember();
@@ -690,7 +694,7 @@ bool TypeInfoFields::isVirtualMember( const std::wstring &name )
 
     size_t  pos = name.find_first_of( L'.');
 
-    UdtFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
+    TypeFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
 
     if ( pos == std::wstring::npos )
         return fieldPtr->isVirtualMember();
@@ -713,7 +717,7 @@ bool TypeInfoFields::isVirtualMember( size_t index )
 
 void TypeInfoUdt::getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
 {
-    UdtFieldPtr  fieldPtr = m_fields.lookup( fieldName );
+    TypeFieldPtr  fieldPtr = m_fields.lookup( fieldName );
 
     if ( !fieldPtr->isVirtualMember() )
         throw TypeException( getName(), L"field is not a virtual member" );
@@ -725,7 +729,7 @@ void TypeInfoUdt::getVirtualDisplacement( const std::wstring& fieldName, MEMOFFS
 
 void TypeInfoUdt::getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
 {
-    UdtFieldPtr  fieldPtr = m_fields.lookup( fieldIndex );
+    TypeFieldPtr  fieldPtr = m_fields.lookup( fieldIndex );
 
     if ( !fieldPtr->isVirtualMember() )
         throw TypeException( getName(), L"field is not a virtual member" );
@@ -769,7 +773,7 @@ void TypeInfoUdt::getFields(
         else
         if ( symTag == SymTagData )
         {
-            UdtFieldPtr  fieldPtr;
+            TypeFieldPtr  fieldPtr;
 
             switch ( childSym->getDataKind() )
             {
@@ -793,7 +797,7 @@ void TypeInfoUdt::getFields(
         else
         if ( symTag == SymTagVTable )
         {
-            UdtFieldPtr  fieldPtr;
+            TypeFieldPtr  fieldPtr;
 
             if ( baseVirtualSym )
             {
@@ -842,7 +846,24 @@ void TypeInfoEnum::getFields()
     {
         SymbolPtr  childSym = m_symbol->getChildByIndex( i );
 
-        UdtFieldPtr  fieldPtr = UdtFieldPtr( new EnumField( childSym ) );
+        TypeFieldPtr  fieldPtr = TypeFieldPtr( new EnumField( childSym ) );
+
+        m_fields.push_back( fieldPtr );
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypeInfoFuncPrototype::getFields()
+{
+    size_t   childCount = m_symbol->getChildCount();
+
+    for ( size_t  i = 0; i < childCount; ++i )
+    {
+        SymbolPtr  childSym = m_symbol->getChildByIndex( i );
+
+        TypeFieldPtr  fieldPtr = TypeFieldPtr( new FunctionField( childSym ) );
 
         m_fields.push_back( fieldPtr );
     }

@@ -313,3 +313,17 @@ TEST_F( TypeInfoTest, VirtualMember )
     EXPECT_TRUE( typeInfo->isVirtualMember(L"m_baseField") );
 }
 
+
+TEST_F( TypeInfoTest, Function )
+{
+    TypeInfoPtr func;
+    ASSERT_NO_THROW( func = loadType(L"CdeclFunc") );
+    EXPECT_EQ( L"CdeclFunc", func->getName() );
+    EXPECT_EQ( m_targetModule->getSymbolVa(L"CdeclFunc"), *func);
+    EXPECT_EQ( 2, func->getElementCount() );
+    EXPECT_EQ( L"Float", func->getElement(1)->getName() );
+    
+    TypeInfoPtr method;
+    ASSERT_NO_THROW( method = loadType(L"classChild::virtMethod2") );
+}
+
