@@ -112,7 +112,6 @@ TEST_F( TypedVarTest, GetElementCount )
 TEST_F( TypedVarTest, GetElementByIndex )
 {
     EXPECT_THROW( loadTypedVar(L"ucharVar")->getElement(0), TypeException );
-    EXPECT_THROW( loadTypedVar(L"g_structTestPtr")->getElement(0), TypeException );
     EXPECT_EQ( g_structTest.m_field1, *loadTypedVar(L"g_structTest")->getElement(1) );
     EXPECT_THROW( loadTypedVar(L"g_structTest")->getElement(10), IndexException );
     EXPECT_EQ( g_testArray[0].m_field1, *loadTypedVar(L"g_testArray")->getElement(0)->getElement(1) );
@@ -148,6 +147,9 @@ TEST_F( TypedVarTest, Deref )
     TypedVarPtr  var;
     ASSERT_NO_THROW( var = loadTypedVar(L"pbigValue") );
     EXPECT_EQ( bigValue, *var->deref() );
+
+    ASSERT_NO_THROW( var = loadTypedVar(L"g_listHead") );
+    ASSERT_EQ( *var->getElement(L"flink")->deref()->getElement(L"flink"), *var->getElement(L"flink")->getElement(L"flink") );
 }
 
 TEST_F( TypedVarTest, ContainingRecord )
@@ -203,4 +205,3 @@ TEST_F( TypedVarTest, FuncPtr )
     TypedVarPtr  funcptr;
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncPtr" ) );
 }
-

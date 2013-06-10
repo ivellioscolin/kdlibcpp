@@ -257,6 +257,17 @@ public:
     }
 
     virtual TypedVarPtr deref();
+
+    virtual TypedVarPtr getElement( const std::wstring& fieldName ) {
+        TypedVarPtr  derefPtr = deref();
+        return derefPtr->getElement( fieldName );
+    }
+
+    virtual  TypedVarPtr getElement( size_t index ) {
+        TypedVarPtr  derefPtr = deref();
+        return derefPtr->getElement( index );
+    }
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
