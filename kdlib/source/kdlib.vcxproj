@@ -42,6 +42,7 @@
     <ClInclude Include="..\include\kdlib\dbgengine.h" />
     <ClInclude Include="..\include\kdlib\dbgio.h" />
     <ClInclude Include="..\include\kdlib\dbgtypedef.h" />
+    <ClInclude Include="..\include\kdlib\eventhandler.h" />
     <ClInclude Include="..\include\kdlib\exceptions.h" />
     <ClInclude Include="..\include\kdlib\kdlib.h" />
     <ClInclude Include="..\include\kdlib\memaccess.h" />

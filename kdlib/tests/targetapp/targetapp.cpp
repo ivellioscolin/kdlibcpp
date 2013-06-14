@@ -2,9 +2,13 @@
 //
 
 #include "stdafx.h"
+
 #include <string>
 
+#include "test/testfunc.h"
+
 int breakOnRun();
+int breakpointTestRun();
 int memTestRun();
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -23,6 +27,9 @@ int _tmain(int argc, _TCHAR* argv[])
     if ( testGroup == L"typedvartest" )
         return breakOnRun();
 
+    if ( testGroup == L"breakhandlertest" )
+        return breakpointTestRun();
+
     return breakOnRun();
 }
 
@@ -32,4 +39,12 @@ int breakOnRun()
     return 0;
 }
 
+int breakpointTestRun()
+{
+    __debugbreak();
+
+    CdeclFunc( 10, 10.0f );
+
+    return 0;
+}
 

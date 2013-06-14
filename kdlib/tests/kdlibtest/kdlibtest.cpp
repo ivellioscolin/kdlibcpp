@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "kdlib/dbgengine.h"
 #include "processtest.h"
 #include "moduletest.h"
@@ -10,6 +10,7 @@
 #include "typeinfotest.h"
 #include "typedvartest.h"
 #include "varianttest.h"
+#include "breakhandler.h"
 
 class Environment : public ::testing::Environment {
 public:
@@ -26,10 +27,10 @@ public:
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-    ::testing::InitGoogleTest(&argc, argv);
+    ::testing::InitGoogleMock(&argc, argv);
 
-    ::testing::AddGlobalTestEnvironment( new Environment );
+    ::testing::AddGlobalTestEnvironment( new ::Environment );
 
     return RUN_ALL_TESTS();
 }
-
+ 

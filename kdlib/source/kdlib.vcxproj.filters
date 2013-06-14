@@ -71,6 +71,9 @@
     <ClInclude Include="..\include\kdlib\dbgio.h">
       <Filter>include/kdlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\kdlib\eventhandler.h">
+      <Filter>include/kdlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">

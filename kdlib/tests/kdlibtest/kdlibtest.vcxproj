@@ -79,6 +79,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\test\testvars.h" />
+    <ClInclude Include="breakhandler.h" />
+    <ClInclude Include="eventhandler.h" />
     <ClInclude Include="memorytest.h" />
     <ClInclude Include="moduletest.h" />
     <ClInclude Include="processtest.h" />
@@ -90,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\comdate\testvars.cpp" />
-    <ClCompile Include="gtest\gtest-all.cc">
+    <ClCompile Include="gmock\gmock-gtest-all.cc">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="kdlibtest.cpp" />

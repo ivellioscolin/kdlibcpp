@@ -388,6 +388,70 @@ THREAD_ID getCurrentThreadId()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset )
+{
+    HRESULT  hres;
+
+    IDebugBreakpoint  *bp;
+    hres = g_dbgMgr->control->AddBreakpoint(
+        DEBUG_BREAKPOINT_CODE,
+        DEBUG_ANY_ID,
+        &bp);
+
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::AddBreakpoint", hres);
+
+    hres = bp->SetOffset(offset);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException(L"IDebugBreakpoint::SetOffset", hres);
+    }
+
+    ULONG bpFlags;
+    hres = bp->GetFlags(&bpFlags);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException(L"IDebugBreakpoint::GetFlags", hres);
+    }
+
+
+    bpFlags |= DEBUG_BREAKPOINT_ENABLED | DEBUG_BREAKPOINT_ADDER_ONLY | DEBUG_BREAKPOINT_GO_ONLY;
+    hres = bp->SetFlags(bpFlags);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException( L"IDebugBreakpoint::SetFlags", hres);
+    }
+
+    ULONG  breakId;
+    hres = bp->GetId(&breakId);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException( L"IDebugBreakpoint::GetId", hres);
+    }
+
+    return breakId;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void registerEventsCallback( DebugEventsCallback *callback )
+{
+    g_dbgMgr->registerEventsCallback( callback );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void removeEventsCallback( DebugEventsCallback *callback )
+{
+    g_dbgMgr->removeEventsCallback( callback );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end 
 
 
