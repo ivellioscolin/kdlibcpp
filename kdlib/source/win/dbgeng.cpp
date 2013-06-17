@@ -200,11 +200,11 @@ bool isKernelDebugging()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-void targetGo()
+ExecutionStatus targetChangeStatus( ULONG status )
 {
     HRESULT     hres;
 
-    hres = g_dbgMgr->control->SetExecutionStatus( DEBUG_STATUS_GO );
+    hres = g_dbgMgr->control->SetExecutionStatus( status );
 
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::SetExecutionStatus failed", hres );
@@ -214,66 +214,43 @@ void targetGo()
     do {
         hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
         if ( FAILED( hres ) )
+        {
+            hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
+            if ( FAILED( hres ) )
+                throw  DbgEngException( L"IDebugControl::GetExecutionStatus  failed", hres ); 
+
+            if ( currentStatus == DEBUG_STATUS_NO_DEBUGGEE )
+                return DebugStatusNoDebuggee;
+            
             throw DbgEngException( L"IDebugControl::WaitForEvent failed", hres );
+        }
 
         hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
 
         if ( FAILED( hres ) )
             throw  DbgEngException( L"IDebugControl::GetExecutionStatus  failed", hres ); 
 
-    } while( currentStatus != DEBUG_STATUS_BREAK && currentStatus != DEBUG_STATUS_NO_DEBUGGEE );
+        if ( currentStatus == DEBUG_STATUS_BREAK )
+            return DebugStatusBreak;
+
+    } while( TRUE );
 }
 
-///////////////////////////////////////////////////////////////////////////////////
 
-void targetStep()
+ExecutionStatus targetGo()
 {
-    HRESULT     hres;
-
-    hres = g_dbgMgr->control->SetExecutionStatus( DEBUG_STATUS_STEP_OVER );
-
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::SetExecutionStatus failed", hres );
-
-    ULONG    currentStatus;
-
-    do {
-        hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugControl::WaitForEvent failed", hres );
-
-        hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
-
-        if ( FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::GetExecutionStatus  failed", hres ); 
-
-    } while( currentStatus != DEBUG_STATUS_BREAK && currentStatus != DEBUG_STATUS_NO_DEBUGGEE );
+    return targetChangeStatus( DEBUG_STATUS_GO );
 }
 
-///////////////////////////////////////////////////////////////////////////////
 
-void targetStepIn()
+ExecutionStatus targetStep()
 {
-    HRESULT     hres;
+    return targetChangeStatus( DEBUG_STATUS_STEP_OVER );
+}
 
-    hres = g_dbgMgr->control->SetExecutionStatus( DEBUG_STATUS_STEP_INTO );
-
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::SetExecutionStatus", hres );
-
-    ULONG    currentStatus;
-
-    do {
-        hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
-
-        hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
-
-        if ( FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
-
-    } while( currentStatus != DEBUG_STATUS_BREAK && currentStatus != DEBUG_STATUS_NO_DEBUGGEE );
+ExecutionStatus targetStepIn()
+{
+    return targetChangeStatus( DEBUG_STATUS_STEP_INTO );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -434,6 +411,20 @@ BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset )
     }
 
     return breakId;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void breakPointRemove( BREAKPOINT_ID id )
+{
+    IDebugBreakpoint *bp;
+    HRESULT hres = g_dbgMgr->control->GetBreakpointById(id, &bp);
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetBreakpointById", hres);
+
+    hres = g_dbgMgr->control->RemoveBreakpoint(bp);
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::RemoveBreakpoint", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

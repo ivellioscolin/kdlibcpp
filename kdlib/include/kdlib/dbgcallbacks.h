@@ -8,21 +8,6 @@ namespace kdlib {
 
 //////////////////////////////////////////////////////////////////////////////
 
-enum DebugCallbackResult {
-    DebugCallbackProceed = 0,
-    DebugCallbackNoChange = 1,
-    DebugCallbackBreak = 2,
-    DebugCallbackMax = 3
-};
-
-enum ExecutionStatus {
-    DebugStatusNoChange             = 0,
-    DebugStatusGo                   = 1,
-    DebugStatusBreak                = 6,
-    DebugStatusNoDebuggee           = 7
-};
-
-
 struct DebugEventsCallback {
 
     virtual DebugCallbackResult onBreakpoint( BREAKPOINT_ID bpId ) = 0;

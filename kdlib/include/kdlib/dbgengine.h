@@ -23,11 +23,6 @@ void terminateProcess( PROCESS_DEBUG_ID processId = -1);
 void loadDump( const std::wstring &fileName );
 void writeDump( const std::wstring &fileNamem, bool smallDump );
 
-void targetGo();
-void targetStep();
-void targetStepIn();
-void targetBreak();
-
 bool isDumpAnalyzing();
 bool isKernelDebugging();
 
@@ -68,6 +63,11 @@ BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset );
 BREAKPOINT_ID hardwareBreakPointSet( MEMOFFSET_64 offset, size_t = 0, ACCESS_TYPE accessType = 0 );
 void breakPointRemove( BREAKPOINT_ID id );
 void breakPointRemoveAll();
+
+ExecutionStatus targetGo();
+ExecutionStatus targetStep();
+ExecutionStatus targetStepIn();
+void targetBreak();
 
 ///////////////////////////////////////////////////////////////////////////////
 
