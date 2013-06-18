@@ -161,6 +161,14 @@ MEMOFFSET_64 getSymbolOffset( const std::wstring &fullName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
+{
+    ModulePtr  module = loadModule(offset);
+    return module->findSymbol( offset, displacement );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoPtr loadType( const std::wstring &typeName )
 {
     std::wstring     moduleName;
