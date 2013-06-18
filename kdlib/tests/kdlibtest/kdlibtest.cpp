@@ -11,6 +11,7 @@
 #include "typedvartest.h"
 #include "varianttest.h"
 #include "breakhandler.h"
+#include "cputest.h"
 
 class Environment : public ::testing::Environment {
 public:

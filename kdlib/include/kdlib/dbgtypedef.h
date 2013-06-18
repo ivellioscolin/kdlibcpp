@@ -29,6 +29,12 @@ enum ExecutionStatus {
     DebugStatusNoDebuggee           = 7
 };
 
+enum CPUType {
+    CPU_I386 = 0,
+    CPU_AMD64 = 1,
+    CPU_MAX = 2
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

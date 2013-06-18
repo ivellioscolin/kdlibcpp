@@ -74,6 +74,9 @@
     <ClInclude Include="..\include\kdlib\eventhandler.h">
       <Filter>include/kdlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\kdlib\cpucontext.h">
+      <Filter>include/kdlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">
@@ -113,5 +116,6 @@
       <Filter>windbg</Filter>
     </ClCompile>
     <ClCompile Include="dbgio.cpp" />
+    <ClCompile Include="cpucontext.cpp" />
   </ItemGroup>
 </Project>

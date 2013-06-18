@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cpucontext.cpp" />
     <ClCompile Include="dbgio.cpp" />
     <ClCompile Include="dbgmod.cpp" />
     <ClCompile Include="dia\diadata.cpp" />
@@ -38,6 +39,7 @@
     <ClCompile Include="win\sympath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\kdlib\cpucontext.h" />
     <ClInclude Include="..\include\kdlib\dbgcallbacks.h" />
     <ClInclude Include="..\include\kdlib\dbgengine.h" />
     <ClInclude Include="..\include\kdlib\dbgio.h" />
