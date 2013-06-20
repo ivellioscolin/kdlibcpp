@@ -35,6 +35,19 @@ enum CPUType {
     CPU_MAX = 2
 };
 
+enum CPURegType {
+    RegInt8,
+    RegInt16,
+    RegInt32,
+    RegInt64,
+    RegFloat32,
+    RegFloat64,
+    RegFloat80,
+    RegFloat128,
+    RegVector64,
+    RegVector128
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

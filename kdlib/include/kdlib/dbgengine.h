@@ -83,6 +83,10 @@ MEMOFFSET_64 getInstructionOffset( THREAD_ID id );
 MEMOFFSET_64 getStackOffset( THREAD_ID id );
 MEMOFFSET_64 getFrameOffset( THREAD_ID id );
 
+size_t getRegsiterIndex( const std::wstring &name );
+CPURegType getRegisterType( size_t index );
+void getRegisterValue( size_t index, void* buffer, size_t bufferSize );
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

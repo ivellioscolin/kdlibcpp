@@ -535,6 +535,128 @@ MEMOFFSET_64 getFrameOffset( THREAD_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t getRegsiterIndex( const std::wstring &name )
+{
+    HRESULT      hres;
+    ULONG        index;
+
+    hres = g_dbgMgr->registers->GetIndexByNameWide( name.c_str(), &index );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugRegisters2::GetIndexByNameWide", hres ); 
+
+    return index;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+CPURegType getRegisterType( size_t index )
+{
+    HRESULT      hres;
+
+    DEBUG_REGISTER_DESCRIPTION  desc = {};
+    hres = g_dbgMgr->registers->GetDescriptionWide( index, NULL, 0, NULL, &desc );
+
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugRegisters2::GetDescriptionWide", hres ); 
+
+    switch ( desc.Type )
+    {
+    case DEBUG_VALUE_INT8: return RegInt8;
+    case DEBUG_VALUE_INT16: return RegInt16;
+    case DEBUG_VALUE_INT32: return RegInt32;
+    case DEBUG_VALUE_INT64: return RegInt64;
+    case DEBUG_VALUE_FLOAT32: return RegFloat32;
+    case DEBUG_VALUE_FLOAT64: return RegFloat64;
+    case DEBUG_VALUE_FLOAT80: return RegFloat80;
+    case DEBUG_VALUE_FLOAT128: return RegFloat128;
+    case DEBUG_VALUE_VECTOR64: return RegVector64;
+    case DEBUG_VALUE_VECTOR128: return RegVector128;
+    }
+
+    throw DbgException( L"Unknown regsiter type" ); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void getRegisterValue( size_t index, void* buffer, size_t bufferSize )
+{
+
+    HRESULT      hres;
+
+    DEBUG_VALUE  dbgvalue = {};
+    hres = g_dbgMgr->registers->GetValue( index, &dbgvalue );
+
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+
+    switch ( dbgvalue.Type )
+    {
+    case DEBUG_VALUE_INT8: 
+        if ( bufferSize < sizeof(char) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        *(char*)buffer = dbgvalue.I8;
+        return;
+
+    case DEBUG_VALUE_INT16: 
+        if ( bufferSize < sizeof(short) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        *(short*)buffer = dbgvalue.I16;
+        return;
+
+    case DEBUG_VALUE_INT32: 
+        if ( bufferSize < sizeof(long) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        *(long*)buffer = dbgvalue.I32;
+        return;
+
+    case DEBUG_VALUE_INT64: 
+        if ( bufferSize < sizeof(long long) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        *(long long*)buffer = dbgvalue.I64;
+        return;
+
+    case DEBUG_VALUE_FLOAT32: 
+        if ( bufferSize < sizeof(float) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        *(float*)buffer = dbgvalue.F32;
+        return;
+
+    case DEBUG_VALUE_FLOAT64: 
+        if ( bufferSize < sizeof(double) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        *(double*)buffer = dbgvalue.F64;
+        return;
+
+    case DEBUG_VALUE_FLOAT80:
+        if ( bufferSize < sizeof(dbgvalue.F80Bytes) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        memcpy_s( buffer, bufferSize, dbgvalue.F80Bytes, sizeof(dbgvalue.F80Bytes) );
+        return;
+
+    case DEBUG_VALUE_FLOAT128:
+        if ( bufferSize < sizeof(dbgvalue.F128Bytes) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        memcpy_s( buffer, bufferSize, dbgvalue.F128Bytes, sizeof(dbgvalue.F128Bytes) );
+        return;
+
+    case DEBUG_VALUE_VECTOR64:
+        if ( bufferSize < sizeof(dbgvalue.VI64) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        memcpy_s( buffer, bufferSize, dbgvalue.VI64, sizeof(dbgvalue.VI64) );
+        return;
+
+    case DEBUG_VALUE_VECTOR128:
+        if ( bufferSize < 2*sizeof(dbgvalue.VI64) )
+            throw DbgException( L"Insufficient buffer size" ); 
+        memcpy_s( buffer, bufferSize, dbgvalue.VI64, 2*sizeof(dbgvalue.VI64) );
+        return;
+     }
+
+    throw DbgException( L"Unknown regsiter type" ); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end 
 
 

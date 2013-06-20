@@ -46,4 +46,74 @@ MEMOFFSET_64 CPUContext::getFP()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+NumVariant CPUContext::getRegisterByName( const std::wstring &name)
+{
+    size_t index = getRegsiterIndex( name );
+    return getRegisterByIndex( index );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant CPUContext::getRegisterByIndex( size_t index )
+{
+    CPURegType  regType = getRegisterType(index);
+
+    switch( regType )
+    {
+    case  RegInt8:
+        {
+            char  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+    case  RegInt16:
+        {
+            short  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+    case  RegInt32:
+        {
+            long  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+
+    case  RegInt64:
+        {
+            long long  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+    case  RegFloat32:
+        {
+            float  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+
+    case  RegFloat64:
+        {
+            double  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+    }
+
+    throw DbgException( L"unsupported registry type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end
