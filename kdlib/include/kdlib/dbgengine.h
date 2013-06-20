@@ -55,8 +55,16 @@ std::wstring getSourceFile( MEMOFFSET_64 offset = 0);
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset = 0 );
 
 // processes end threads
-PROCESS_ID getCurrentProcessId();
+size_t getNumberThreads();
 THREAD_ID getCurrentThreadId();
+void setCurrentThread( THREAD_ID id );
+THREAD_ID getThreadSystemId( THREAD_ID id );
+
+size_t getNumberProcesses();
+PROCESS_ID getCurrentProcessId();
+void setCurrentProcess( PROCESS_ID id );
+PROCESS_ID getProcessSystemId( PROCESS_ID id );
+
 
 //breakpoints
 BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset );
@@ -68,6 +76,12 @@ ExecutionStatus targetGo();
 ExecutionStatus targetStep();
 ExecutionStatus targetStepIn();
 void targetBreak();
+
+// registers
+
+MEMOFFSET_64 getInstructionOffset( THREAD_ID id );
+MEMOFFSET_64 getStackOffset( THREAD_ID id );
+MEMOFFSET_64 getFrameOffset( THREAD_ID id );
 
 ///////////////////////////////////////////////////////////////////////////////
 

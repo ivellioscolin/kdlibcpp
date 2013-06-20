@@ -23,6 +23,7 @@ DebugManager::DebugManager()
     dataspace = CComQIPtr<IDebugDataSpaces4>(client);
     symbols = CComQIPtr<IDebugSymbols3>(client);
     advanced = CComQIPtr<IDebugAdvanced2>(client);
+    registers = CComQIPtr<IDebugRegisters2>(client);
 
     client->SetEventCallbacks( this );
 }

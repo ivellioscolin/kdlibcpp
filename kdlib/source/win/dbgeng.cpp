@@ -340,13 +340,13 @@ ULONG getCurrentTime()
 PROCESS_ID getCurrentProcessId()
 {
     HRESULT      hres;
-    ULONG        pid;
+    ULONG        id;
 
-    hres = g_dbgMgr->system->GetCurrentProcessSystemId( &pid );
+    hres = g_dbgMgr->system->GetCurrentProcessId( &id );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects2::GetCurrentProcessSystemId", hres ); 
 
-    return  PROCESS_ID(pid);
+    return  PROCESS_ID(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -354,13 +354,27 @@ PROCESS_ID getCurrentProcessId()
 THREAD_ID getCurrentThreadId()
 {
     HRESULT      hres;
-    ULONG        tid;
+    ULONG        id;
 
-    hres = g_dbgMgr->system->GetCurrentThreadSystemId( &tid );
+    hres = g_dbgMgr->system->GetCurrentThreadId( &id );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentThreadSystemId", hres ); 
+        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentThreadId", hres ); 
         
-     return THREAD_ID(tid);
+     return THREAD_ID(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t getNumberThreads()
+{
+    HRESULT     hres;
+    ULONG       number;
+
+    hres = g_dbgMgr->system->GetNumberThreads( &number );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetNumberThreads", hres ); 
+        
+    return number;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -439,6 +453,84 @@ void registerEventsCallback( DebugEventsCallback *callback )
 void removeEventsCallback( DebugEventsCallback *callback )
 {
     g_dbgMgr->removeEventsCallback( callback );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getInstructionOffset( THREAD_ID id )
+{
+    HRESULT      hres;
+    ULONG        previousId;
+
+    hres = g_dbgMgr->system->GetCurrentThreadId( &previousId );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+
+    MEMOFFSET_64 offset;
+    hres =  g_dbgMgr->registers->GetInstructionOffset( &offset );
+
+    g_dbgMgr->system->SetCurrentThreadId( previousId );
+
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugRegisters::GetInstructionOffset", hres ); 
+
+    return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getStackOffset( THREAD_ID id )
+{
+    HRESULT      hres;
+    ULONG        previousId;
+
+    hres = g_dbgMgr->system->GetCurrentThreadId( &previousId );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+
+    MEMOFFSET_64 offset;
+    hres =  g_dbgMgr->registers->GetStackOffset( &offset );
+
+    g_dbgMgr->system->SetCurrentThreadId( previousId );
+
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugRegisters::GetStackOffset", hres ); 
+
+    return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getFrameOffset( THREAD_ID id )
+{
+    HRESULT      hres;
+    ULONG        previousId;
+
+    hres = g_dbgMgr->system->GetCurrentThreadId( &previousId );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+
+    MEMOFFSET_64 offset;
+    hres =  g_dbgMgr->registers->GetFrameOffset( &offset );
+
+    g_dbgMgr->system->SetCurrentThreadId( previousId );
+
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugRegisters::GetFrameOffset", hres ); 
+
+    return offset;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
