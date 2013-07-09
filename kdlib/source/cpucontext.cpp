@@ -48,22 +48,29 @@ MEMOFFSET_64 CPUContext::getFP()
 
 NumVariant CPUContext::getRegisterByName( const std::wstring &name)
 {
-    size_t index = getRegsiterIndex( name );
+    size_t index = getRegsiterIndex( m_contextIndex, name );
     return getRegisterByIndex( index );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring CPUContext::getRegisterName( size_t index )
+{
+    return kdlib::getRegisterName( m_contextIndex, index );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 NumVariant CPUContext::getRegisterByIndex( size_t index )
 {
-    CPURegType  regType = getRegisterType(index);
+    CPURegType  regType = getRegisterType(m_contextIndex, index);
 
     switch( regType )
     {
     case  RegInt8:
         {
             char  val;
-            getRegisterValue( index, &val, sizeof(val) );
+            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
         break;
@@ -71,7 +78,7 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
     case  RegInt16:
         {
             short  val;
-            getRegisterValue( index, &val, sizeof(val) );
+            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
         break;
@@ -79,7 +86,7 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
     case  RegInt32:
         {
             long  val;
-            getRegisterValue( index, &val, sizeof(val) );
+            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
         break;
@@ -88,7 +95,7 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
     case  RegInt64:
         {
             long long  val;
-            getRegisterValue( index, &val, sizeof(val) );
+            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
         break;
@@ -96,7 +103,7 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
     case  RegFloat32:
         {
             float  val;
-            getRegisterValue( index, &val, sizeof(val) );
+            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
         break;
@@ -105,10 +112,16 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
     case  RegFloat64:
         {
             double  val;
-            getRegisterValue( index, &val, sizeof(val) );
+            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
         break;
+
+    case RegFloat80:
+    case RegFloat128:
+    case RegVector64:
+    case RegVector128:
+        return NumVariant();
     }
 
     throw DbgException( L"unsupported registry type");

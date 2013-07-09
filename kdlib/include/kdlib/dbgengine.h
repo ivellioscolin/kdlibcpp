@@ -83,9 +83,11 @@ MEMOFFSET_64 getInstructionOffset( THREAD_ID id );
 MEMOFFSET_64 getStackOffset( THREAD_ID id );
 MEMOFFSET_64 getFrameOffset( THREAD_ID id );
 
-size_t getRegsiterIndex( const std::wstring &name );
-CPURegType getRegisterType( size_t index );
-void getRegisterValue( size_t index, void* buffer, size_t bufferSize );
+size_t getRegisterNumber( THREAD_ID id );
+size_t getRegsiterIndex( THREAD_ID id, const std::wstring &name );
+CPURegType getRegisterType( THREAD_ID id, size_t index );
+std::wstring getRegisterName( THREAD_ID id, size_t index );
+void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSize );
 
 ///////////////////////////////////////////////////////////////////////////////
 

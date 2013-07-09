@@ -457,14 +457,36 @@ void removeEventsCallback( DebugEventsCallback *callback )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class CurrentThreadGuard {
+
+public:
+
+    CurrentThreadGuard() {
+
+        HRESULT      hres;
+
+        hres = g_dbgMgr->system->GetCurrentThreadId( &m_previousId );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+    }
+
+    ~CurrentThreadGuard() {
+        g_dbgMgr->system->SetCurrentThreadId( m_previousId );
+    }
+
+private:
+
+
+    THREAD_ID   m_previousId;
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 getInstructionOffset( THREAD_ID id )
 {
-    HRESULT      hres;
-    ULONG        previousId;
-
-    hres = g_dbgMgr->system->GetCurrentThreadId( &previousId );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+    HRESULT                 hres;
+    CurrentThreadGuard      previousThread;
 
     hres = g_dbgMgr->system->SetCurrentThreadId( id );
     if ( FAILED( hres ) )
@@ -472,8 +494,6 @@ MEMOFFSET_64 getInstructionOffset( THREAD_ID id )
 
     MEMOFFSET_64 offset;
     hres =  g_dbgMgr->registers->GetInstructionOffset( &offset );
-
-    g_dbgMgr->system->SetCurrentThreadId( previousId );
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetInstructionOffset", hres ); 
@@ -485,12 +505,8 @@ MEMOFFSET_64 getInstructionOffset( THREAD_ID id )
 
 MEMOFFSET_64 getStackOffset( THREAD_ID id )
 {
-    HRESULT      hres;
-    ULONG        previousId;
-
-    hres = g_dbgMgr->system->GetCurrentThreadId( &previousId );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+    HRESULT                 hres;
+    CurrentThreadGuard      previousThread;
 
     hres = g_dbgMgr->system->SetCurrentThreadId( id );
     if ( FAILED( hres ) )
@@ -498,8 +514,6 @@ MEMOFFSET_64 getStackOffset( THREAD_ID id )
 
     MEMOFFSET_64 offset;
     hres =  g_dbgMgr->registers->GetStackOffset( &offset );
-
-    g_dbgMgr->system->SetCurrentThreadId( previousId );
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetStackOffset", hres ); 
@@ -511,12 +525,8 @@ MEMOFFSET_64 getStackOffset( THREAD_ID id )
 
 MEMOFFSET_64 getFrameOffset( THREAD_ID id )
 {
-    HRESULT      hres;
-    ULONG        previousId;
-
-    hres = g_dbgMgr->system->GetCurrentThreadId( &previousId );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+    HRESULT                 hres;
+    CurrentThreadGuard      previousThread;
 
     hres = g_dbgMgr->system->SetCurrentThreadId( id );
     if ( FAILED( hres ) )
@@ -524,8 +534,6 @@ MEMOFFSET_64 getFrameOffset( THREAD_ID id )
 
     MEMOFFSET_64 offset;
     hres =  g_dbgMgr->registers->GetFrameOffset( &offset );
-
-    g_dbgMgr->system->SetCurrentThreadId( previousId );
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetFrameOffset", hres ); 
@@ -535,10 +543,35 @@ MEMOFFSET_64 getFrameOffset( THREAD_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t getRegsiterIndex( const std::wstring &name )
+size_t getRegisterNumber( THREAD_ID id )
 {
-    HRESULT      hres;
-    ULONG        index;
+    HRESULT  hres;
+    ULONG  index;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+
+    ULONG number;
+    hres = g_dbgMgr->registers->GetNumberRegisters( &number );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugRegisters::GetNumberRegisters", hres ); 
+
+    return size_t(number);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t getRegsiterIndex( THREAD_ID id, const std::wstring &name )
+{
+    HRESULT  hres;
+    ULONG  index;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
 
     hres = g_dbgMgr->registers->GetIndexByNameWide( name.c_str(), &index );
     if ( FAILED( hres ) )
@@ -549,17 +582,25 @@ size_t getRegsiterIndex( const std::wstring &name )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CPURegType getRegisterType( size_t index )
+CPURegType getRegisterType( THREAD_ID id, size_t index )
 {
-    HRESULT      hres;
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
 
-    DEBUG_REGISTER_DESCRIPTION  desc = {};
-    hres = g_dbgMgr->registers->GetDescriptionWide( index, NULL, 0, NULL, &desc );
-
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugRegisters2::GetDescriptionWide", hres ); 
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
 
-    switch ( desc.Type )
+    if ( index >= getRegisterNumber( id ) )
+        throw IndexException(index);
+
+    DEBUG_VALUE  dbgvalue = {};
+    hres = g_dbgMgr->registers->GetValue( index, &dbgvalue );
+
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+
+    switch ( dbgvalue.Type )
     {
     case DEBUG_VALUE_INT8: return RegInt8;
     case DEBUG_VALUE_INT16: return RegInt16;
@@ -578,15 +619,42 @@ CPURegType getRegisterType( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void getRegisterValue( size_t index, void* buffer, size_t bufferSize )
+std::wstring getRegisterName( THREAD_ID id, size_t index )
 {
-
     HRESULT      hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+    
+    wchar_t  regName[0x100];
+
+    hres = g_dbgMgr->registers->GetDescriptionWide( index, regName, 0x100, NULL, NULL );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugRegisters2::GetDescriptionWide", hres ); 
+
+    return std::wstring( regName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSize )
+{
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    if ( index >= getRegisterNumber( id ) )
+        throw IndexException(index);
 
     DEBUG_VALUE  dbgvalue = {};
     hres = g_dbgMgr->registers->GetValue( index, &dbgvalue );
 
-    if ( FAILED( hres ) )
+    if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
 
     switch ( dbgvalue.Type )
@@ -654,6 +722,8 @@ void getRegisterValue( size_t index, void* buffer, size_t bufferSize )
 
     throw DbgException( L"Unknown regsiter type" ); 
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
