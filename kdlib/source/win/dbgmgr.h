@@ -44,6 +44,7 @@ private:
 
     boost::recursive_mutex      m_callbacksLock;
     EventsCallbackList          m_callbacks;
+    ULONG                       m_previousExecutionStatus;
 
     STDMETHOD_(ULONG, AddRef)() { return 1; }
     STDMETHOD_(ULONG, Release)() { return 1; }
@@ -53,13 +54,19 @@ private:
         __out PULONG Mask 
         )
     {
-        *Mask = DEBUG_EVENT_BREAKPOINT;
+        *Mask = 0;
+        *Mask |= DEBUG_EVENT_BREAKPOINT;
+        *Mask |= DEBUG_EVENT_CHANGE_ENGINE_STATE;
         return S_OK;
     }
 
     STDMETHOD(Breakpoint)(
         __in IDebugBreakpoint *bp
     );
+
+    STDMETHOD(ChangeEngineState)(
+        __in ULONG Flags,
+        __in ULONG64 Argument );
 };
 
 extern DebugManager*  g_dbgMgr;

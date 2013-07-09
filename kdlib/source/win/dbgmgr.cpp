@@ -12,6 +12,8 @@ DebugManager*  g_dbgMgr = NULL;
 
 DebugManager::DebugManager()
 {
+    m_previousExecutionStatus = DebugStatusNoChange;
+
     CoInitialize(NULL);
 
     HRESULT  hres = DebugCreate( __uuidof(IDebugClient4), (void **)&client );
@@ -72,6 +74,8 @@ ULONG ConvertCallbackResult( DebugCallbackResult result )
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint *bp ) 
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
@@ -93,6 +97,35 @@ HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint *bp )
     }
 
     return ConvertCallbackResult( result );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
+    __in ULONG Flags,
+    __in ULONG64 Argument )
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    if ( ( ( Flags & DEBUG_CES_EXECUTION_STATUS ) != 0 ) &&
+         ( ( Argument & DEBUG_STATUS_INSIDE_WAIT ) == 0 ) &&
+         (ULONG)Argument != m_previousExecutionStatus )
+    {
+        if ( m_previousExecutionStatus == DEBUG_STATUS_NO_DEBUGGEE &&
+             (ULONG)Argument != DEBUG_STATUS_GO )
+                return S_OK;
+
+        EventsCallbackList::iterator  it = m_callbacks.begin();
+
+        for ( ; it != m_callbacks.end(); ++it )
+        {
+            (*it)->onExecutionStatusChange( (ExecutionStatus)Argument );
+        }
+
+        m_previousExecutionStatus = (ULONG)Argument;
+    }
+
+    return S_OK;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

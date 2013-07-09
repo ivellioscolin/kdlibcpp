@@ -12,6 +12,7 @@ struct DebugEventsCallback {
 
     virtual DebugCallbackResult onBreakpoint( BREAKPOINT_ID bpId ) = 0;
     virtual DebugCallbackResult onException( EXCEPTION_INFO exceptionInfo ) = 0;
+    virtual void onExecutionStatusChange( ExecutionStatus executionStatus ) = 0;
 
    // virtual DEBUG_CALLBACK_RESULT OnBreakpoint( BREAKPOINT_ID bpId ) = 0;
    // virtual DEBUG_CALLBACK_RESULT OnModuleLoad( MEMOFFSET_64 offset, const std::wstring &name ) = 0;
