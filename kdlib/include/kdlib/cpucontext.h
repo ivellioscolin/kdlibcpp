@@ -21,7 +21,8 @@ public:
     CPUType getCPUMode();
     NumVariant getRegisterByName( const std::wstring &name);
     NumVariant getRegisterByIndex( size_t index );
-    
+    std::wstring getRegisterName( size_t index );
+
     MEMOFFSET_64 getIP();
     MEMOFFSET_64 getSP();
     MEMOFFSET_64 getFP();

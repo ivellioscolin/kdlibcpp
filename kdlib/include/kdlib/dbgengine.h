@@ -79,9 +79,9 @@ void targetBreak();
 
 // registers
 
-MEMOFFSET_64 getInstructionOffset( THREAD_ID id );
-MEMOFFSET_64 getStackOffset( THREAD_ID id );
-MEMOFFSET_64 getFrameOffset( THREAD_ID id );
+MEMOFFSET_64 getInstructionOffset( THREAD_ID id = -1 );
+MEMOFFSET_64 getStackOffset( THREAD_ID id = -1);
+MEMOFFSET_64 getFrameOffset( THREAD_ID id = -1);
 
 size_t getRegisterNumber( THREAD_ID id );
 size_t getRegsiterIndex( THREAD_ID id, const std::wstring &name );

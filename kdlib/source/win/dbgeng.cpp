@@ -488,9 +488,12 @@ MEMOFFSET_64 getInstructionOffset( THREAD_ID id )
     HRESULT                 hres;
     CurrentThreadGuard      previousThread;
 
-    hres = g_dbgMgr->system->SetCurrentThreadId( id );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+    if ( id != -1 )
+    {
+        hres = g_dbgMgr->system->SetCurrentThreadId( id );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+    }
 
     MEMOFFSET_64 offset;
     hres =  g_dbgMgr->registers->GetInstructionOffset( &offset );
@@ -508,9 +511,12 @@ MEMOFFSET_64 getStackOffset( THREAD_ID id )
     HRESULT                 hres;
     CurrentThreadGuard      previousThread;
 
-    hres = g_dbgMgr->system->SetCurrentThreadId( id );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+    if ( id != -1 )
+    {
+        hres = g_dbgMgr->system->SetCurrentThreadId( id );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+    }
 
     MEMOFFSET_64 offset;
     hres =  g_dbgMgr->registers->GetStackOffset( &offset );
@@ -528,9 +534,12 @@ MEMOFFSET_64 getFrameOffset( THREAD_ID id )
     HRESULT                 hres;
     CurrentThreadGuard      previousThread;
 
-    hres = g_dbgMgr->system->SetCurrentThreadId( id );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+    if ( id != -1 )
+    {
+        hres = g_dbgMgr->system->SetCurrentThreadId( id );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
+    }
 
     MEMOFFSET_64 offset;
     hres =  g_dbgMgr->registers->GetFrameOffset( &offset );
@@ -546,7 +555,6 @@ MEMOFFSET_64 getFrameOffset( THREAD_ID id )
 size_t getRegisterNumber( THREAD_ID id )
 {
     HRESULT  hres;
-    ULONG  index;
     CurrentThreadGuard  previousThread;
 
     hres = g_dbgMgr->system->SetCurrentThreadId( id );
@@ -724,6 +732,58 @@ void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSi
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+
+void disasmAssemblay( MEMOFFSET_64 offset, const std::wstring &instruction, MEMOFFSET_64 &nextOffset )
+{
+    HRESULT     hres;
+
+    hres = g_dbgMgr->control->AssembleWide( offset, instruction.c_str(), &nextOffset );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::Assemble", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void disasmDisassembly( MEMOFFSET_64 offset, std::wstring &instruction, MEMOFFSET_64 &nextOffset, MEMOFFSET_64 &ea )
+{
+    HRESULT     hres;
+    wchar_t     buffer[0x100];
+    ULONG       disasmSize = 0;
+    ULONG64     endOffset = 0;
+    
+    hres = 
+        g_dbgMgr->control->DisassembleWide(
+            offset,
+            DEBUG_DISASM_EFFECTIVE_ADDRESS,
+            buffer,
+            sizeof(buffer)/sizeof(wchar_t),
+            &disasmSize,
+            &nextOffset );
+
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::Disassemble", hres );
+
+    hres = g_dbgMgr->control->GetDisassembleEffectiveOffset(&ea);
+    if ( FAILED( hres ) )
+        ea = 0;
+
+    instruction = std::wstring( buffer, disasmSize - 2);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getNearInstruction( MEMOFFSET_64 offset, LONG delta )
+{
+    HRESULT  hres;
+    ULONG64  nearOffset;
+
+    hres = g_dbgMgr->control->GetNearInstruction( offset, delta, &nearOffset );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::GetNearInstruction", hres );
+
+    return nearOffset;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
