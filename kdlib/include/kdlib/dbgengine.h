@@ -26,6 +26,9 @@ void writeDump( const std::wstring &fileNamem, bool smallDump );
 bool isDumpAnalyzing();
 bool isKernelDebugging();
 
+std::wstring debugCommand( const std::wstring &command );
+unsigned long long evaluate( const std::wstring  &expression );
+
 // system properties
 size_t ptrSize();
 bool is64bitSystem();

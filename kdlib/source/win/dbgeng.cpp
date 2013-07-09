@@ -200,6 +200,66 @@ bool isKernelDebugging()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+std::wstring debugCommand( const std::wstring &command )
+{
+    HRESULT         hres;
+    OutputReader    outReader( g_dbgMgr->client );
+
+    hres = g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
+
+    if ( FAILED( hres ) )
+        throw  DbgEngException( L"IDebugControl::Execute", hres ); 
+
+    return std::wstring( outReader.Line() ); 
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+unsigned long long evaluate( const std::wstring  &expression )
+{
+    HRESULT             hres;
+    ULONG64             value = 0;
+    DEBUG_VALUE         debugValue = {};
+    ULONG               remainderIndex = 0;
+
+    hres = g_dbgMgr->control->IsPointer64Bit();
+    if ( FAILED( hres ) )
+        throw  DbgEngException( L"IDebugControl::IsPointer64Bit", hres );
+    
+    if ( hres == S_OK )
+    {
+        hres = g_dbgMgr->control->EvaluateWide( 
+            expression.c_str(), 
+            DEBUG_VALUE_INT64,
+            &debugValue,
+            &remainderIndex );
+            
+        if ( FAILED( hres ) )
+            throw  DbgEngException( L"IDebugControl::Evaluate", hres );
+            
+        if ( remainderIndex == expression.length() )
+            value = debugValue.I64;
+    }
+    else
+    {
+        hres = g_dbgMgr->control->EvaluateWide( 
+            expression.c_str(), 
+            DEBUG_VALUE_INT32,
+            &debugValue,
+            &remainderIndex );
+            
+        if (  FAILED( hres ) )
+            throw  DbgEngException( L"IDebugControl::Evaluated", hres );
+            
+        if ( remainderIndex == expression.length() )
+            value = debugValue.I32;
+    }
+
+    return value;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
 ExecutionStatus targetChangeStatus( ULONG status )
 {
     HRESULT     hres;
