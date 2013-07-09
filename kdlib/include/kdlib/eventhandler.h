@@ -19,6 +19,9 @@ public:
         return DebugCallbackNoChange;
     }
 
+    virtual void onExecutionStatusChange( ExecutionStatus executionStatus ) 
+    {}
+
     EventHandler() {
        registerEventsCallback(this);
     }

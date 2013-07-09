@@ -5,6 +5,7 @@
 #include "kdlib/dbgengine.h"
 #include "kdlib/dbgcallbacks.h"
 #include "kdlib/dbgio.h"
+#include "kdlib/disasm.h"
 #include "kdlib/exceptions.h"
 #include "kdlib/eventhandler.h"
 #include "kdlib/memaccess.h"
