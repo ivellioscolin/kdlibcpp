@@ -101,6 +101,31 @@ HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint *bp )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ExecutionStatus ConvertDbgEngineExecutionStatus( ULONG status )
+{
+    switch( status )
+    {
+    case DEBUG_STATUS_NO_CHANGE:
+        return DebugStatusNoChange;
+
+    case DEBUG_STATUS_GO:
+    case DEBUG_STATUS_GO_HANDLED:
+    case DEBUG_STATUS_GO_NOT_HANDLED:
+    case DEBUG_STATUS_STEP_OVER:
+    case DEBUG_STATUS_STEP_INTO:
+    case DEBUG_STATUS_STEP_BRANCH:
+        return DebugStatusGo;
+
+    case DEBUG_STATUS_BREAK:
+        return DebugStatusBreak;
+
+    case DEBUG_STATUS_NO_DEBUGGEE:
+        return DebugStatusNoDebuggee;
+    }
+
+    NOT_IMPLEMENTED();
+}
+
 HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
     __in ULONG Flags,
     __in ULONG64 Argument )
@@ -115,11 +140,13 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
              (ULONG)Argument != DEBUG_STATUS_GO )
                 return S_OK;
 
+        ExecutionStatus  executionStatus = ConvertDbgEngineExecutionStatus( (ULONG)Argument );
+
         EventsCallbackList::iterator  it = m_callbacks.begin();
 
         for ( ; it != m_callbacks.end(); ++it )
         {
-            (*it)->onExecutionStatusChange( (ExecutionStatus)Argument );
+            (*it)->onExecutionStatusChange( executionStatus );
         }
 
         m_previousExecutionStatus = (ULONG)Argument;

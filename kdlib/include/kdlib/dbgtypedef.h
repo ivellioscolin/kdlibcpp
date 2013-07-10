@@ -23,10 +23,10 @@ enum DebugCallbackResult {
 };
 
 enum ExecutionStatus {
-    DebugStatusNoChange             = 0,
-    DebugStatusGo                   = 1,
-    DebugStatusBreak                = 6,
-    DebugStatusNoDebuggee           = 7
+    DebugStatusNoChange,
+    DebugStatusGo,
+    DebugStatusBreak,
+    DebugStatusNoDebuggee
 };
 
 enum CPUType {

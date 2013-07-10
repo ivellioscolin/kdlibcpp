@@ -60,6 +60,14 @@ public:
         return m_imageName;
     }
 
+    unsigned long getCheckSum() const {
+        return m_checkSum;
+    }
+
+    unsigned long getTimeDataStamp() const {
+        return m_timeDataStamp;
+    }
+
     std::wstring getSymFile();
 
     void
