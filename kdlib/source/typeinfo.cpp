@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include <sstream>
+#include <iomanip>
 
 #include <boost/regex.hpp>
 
@@ -747,6 +748,47 @@ void TypeInfoUdt::getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtu
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypeInfoUdt::str()
+{
+    std::wstringstream  sstr;
+
+    sstr << L"class/struct " << ": " << getName() << " Size: 0x" << std::hex << getSize() << " (" << std::dec << getSize() << ")" << std::endl;
+    
+    size_t  fieldCount = getElementCount();
+
+    for ( size_t i = 0; i < fieldCount; ++i )
+    {
+        TypeFieldPtr   udtField = m_fields.lookup(i);
+
+        if ( udtField->isStaticMember() )
+        {
+            sstr << L"   =" << std::right << std::setw(10) << std::setfill(L'0') << std::hex << udtField->getStaticOffset();
+            sstr << L" " << std::left << std::setw(18) << std::setfill(L' ') << udtField->getName() << L':';
+        }
+        else
+        {
+            if ( udtField->isVirtualMember() )
+            {
+                sstr << L"   virtual base " << udtField->getVirtualBaseClassName();
+                sstr << L" +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << udtField->getOffset();
+                sstr << L" " << udtField->getName() << L':';
+            }
+            else
+            {
+                sstr << L"   +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << udtField->getOffset();
+                sstr << L" " << std::left << std::setw(24) << std::setfill(L' ') << udtField->getName() << L':';
+            }
+        }
+
+        sstr << L" " << std::left << udtField->getTypeInfo()->getName();
+        sstr << std::endl;
+    }
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoUdt::getFields()
 {
     getFields( m_symbol, SymbolPtr() );
@@ -844,6 +886,28 @@ void TypeInfoUdt::getVirtualFields()
     }
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypeInfoEnum::str()
+{
+    std::wstringstream  sstr;
+
+    sstr << L"enum: " << getName() << std::endl;
+
+    size_t  fieldCount = getElementCount();
+
+    for ( size_t i = 0; i < fieldCount; ++i )
+    {
+        TypeFieldPtr   enumField = m_fields.lookup(i);
+        sstr << L"   " << enumField->getName();
+        sstr << L" = " << enumField->getValue().asStr();
+        sstr << std::endl;
+    }
+
+    return sstr.str();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void TypeInfoEnum::getFields()
@@ -899,7 +963,5 @@ std::wstring TypeInfoBitField::getName()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-
 
 } // kdlib namespace end

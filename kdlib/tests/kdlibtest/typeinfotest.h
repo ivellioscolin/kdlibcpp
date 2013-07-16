@@ -327,3 +327,9 @@ TEST_F( TypeInfoTest, Function )
     ASSERT_NO_THROW( method = loadType(L"classChild::virtMethod2") );
 }
 
+TEST_F( TypeInfoTest, Str )
+{
+    std::wstring str;
+    ASSERT_NO_THROW( str = loadType(L"enumType")->str() );
+}
+

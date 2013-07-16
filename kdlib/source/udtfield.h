@@ -69,6 +69,8 @@ public:
 
     virtual TypeInfoPtr getTypeInfo() = 0;
 
+    virtual NumVariant getValue() const = 0;
+
 protected:
 
     TypeField( const std::wstring  &name ) :
@@ -159,6 +161,10 @@ private:
 
     virtual TypeInfoPtr getTypeInfo();
 
+    virtual NumVariant getValue() const {
+        throw TypeException(  m_name, L"filed has no value" );
+    }
+
     SymbolPtr  m_symbol;
 };
 
@@ -178,6 +184,8 @@ private:
         return loadType(m_symbol);
     }
 
+    NumVariant getValue() const;
+
     SymbolPtr  m_symbol;
 };
 
@@ -196,6 +204,11 @@ private:
     virtual TypeInfoPtr getTypeInfo() {
         return loadType(m_symbol->getType());
     }
+
+    virtual NumVariant getValue() const {
+        throw TypeException(  m_name, L"function parameter has no value" );
+    }
+
 
     SymbolPtr  m_symbol;
 };

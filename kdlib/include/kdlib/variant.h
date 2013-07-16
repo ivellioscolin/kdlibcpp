@@ -1,6 +1,8 @@
 #pragma once 
 
 #include <exception>
+#include <string>
+#include <sstream>
 
 #include <boost/operators.hpp>
 
@@ -262,6 +264,90 @@ public:
 
     double asDouble() {
         return cast( doubleT ).m_doubleVal;
+    }
+
+    std::wstring asStr() {
+
+        std::wstringstream sstr;
+
+        sstr << std::dec;
+
+        switch ( m_numType )
+        {
+        case charT:
+        case shortT:
+        case longT:
+        case intT:
+           sstr << asInt();
+           return sstr.str();
+
+        case ucharT:
+        case ushortT:
+        case ulongT:
+        case uintT:
+           sstr << asUInt();
+           return sstr.str();
+
+        case longlongT:
+           sstr << m_longlongVal;
+           return sstr.str();
+
+        case ulonglongT:
+           sstr << m_ulonglongVal;
+           return sstr.str();
+
+        case floatT:
+           sstr << m_floatVal;
+           return sstr.str();
+
+        case doubleT:
+           sstr << m_doubleVal;
+           return sstr.str();
+        }
+
+        throw NumVariantError();
+    }
+
+    std::wstring asHex() {
+
+        std::wstringstream sstr;
+
+        sstr << std::hex;
+
+        switch ( m_numType )
+        {
+        case charT:
+        case shortT:
+        case longT:
+        case intT:
+           sstr << asInt();
+           return sstr.str();
+
+        case ucharT:
+        case ushortT:
+        case ulongT:
+        case uintT:
+           sstr << asUInt();
+           return sstr.str();
+
+        case longlongT:
+           sstr << m_longlongVal;
+           return sstr.str();
+
+        case ulonglongT:
+           sstr << m_ulonglongVal;
+           return sstr.str();
+
+        case floatT:
+           sstr << m_floatVal;
+           return sstr.str();
+
+        case doubleT:
+           sstr << m_doubleVal;
+           return sstr.str();
+        }
+
+        throw NumVariantError();
     }
 
     bool isChar() {

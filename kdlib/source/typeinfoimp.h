@@ -26,6 +26,10 @@ class TypeInfoImp : public TypeInfo, public boost::enable_shared_from_this<TypeI
 {
 protected:
 
+    virtual std::wstring str() {
+        NOT_IMPLEMENTED();
+    }
+
     virtual std::wstring getName() {
         NOT_IMPLEMENTED();
     }
@@ -258,6 +262,7 @@ public:
 
 protected:
 
+    virtual std::wstring str();
 
     virtual size_t getSize() {
         return  m_symbol->getSize();
@@ -306,6 +311,8 @@ public:
         {}
 
 protected:
+
+    virtual std::wstring str();
 
     virtual bool isEnum() 
     {
@@ -411,6 +418,10 @@ public:
 
 protected:
 
+    virtual std::wstring str() {
+        return m_name;
+    }
+
     virtual std::wstring getName() {
         return m_name;
     }
@@ -445,6 +456,11 @@ public:
 
 protected:
 
+    virtual std::wstring str() {
+        return getName();
+    }
+
+
     virtual bool isVoid() {
         return true;
     }
@@ -476,6 +492,10 @@ public:
 
 
 protected:
+
+    virtual std::wstring str() {
+        return getName();
+    }
 
     virtual std::wstring getName() {
         return m_symbol->getName();
@@ -562,6 +582,10 @@ public:
 
 protected:
 
+    virtual std::wstring str() {
+        return L"ptr to " + m_derefType->getName();
+    }
+
     virtual bool isPointer() {
         return true;
     }
@@ -606,6 +630,10 @@ public:
     }
 
 protected:
+
+    virtual std::wstring str() {
+        return getName();
+    }
 
     virtual bool isArray() 
     {
