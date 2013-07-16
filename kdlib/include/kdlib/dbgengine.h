@@ -75,6 +75,7 @@ BREAKPOINT_ID hardwareBreakPointSet( MEMOFFSET_64 offset, size_t = 0, ACCESS_TYP
 void breakPointRemove( BREAKPOINT_ID id );
 void breakPointRemoveAll();
 
+ExecutionStatus targetExecutionStatus();
 ExecutionStatus targetGo();
 ExecutionStatus targetStep();
 ExecutionStatus targetStepIn();

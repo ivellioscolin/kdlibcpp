@@ -260,6 +260,22 @@ unsigned long long evaluate( const std::wstring  &expression )
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+ExecutionStatus targetExecutionStatus()
+{
+    HRESULT     hres;
+
+    ULONG    currentStatus;
+
+    hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
+
+    if ( FAILED( hres ) )
+        throw  DbgEngException( L"IDebugControl::GetExecutionStatus  failed", hres ); 
+
+    return ConvertDbgEngineExecutionStatus( currentStatus );
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
 ExecutionStatus targetChangeStatus( ULONG status )
 {
     HRESULT     hres;
