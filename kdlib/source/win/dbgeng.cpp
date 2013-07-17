@@ -863,6 +863,43 @@ MEMOFFSET_64 getNearInstruction( MEMOFFSET_64 offset, LONG delta )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+EXTENSION_ID loadExtension(const std::wstring &extPath )
+{
+    HRESULT  hres;
+    ULONG64  handle = 0;
+
+    hres = g_dbgMgr->control->AddExtensionWide( extPath.c_str(), 0, &handle );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::AddExtension", hres );
+
+    return handle;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void removeExtension( EXTENSION_ID extHandle )
+{
+    g_dbgMgr->control->RemoveExtension( extHandle );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  )
+{
+    HRESULT  hres;
+    OutputReader    outReader( g_dbgMgr->client );
+
+    hres = g_dbgMgr->control->CallExtensionWide( extHandle, command.c_str(), params.c_str() );
+
+    if ( FAILED( hres ) )
+        throw  DbgEngException( L"IDebugControl::CallExtension", hres ); 
+        
+    return outReader.Line();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 } // kdlib namespace end 
 
 

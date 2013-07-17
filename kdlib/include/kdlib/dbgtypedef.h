@@ -14,6 +14,7 @@ typedef long                    MEMDISPLACEMENT;
 typedef unsigned long           BITOFFSET;
 typedef void*                   EXCEPTION_INFO;
 typedef unsigned long           ACCESS_TYPE;
+typedef unsigned long long      EXTENSION_ID;
 
 enum DebugCallbackResult {
     DebugCallbackProceed = 0,

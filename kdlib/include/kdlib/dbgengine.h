@@ -93,6 +93,13 @@ CPURegType getRegisterType( THREAD_ID id, size_t index );
 std::wstring getRegisterName( THREAD_ID id, size_t index );
 void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSize );
 
+//
+// Extensions
+EXTENSION_ID loadExtension(const std::wstring &extPath );
+void removeExtension( EXTENSION_ID extHandle );
+std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  );
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end
