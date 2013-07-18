@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +49,13 @@ enum CPURegType {
     RegFloat128,
     RegVector64,
     RegVector128
+};
+
+struct SystemInfo {
+    unsigned long  majorVersion;
+    unsigned long  minorVersion;
+    unsigned long  buildNumber;
+    std::wstring  buildDescription;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

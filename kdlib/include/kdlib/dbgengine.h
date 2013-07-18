@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "kdlib/dbgtypedef.h"
+#include "kdlib/varstruct.h"
 
 namespace kdlib {
 
@@ -35,6 +36,7 @@ bool is64bitSystem();
 size_t getPageSize();
 unsigned long getSystemUptime();
 unsigned long getCurrentTime();
+void getSystemInfo( SystemInfo &systemInfo );
 
 //manage target modules
 size_t getNumberModules();
@@ -98,6 +100,7 @@ void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSi
 EXTENSION_ID loadExtension(const std::wstring &extPath );
 void removeExtension( EXTENSION_ID extHandle );
 std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  );
+
 
 
 ///////////////////////////////////////////////////////////////////////////////

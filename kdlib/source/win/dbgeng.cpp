@@ -413,6 +413,46 @@ ULONG getCurrentTime()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void getSystemInfo( SystemInfo &systemInfo )
+{
+    HRESULT  hres;
+
+    ULONG platformId, servicePackNumber;
+
+    hres = g_dbgMgr->control->GetSystemVersion(
+        &platformId,
+        &systemInfo.majorVersion,
+        &systemInfo.minorVersion,
+        NULL,
+        0,
+        NULL,
+        &servicePackNumber,
+        NULL,
+        0,
+        NULL );
+
+    if ( FAILED( hres ) )
+         throw DbgEngException( L"IDebugControl::GetSystemVersion", hres );
+
+    ULONG strSize = 0;
+
+    hres = g_dbgMgr->control->GetSystemVersionStringWide( DEBUG_SYSVERSTR_BUILD, NULL, 0, &strSize );
+
+    if ( strSize == 0 )
+         throw DbgEngException( L"IDebugControl4::GetSystemVersionStringWide", hres );
+
+    std::vector<wchar_t> buffer(strSize);
+
+    hres = g_dbgMgr->control->GetSystemVersionStringWide( DEBUG_SYSVERSTR_BUILD, &buffer[0], buffer.size(), NULL );
+    if ( FAILED( hres ) )
+         throw DbgEngException( L"IDebugControl::GetSystemVersion", hres );
+
+    systemInfo.buildDescription = std::wstring( &buffer[0], strSize );
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 PROCESS_ID getCurrentProcessId()
 {
     HRESULT      hres;
