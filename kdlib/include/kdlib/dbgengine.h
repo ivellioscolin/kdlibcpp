@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "kdlib/dbgtypedef.h"
-#include "kdlib/varstruct.h"
 
 namespace kdlib {
 

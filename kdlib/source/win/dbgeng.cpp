@@ -419,6 +419,10 @@ void getSystemInfo( SystemInfo &systemInfo )
 
     ULONG platformId, servicePackNumber;
 
+    systemInfo.buildNumber = 0;
+    systemInfo.majorVersion = 0;
+    systemInfo.minorVersion = 0;
+
     hres = g_dbgMgr->control->GetSystemVersion(
         &platformId,
         &systemInfo.majorVersion,
@@ -447,7 +451,7 @@ void getSystemInfo( SystemInfo &systemInfo )
     if ( FAILED( hres ) )
          throw DbgEngException( L"IDebugControl::GetSystemVersion", hres );
 
-    systemInfo.buildDescription = std::wstring( &buffer[0], strSize );
+    systemInfo.buildDescription = std::wstring( &buffer[0] );
 
 }
 
