@@ -889,6 +889,64 @@ void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+CPUType getCPUType( THREAD_ID id )
+{
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    ULONG       processorType;
+
+    hres = g_dbgMgr->control->GetActualProcessorType( &processorType );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::GetActualProcessorType", hres );
+
+    switch( processorType )
+    {
+    case IMAGE_FILE_MACHINE_I386:
+        return CPU_I386;
+
+    case IMAGE_FILE_MACHINE_AMD64:
+        return CPU_AMD64;
+    }
+
+    throw DbgException( L"Unknown processor type" );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+CPUType getCPUMode( THREAD_ID id )
+{
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    ULONG       processorType;
+
+    hres = g_dbgMgr->control->GetEffectiveProcessorType( &processorType );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::GetActualProcessorType", hres );
+
+    switch( processorType )
+    {
+    case IMAGE_FILE_MACHINE_I386:
+        return CPU_I386;
+
+    case IMAGE_FILE_MACHINE_AMD64:
+        return CPU_AMD64;
+    }
+
+    throw DbgException( L"Unknown processor type" );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void disasmAssemblay( MEMOFFSET_64 offset, const std::wstring &instruction, MEMOFFSET_64 &nextOffset )
 {
     HRESULT     hres;

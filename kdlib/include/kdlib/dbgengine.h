@@ -93,7 +93,8 @@ size_t getRegsiterIndex( THREAD_ID id, const std::wstring &name );
 CPURegType getRegisterType( THREAD_ID id, size_t index );
 std::wstring getRegisterName( THREAD_ID id, size_t index );
 void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSize );
-
+CPUType getCPUType( THREAD_ID id );
+CPUType getCPUMode( THREAD_ID id );
 unsigned long long loadMSR( THREAD_ID id, size_t msrIndex );
 void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value );
 
