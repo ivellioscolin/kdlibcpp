@@ -129,4 +129,18 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+unsigned long long CPUContext::loadMSR( size_t msrIndex )
+{
+    return kdlib::loadMSR(m_contextIndex, msrIndex );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContext::setMSR( size_t msrIndex, unsigned long long value )
+{
+    return kdlib::setMSR( m_contextIndex, msrIndex, value );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end

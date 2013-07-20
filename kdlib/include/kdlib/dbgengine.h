@@ -94,6 +94,9 @@ CPURegType getRegisterType( THREAD_ID id, size_t index );
 std::wstring getRegisterName( THREAD_ID id, size_t index );
 void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSize );
 
+unsigned long long loadMSR( THREAD_ID id, size_t msrIndex );
+void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value );
+
 //
 // Extensions
 EXTENSION_ID loadExtension(const std::wstring &extPath );

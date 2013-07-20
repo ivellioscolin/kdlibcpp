@@ -851,6 +851,41 @@ void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSi
     throw DbgException( L"Unknown regsiter type" ); 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long long loadMSR( THREAD_ID id, size_t msrIndex )
+{
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    ULONG64     value;
+
+    hres = g_dbgMgr->dataspace->ReadMsr( msrIndex, &value );
+    if ( FAILED( hres ) )
+         throw DbgEngException( L"IDebugDataSpaces::ReadMsr", hres );
+
+    return value;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value )
+{
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    hres = g_dbgMgr->dataspace->WriteMsr(msrIndex, value);
+    if ( FAILED( hres ) )
+         throw DbgEngException( L"IDebugDataSpaces::WriteMsr", hres );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

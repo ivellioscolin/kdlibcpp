@@ -27,6 +27,9 @@ public:
     MEMOFFSET_64 getSP();
     MEMOFFSET_64 getFP();
 
+    unsigned long long loadMSR( size_t msrIndex );
+    void setMSR( size_t msrIndex, unsigned long long value );
+
 protected:
 
     friend CPUContextPtr loadCPUCurrentContext();
