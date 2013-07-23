@@ -60,9 +60,12 @@ void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displac
 
 // processes end threads
 size_t getNumberThreads();
-THREAD_ID getCurrentThreadId();
-void setCurrentThread( THREAD_ID id );
-THREAD_ID getThreadSystemId( THREAD_ID id );
+THREAD_DEBUG_ID getCurrentThreadId();
+void setCurrentThread( THREAD_DEBUG_ID id );
+MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id );
+THREAD_DEBUG_ID getThreadIdByOffset( MEMOFFSET_64 offset );
+THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id );
+THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid );
 
 size_t getNumberProcesses();
 PROCESS_DEBUG_ID getCurrentProcessId();
