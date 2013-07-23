@@ -32,7 +32,7 @@ MEMOFFSET_64 addr64( MEMOFFSET_64 offset )
         break;
 
     default:
-        throw DbgException( L"Unknown processor type" );
+        throw DbgException( "Unknown processor type" );
         break;
     }
 

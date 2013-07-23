@@ -1,11 +1,12 @@
 #include "stdafx.h"
 
+#include <vector>
+
+#include <comutil.h>
+
 #include "kdlib/dbgengine.h"
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
-
-#include <vector>
-
 
 namespace  kdlib {
 
@@ -23,6 +24,13 @@ void uninitialize()
 {
     delete g_dbgMgr;
     g_dbgMgr = NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string DbgWideException::getCStrDesc( const std::wstring &desc )
+{
+    return std::string( _bstr_t( desc.c_str() ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -928,7 +936,7 @@ CPURegType getRegisterType( THREAD_ID id, size_t index )
     case DEBUG_VALUE_VECTOR128: return RegVector128;
     }
 
-    throw DbgException( L"Unknown regsiter type" ); 
+    throw DbgException( "Unknown regsiter type" ); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -975,66 +983,66 @@ void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSi
     {
     case DEBUG_VALUE_INT8: 
         if ( bufferSize < sizeof(char) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         *(char*)buffer = dbgvalue.I8;
         return;
 
     case DEBUG_VALUE_INT16: 
         if ( bufferSize < sizeof(short) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         *(short*)buffer = dbgvalue.I16;
         return;
 
     case DEBUG_VALUE_INT32: 
         if ( bufferSize < sizeof(long) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         *(long*)buffer = dbgvalue.I32;
         return;
 
     case DEBUG_VALUE_INT64: 
         if ( bufferSize < sizeof(long long) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         *(long long*)buffer = dbgvalue.I64;
         return;
 
     case DEBUG_VALUE_FLOAT32: 
         if ( bufferSize < sizeof(float) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         *(float*)buffer = dbgvalue.F32;
         return;
 
     case DEBUG_VALUE_FLOAT64: 
         if ( bufferSize < sizeof(double) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         *(double*)buffer = dbgvalue.F64;
         return;
 
     case DEBUG_VALUE_FLOAT80:
         if ( bufferSize < sizeof(dbgvalue.F80Bytes) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         memcpy_s( buffer, bufferSize, dbgvalue.F80Bytes, sizeof(dbgvalue.F80Bytes) );
         return;
 
     case DEBUG_VALUE_FLOAT128:
         if ( bufferSize < sizeof(dbgvalue.F128Bytes) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         memcpy_s( buffer, bufferSize, dbgvalue.F128Bytes, sizeof(dbgvalue.F128Bytes) );
         return;
 
     case DEBUG_VALUE_VECTOR64:
         if ( bufferSize < sizeof(dbgvalue.VI64) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         memcpy_s( buffer, bufferSize, dbgvalue.VI64, sizeof(dbgvalue.VI64) );
         return;
 
     case DEBUG_VALUE_VECTOR128:
         if ( bufferSize < 2*sizeof(dbgvalue.VI64) )
-            throw DbgException( L"Insufficient buffer size" ); 
+            throw DbgException( "Insufficient buffer size" ); 
         memcpy_s( buffer, bufferSize, dbgvalue.VI64, 2*sizeof(dbgvalue.VI64) );
         return;
      }
 
-    throw DbgException( L"Unknown regsiter type" ); 
+    throw DbgException( "Unknown regsiter type" ); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1099,7 +1107,7 @@ CPUType getCPUType( THREAD_ID id )
         return CPU_AMD64;
     }
 
-    throw DbgException( L"Unknown processor type" );
+    throw DbgException( "Unknown processor type" );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1128,7 +1136,7 @@ CPUType getCPUMode( THREAD_ID id )
         return CPU_AMD64;
     }
 
-    throw DbgException( L"Unknown processor type" );
+    throw DbgException( "Unknown processor type" );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

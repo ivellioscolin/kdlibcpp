@@ -59,7 +59,7 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
 TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
 {
     if ( !varType )
-        throw DbgException( L"type info is null");
+        throw DbgException( "type info is null");
 
     return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
 }
@@ -120,7 +120,7 @@ TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,
 TypedVarPtr containingRecord( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const std::wstring &fieldName )
 {
     if ( !typeInfo )
-        throw DbgException( L"type info is null");
+        throw DbgException( "type info is null");
 
     offset = addr64( offset );
 
@@ -158,7 +158,7 @@ TypedVarList loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &typeName
 TypedVarList loadTypedVarList( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const std::wstring &fieldName )
 {
     if ( !typeInfo )
-        throw DbgException( L"type info is null" );
+        throw DbgException( "type info is null" );
 
     offset = addr64(offset);
 
@@ -214,7 +214,7 @@ TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring &typeNam
 TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, size_t number )
 {
    if ( !typeInfo )
-        throw DbgException( L"type info is null" );
+        throw DbgException( "type info is null" );
 
     offset = addr64(offset); 
 

@@ -227,7 +227,7 @@ MEMOFFSET_64 ptrPtr( MEMOFFSET_64 offset, size_t psize)
     if ( psize == 8 )
         return addr64(ptrQWord(offset) );
 
-    throw DbgException(L"unknown pointer size");
+    throw DbgException("unknown pointer size");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -8,12 +8,12 @@
 
 namespace  kdlib {
 
-class DbgEngException : public DbgException
+class DbgEngException : public DbgWideException
 {
 public:
 
     DbgEngException( const std::wstring  &methodName, HRESULT hres ) :
-        DbgException( buildHresultDesc( methodName, hres ).c_str() )
+        DbgWideException( buildHresultDesc( methodName, hres ).c_str() )
         {}
 
 private:

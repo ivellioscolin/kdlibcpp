@@ -15,30 +15,37 @@ class DbgException : public std::exception
 {
 public:
 
-    DbgException( const std::wstring  &desc ) :
-        m_desc(desc),
-        std::exception( "KDLIBCPP Exception" )
+    DbgException( const std::string  &desc ) :
+        std::exception( desc.c_str() )
         {}
-
-    const  std::wstring& getDesc() const {
-        return m_desc;
-    }
-
-private:
-
-    std::wstring    m_desc;
 
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MemoryException : public DbgException
+class DbgWideException : public DbgException
+{
+public:
+
+    DbgWideException( const std::wstring  &desc ) : 
+        DbgException( getCStrDesc(desc) )
+        {}
+
+private:
+
+    static std::string getCStrDesc( const std::wstring &desc );
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class MemoryException : public DbgWideException
 {
 public:
 
     MemoryException( MEMOFFSET_64 targetAddr, bool phyAddr = false ) :
         m_targetAddress( targetAddr ),
-        DbgException( buildDesc( targetAddr, phyAddr ) )
+        DbgWideException( buildDesc( targetAddr, phyAddr ) )
         {}    
     
     MEMOFFSET_64
@@ -64,12 +71,12 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////////
 
-class SymbolException : public DbgException 
+class SymbolException : public DbgWideException 
 {
 public:
 
     SymbolException( const std::wstring  &desc ) :
-        DbgException( desc )
+        DbgWideException( desc )
         {}    
 
 };
@@ -116,12 +123,12 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////
 
-class ImplementException : public DbgException
+class ImplementException : public DbgWideException
 {
 public:
 
     ImplementException( const std::wstring &file, int line, const std::wstring &msg ) :
-         DbgException( buildDesc(file,line, msg) )    
+         DbgWideException( buildDesc(file,line, msg) )    
          {}
 
 private:

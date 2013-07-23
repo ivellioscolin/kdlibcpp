@@ -619,7 +619,7 @@ void DiaSymbol::getValue( NumVariant &btv )
         break;
 
     default:
-        throw DbgException( L"Unsupported const value" );
+        throw DbgException( "Unsupported const value" );
     }
 }
 

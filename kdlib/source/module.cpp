@@ -150,7 +150,7 @@ SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset )
     offset = addr64(offset);
 
     if ( offset < m_base || offset > getEnd() )
-        throw DbgException( L"address is out of the module space" );
+        throw DbgException( "address is out of the module space" );
 
     return getSymbolByRva( (MEMOFFSET_32)(offset - m_base ) );
 }

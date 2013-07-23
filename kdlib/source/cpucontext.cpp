@@ -124,7 +124,7 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
         return NumVariant();
     }
 
-    throw DbgException( L"unsupported registry type");
+    throw DbgException( "unsupported registry type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
