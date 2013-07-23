@@ -75,11 +75,11 @@ METHOD_NAME ( __in PDEBUG_CLIENT client,  __in_opt PCSTR args)               \
     }                                                                        \
     catch( kdlib::DbgException& de )                                         \
     {                                                                        \
-        ctrl->OutputWide( DEBUG_OUTPUT_ERROR,  L"Kdlib exception: %ws", de.getDesc().c_str() ); \
+        ctrl->Output( DEBUG_OUTPUT_ERROR,  "Kdlib exception: %s", de.what() ); \
     }                                                                        \
     catch(...)                                                               \
     {                                                                        \
-        ctrl->OutputWide( DEBUG_OUTPUT_ERROR,  L"Unknown pykd exception" );  \
+        ctrl->Output( DEBUG_OUTPUT_ERROR,  "Unknown pykd exception" );  \
     }                                                                        \
     client->SetOutputMask( mask );                                           \
     return S_OK;                                                             \

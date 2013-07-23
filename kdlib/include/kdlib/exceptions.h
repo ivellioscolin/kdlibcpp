@@ -123,31 +123,31 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////
 
-class ImplementException : public DbgWideException
+class ImplementException : public DbgException
 {
 public:
 
-    ImplementException( const std::wstring &file, int line, const std::wstring &msg ) :
-         DbgWideException( buildDesc(file,line, msg) )    
+    ImplementException( const std::string &file, int line, const std::string &msg ) :
+         DbgException( buildDesc(file,line, msg) )    
          {}
 
 private:
 
-    static std::wstring buildDesc( const std::wstring &file, int line, const std::wstring &msg )
+    static std::string buildDesc( const std::string &file, int line, const std::string &msg )
     {
-        std::wstringstream sstream;
-        sstream << L"File: " << file << L" Line: " << line << L"  " << msg;
+        std::stringstream sstream;
+        sstream << "File: " << file << " Line: " << line << "  " << msg;
         return sstream.str();
     }
 
 };
 
 //#define WIDEN2(x)
-#define WIDEN(x) L#x
-#define __WFILE__ WIDEN(__FILE__)
+//#define WIDEN(x) L#x
+//#define __WFILE__ WIDEN(__FILE__)
 
-#define NOT_IMPLEMENTED()   throw ImplementException( __WFILE__, __LINE__, L"Not Implemented" );
-#define TODO(x) throw ImplementException( __WFILE__, __LINE__, WIDEN(x) );
+#define NOT_IMPLEMENTED()   throw ImplementException( __FILE__, __LINE__, "Not Implemented" );
+#define TODO(x) throw ImplementException( __FILE__, __LINE__, x );
 
 ///////////////////////////////////////////////////////////////////////////////
 
