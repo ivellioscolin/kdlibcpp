@@ -65,9 +65,12 @@ void setCurrentThread( THREAD_ID id );
 THREAD_ID getThreadSystemId( THREAD_ID id );
 
 size_t getNumberProcesses();
-PROCESS_ID getCurrentProcessId();
-void setCurrentProcess( PROCESS_ID id );
-PROCESS_ID getProcessSystemId( PROCESS_ID id );
+PROCESS_DEBUG_ID getCurrentProcessId();
+void setCurrentProcess( PROCESS_DEBUG_ID id );
+MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id );
+PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset );
+PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id );
+PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid );
 
 
 //breakpoints

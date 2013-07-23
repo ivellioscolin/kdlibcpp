@@ -464,9 +464,109 @@ PROCESS_ID getCurrentProcessId()
 
     hres = g_dbgMgr->system->GetCurrentProcessId( &id );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentProcessSystemId", hres ); 
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres ); 
 
     return  PROCESS_ID(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
+{
+    HRESULT      hres;
+    ULONG        old_id;
+
+    hres = g_dbgMgr->system->GetCurrentProcessId( &old_id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+
+    if ( old_id != id )
+    {
+        hres = g_dbgMgr->system->SetCurrentProcessId( id );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
+    }
+
+    ULONG  systemId;
+    hres = g_dbgMgr->system->GetCurrentProcessSystemId( &systemId );
+
+    g_dbgMgr->system->SetCurrentProcessId( old_id );
+
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
+
+    return systemId;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid )
+{
+    HRESULT  hres;
+    ULONG  id;
+
+    hres = g_dbgMgr->system->GetProcessIdBySystemId( pid, &id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetProcessIdBySystemId", hres );
+
+    return id;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset )
+{
+    HRESULT  hres;
+    ULONG  id;
+
+    hres = g_dbgMgr->system->GetProcessIdByDataOffset( offset, &id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetProcessIdBySystemId", hres );
+
+    return id;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
+{
+    HRESULT      hres;
+    ULONG        old_id;
+
+    hres = g_dbgMgr->system->GetCurrentProcessId( &old_id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+
+    if ( old_id != id )
+    {
+        hres = g_dbgMgr->system->SetCurrentProcessId( id );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
+    }
+
+    MEMOFFSET_64  offset;
+    hres = g_dbgMgr->system->GetCurrentProcessDataOffset( &offset );
+
+    g_dbgMgr->system->SetCurrentProcessId( old_id );
+
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
+
+    return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t getNumberProcesses()
+{
+    HRESULT  hres;
+    ULONG  number;
+
+    hres = g_dbgMgr->system->GetNumberProcesses( &number );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
+
+    return number;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
