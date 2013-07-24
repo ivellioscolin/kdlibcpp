@@ -106,10 +106,6 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData );
-
-///////////////////////////////////////////////////////////////////////////////
-
 class TypedVarImp : public TypedVar
 {
 
@@ -159,17 +155,17 @@ protected:
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
-    
+
     virtual size_t getElementCount()
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
-    
+
     virtual std::wstring getElementName( size_t index ) 
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
-   
+
 protected:
 
     TypedVarImp( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData ) :
@@ -315,6 +311,30 @@ public:
     virtual NumVariant getValue() const {
         return NumVariant( m_varData->readDWord() );
     }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypedVarFunction : public TypedVarImp
+{
+public:
+
+    TypedVarFunction( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, SymbolPtr symVar ) :
+        TypedVarImp( typeInfo, varData ),
+        m_symVar(symVar)
+    {
+    }
+
+    virtual NumVariant getValue() const {
+        return NumVariant( getAddress() );
+    }
+
+    virtual size_t getSize() const {
+        return m_symVar->getSize();
+    }
+
+private:
+    SymbolPtr m_symVar;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

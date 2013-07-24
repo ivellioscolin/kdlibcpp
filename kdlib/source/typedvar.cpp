@@ -12,6 +12,39 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, const SymbolPtr &symVar )
+{
+    if ( typeInfo->isBase() )
+        return TypedVarPtr( new TypedVarBase( typeInfo, varData ) );
+
+    if ( typeInfo->isUserDefined() )
+        return TypedVarPtr( new TypedVarUdt( typeInfo, varData ) );
+
+    if ( typeInfo->isPointer() )
+        return TypedVarPtr( new TypedVarPointer( typeInfo, varData ) );
+
+    if ( typeInfo->isArray() )
+        return TypedVarPtr( new TypedVarArray( typeInfo, varData ) );
+
+    if ( typeInfo->isBitField() )
+        return TypedVarPtr( new TypedVarBitField( typeInfo, varData ) );
+
+    if ( typeInfo->isEnum() )
+        return TypedVarPtr( new TypedVarEnum( typeInfo, varData ) );
+
+    if ( typeInfo->isFunction() )
+    {
+        if (!symVar)
+            throw DbgException( "impossible to create a function" );
+
+        return TypedVarPtr( new TypedVarFunction( typeInfo, varData, symVar ) );
+    }
+
+    NOT_IMPLEMENTED();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr loadTypedVar( const std::wstring &varName )
 {
     std::wstring     moduleName;
@@ -39,7 +72,7 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
     {
         MEMOFFSET_64 offset = module->getBase() + symVar->getRva();
 
-        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
+        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), symVar );
     }
 
     NOT_IMPLEMENTED();
@@ -47,46 +80,21 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
+TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset, const SymbolPtr &symVar )
 {
     TypeInfoPtr varType = loadType( typeName );
 
-    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
+    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), symVar );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
+TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset, const SymbolPtr &symVar )
 {
     if ( !varType )
         throw DbgException( "type info is null");
 
-    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData )
-{
-    if ( typeInfo->isBase() )
-        return TypedVarPtr( new TypedVarBase( typeInfo, varData ) );
-
-    if ( typeInfo->isUserDefined() )
-        return TypedVarPtr( new TypedVarUdt( typeInfo, varData ) );
-
-    if ( typeInfo->isPointer() )
-        return TypedVarPtr( new  TypedVarPointer( typeInfo, varData ) );
-
-    if ( typeInfo->isArray() )
-        return TypedVarPtr( new TypedVarArray( typeInfo, varData ) );
-
-    if ( typeInfo->isBitField() )
-        return TypedVarPtr( new TypedVarBitField( typeInfo, varData ) );
-
-    if ( typeInfo->isEnum() )
-        return TypedVarPtr( new TypedVarEnum( typeInfo, varData ) );
-
-    NOT_IMPLEMENTED();
+    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), symVar );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,7 +132,7 @@ TypedVarPtr containingRecord( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const 
 
     offset = addr64( offset );
 
-    return loadTypedVar( typeInfo, offset - typeInfo->getElementOffset( fieldName ) );
+    return loadTypedVar( typeInfo, offset - typeInfo->getElementOffset( fieldName ), SymbolPtr() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -172,7 +180,7 @@ TypedVarList loadTypedVarList( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const
     if ( fieldTypeInfo->getName() == ( typeInfo->getName() + L"*" ) )
     {
         for( entryAddress = ptrPtr(offset, psize); addr64(entryAddress) != offset && entryAddress != NULL; entryAddress = ptrPtr( entryAddress + typeInfo->getElementOffset(fieldName), psize ) )
-            lst.push_back( loadTypedVar( typeInfo, entryAddress ) );
+            lst.push_back( loadTypedVar( typeInfo, entryAddress, SymbolPtr() ) );
     }
     else
     {
@@ -222,7 +230,7 @@ TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, size
     lst.reserve(100);
 
     for( size_t i = 0; i < number; ++i )
-        lst.push_back( loadTypedVar( typeInfo, offset + i * typeInfo->getSize() ) );
+        lst.push_back( loadTypedVar( typeInfo, offset + i * typeInfo->getSize(), SymbolPtr() ) );
    
     return lst;
 }
@@ -286,7 +294,7 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
         if ( staticOffset == 0 )
            NOT_IMPLEMENTED();
 
-        return  loadTypedVar( fieldType, staticOffset );
+        return  loadTypedVar( fieldType, staticOffset, SymbolPtr() );
     }
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
@@ -296,7 +304,7 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
         fieldOffset += getVirtualBaseDisplacement( fieldName );
     }
 
-    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset, SymbolPtr() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -312,7 +320,7 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
         if ( staticOffset == 0 )
            NOT_IMPLEMENTED();
 
-        return  loadTypedVar( fieldType, staticOffset );
+        return  loadTypedVar( fieldType, staticOffset, SymbolPtr() );
     }
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(index);
@@ -322,7 +330,7 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
         fieldOffset += getVirtualBaseDisplacement( index );
     }
 
-    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset, SymbolPtr() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -365,7 +373,8 @@ TypedVarPtr TypedVarPointer::deref()
 {
     return loadTypedVar( 
                 m_typeInfo->deref(), 
-                m_typeInfo->getPtrSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8() );
+                m_typeInfo->getPtrSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8(),
+                SymbolPtr() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -377,14 +386,14 @@ TypedVarPtr TypedVarArray::getElement( size_t index )
 
     TypeInfoPtr     elementType = m_typeInfo->getElement(0);
 
-    return loadTypedVar( elementType, m_varData->getAddress() + elementType->getSize()*index );
+    return loadTypedVar( elementType, m_varData->getAddress() + elementType->getSize()*index, SymbolPtr() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 NumVariant TypedVarBitField::getValue() const
 {
-    NumVariant  var = *loadTypedVar( m_typeInfo->getBitType(), m_varData->getAddress() );
+    NumVariant  var = *loadTypedVar( m_typeInfo->getBitType(), m_varData->getAddress(), SymbolPtr() );
 
     var >>=  m_typeInfo->getBitOffset();
 

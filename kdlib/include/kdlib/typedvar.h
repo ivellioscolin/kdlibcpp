@@ -16,9 +16,9 @@ typedef std::vector<TypedVarPtr> TypedVarList;
 
 TypedVarPtr loadTypedVar( const std::wstring &varName );
 
-TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr );
+TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr, const SymbolPtr &symVar );
 
-TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
+TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr, const SymbolPtr &symVar );
 
 TypedVarPtr containingRecord( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
 
@@ -37,9 +37,9 @@ class TypedVar : private boost::noncopyable, public NumBehavior {
 
     friend TypedVarPtr loadTypedVar( const std::wstring &varName );
 
-    friend TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr );
+    friend TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr, const SymbolPtr &symVa );
 
-    friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
+    friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr, const SymbolPtr &symVa );
 
 public:
     

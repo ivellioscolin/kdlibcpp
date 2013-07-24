@@ -228,7 +228,7 @@ TypedVarPtr Module::getTypedVarByAddr( MEMOFFSET_64 offset )
 
     TypeInfoPtr typeInfo = loadType( symVar->getType() );
 
-    return loadTypedVar( typeInfo, offset );
+    return loadTypedVar( typeInfo, offset, symVar );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ TypedVarPtr Module::getTypedVarByName( const std::wstring &symName )
     {
         MEMOFFSET_64  offset = getSymbolVa( symName );
 
-        return loadTypedVar( typeInfo, offset );
+        return loadTypedVar( typeInfo, offset, symVar );
     }
 
     TODO( "constant support");
@@ -260,7 +260,7 @@ TypedVarPtr Module::getTypedVarByTypeName( const std::wstring &typeName, MEMOFFS
 
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
-    return loadTypedVar(typeInfo, offset );
+    return loadTypedVar( typeInfo, offset, SymbolPtr() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
