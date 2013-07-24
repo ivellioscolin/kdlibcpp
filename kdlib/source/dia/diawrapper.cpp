@@ -428,6 +428,21 @@ ULONG DiaSymbol::getRegRealativeId()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+SymbolPtr DiaSymbol::getObjectPointerType()
+{
+    DiaSymbolPtr diaSymbol(callSymbol(get_objectPointerType));
+    return SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+ULONG DiaSymbol::getCallingConvention()
+{
+    return callSymbol(get_callingConvention);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 ULONG DiaSymbol::getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative)
 {
     DiaRegToRegRelativeBase::const_iterator it = 

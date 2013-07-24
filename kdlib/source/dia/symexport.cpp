@@ -166,6 +166,16 @@ class ExportSymbolBase : public Symbol
     {
         NOT_IMPLEMENTED();
     }
+
+    virtual SymbolPtr getObjectPointerType()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getCallingConvention()
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

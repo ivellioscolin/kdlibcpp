@@ -132,6 +132,38 @@ enum MachineTypes {
     machine_AMD64 = 0x8664
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+enum CallingConventionType
+{
+    CallConv_NearC = 0x00,
+    CallConv_FarC = 0x01,
+    CallConv_NearPascal = 0x02,
+    CallConv_FarPascal = 0x03,
+    CallConv_NearFast = 0x04,
+    CallConv_FarFast = 0x05,
+    CallConv_Skipped = 0x06,
+    CallConv_NearStd = 0x07,
+    CallConv_FarStd = 0x08,
+    CallConv_NearSys = 0x09,
+    CallConv_FarSys = 0x0a,
+    CallConv_ThisCall = 0x0b,
+    CallConv_MipsCall = 0x0c,
+    CallConv_Generic = 0x0d,
+    CallConv_AlphaCall = 0x0e,
+    CallConv_PpcCall = 0x0f,
+    CallConv_ShCall = 0x10,
+    CallConv_ArmCall = 0x11,
+    CallConv_Am33Call = 0x12,
+    CallConv_TriCall = 0x13,
+    CallConv_Sh5Call = 0x14,
+    CallConv_M32RCall = 0x15,
+    CallConv_ClrCall = 0x16,
+    CallConv_Inline = 0x17
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 class Symbol {
 
 public:
@@ -165,6 +197,8 @@ public:
     virtual bool isIndirectVirtualBaseClass() = 0;
     virtual bool isVirtualBaseClass() = 0;
     virtual unsigned long getRegRealativeId() = 0;  // <- RegRealativeId
+    virtual SymbolPtr getObjectPointerType() = 0; // "this" for method
+    virtual unsigned long getCallingConvention() = 0; // <- CallingConventionType
 };
 
 ///////////////////////////////////////////////////////////////////////////////

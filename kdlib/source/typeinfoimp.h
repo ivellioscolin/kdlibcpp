@@ -85,7 +85,7 @@ protected:
     virtual bool isConstant() {
         return m_constant;
     }
-    
+
     virtual TypeInfoPtr getElement( const std::wstring &name ) {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
@@ -156,6 +156,14 @@ protected:
 
     virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
         throw TypeException( getName(), L"type is not a struct" ); 
+    }
+
+    virtual CallingConventionType getCallingConvention() {
+        throw TypeException( getName(), L"type is not a function" ); 
+    }
+
+    virtual bool hasThis() {
+        throw TypeException( getName(), L"type is not a function" ); 
     }
 
 public:
@@ -330,79 +338,49 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoFuncPrototype : public TypeInfoFields
+class TypeInfoFunction : public TypeInfoImp
 {
 public:
 
-    TypeInfoFuncPrototype( SymbolPtr& symbol ) :
-        TypeInfoFields( L"function" ),
-        m_symbol( symbol )
-        {}
+    TypeInfoFunction( SymbolPtr& symbol );
 
 protected:
 
-    virtual std::wstring getName() {
-       return m_symbol->getName();
+    virtual std::wstring str() {
+        return getName();
     }
 
-    virtual void getFields();
+    virtual std::wstring getName();
 
-    SymbolPtr  m_symbol;
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class TypeInfoFunc : public TypeInfoImp
-{
-public:
-
-    TypeInfoFunc( SymbolPtr& symbol )
-    {
-        m_symbol = symbol;
-        m_prototype = loadType( symbol->getType() );
+    virtual size_t getPtrSize() {
+        return getPtrSizeBySymbol( m_symbol );
     }
 
-protected:
-
-    virtual bool isFunction() 
-    {
+    virtual bool isFunction() {
         return true;
     }
 
-    virtual std::wstring getName() {
-       return m_symbol->getName();
-    }
-
-    virtual NumVariant getValue() const {
-        return m_symbol->getVa();
-    }
-
-    virtual TypeInfoPtr getElement( const std::wstring &name ) {
-        return m_prototype->getElement(name);
-    }
-
-    virtual TypeInfoPtr getElement( size_t index ) {
-        return m_prototype->getElement(index);
-    }
-
-    virtual std::wstring getElementName( size_t index ) {
-        return m_prototype->getElementName(index);
-    }
-
-    virtual size_t getElementIndex( const std::wstring &name ) {
-        return m_prototype->getElementIndex(name);
-    }
-
     virtual size_t getElementCount() {
-        return m_prototype->getElementCount();
+        return m_args.size();
+    }
+    virtual TypeInfoPtr getElement( size_t index );
+
+    virtual CallingConventionType getCallingConvention();
+
+    virtual bool hasThis() {
+        return m_hasThis;
     }
 
-    TypeInfoPtr m_prototype;
+    // virtual TypeInfoPtr getReturnType();
 
-    SymbolPtr  m_symbol;
+private:
+    SymbolPtr m_symbol;
+
+    bool m_hasThis;
+
+    typedef std::vector< SymbolPtr > Args;
+    Args m_args;
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

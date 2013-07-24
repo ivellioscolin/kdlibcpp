@@ -77,6 +77,9 @@ public:
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
     virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
 
+    virtual CallingConventionType getCallingConvention() = 0; // <- CallingConventionType
+    virtual bool hasThis() = 0;
+
 protected:
 
     static bool isBaseType( const std::wstring &typeName );

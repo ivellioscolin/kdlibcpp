@@ -39,6 +39,17 @@ _UnderscoreFunc( int a, float b )
    LocalStaticFunc(a,b);
 }
 
+void FuncTestClass::method()
+{
+    LocalStaticFunc(1,2);
+}
+
+void __cdecl FuncTestClass::staticMethod()
+{
+    LocalStaticFunc(2,3);
+}
 
 void ( *CdeclFuncPtr)( int a, float b) = &CdeclFunc;
 
+void (FuncTestClass::*MethodPtr)() = &FuncTestClass::method;
+void (__cdecl*CdeclStaticMethodPtr)() = &FuncTestClass::staticMethod;

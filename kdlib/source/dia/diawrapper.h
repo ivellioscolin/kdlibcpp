@@ -108,6 +108,10 @@ public:
     //ULONG getRegisterId();
     virtual ULONG getRegRealativeId() override;
 
+    virtual SymbolPtr getObjectPointerType() override;
+
+    virtual ULONG getCallingConvention() override;
+
     MachineTypes getMachineType() {
         return m_machineType;
     }

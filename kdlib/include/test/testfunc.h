@@ -12,7 +12,15 @@ void
 __fastcall
 FastcallFunc( int a, float b );
 
+class FuncTestClass
+{
+public:
+    void method();
+    static void __cdecl staticMethod();
+};
 
 extern void ( *CdeclFuncPtr)( int a, float b);
 
+extern void (FuncTestClass::*MethodPtr)();
+extern void (__cdecl*CdeclStaticMethodPtr)();
 

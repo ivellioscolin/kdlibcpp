@@ -266,15 +266,15 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
         ptr = TypeInfoPtr( new TypeInfoEnum( symbol ) );
         break;
 
-    case SymTagFunction:
-        ptr = TypeInfoPtr( new TypeInfoFunc( symbol ) );
-        break;
-
     case SymTagFunctionType:
-        ptr = TypeInfoPtr( new TypeInfoFuncPrototype( symbol ) );
+        ptr = TypeInfoPtr( new TypeInfoFunction( symbol ) );
         break;
 
     case SymTagTypedef:
+        ptr = loadType( symbol->getType() );
+        break;
+
+    case SymTagFunctionArgType:
         ptr = loadType( symbol->getType() );
         break;
 
@@ -927,18 +927,89 @@ void TypeInfoEnum::getFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void TypeInfoFuncPrototype::getFields()
+TypeInfoFunction::TypeInfoFunction( SymbolPtr& symbol ) :
+    m_symbol(symbol),
+    m_hasThis(false)
 {
-    size_t   childCount = m_symbol->getChildCount();
-
-    for ( size_t  i = 0; i < childCount; ++i )
+    // add this
+    try
     {
-        SymbolPtr  childSym = m_symbol->getChildByIndex( i );
-
-        TypeFieldPtr  fieldPtr = TypeFieldPtr( new FunctionField( childSym ) );
-
-        m_fields.push_back( fieldPtr );
+        m_args.push_back( m_symbol->getObjectPointerType() );
+        m_hasThis = true;
     }
+    catch(const SymbolException &)
+    {
+    }
+
+    // add args
+    SymbolPtrList lstArgs = m_symbol->findChildren(SymTagFunctionArgType);
+    m_args.insert( m_args.end(), lstArgs.begin(), lstArgs.end() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypeInfoFunction::getName()
+{
+    std::wstringstream sstr;
+
+    // FIXME: getReturnType!
+    sstr << L"<?ret_type?>";
+
+    sstr << L"(";
+    switch (getCallingConvention())
+    {
+    case CallConv_NearC:
+        sstr << L"__cdecl";
+        break;
+
+    case CallConv_NearFast:
+        sstr << L"__fastcall";
+        break;
+
+    case CallConv_NearStd:
+        sstr << L"__stdcall";
+        break;
+
+    case CallConv_ThisCall:
+        sstr << L"__thiscall";
+        break;
+
+    case CallConv_ClrCall:
+        sstr << L"__clrcall";
+        break;
+
+    default:
+        sstr << L"__userpurge";
+        break;
+    }
+    sstr << L")(";
+
+    Args::iterator itArg = m_args.begin();
+    for (; itArg != m_args.end(); ++itArg)
+    {
+        if (itArg != m_args.begin())
+            sstr << L", ";
+        sstr << loadType( *itArg )->getName();
+    }
+
+    sstr << L")";
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoFunction::getElement( size_t index )
+{
+    if ( index >= m_args.size() )
+        throw IndexException( index );
+    return loadType( m_args[index] );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+CallingConventionType TypeInfoFunction::getCallingConvention()
+{
+    return static_cast< CallingConventionType >( m_symbol->getCallingConvention() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

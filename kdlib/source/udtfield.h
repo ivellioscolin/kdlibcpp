@@ -191,30 +191,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FunctionField : public TypeField 
-{
-public:
-    FunctionField( const SymbolPtr &sym ) :
-        TypeField(L""),
-        m_symbol( sym )
-        {}
-
-private:
-
-    virtual TypeInfoPtr getTypeInfo() {
-        return loadType(m_symbol->getType());
-    }
-
-    virtual NumVariant getValue() const {
-        throw TypeException(  m_name, L"function parameter has no value" );
-    }
-
-
-    SymbolPtr  m_symbol;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 class FieldCollection 
 {
 public:
