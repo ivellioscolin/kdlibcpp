@@ -103,6 +103,8 @@ CPUType getCPUType( THREAD_ID id );
 CPUType getCPUMode( THREAD_ID id );
 unsigned long long loadMSR( THREAD_ID id, size_t msrIndex );
 void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value );
+size_t getNumberFrames(THREAD_ID id);
+void getStackFrame( THREAD_ID id, size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
 
 //
 // Extensions

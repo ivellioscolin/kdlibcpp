@@ -1083,6 +1083,54 @@ void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t getNumberFrames(THREAD_ID id)
+{  
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME> dbgFrames(filledFrames);
+
+    hres = g_dbgMgr->control->GetStackTrace( 0, 0, 0, &dbgFrames[0], filledFrames, &filledFrames);
+    if (S_OK != hres)
+        throw DbgEngException( L"IDebugControl::GetStackTrace", hres );
+
+    return filledFrames;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void getStackFrame( THREAD_ID id, size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
+{
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME> dbgFrames(filledFrames);
+
+    hres = g_dbgMgr->control->GetStackTrace( 0, 0, 0, &dbgFrames[0], filledFrames, &filledFrames);
+    if (S_OK != hres)
+        throw DbgEngException( L"IDebugControl::GetStackTrace", hres );
+
+    if ( frameIndex >= filledFrames )
+        throw IndexException( frameIndex );
+
+    ip = dbgFrames[frameIndex].InstructionOffset;
+    ret = dbgFrames[frameIndex].ReturnOffset;
+    fp = dbgFrames[frameIndex].FrameOffset;
+    sp = dbgFrames[frameIndex].StackOffset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 CPUType getCPUType( THREAD_ID id )
 {
     HRESULT  hres;

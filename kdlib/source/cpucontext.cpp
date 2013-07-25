@@ -157,4 +157,18 @@ CPUType CPUContext::getCPUMode()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t CPUContext::getStackLength()
+{
+    return kdlib::getNumberFrames( m_contextIndex );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContext::getStackFrame( size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
+{
+    kdlib::getStackFrame( m_contextIndex, frameIndex, ip, ret, fp, sp );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end

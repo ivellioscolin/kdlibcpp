@@ -27,6 +27,12 @@ public:
     MEMOFFSET_64 getSP();
     MEMOFFSET_64 getFP();
 
+    size_t getStackLength();
+    void getStackFrame( size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
+    void getCurrentStackFrame( size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) {
+        getStackFrame( 0, ip, ret, fp, sp );
+    }
+
     unsigned long long loadMSR( size_t msrIndex );
     void setMSR( size_t msrIndex, unsigned long long value );
 
