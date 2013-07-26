@@ -83,7 +83,9 @@ class WindbgIn : public DbgIn
         ULONG  read = 0;
         g_dbgMgr->control->InputWide( &inputBuffer[0], inputBuffer.size(), &read );
 
-        return std::wstring( &inputBuffer[0] );
+         std::wstring  inputstr = std::wstring( &inputBuffer[0] );
+
+         return inputstr.empty() ? L"\n" : inputstr;
     }
 };
 
