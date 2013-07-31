@@ -38,7 +38,7 @@ unsigned long getCurrentTime();
 void getSystemInfo( SystemInfo &systemInfo );
 
 //manage target modules
-size_t getNumberModules();
+unsigned long getNumberModules();
 std::vector<MEMOFFSET_64> getModuleBasesList();
 MEMOFFSET_64 findModuleBase( const std::wstring &moduleName );
 MEMOFFSET_64 findModuleBase( MEMOFFSET_64 offset );
@@ -59,7 +59,7 @@ std::wstring getSourceFile( MEMOFFSET_64 offset = 0);
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset = 0 );
 
 // processes end threads
-size_t getNumberThreads();
+unsigned long getNumberThreads();
 THREAD_DEBUG_ID getCurrentThreadId();
 void setCurrentThread( THREAD_DEBUG_ID id );
 MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id );
@@ -67,7 +67,7 @@ THREAD_DEBUG_ID getThreadIdByOffset( MEMOFFSET_64 offset );
 THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id );
 THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid );
 
-size_t getNumberProcesses();
+unsigned long getNumberProcesses();
 PROCESS_DEBUG_ID getCurrentProcessId();
 void setCurrentProcess( PROCESS_DEBUG_ID id );
 MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id );
@@ -94,17 +94,17 @@ MEMOFFSET_64 getInstructionOffset( THREAD_ID id = -1 );
 MEMOFFSET_64 getStackOffset( THREAD_ID id = -1);
 MEMOFFSET_64 getFrameOffset( THREAD_ID id = -1);
 
-size_t getRegisterNumber( THREAD_ID id );
-size_t getRegsiterIndex( THREAD_ID id, const std::wstring &name );
-CPURegType getRegisterType( THREAD_ID id, size_t index );
-std::wstring getRegisterName( THREAD_ID id, size_t index );
-void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSize );
+unsigned long getRegisterNumber( THREAD_ID id );
+unsigned long getRegsiterIndex( THREAD_ID id, const std::wstring &name );
+CPURegType getRegisterType( THREAD_ID id, unsigned long index );
+std::wstring getRegisterName( THREAD_ID id, unsigned long index );
+void getRegisterValue( THREAD_ID id, unsigned long index, void* buffer, size_t bufferSize );
 CPUType getCPUType( THREAD_ID id );
 CPUType getCPUMode( THREAD_ID id );
-unsigned long long loadMSR( THREAD_ID id, size_t msrIndex );
-void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value );
-size_t getNumberFrames(THREAD_ID id);
-void getStackFrame( THREAD_ID id, size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
+unsigned long long loadMSR( THREAD_ID id, unsigned long msrIndex );
+void setMSR( THREAD_ID id, unsigned long msrIndex, unsigned long long value );
+unsigned long getNumberFrames(THREAD_ID id);
+void getStackFrame( THREAD_ID id, unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
 
 //
 // Extensions

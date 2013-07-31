@@ -97,9 +97,6 @@
       <Filter>win</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="dbgmod.cpp">
-      <Filter>win</Filter>
-    </ClCompile>
     <ClCompile Include="dia\diaload.cpp">
       <Filter>dia</Filter>
     </ClCompile>
@@ -124,5 +121,8 @@
     <ClCompile Include="dbgio.cpp" />
     <ClCompile Include="cpucontext.cpp" />
     <ClCompile Include="disasm.cpp" />
+    <ClCompile Include="win\dbgmod.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

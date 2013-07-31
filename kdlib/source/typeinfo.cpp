@@ -807,7 +807,7 @@ void TypeInfoUdt::getFields(
 {
     size_t   childCount = rootSym->getChildCount();
 
-    for ( size_t  i = 0; i < childCount; ++i )
+    for ( unsigned long  i = 0; i < childCount; ++i )
     {
         SymbolPtr  childSym = rootSym->getChildByIndex( i );
 
@@ -869,7 +869,7 @@ void TypeInfoUdt::getVirtualFields()
 {
     size_t   childCount = m_symbol->getChildCount(SymTagBaseClass);
 
-    for ( size_t i = 0; i < childCount; ++i )
+    for ( unsigned long i = 0; i < childCount; ++i )
     {
         SymbolPtr  childSym = m_symbol->getChildByIndex( i );
 
@@ -914,7 +914,7 @@ void TypeInfoEnum::getFields()
 {
     size_t   childCount = m_symbol->getChildCount();
 
-    for ( size_t  i = 0; i < childCount; ++i )
+    for ( unsigned long  i = 0; i < childCount; ++i )
     {
         SymbolPtr  childSym = m_symbol->getChildByIndex( i );
 
@@ -1017,7 +1017,7 @@ CallingConventionType TypeInfoFunction::getCallingConvention()
 
 TypeInfoBitField::TypeInfoBitField( SymbolPtr &symbol )
 {
-    m_bitWidth = symbol->getSize();
+    m_bitWidth = static_cast<BITOFFSET>(symbol->getSize());
     m_bitPos = symbol->getBitPosition();
     m_bitType = TypeInfo::getBaseTypeInfo( symbol->getType() );
     m_size = m_bitType->getSize();

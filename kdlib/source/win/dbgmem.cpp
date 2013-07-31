@@ -4,10 +4,14 @@
 
 #include <windows.h>
 
+#include <boost/numeric/conversion/cast.hpp>
+
 #include "kdlib/dbgengine.h"
 
 #include "win/dbgmgr.h"
 #include "win/exceptions.h"
+
+using boost::numeric_cast;
 
 namespace  kdlib {
 
@@ -58,11 +62,11 @@ void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr,
 
         DBG_UNREFERENCED_LOCAL_VARIABLE(nextAddress);
 
-        hres = g_dbgMgr->dataspace->ReadVirtual( offset, buffer, length, readed );
+        hres = g_dbgMgr->dataspace->ReadVirtual( offset, buffer, numeric_cast<ULONG>(length), readed );
     }
     else
     {
-        hres = g_dbgMgr->dataspace->ReadPhysical( offset, buffer, length, readed );
+        hres = g_dbgMgr->dataspace->ReadPhysical( offset, buffer,  numeric_cast<ULONG>(length), readed );
     }
 
     if ( FAILED( hres ) )
@@ -84,11 +88,11 @@ bool readMemoryUnsafe( MEMOFFSET_64 offset, void* buffer, size_t length, bool ph
 
         DBG_UNREFERENCED_LOCAL_VARIABLE(nextAddress);
 
-        hres = g_dbgMgr->dataspace->ReadVirtual( offset, buffer, length, readed );
+        hres = g_dbgMgr->dataspace->ReadVirtual( offset, buffer,  numeric_cast<ULONG>(length), readed );
     }
     else
     {
-        hres = g_dbgMgr->dataspace->ReadPhysical( offset, buffer, length, readed );
+        hres = g_dbgMgr->dataspace->ReadPhysical( offset, buffer,  numeric_cast<ULONG>(length), readed );
     }
 
     return hres == S_OK;

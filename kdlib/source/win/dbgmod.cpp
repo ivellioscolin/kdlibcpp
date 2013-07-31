@@ -43,7 +43,7 @@ MEMOFFSET_64 findModuleBase( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t getNumberModules()
+unsigned long getNumberModules()
 {
     ULONG  loaded;
     ULONG  unloaded;
@@ -63,7 +63,7 @@ std::vector<MEMOFFSET_64> getModuleBasesList()
 
     std::vector<MEMOFFSET_64>  moduleList;
 
-    for ( size_t i = 0; i < num; ++i )
+    for ( ULONG i = 0; i < num; ++i )
     {
         ULONG64  base = 0;
         HRESULT  hres = g_dbgMgr->symbols->GetModuleByIndex( i, &base );
@@ -107,7 +107,7 @@ std::wstring getModuleName( MEMOFFSET_64 baseOffset )
         DEBUG_ANY_ID,
         baseOffset,
         &moduleName[0],
-        moduleName.size(),
+        static_cast<ULONG>(moduleName.size()),
         NULL );
 
     if ( FAILED( hres ) )
@@ -129,7 +129,7 @@ std::wstring getModuleImageName( MEMOFFSET_64 baseOffset )
         DEBUG_ANY_ID,
         baseOffset,
         &moduleName[0],
-        moduleName.size(),
+        static_cast<ULONG>(moduleName.size()),
         NULL );
 
     if ( FAILED( hres ) )

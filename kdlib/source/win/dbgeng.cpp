@@ -455,7 +455,7 @@ void getSystemInfo( SystemInfo &systemInfo )
 
     std::vector<wchar_t> buffer(strSize);
 
-    hres = g_dbgMgr->control->GetSystemVersionStringWide( DEBUG_SYSVERSTR_BUILD, &buffer[0], buffer.size(), NULL );
+    hres = g_dbgMgr->control->GetSystemVersionStringWide( DEBUG_SYSVERSTR_BUILD, &buffer[0], static_cast<ULONG>(buffer.size()), NULL );
     if ( FAILED( hres ) )
          throw DbgEngException( L"IDebugControl::GetSystemVersion", hres );
 
@@ -565,7 +565,7 @@ MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t getNumberProcesses()
+unsigned long getNumberProcesses()
 {
     HRESULT  hres;
     ULONG  number;
@@ -593,7 +593,7 @@ THREAD_ID getCurrentThreadId()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t getNumberThreads()
+unsigned long getNumberThreads()
 {
     HRESULT     hres;
     ULONG       number;
@@ -866,7 +866,7 @@ MEMOFFSET_64 getFrameOffset( THREAD_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t getRegisterNumber( THREAD_ID id )
+unsigned long getRegisterNumber( THREAD_ID id )
 {
     HRESULT  hres;
     CurrentThreadGuard  previousThread;
@@ -880,12 +880,12 @@ size_t getRegisterNumber( THREAD_ID id )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugRegisters::GetNumberRegisters", hres ); 
 
-    return size_t(number);
+    return number;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t getRegsiterIndex( THREAD_ID id, const std::wstring &name )
+unsigned long getRegsiterIndex( THREAD_ID id, const std::wstring &name )
 {
     HRESULT  hres;
     ULONG  index;
@@ -904,7 +904,7 @@ size_t getRegsiterIndex( THREAD_ID id, const std::wstring &name )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CPURegType getRegisterType( THREAD_ID id, size_t index )
+CPURegType getRegisterType( THREAD_ID id, unsigned long index )
 {
     HRESULT  hres;
     CurrentThreadGuard  previousThread;
@@ -917,7 +917,7 @@ CPURegType getRegisterType( THREAD_ID id, size_t index )
         throw IndexException(index);
 
     DEBUG_VALUE  dbgvalue = {};
-    hres = g_dbgMgr->registers->GetValue( index, &dbgvalue );
+    hres = g_dbgMgr->registers->GetValue( static_cast<ULONG>(index), &dbgvalue );
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
@@ -941,7 +941,7 @@ CPURegType getRegisterType( THREAD_ID id, size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring getRegisterName( THREAD_ID id, size_t index )
+std::wstring getRegisterName( THREAD_ID id, unsigned long index )
 {
     HRESULT      hres;
     CurrentThreadGuard  previousThread;
@@ -952,7 +952,7 @@ std::wstring getRegisterName( THREAD_ID id, size_t index )
     
     wchar_t  regName[0x100];
 
-    hres = g_dbgMgr->registers->GetDescriptionWide( index, regName, 0x100, NULL, NULL );
+    hres = g_dbgMgr->registers->GetDescriptionWide( static_cast<ULONG>(index), regName, 0x100, NULL, NULL );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugRegisters2::GetDescriptionWide", hres ); 
 
@@ -961,7 +961,7 @@ std::wstring getRegisterName( THREAD_ID id, size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSize )
+void getRegisterValue( THREAD_ID id, unsigned long index, void* buffer, size_t bufferSize )
 {
     HRESULT  hres;
     CurrentThreadGuard  previousThread;
@@ -974,7 +974,7 @@ void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSi
         throw IndexException(index);
 
     DEBUG_VALUE  dbgvalue = {};
-    hres = g_dbgMgr->registers->GetValue( index, &dbgvalue );
+    hres = g_dbgMgr->registers->GetValue(index, &dbgvalue );
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
@@ -1047,7 +1047,7 @@ void getRegisterValue( THREAD_ID id, size_t index, void* buffer, size_t bufferSi
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long long loadMSR( THREAD_ID id, size_t msrIndex )
+unsigned long long loadMSR( THREAD_ID id, unsigned long msrIndex )
 {
     HRESULT  hres;
     CurrentThreadGuard  previousThread;
@@ -1067,7 +1067,7 @@ unsigned long long loadMSR( THREAD_ID id, size_t msrIndex )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value )
+void setMSR( THREAD_ID id, unsigned long msrIndex, unsigned long long value )
 {
     HRESULT  hres;
     CurrentThreadGuard  previousThread;
@@ -1083,7 +1083,7 @@ void setMSR( THREAD_ID id, size_t msrIndex, unsigned long long value )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t getNumberFrames(THREAD_ID id)
+unsigned long getNumberFrames(THREAD_ID id)
 {  
     HRESULT  hres;
     CurrentThreadGuard  previousThread;
@@ -1104,7 +1104,7 @@ size_t getNumberFrames(THREAD_ID id)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void getStackFrame( THREAD_ID id, size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
+void getStackFrame( THREAD_ID id, unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
 {
     HRESULT  hres;
     CurrentThreadGuard  previousThread;

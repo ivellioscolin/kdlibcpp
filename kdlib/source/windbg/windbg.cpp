@@ -81,7 +81,7 @@ class WindbgIn : public DbgIn
         std::vector<wchar_t>  inputBuffer(0x10000);
 
         ULONG  read = 0;
-        g_dbgMgr->control->InputWide( &inputBuffer[0], inputBuffer.size(), &read );
+        g_dbgMgr->control->InputWide( &inputBuffer[0], static_cast<ULONG>(inputBuffer.size()), &read );
 
          std::wstring  inputstr = std::wstring( &inputBuffer[0] );
 

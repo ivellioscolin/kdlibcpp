@@ -8,7 +8,7 @@ namespace kdlib {
 
 /////////////////////////////////////////////////////////////
 
-CPUContext::CPUContext( size_t index )
+CPUContext::CPUContext( unsigned long index )
 {
     if ( index == -1 )
     {
@@ -48,20 +48,20 @@ MEMOFFSET_64 CPUContext::getFP()
 
 NumVariant CPUContext::getRegisterByName( const std::wstring &name)
 {
-    size_t index = getRegsiterIndex( m_contextIndex, name );
+    unsigned long index = getRegsiterIndex( m_contextIndex, name );
     return getRegisterByIndex( index );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring CPUContext::getRegisterName( size_t index )
+std::wstring CPUContext::getRegisterName( unsigned long index )
 {
     return kdlib::getRegisterName( m_contextIndex, index );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant CPUContext::getRegisterByIndex( size_t index )
+NumVariant CPUContext::getRegisterByIndex( unsigned long index )
 {
     CPURegType  regType = getRegisterType(m_contextIndex, index);
 
@@ -129,14 +129,14 @@ NumVariant CPUContext::getRegisterByIndex( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long long CPUContext::loadMSR( size_t msrIndex )
+unsigned long long CPUContext::loadMSR( unsigned long msrIndex )
 {
     return kdlib::loadMSR(m_contextIndex, msrIndex );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CPUContext::setMSR( size_t msrIndex, unsigned long long value )
+void CPUContext::setMSR( unsigned long msrIndex, unsigned long long value )
 {
     return kdlib::setMSR( m_contextIndex, msrIndex, value );
 }
@@ -157,14 +157,14 @@ CPUType CPUContext::getCPUMode()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t CPUContext::getStackLength()
+unsigned long CPUContext::getStackLength()
 {
     return kdlib::getNumberFrames( m_contextIndex );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CPUContext::getStackFrame( size_t frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
+void CPUContext::getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
 {
     kdlib::getStackFrame( m_contextIndex, frameIndex, ip, ret, fp, sp );
 }
