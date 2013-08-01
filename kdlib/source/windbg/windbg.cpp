@@ -93,6 +93,38 @@ WindbgIn  windbgIn;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+InterruptWatch::InterruptWatch()
+{
+    m_stopEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
+    m_thread = CreateThread( NULL, 0, threadRoutine, this, 0, NULL );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+InterruptWatch::~InterruptWatch()
+{
+    SetEvent( m_stopEvent );
+    WaitForSingleObject( m_thread, INFINITE );
+    CloseHandle( m_stopEvent );
+    CloseHandle( m_thread );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+DWORD InterruptWatch::interruptWatchRoutine()
+{
+    while( WAIT_TIMEOUT == WaitForSingleObject( m_stopEvent, 250 ) )
+    {
+        HRESULT  hres =  g_dbgMgr->control->GetInterrupt();
+        if ( hres == S_OK && onInterrupt() )
+            break;
+    }
+
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void WindbgExtension::parseArgs(const char* args)
 {
     typedef  boost::escaped_list_separator<char>    char_separator_t;
@@ -111,7 +143,6 @@ void WindbgExtension::parseArgs(const char* args)
 
     m_argsList = argsList;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -23,6 +23,7 @@ public:
     virtual void setUp() {}
     virtual void tearDown() {}
     virtual void parseArgs(const char* args);
+    virtual bool userInterrupt() {}
 
     bool isInit() {
         return m_init;
@@ -39,11 +40,34 @@ protected:
     const ArgsList& getArgs() const {
         return  m_argsList;
     }
-
     ArgsList  m_argsList;
 
     bool m_init;
 
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class InterruptWatch
+{
+public:
+
+    InterruptWatch();
+    virtual ~InterruptWatch();
+
+    virtual bool onInterrupt() { return true; }
+
+private:
+
+    DWORD interruptWatchRoutine();
+
+    static DWORD WINAPI threadRoutine(LPVOID lpParameter) {
+        return  static_cast<InterruptWatch*>(lpParameter)->interruptWatchRoutine();
+    }
+
+    HANDLE  m_thread;
+
+    HANDLE  m_stopEvent;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
