@@ -23,7 +23,6 @@ public:
     virtual void setUp() {}
     virtual void tearDown() {}
     virtual void parseArgs(const char* args);
-    virtual bool userInterrupt() {}
 
     bool isInit() {
         return m_init;
