@@ -101,6 +101,7 @@ std::wstring getRegisterName( THREAD_ID id, unsigned long index );
 void getRegisterValue( THREAD_ID id, unsigned long index, void* buffer, size_t bufferSize );
 CPUType getCPUType( THREAD_ID id );
 CPUType getCPUMode( THREAD_ID id );
+void setCPUMode( THREAD_ID id, CPUType mode );
 unsigned long long loadMSR( THREAD_ID id, unsigned long msrIndex );
 void setMSR( THREAD_ID id, unsigned long msrIndex, unsigned long long value );
 unsigned long getNumberFrames(THREAD_ID id);

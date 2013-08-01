@@ -157,6 +157,31 @@ CPUType CPUContext::getCPUMode()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void CPUContext::setCPUMode( CPUType mode )
+{
+    kdlib::setCPUMode( m_contextIndex, mode );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContext::switchCPUMode()
+{
+    switch ( getCPUMode() )
+    {
+    case CPU_I386:
+        setCPUMode(CPU_AMD64);
+        return;
+    
+    case CPU_AMD64:
+        setCPUMode(CPU_I386);
+        return;
+    }
+
+    DbgException( "can not switch CPU mode");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 unsigned long CPUContext::getStackLength()
 {
     return kdlib::getNumberFrames( m_contextIndex );

@@ -1189,6 +1189,38 @@ CPUType getCPUMode( THREAD_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void setCPUMode( THREAD_ID id, CPUType mode )
+{
+    HRESULT  hres;
+    CurrentThreadGuard  previousThread;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+    ULONG  processorMode;
+
+    switch( mode )
+    {
+    case CPU_I386:
+        processorMode = IMAGE_FILE_MACHINE_I386;
+        break;
+
+    case CPU_AMD64:
+        processorMode = IMAGE_FILE_MACHINE_AMD64;
+        break;
+
+    default:
+        DbgException( "Unknown processor type" );
+    }
+
+    hres =  g_dbgMgr->control->SetEffectiveProcessorType( processorMode );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::SetEffectiveProcessorType", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void disasmAssemblay( MEMOFFSET_64 offset, const std::wstring &instruction, MEMOFFSET_64 &nextOffset )
 {
     HRESULT     hres;

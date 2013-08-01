@@ -19,6 +19,9 @@ public:
 
     CPUType getCPUType();
     CPUType getCPUMode();
+    void setCPUMode( CPUType mode );
+    void switchCPUMode();
+
     NumVariant getRegisterByName( const std::wstring &name);
     NumVariant getRegisterByIndex( unsigned long index );
     std::wstring getRegisterName( unsigned long index );
