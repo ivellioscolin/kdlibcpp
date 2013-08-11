@@ -157,4 +157,37 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
 
 ///////////////////////////////////////////////////////////////////////////////
 
+HRESULT STDMETHODCALLTYPE DebugManager::Exception(
+    __in PEXCEPTION_RECORD64 Exception,
+    __in ULONG FirstChance )
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    ExceptionInfo   excinfo = {};
+
+    excinfo.firstChance = FirstChance != 0;
+
+    excinfo.exceptionCode = Exception->ExceptionCode;
+    excinfo.exceptionFlags = Exception->ExceptionFlags;
+    excinfo.exceptionRecord = Exception->ExceptionRecord;
+    excinfo.exceptionAddress = Exception->ExceptionAddress;
+    excinfo.parameterCount = Exception->NumberParameters;
+
+    for (ULONG i = 0; i < Exception->NumberParameters; ++i)
+        excinfo.parameters[i] = Exception->ExceptionInformation[i];
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
+    {
+        DebugCallbackResult  ret = (*it)->onException( excinfo );
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
+
+    return ConvertCallbackResult( result );
+}
+
+///////////////////////////////////////////////////////////////////
+
 } //kdlib namespace end

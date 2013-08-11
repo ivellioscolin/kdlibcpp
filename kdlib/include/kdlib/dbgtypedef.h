@@ -15,7 +15,6 @@ typedef unsigned long long      MEMOFFSET_64;
 typedef unsigned long           MEMOFFSET_32;
 typedef long                    MEMDISPLACEMENT;
 typedef unsigned long           BITOFFSET;
-typedef void*                   EXCEPTION_INFO;
 typedef unsigned long           ACCESS_TYPE;
 typedef unsigned long long      EXTENSION_ID;
 
@@ -57,6 +56,17 @@ struct SystemInfo {
     unsigned long  minorVersion;
     unsigned long  buildNumber;
     std::wstring  buildDescription;
+};
+
+struct ExceptionInfo {
+    bool  firstChance;
+    unsigned long  exceptionCode;
+    unsigned long  exceptionFlags;
+    MEMOFFSET_64  exceptionRecord;
+    MEMOFFSET_64  exceptionAddress;
+
+    unsigned long parameterCount;
+    unsigned long long parameters[0x10];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

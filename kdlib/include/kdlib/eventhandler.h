@@ -15,7 +15,7 @@ public:
         return DebugCallbackNoChange;
     }
 
-    virtual DebugCallbackResult onException( EXCEPTION_INFO exceptionInfo ) {
+    virtual DebugCallbackResult onException( const ExceptionInfo &exceptionInfo ) {
         return DebugCallbackNoChange;
     }
 

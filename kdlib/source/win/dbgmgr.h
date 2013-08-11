@@ -59,6 +59,7 @@ private:
         *Mask = 0;
         *Mask |= DEBUG_EVENT_BREAKPOINT;
         *Mask |= DEBUG_EVENT_CHANGE_ENGINE_STATE;
+        *Mask |= DEBUG_EVENT_EXCEPTION;
         return S_OK;
     }
 
@@ -69,6 +70,10 @@ private:
     STDMETHOD(ChangeEngineState)(
         __in ULONG Flags,
         __in ULONG64 Argument );
+
+    STDMETHOD(Exception)(
+        __in PEXCEPTION_RECORD64 Exception,
+        __in  ULONG FirstChance );
 };
 
 extern DebugManager*  g_dbgMgr;
