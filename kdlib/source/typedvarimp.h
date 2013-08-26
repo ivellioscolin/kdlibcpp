@@ -29,6 +29,7 @@ public:
     virtual MEMOFFSET_64 getAddress() const = 0;
     virtual MEMOFFSET_64 readPtr4() const = 0;
     virtual MEMOFFSET_64 readPtr8() const = 0;
+    virtual std::wstring asString() const = 0;
 
 protected:
     virtual ~VarDataProvider()
@@ -98,6 +99,12 @@ public:
         return addr64(ptrQWord(m_offset));
     }
 
+    virtual std::wstring asString() const {
+        std::wstringstream sstr;
+        sstr << L"at 0x" << std::hex << m_offset;
+        return sstr.str();
+    }
+
 protected:
 
     MEMOFFSET_64  m_offset;
@@ -110,6 +117,12 @@ class TypedVarImp : public TypedVar
 {
 
 protected:
+
+
+    virtual std::wstring str() 
+    {
+        NOT_IMPLEMENTED();
+    }
 
     virtual NumVariant getValue() const
     {
@@ -192,6 +205,8 @@ protected:
     
     virtual NumVariant getValue() const;
 
+    virtual std::wstring str();
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -232,6 +247,8 @@ protected:
 
     MEMDISPLACEMENT getVirtualBaseDisplacement( const std::wstring &fieldName );
     MEMDISPLACEMENT getVirtualBaseDisplacement( size_t index );
+
+    virtual std::wstring str();
 };
 
 
@@ -264,6 +281,7 @@ public:
         return derefPtr->getElement( index );
     }
 
+    virtual std::wstring str();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -285,6 +303,8 @@ public:
     }
 
     virtual  TypedVarPtr getElement( size_t index );
+
+    virtual std::wstring str();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -311,6 +331,10 @@ public:
     virtual NumVariant getValue() const {
         return NumVariant( m_varData->readDWord() );
     }
+
+    virtual std::wstring str();
+
+    std::wstring printValue();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -319,22 +343,16 @@ class TypedVarFunction : public TypedVarImp
 {
 public:
 
-    TypedVarFunction( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, SymbolPtr symVar ) :
-        TypedVarImp( typeInfo, varData ),
-        m_symVar(symVar)
-    {
-    }
+    TypedVarFunction( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData ) :
+        TypedVarImp( typeInfo, varData )
+    {}
 
     virtual NumVariant getValue() const {
         return NumVariant( getAddress() );
     }
 
-    virtual size_t getSize() const {
-        return m_symVar->getSize();
-    }
+    virtual std::wstring str();
 
-private:
-    SymbolPtr m_symVar;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -175,6 +175,9 @@ std::wstring loadWStr( MEMOFFSET_64 offset )
             0,
             &strLength );
 
+    if ( FAILED( hres ) )
+        throw MemoryException( offset );
+
     std::vector<wchar_t>  buffer(strLength);
         
     hres = 

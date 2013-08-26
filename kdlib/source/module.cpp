@@ -228,7 +228,7 @@ TypedVarPtr Module::getTypedVarByAddr( MEMOFFSET_64 offset )
 
     TypeInfoPtr typeInfo = loadType( symVar->getType() );
 
-    return loadTypedVar( typeInfo, offset, symVar );
+    return loadTypedVar( typeInfo, offset );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ TypedVarPtr Module::getTypedVarByName( const std::wstring &symName )
     {
         MEMOFFSET_64  offset = getSymbolVa( symName );
 
-        return loadTypedVar( typeInfo, offset, symVar );
+        return loadTypedVar( typeInfo, offset );
     }
 
     TODO( "constant support");
@@ -253,14 +253,9 @@ TypedVarPtr Module::getTypedVarByName( const std::wstring &symName )
 
 TypedVarPtr Module::getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 offset )
 {
-    offset = addr64(offset);
-
-    if ( offset < m_base || offset >= m_base + m_size )
-        throw SymbolException(L"offset dont has to module");
-
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
-    return loadTypedVar( typeInfo, offset, SymbolPtr() );
+    return loadTypedVar( typeInfo, offset );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

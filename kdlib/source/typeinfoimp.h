@@ -371,6 +371,10 @@ protected:
         return m_hasThis;
     }
 
+    virtual size_t getSize() {
+        return m_symbol->getSize();
+    }
+
     // virtual TypeInfoPtr getReturnType();
 
 private:
@@ -476,7 +480,7 @@ protected:
     }
 
     virtual std::wstring getName() {
-        return m_symbol->getName();
+        return L"VTable";
     }
 
     SymbolPtr   m_symbol;

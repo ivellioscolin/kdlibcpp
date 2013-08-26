@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <iomanip>
+
 #include <boost/regex.hpp>
 
 #include "kdlib/typedvar.h"
@@ -12,7 +14,7 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, const SymbolPtr &symVar )
+TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData )
 {
     if ( typeInfo->isBase() )
         return TypedVarPtr( new TypedVarBase( typeInfo, varData ) );
@@ -33,12 +35,15 @@ TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varDat
         return TypedVarPtr( new TypedVarEnum( typeInfo, varData ) );
 
     if ( typeInfo->isFunction() )
-    {
-        if (!symVar)
-            throw DbgException( "impossible to create a function" );
+        return TypedVarPtr( new TypedVarFunction( typeInfo, varData ) );
 
-        return TypedVarPtr( new TypedVarFunction( typeInfo, varData, symVar ) );
-    }
+    //{
+    //    //if (!symVar)
+    //    //    throw DbgException( "impossible to create a function" );
+
+    //   // return TypedVarPtr( new TypedVarFunction( typeInfo, varData, symVar ) );
+    //    NOT_IMPLEMENTED();
+    //}
 
     NOT_IMPLEMENTED();
 }
@@ -72,7 +77,7 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
     {
         MEMOFFSET_64 offset = module->getBase() + symVar->getRva();
 
-        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), symVar );
+        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
     }
 
     NOT_IMPLEMENTED();
@@ -80,21 +85,21 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset, const SymbolPtr &symVar )
+TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
 {
     TypeInfoPtr varType = loadType( typeName );
 
-    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), symVar );
+    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset, const SymbolPtr &symVar )
+TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
 {
     if ( !varType )
         throw DbgException( "type info is null");
 
-    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), symVar );
+    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,7 +137,7 @@ TypedVarPtr containingRecord( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const 
 
     offset = addr64( offset );
 
-    return loadTypedVar( typeInfo, offset - typeInfo->getElementOffset( fieldName ), SymbolPtr() );
+    return loadTypedVar( typeInfo, offset - typeInfo->getElementOffset( fieldName ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,7 +185,7 @@ TypedVarList loadTypedVarList( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, const
     if ( fieldTypeInfo->getName() == ( typeInfo->getName() + L"*" ) )
     {
         for( entryAddress = ptrPtr(offset, psize); addr64(entryAddress) != offset && entryAddress != NULL; entryAddress = ptrPtr( entryAddress + typeInfo->getElementOffset(fieldName), psize ) )
-            lst.push_back( loadTypedVar( typeInfo, entryAddress, SymbolPtr() ) );
+            lst.push_back( loadTypedVar( typeInfo, entryAddress ) );
     }
     else
     {
@@ -230,7 +235,7 @@ TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, size
     lst.reserve(100);
 
     for( size_t i = 0; i < number; ++i )
-        lst.push_back( loadTypedVar( typeInfo, offset + i * typeInfo->getSize(), SymbolPtr() ) );
+        lst.push_back( loadTypedVar( typeInfo, offset + i * typeInfo->getSize() ) );
    
     return lst;
 }
@@ -283,6 +288,18 @@ NumVariant TypedVarBase::getValue() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypedVarBase::str()
+{
+    std::wstringstream  sstr;
+
+    sstr << m_typeInfo->getName() << L" " << m_varData->asString();
+    sstr << " Value: " <<  L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 {
     TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
@@ -294,7 +311,7 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
         if ( staticOffset == 0 )
            NOT_IMPLEMENTED();
 
-        return  loadTypedVar( fieldType, staticOffset, SymbolPtr() );
+        return  loadTypedVar( fieldType, staticOffset );
     }
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
@@ -304,7 +321,7 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
         fieldOffset += getVirtualBaseDisplacement( fieldName );
     }
 
-    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset, SymbolPtr() );
+    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,7 +337,7 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
         if ( staticOffset == 0 )
            NOT_IMPLEMENTED();
 
-        return  loadTypedVar( fieldType, staticOffset, SymbolPtr() );
+        return  loadTypedVar( fieldType, staticOffset );
     }
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(index);
@@ -330,7 +347,7 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
         fieldOffset += getVirtualBaseDisplacement( index );
     }
 
-    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset, SymbolPtr() );
+    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -369,12 +386,86 @@ MEMDISPLACEMENT TypedVarUdt::getVirtualBaseDisplacement( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypedVarUdt::str()
+{
+    std::wstringstream  sstr;
+
+    sstr << L"struct/class: " << m_typeInfo->getName() << " " << m_varData->asString() << std::endl;
+    
+    for ( size_t i = 0; i < m_typeInfo->getElementCount(); ++i )
+    {
+        TypeInfoPtr     fieldType = m_typeInfo->getElement(i);
+        TypedVarPtr     fieldVar;
+
+        if ( m_typeInfo->isStaticMember(i) )
+        {
+            MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(i);
+            if ( staticOffset != 0 )
+                fieldVar = loadTypedVar( fieldType, staticOffset );
+
+            sstr << L"   =" << std::right << std::setw(10) << std::setfill(L'0') << std::hex << staticOffset;
+            sstr << L" " << std::left << std::setw(18) << std::setfill(L' ') << m_typeInfo->getElementName(i) << ':';
+        }
+        else
+        {
+            MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(i);
+
+            if ( m_typeInfo->isVirtualMember(i) )
+            {
+                fieldOffset += getVirtualBaseDisplacement(i);
+            }
+
+            fieldVar = loadTypedVar( fieldType, getAddress() + fieldOffset );
+            sstr << L"   +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << fieldOffset;
+            sstr << L" " << std::left << std::setw(24) << std::setfill(L' ') << m_typeInfo->getElementName(i) << ':';
+        }
+
+        sstr << " " << std::left << fieldType->getName();
+
+        if ( fieldType->isBase() )
+        {
+            sstr << L"   ";
+
+            if( fieldVar )
+                sstr << L"0x" << fieldVar->getValue().asHex() <<  L" (" << fieldVar->getValue().asStr() <<  L")";
+            else
+                sstr << L"failed to get value";
+        }
+        else if ( fieldType->isPointer() )
+        {
+            sstr << L"   ";
+
+            if( fieldVar )
+                sstr << L"0x" << fieldVar->getValue().asHex();
+            else
+                sstr << L"failed to get value";
+        }
+
+        sstr << std::endl;
+    }
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr TypedVarPointer::deref()
 {
     return loadTypedVar( 
                 m_typeInfo->deref(), 
-                m_typeInfo->getPtrSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8(),
-                SymbolPtr() );
+                m_typeInfo->getPtrSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypedVarPointer::str()
+{
+    std::wstringstream   sstr;
+
+    sstr << L"Ptr " << m_typeInfo->getName() << L" " << m_varData->asString();
+    sstr << L" Value: " <<  L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+
+    return sstr.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -386,14 +477,25 @@ TypedVarPtr TypedVarArray::getElement( size_t index )
 
     TypeInfoPtr     elementType = m_typeInfo->getElement(0);
 
-    return loadTypedVar( elementType, m_varData->getAddress() + elementType->getSize()*index, SymbolPtr() );
+    return loadTypedVar( elementType, m_varData->getAddress() + elementType->getSize()*index );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypedVarArray::str()
+{
+    std::wstringstream   sstr;
+
+    sstr << m_typeInfo->getName() << L" " << m_varData->asString();
+
+    return sstr.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 NumVariant TypedVarBitField::getValue() const
 {
-    NumVariant  var = *loadTypedVar( m_typeInfo->getBitType(), m_varData->getAddress(), SymbolPtr() );
+    NumVariant  var = *loadTypedVar( m_typeInfo->getBitType(), m_varData->getAddress() );
 
     var >>=  m_typeInfo->getBitOffset();
 
@@ -419,6 +521,58 @@ NumVariant TypedVarBitField::getValue() const
     }
 
     return var;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypedVarEnum::str()
+{
+    std::wstringstream       sstr;
+
+    sstr << L"enum: " << m_typeInfo->getName() << L" " << m_varData->asString();
+    sstr << L" Value: " << printValue();
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypedVarEnum::printValue()
+{
+    std::wstringstream   sstr;
+
+    try {
+
+        unsigned long   ulongVal1 = getValue().asULong();
+
+        for ( size_t i = 0; i < m_typeInfo->getElementCount(); ++i )
+        {
+            unsigned long   ulongVal2 = m_typeInfo->getElement(i)->getValue().asULong();
+            if ( ulongVal1 == ulongVal2 )
+            {
+                sstr << m_typeInfo->getElementName(i);
+                sstr << L" (" << getValue().asHex() << L")";
+
+                return sstr.str();
+            }
+        }
+
+        sstr << getValue().asHex();
+        sstr << L" ( No matching name )";
+    }
+    catch( MemoryException& )
+    {
+        sstr << L"????";
+    }
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypedVarFunction::str()
+{
+    return m_typeInfo->getName();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

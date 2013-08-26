@@ -266,6 +266,10 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
         ptr = TypeInfoPtr( new TypeInfoEnum( symbol ) );
         break;
 
+    case SymTagFunction:
+        ptr = TypeInfoPtr( new TypeInfoFunction( symbol->getType() ) );
+        break;
+
     case SymTagFunctionType:
         ptr = TypeInfoPtr( new TypeInfoFunction( symbol ) );
         break;
