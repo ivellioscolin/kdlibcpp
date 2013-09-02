@@ -35,35 +35,42 @@ std::string DbgWideException::getCStrDesc( const std::wstring &desc )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID startProcess( const std::wstring  &processName )
+static void setInitialBreakOption()
 {
-    HRESULT     hres;
-
-    ULONG       opt;
-    hres = g_dbgMgr->control->GetEngineOptions( &opt );
+    ULONG   opt;
+    HRESULT hres = g_dbgMgr->control->GetEngineOptions( &opt );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetEngineOptions failed", hres  );
+        throw DbgEngException( L"IDebugControl::GetEngineOptions", hres  );
 
     opt |= DEBUG_ENGOPT_INITIAL_BREAK;
     hres = g_dbgMgr->control->SetEngineOptions( opt );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::SetEngineOptions failed", hres );
+        throw DbgEngException( L"IDebugControl::SetEngineOptions", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+PROCESS_DEBUG_ID startProcess( const std::wstring  &processName )
+{
+    HRESULT     hres;
+
+    setInitialBreakOption();
 
     std::vector< std::wstring::value_type >      cmdLine( processName.size() + 1 );
     wcscpy_s( &cmdLine[0], cmdLine.size(), processName.c_str() );
 
     hres = g_dbgMgr->client->CreateProcessWide( 0, &cmdLine[0], DEBUG_PROCESS | DETACHED_PROCESS );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugClient4::CreateProcessWide failed", hres );
+        throw DbgEngException( L"IDebugClient4::CreateProcessWide", hres );
 
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::WaitForEvent failed", hres );
+        throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
 
     ULONG processId = -1;
     hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId failed", hres );
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
 
     return processId;
 }
@@ -78,7 +85,7 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
     {
         hres = g_dbgMgr->system->SetCurrentProcessId(processId);
         if ( FAILED(hres) )
-            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId failed", hres );
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
     hres = g_dbgMgr->client->TerminateCurrentProcess();
@@ -92,16 +99,8 @@ PROCESS_DEBUG_ID attachProcess( PROCESS_ID pid )
 {
     HRESULT     hres;
 
-    ULONG       opt;
-    hres = g_dbgMgr->control->GetEngineOptions( &opt );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetEngineOptions", hres );
+    setInitialBreakOption();
 
-    opt |= DEBUG_ENGOPT_INITIAL_BREAK;
-    hres = g_dbgMgr->control->SetEngineOptions( opt );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::SetEngineOptions", hres );
-    
     hres = g_dbgMgr->client->AttachProcess( 0, pid, 0 );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::AttachProcess", hres );
@@ -128,12 +127,12 @@ void detachProcess( PROCESS_DEBUG_ID processId )
     {
         hres = g_dbgMgr->system->SetCurrentProcessId(processId);
         if ( FAILED(hres) )
-            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId failed", hres );
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugClient::DetachCurrentProcess failed", hres );
+        throw DbgEngException( L"IDebugClient::DetachCurrentProcess", hres );
 }
 
 
@@ -142,14 +141,14 @@ void detachProcess( PROCESS_DEBUG_ID processId )
 void loadDump( const std::wstring &fileName )
 {
     HRESULT     hres;
-     
+
     hres = g_dbgMgr->client->OpenDumpFileWide( fileName.c_str(), NULL );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugClient4::OpenDumpFileWide failed", hres );
+        throw DbgEngException( L"IDebugClient4::OpenDumpFileWide", hres );
 
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::WaitForEvent failed", hres );
+        throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,11 +158,11 @@ void writeDump( const std::wstring &fileName, bool smallDump )
     HRESULT     hres;
 
     ULONG       debugClass, debugQualifier;
-    
+
     hres = g_dbgMgr->control->GetDebuggeeType( &debugClass, &debugQualifier );
-    
+
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetDebuggeeType  failed", hres );
+        throw DbgEngException( L"IDebugControl::GetDebuggeeType", hres );
 
     hres = g_dbgMgr->client->WriteDumpFileWide(
         fileName.c_str(), 
@@ -173,7 +172,35 @@ void writeDump( const std::wstring &fileName, bool smallDump )
         NULL );
 
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugClient4::WriteDumpFileWide failed", hres );
+        throw DbgEngException( L"IDebugClient4::WriteDumpFileWide", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+bool isLocalKernelDebuggerEnabled()
+{
+    HRESULT hres = g_dbgMgr->client->IsKernelDebuggerEnabled();
+    if ( ( hres != S_OK ) && ( hres != S_FALSE ) )
+        throw DbgEngException( L"IDebugClient::IsKernelDebuggerEnabled", hres );
+    return hres == S_OK;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+void attachKernel( const std::wstring &connectOptions )
+{
+    setInitialBreakOption();
+
+    HRESULT hres = 
+        g_dbgMgr->client->AttachKernelWide(
+            connectOptions.empty() ? DEBUG_ATTACH_LOCAL_KERNEL : DEBUG_ATTACH_KERNEL_CONNECTION,
+            connectOptions.empty() ? NULL : connectOptions.c_str());
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugClient::AttachKernel", hres );
+
+    hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -182,12 +209,12 @@ bool isDumpAnalyzing()
 {
     HRESULT         hres;
     ULONG           debugClass, debugQualifier;
-    
+
     hres = g_dbgMgr->control->GetDebuggeeType( &debugClass, &debugQualifier );
-    
+
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetDebuggeeType  failed", hres );
-         
+        throw DbgEngException( L"IDebugControl::GetDebuggeeType", hres );
+
     return debugQualifier >= DEBUG_DUMP_SMALL;
 }
 
@@ -197,12 +224,12 @@ bool isKernelDebugging()
 {
     HRESULT     hres;
     ULONG       debugClass, debugQualifier;
-    
+
     hres = g_dbgMgr->control->GetDebuggeeType( &debugClass, &debugQualifier );
-    
+
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetDebuggeeType  failed", hres );
-         
+        throw DbgEngException( L"IDebugControl::GetDebuggeeType", hres );
+
     return debugClass == DEBUG_CLASS_KERNEL;
 }
 
@@ -277,7 +304,7 @@ ExecutionStatus targetExecutionStatus()
     hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
 
     if ( FAILED( hres ) )
-        throw  DbgEngException( L"IDebugControl::GetExecutionStatus  failed", hres ); 
+        throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
 
     return ConvertDbgEngineExecutionStatus( currentStatus );
 }
@@ -291,7 +318,7 @@ ExecutionStatus targetChangeStatus( ULONG status )
     hres = g_dbgMgr->control->SetExecutionStatus( status );
 
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::SetExecutionStatus failed", hres );
+        throw DbgEngException( L"IDebugControl::SetExecutionStatus", hres );
 
     ULONG    currentStatus;
 
@@ -301,18 +328,18 @@ ExecutionStatus targetChangeStatus( ULONG status )
         {
             hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
             if ( FAILED( hres ) )
-                throw  DbgEngException( L"IDebugControl::GetExecutionStatus  failed", hres ); 
+                throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
 
             if ( currentStatus == DEBUG_STATUS_NO_DEBUGGEE )
                 return DebugStatusNoDebuggee;
             
-            throw DbgEngException( L"IDebugControl::WaitForEvent failed", hres );
+            throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
         }
 
         hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
 
         if ( FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::GetExecutionStatus  failed", hres ); 
+            throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
 
         if ( currentStatus == DEBUG_STATUS_BREAK )
             return DebugStatusBreak;

@@ -23,6 +23,9 @@ void terminateProcess( PROCESS_DEBUG_ID processId = -1);
 void loadDump( const std::wstring &fileName );
 void writeDump( const std::wstring &fileNamem, bool smallDump );
 
+bool isLocalKernelDebuggerEnabled();
+void attachKernel( const std::wstring &connectOptions = L"" );
+
 bool isDumpAnalyzing();
 bool isKernelDebugging();
 
