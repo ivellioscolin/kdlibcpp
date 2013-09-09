@@ -201,6 +201,8 @@ public:
         TypedVarImp( typeInfo, varData )
         {}
 
+    std::wstring printValue() const;
+
 protected:
     
     virtual NumVariant getValue() const;
@@ -249,6 +251,8 @@ protected:
     MEMDISPLACEMENT getVirtualBaseDisplacement( size_t index );
 
     virtual std::wstring str();
+
+    std::wstring printFieldValue( const TypeInfoPtr& typeInfo, const TypedVarPtr& var );
 };
 
 
@@ -282,6 +286,9 @@ public:
     }
 
     virtual std::wstring str();
+
+
+    std::wstring printValue() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

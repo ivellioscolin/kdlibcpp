@@ -9,6 +9,32 @@
 
 #include "typedvarimp.h"
 
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring printFieldValue( const kdlib::TypeInfoPtr& fieldType, const kdlib::TypedVarPtr& fieldVar )
+{
+    std::wstringstream  sstr;
+
+    if ( fieldType->isBase() )
+    {
+        return dynamic_cast<const kdlib::TypedVarBase*>( fieldVar.get() )->printValue();
+    }
+
+    if ( fieldType->isPointer() )
+    {
+        return dynamic_cast<const kdlib::TypedVarPointer*>( fieldVar.get() )->printValue();
+    }
+
+    return L"";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+} // end noname namespace
 
 namespace kdlib {
 
@@ -300,6 +326,21 @@ std::wstring TypedVarBase::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypedVarBase::printValue() const
+{
+    std::wstringstream  sstr;
+
+    try {
+        sstr << L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+        return sstr.str();
+    } catch(MemoryException& )
+    {}
+
+    return L"Ivalid memory";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 {
     TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
@@ -377,10 +418,13 @@ MEMDISPLACEMENT TypedVarUdt::getVirtualBaseDisplacement( size_t index )
     m_typeInfo->getVirtualDisplacement( index, virtualBasePtr, virtualDispIndex, virtualDispSize );
 
     MEMOFFSET_64 vfnptr = m_varData->getAddress() + virtualBasePtr;
+
+    if ( !vfnptr )
+        return 0; // объект может быть еще не инциализированным  или находится в процессе удаления
+
     MEMOFFSET_64 vtbl = m_typeInfo->getPtrSize() == 4 ? ptrDWord( vfnptr ) : ptrQWord(vfnptr);
 
     MEMDISPLACEMENT     displacement =  ptrSignDWord( vtbl + virtualDispIndex*virtualDispSize );
-
     return virtualBasePtr + displacement;
 }
 
@@ -422,24 +466,38 @@ std::wstring TypedVarUdt::str()
 
         sstr << " " << std::left << fieldType->getName();
 
-        if ( fieldType->isBase() )
-        {
-            sstr << L"   ";
+        if ( fieldVar )
+            sstr << L"   " << ::printFieldValue( fieldType, fieldVar );
+        else
+            sstr << L"   " << L"failed to get value";
 
-            if( fieldVar )
-                sstr << L"0x" << fieldVar->getValue().asHex() <<  L" (" << fieldVar->getValue().asStr() <<  L")";
-            else
-                sstr << L"failed to get value";
-        }
-        else if ( fieldType->isPointer() )
-        {
-            sstr << L"   ";
 
-            if( fieldVar )
-                sstr << L"0x" << fieldVar->getValue().asHex();
-            else
-                sstr << L"failed to get value";
-        }
+
+        //try {
+
+        //    if ( fieldType->isBase() )
+        //    {
+        //        sstr << L"   ";
+
+        //        if( fieldVar )
+        //            sstr << L"0x" << fieldVar->getValue().asHex() <<  L" (" << fieldVar->getValue().asStr() <<  L")";
+        //        else
+        //            sstr << L"failed to get value";
+        //    }
+        //    else if ( fieldType->isPointer() )
+        //    {
+        //        sstr << L"   ";
+
+        //        if( fieldVar )
+        //            sstr << L"0x" << fieldVar->getValue().asHex();
+        //        else
+        //            sstr << L"failed to get value";
+        //    }
+
+        //} catch( MemoryException& )
+        //{
+        //    sstr << L"Invalid memory";
+        //}
 
         sstr << std::endl;
     }
@@ -463,9 +521,26 @@ std::wstring TypedVarPointer::str()
     std::wstringstream   sstr;
 
     sstr << L"Ptr " << m_typeInfo->getName() << L" " << m_varData->asString();
-    sstr << L" Value: " <<  L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+    sstr << L" Value: " <<  printValue();
 
     return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypedVarPointer::printValue() const
+{
+    std::wstringstream   sstr;
+
+    try {
+
+         sstr << L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+         return sstr.str();
+
+    } catch(MemoryException&)
+    {}
+
+    return L"Invalid memory";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
