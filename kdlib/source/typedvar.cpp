@@ -309,6 +309,9 @@ NumVariant TypedVarBase::getValue() const
     if ( m_typeInfo->getName() == L"Bool" )
         return NumVariant( m_varData->readByte() );
 
+    if ( m_typeInfo->getName() == L"Hresult" )
+        return NumVariant( m_varData->readDWord() );
+
     NOT_IMPLEMENTED();
 }
 

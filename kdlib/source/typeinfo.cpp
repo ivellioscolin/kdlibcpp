@@ -294,7 +294,7 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex baseMatch(L"^(Char)|(WChar)|(Int1B)|(UInt1B)|(Int2B)|(UInt2B)|(Int4B)|(UInt4B)|(Int8B)|(UInt8B)|(Long)|(ULong)|(Float)|(Bool)|(Double)|(Void)$" );
+static const boost::wregex baseMatch(L"^(Char)|(WChar)|(Int1B)|(UInt1B)|(Int2B)|(UInt2B)|(Int4B)|(UInt4B)|(Int8B)|(UInt8B)|(Long)|(ULong)|(Float)|(Bool)|(Double)|(Void)|(Hresult)$" );
 
 bool TypeInfo::isBaseType( const std::wstring &typeName )
 {
@@ -376,6 +376,9 @@ TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrS
 
         if ( baseMatchResult[16].matched )
             return TypeInfoPtr( new TypeInfoVoid( ptrSize ) );
+
+        if ( baseMatchResult[17].matched )
+            return TypeInfoPtr( new TypeInfoBaseWrapper<unsigned long>(L"Hresult", ptrSize) );
    }
 
     NOT_IMPLEMENTED();

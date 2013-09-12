@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <atlexcept.h>
+
 #include "test/testvars.h"
 
 #pragma pack( push,4 )
@@ -144,4 +146,6 @@ virtualChild       g_virtChild;
 listEntry deadlockEntry = { &deadlockEntry, &deadlockEntry };
 
 #pragma pack(pop)
+
+volatile ATL::CAtlException g_atlException(E_UNEXPECTED);
 
