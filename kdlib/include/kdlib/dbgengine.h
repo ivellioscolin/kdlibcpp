@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "kdlib/dbgtypedef.h"
+#include "kdlib/variant.h"
 
 namespace kdlib {
 
@@ -30,7 +31,7 @@ bool isDumpAnalyzing();
 bool isKernelDebugging();
 
 std::wstring debugCommand( const std::wstring &command );
-unsigned long long evaluate( const std::wstring  &expression );
+NumVariant evaluate( const std::wstring  &expression, bool cplusplus=false );
 
 // system properties
 size_t ptrSize();
