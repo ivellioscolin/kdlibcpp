@@ -166,6 +166,10 @@ protected:
         throw TypeException( getName(), L"type is not a function" ); 
     }
 
+    virtual TypeInfoPtr getReturnType() {
+        throw TypeException( getName(), L"type is not a function" ); 
+    }
+
 public:
 
     void setConstant( const NumVariant& constVal )
@@ -367,6 +371,9 @@ protected:
 
     virtual CallingConventionType getCallingConvention();
 
+    virtual TypeInfoPtr getReturnType();
+
+
     virtual bool hasThis() {
         return m_hasThis;
     }
@@ -374,9 +381,6 @@ protected:
     virtual size_t getSize() {
         return m_symbol->getSize();
     }
-
-    // virtual TypeInfoPtr getReturnType();
-
 private:
     SymbolPtr m_symbol;
 

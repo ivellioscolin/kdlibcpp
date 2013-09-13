@@ -79,6 +79,7 @@ public:
 
     virtual CallingConventionType getCallingConvention() = 0; // <- CallingConventionType
     virtual bool hasThis() = 0;
+    virtual TypeInfoPtr getReturnType() = 0;
 
 protected:
 

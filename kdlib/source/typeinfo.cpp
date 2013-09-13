@@ -958,9 +958,7 @@ TypeInfoFunction::TypeInfoFunction( SymbolPtr& symbol ) :
 std::wstring TypeInfoFunction::getName()
 {
     std::wstringstream sstr;
-
-    // FIXME: getReturnType!
-    sstr << L"<?ret_type?>";
+    sstr << getReturnType()->getName();
 
     sstr << L"(";
     switch (getCallingConvention())
@@ -1017,6 +1015,13 @@ TypeInfoPtr TypeInfoFunction::getElement( size_t index )
 CallingConventionType TypeInfoFunction::getCallingConvention()
 {
     return static_cast< CallingConventionType >( m_symbol->getCallingConvention() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoFunction::getReturnType()
+{
+    return TypeInfo::getBaseTypeInfo( m_symbol->getType() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
