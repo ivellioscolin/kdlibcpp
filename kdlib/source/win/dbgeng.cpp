@@ -1009,27 +1009,27 @@ void getRegisterValue( THREAD_ID id, unsigned long index, void* buffer, size_t b
     switch ( dbgvalue.Type )
     {
     case DEBUG_VALUE_INT8: 
-        if ( bufferSize < sizeof(char) )
+        if ( bufferSize < sizeof(unsigned char) )
             throw DbgException( "Insufficient buffer size" ); 
-        *(char*)buffer = dbgvalue.I8;
+        *(unsigned char*)buffer = dbgvalue.I8;
         return;
 
     case DEBUG_VALUE_INT16: 
-        if ( bufferSize < sizeof(short) )
+        if ( bufferSize < sizeof(unsigned short) )
             throw DbgException( "Insufficient buffer size" ); 
-        *(short*)buffer = dbgvalue.I16;
+        *(unsigned short*)buffer = dbgvalue.I16;
         return;
 
     case DEBUG_VALUE_INT32: 
-        if ( bufferSize < sizeof(long) )
+        if ( bufferSize < sizeof(unsigned long) )
             throw DbgException( "Insufficient buffer size" ); 
-        *(long*)buffer = dbgvalue.I32;
+        *(unsigned long*)buffer = dbgvalue.I32;
         return;
 
     case DEBUG_VALUE_INT64: 
-        if ( bufferSize < sizeof(long long) )
+        if ( bufferSize < sizeof(unsigned long long) )
             throw DbgException( "Insufficient buffer size" ); 
-        *(long long*)buffer = dbgvalue.I64;
+        *(unsigned long long*)buffer = dbgvalue.I64;
         return;
 
     case DEBUG_VALUE_FLOAT32: 

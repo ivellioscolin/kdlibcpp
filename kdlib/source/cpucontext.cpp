@@ -69,7 +69,7 @@ NumVariant CPUContext::getRegisterByIndex( unsigned long index )
     {
     case  RegInt8:
         {
-            char  val;
+            unsigned char  val;
             getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
@@ -77,7 +77,7 @@ NumVariant CPUContext::getRegisterByIndex( unsigned long index )
 
     case  RegInt16:
         {
-            short  val;
+            unsigned short  val;
             getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
@@ -85,7 +85,7 @@ NumVariant CPUContext::getRegisterByIndex( unsigned long index )
 
     case  RegInt32:
         {
-            long  val;
+            unsigned long  val;
             getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
@@ -94,7 +94,7 @@ NumVariant CPUContext::getRegisterByIndex( unsigned long index )
 
     case  RegInt64:
         {
-            long long  val;
+            unsigned long long  val;
             getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
             return NumVariant(val);
         }
