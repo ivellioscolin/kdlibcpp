@@ -196,5 +196,23 @@ std::wstring loadWStr( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const std::vector<char>& pattern )
+{
+    if ( pattern.empty() )
+        throw DbgException( "searchMemeory: pattern parameter can not have 0 length" );
+
+    beginOffset = addr64(beginOffset);
+
+    ULONG64 foundOffset;
+    HRESULT hres = g_dbgMgr->dataspace->SearchVirtual( beginOffset, length, (PVOID)&pattern[0], (ULONG)pattern.size(), 1, &foundOffset );
+
+    if ( FAILED( hres ) )
+        return 0LL;
+
+    return foundOffset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
