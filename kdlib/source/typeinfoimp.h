@@ -94,11 +94,11 @@ protected:
          throw TypeException( getName(), L" type has no fields or array elements");
     }
 
-    virtual MEMOFFSET_32 getElementOffset( const std::wstring &name ) {
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring &name ) {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
 
-    virtual MEMOFFSET_32 getElementOffset( size_t index ) {
+    virtual MEMOFFSET_REL getElementOffset( size_t index ) {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
 
@@ -211,9 +211,9 @@ protected:
 
     virtual TypeInfoPtr getElement( size_t index );
 
-    virtual MEMOFFSET_32 getElementOffset( const std::wstring &name );
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring &name );
 
-    virtual MEMOFFSET_32 getElementOffset( size_t index );
+    virtual MEMOFFSET_REL getElementOffset( size_t index );
 
     virtual std::wstring getElementName( size_t index );
 
@@ -367,12 +367,12 @@ protected:
     virtual size_t getElementCount() {
         return m_args.size();
     }
+
     virtual TypeInfoPtr getElement( size_t index );
 
     virtual CallingConventionType getCallingConvention();
 
     virtual TypeInfoPtr getReturnType();
-
 
     virtual bool hasThis() {
         return m_hasThis;

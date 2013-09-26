@@ -77,8 +77,8 @@ public:
     MEMOFFSET_64 getSymbolVa( const std::wstring &symbolName );
     MEMOFFSET_32 getSymbolRva( const std::wstring &symbolName );
 
-    SymbolPtr getSymbolByVa( MEMOFFSET_64 offset );
-    SymbolPtr getSymbolByRva( MEMOFFSET_32 offset );
+    SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, MEMDISPLACEMENT* displacement = 0 );
+    SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, MEMDISPLACEMENT* displacement = 0 );
     SymbolPtr getSymbolByName( const std::wstring &symbolName );
     SymbolPtr getSymbolScope();
 

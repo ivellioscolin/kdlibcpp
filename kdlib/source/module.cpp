@@ -145,21 +145,21 @@ void Module::reloadSymbols()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset )
+SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset,  MEMDISPLACEMENT* displacemnt )
 {
     offset = addr64(offset);
 
     if ( offset < m_base || offset > getEnd() )
         throw DbgException( "address is out of the module space" );
 
-    return getSymbolByRva( (MEMOFFSET_32)(offset - m_base ) );
+    return getSymbolByRva( (MEMOFFSET_32)(offset - m_base ), displacemnt );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolByRva( MEMOFFSET_32 rva )
+SymbolPtr Module::getSymbolByRva( MEMOFFSET_32 rva, MEMDISPLACEMENT* displacemnt  )
 {
-   return getSymSession()->findByRva( rva, SymTagNull, NULL );
+   return getSymSession()->findByRva( rva, SymTagNull, displacemnt );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,16 +237,18 @@ TypedVarPtr Module::getTypedVarByName( const std::wstring &symName )
 {
     SymbolPtr  symVar = getSymbolScope()->getChildByName( symName );
 
-    TypeInfoPtr typeInfo = loadType( symVar->getType() );
+    return loadTypedVar( symVar );
 
-    if ( LocIsConstant != symVar->getLocType() )
-    {
-        MEMOFFSET_64  offset = getSymbolVa( symName );
+    //TypeInfoPtr typeInfo = loadType( symVar->getType() );
 
-        return loadTypedVar( typeInfo, offset );
-    }
+    //if ( LocIsConstant != symVar->getLocType() )
+    //{
+    //    MEMOFFSET_64  offset = getSymbolVa( symName );
 
-    TODO( "constant support");
+    //    return loadTypedVar( typeInfo, offset );
+    //}
+
+    //TODO( "constant support");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

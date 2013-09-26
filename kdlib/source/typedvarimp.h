@@ -159,12 +159,22 @@ protected:
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
-    virtual MEMOFFSET_32 getElementOffset( const std::wstring& fieldName ) 
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) 
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
-    virtual MEMOFFSET_32 getElementOffset( size_t index ) 
+    virtual MEMOFFSET_REL getElementOffset( size_t index ) 
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
+    }
+
+    virtual unsigned long getElementOffsetRelative(const std::wstring& fieldName ) 
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no named fields");
+    }
+
+    virtual unsigned long getElementOffsetRelative(size_t index ) 
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
@@ -231,11 +241,11 @@ protected:
 
     virtual  TypedVarPtr getElement( size_t index );
 
-    virtual MEMOFFSET_32 getElementOffset( const std::wstring& fieldName ) {
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) {
         return m_typeInfo->getElementOffset( fieldName );
     }
 
-    virtual MEMOFFSET_32 getElementOffset( size_t index ) {
+    virtual MEMOFFSET_REL getElementOffset( size_t index ) {
         return m_typeInfo->getElementOffset( index );
     }
 
@@ -339,6 +349,7 @@ public:
         return NumVariant( m_varData->readDWord() );
     }
 
+
     virtual std::wstring str();
 
     std::wstring printValue();
@@ -354,11 +365,34 @@ public:
         TypedVarImp( typeInfo, varData )
     {}
 
+
     virtual NumVariant getValue() const {
         return NumVariant( getAddress() );
     }
 
+    virtual size_t getElementCount() {
+        return m_typeInfo->getElementCount();
+    }
+
     virtual std::wstring str();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class SymbolFunction : public TypedVarFunction
+{
+public:
+
+    SymbolFunction( SymbolPtr& symbol );
+
+    MEMOFFSET_REL getElementOffset( size_t index );
+
+    unsigned long getElementOffsetRelative(size_t index );
+    
+protected:
+
+    SymbolPtr  m_symbol;
 
 };
 

@@ -21,6 +21,7 @@ TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName );
 
 size_t getSymbolSize( const std::wstring &name );
 MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
+std::wstring findSymbol( MEMOFFSET_64 offset);
 std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 
 class TypeInfo : private boost::noncopyable, public NumBehavior {
@@ -58,8 +59,8 @@ public:
 
     virtual TypeInfoPtr getElement( const std::wstring &name ) = 0;
     virtual TypeInfoPtr getElement( size_t index ) = 0;
-    virtual MEMOFFSET_32 getElementOffset( const std::wstring &name ) = 0;
-    virtual MEMOFFSET_32 getElementOffset( size_t index ) = 0;
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring &name ) = 0;
+    virtual MEMOFFSET_REL getElementOffset( size_t index ) = 0;
     virtual std::wstring getElementName( size_t index ) = 0;
     virtual size_t getElementIndex( const std::wstring &name ) = 0;
     virtual size_t getElementCount() = 0;

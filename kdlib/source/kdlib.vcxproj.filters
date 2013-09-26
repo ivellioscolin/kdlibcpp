@@ -83,6 +83,9 @@
     <ClInclude Include="..\include\kdlib\disasmengine.h">
       <Filter>include/kdlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\kdlib\stack.h">
+      <Filter>include/kdlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">
@@ -124,5 +127,6 @@
     <ClCompile Include="win\dbgmod.cpp">
       <Filter>win</Filter>
     </ClCompile>
+    <ClCompile Include="stack.cpp" />
   </ItemGroup>
 </Project>

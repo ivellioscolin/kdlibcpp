@@ -170,6 +170,14 @@ std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring findSymbol( MEMOFFSET_64 offset)
+{
+    MEMDISPLACEMENT  displacement;
+    return findSymbol( offset, displacement );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoPtr loadType( const std::wstring &typeName )
 {
     std::wstring     moduleName;
@@ -594,13 +602,13 @@ TypeInfoPtr TypeInfoFields::getElement(size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_32 TypeInfoFields::getElementOffset( const std::wstring &name )
+MEMOFFSET_REL TypeInfoFields::getElementOffset( const std::wstring &name )
 {
     checkFields();
 
     size_t  pos = name.find_first_of( L'.');
 
-    MEMOFFSET_32  offset = m_fields.lookup( std::wstring( name, 0, pos) )->getOffset();
+    MEMOFFSET_REL  offset = m_fields.lookup( std::wstring( name, 0, pos) )->getOffset();
 
     if ( pos != std::wstring::npos )
     {
@@ -614,7 +622,7 @@ MEMOFFSET_32 TypeInfoFields::getElementOffset( const std::wstring &name )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_32 TypeInfoFields::getElementOffset( size_t index )
+MEMOFFSET_REL TypeInfoFields::getElementOffset( size_t index )
 {
     checkFields();
 
@@ -1001,6 +1009,7 @@ std::wstring TypeInfoFunction::getName()
     return sstr.str();
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TypeInfoPtr TypeInfoFunction::getElement( size_t index )
@@ -1025,7 +1034,6 @@ TypeInfoPtr TypeInfoFunction::getReturnType()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
 
 TypeInfoBitField::TypeInfoBitField( SymbolPtr &symbol )
 {

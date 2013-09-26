@@ -10,6 +10,7 @@
 int breakOnRun();
 int breakpointTestRun();
 int memTestRun();
+int stackTestRun();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -30,6 +31,9 @@ int _tmain(int argc, _TCHAR* argv[])
     if ( testGroup == L"breakhandlertest" )
         return breakpointTestRun();
 
+    if ( testGroup == L"stacktest" )
+        return stackTestRun();
+
     return breakOnRun();
 }
 
@@ -48,3 +52,22 @@ int breakpointTestRun()
     return 0;
 }
 
+
+std::string __fastcall stackTestRun2( int&a, double b, const char* c )
+{
+    __debugbreak();
+    return std::string("Hello!");
+}
+
+float stackTestRun1( int a, const float& b, const std::string& c )
+{
+    stackTestRun2( a, b, c.c_str() );
+    return 1.1f;
+}
+
+int stackTestRun()
+{
+    stackTestRun1( 10, 0.8f, "Bye" );
+
+    return 0;
+}

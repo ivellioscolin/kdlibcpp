@@ -31,7 +31,7 @@ public:
         return m_virtualBaseName;
     }
 
-    MEMOFFSET_32 getOffset() const
+    MEMOFFSET_REL getOffset() const
     {
         if ( m_staticOffset != 0 )
             throw TypeException( m_name, L"static field has only virtual address" );

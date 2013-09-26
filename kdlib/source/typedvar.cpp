@@ -32,6 +32,7 @@ std::wstring printFieldValue( const kdlib::TypeInfoPtr& fieldType, const kdlib::
     return L"";
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end noname namespace
@@ -76,6 +77,28 @@ TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varDat
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr loadTypedVar( SymbolPtr &symbol )
+{
+
+    if ( SymTagFunction == symbol->getSymTag() )
+    {
+        return TypedVarPtr( new SymbolFunction( symbol ) );
+    }
+
+    if ( LocIsConstant != symbol->getLocType() )
+    {
+        MEMOFFSET_64 offset = symbol->getVa();
+
+        TypeInfoPtr varType = loadType( symbol );
+
+        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
+    }
+
+    NOT_IMPLEMENTED();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr loadTypedVar( const std::wstring &varName )
 {
     std::wstring     moduleName;
@@ -97,16 +120,27 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
 
     SymbolPtr  symVar = module->getSymbolScope()->getChildByName( symName );
 
-    TypeInfoPtr varType = loadType( symVar );
+    return loadTypedVar( symVar );
 
-    if ( LocIsConstant != symVar->getLocType() )
-    {
-        MEMOFFSET_64 offset = module->getBase() + symVar->getRva();
 
-        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
-    }
 
-    NOT_IMPLEMENTED();
+    //if ( symVar->getSymTag() == SymTagFunction )
+    //{
+    //    return module->
+    //        
+    //        getFunction( module, symVar );
+    //}
+
+    //TypeInfoPtr varType = loadType( symVar );
+
+    //if ( LocIsConstant != symVar->getLocType() )
+    //{
+    //    MEMOFFSET_64 offset = module->getBase() + symVar->getRva();
+
+    //    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
+    //}
+
+    //NOT_IMPLEMENTED();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -651,6 +685,110 @@ std::wstring TypedVarEnum::printValue()
 std::wstring TypedVarFunction::str()
 {
     return m_typeInfo->getName();
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolFunction::SymbolFunction( SymbolPtr& symbol ) :
+    TypedVarFunction( loadType( symbol ), VarDataProviderPtr( new VarDataMemoryProvider( symbol->getVa() ) ) ),
+    m_symbol( symbol )
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+//TypedVarPtr SymbolFunction::getElement( size_t index )
+//{
+//    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
+//    if ( paramLst.size() < index )
+//        throw IndexException( index );
+//
+//    SymbolPtr paramSym;
+//    SymbolPtrList::iterator itVar = paramLst.begin();
+//    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
+//    {
+//        if ( (*itVar)->getDataKind() == DataIsParam  )
+//        {
+//            if ( i == index )
+//            {
+//                paramSym = *itVar;
+//                break;
+//            }
+//
+//            i++;
+//        }
+//    }
+//
+//    if ( !paramSym )
+//        throw IndexException( index );
+//
+//    TypeInfoPtr typeInfo = loadType(paramSym);
+//
+//    //MEMOFFSET_64 offset = (MEMOFFSET_64)( m_symbol->getVa() + paramSym->getOffset() );
+//
+//    //return loadTypedVar( typeInfo, offset );
+//}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL SymbolFunction::getElementOffset( size_t index )
+{
+    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
+    if ( paramLst.size() < index )
+        throw IndexException( index );
+
+    SymbolPtr paramSym;
+    SymbolPtrList::iterator itVar = paramLst.begin();
+    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
+    {
+        if ( (*itVar)->getDataKind() == DataIsParam  )
+        {
+            if ( i == index )
+            {
+                paramSym = *itVar;
+                break;
+            }
+
+            i++;
+        }
+    }
+
+    if ( !paramSym )
+        throw IndexException( index );
+
+    return paramSym->getOffset();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long  SymbolFunction::getElementOffsetRelative(size_t index )
+{
+    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
+    if ( paramLst.size() < index )
+        throw IndexException( index );
+
+    SymbolPtr paramSym;
+    SymbolPtrList::iterator itVar = paramLst.begin();
+    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
+    {
+        if ( (*itVar)->getDataKind() == DataIsParam  )
+        {
+            if ( i == index )
+            {
+                paramSym = *itVar;
+                break;
+            }
+
+            i++;
+        }
+    }
+
+    if ( !paramSym )
+        throw IndexException( index );
+
+    return paramSym->getRegRealativeId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
