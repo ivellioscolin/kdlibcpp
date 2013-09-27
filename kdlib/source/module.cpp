@@ -209,10 +209,19 @@ SymbolOffsetList Module::enumSymbols( const std::wstring  &mask )
 std::wstring Module::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
 {
     displacement = 0;
-    
-    SymbolPtr  sym = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base ), SymTagNull, &displacement );
+    std::wstring name;
 
-    return sym->getName();
+    while ( name.empty() )
+    {
+        SymbolPtr  sym = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base ), SymTagNull, &displacement );
+        name = sym->getName();
+        if ( !name.empty() )
+            break;
+
+        offset = offset - displacement - 1;
+    }
+
+    return name;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

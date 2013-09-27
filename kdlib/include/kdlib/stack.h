@@ -79,7 +79,7 @@ protected:
 class Stack {
 
     friend StackPtr getStack();
-    friend StackPtr getStack( const CPUContextPtr& cpuContext );
+    friend StackPtr getStack( CPUContextPtr& cpuContext );
 
 public:
 
@@ -108,7 +108,7 @@ protected:
 
 StackPtr getStack();
 
-StackPtr getStack( const CPUContextPtr& cpuContext );
+StackPtr getStack( CPUContextPtr& cpuContext );
 
 inline
 StackFramePtr getStackFrame() {

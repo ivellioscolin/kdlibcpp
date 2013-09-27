@@ -12,7 +12,7 @@ StackPtr getStack()
     return StackPtr( new Stack() );
 }
 
-StackPtr getStack( const CPUContextPtr& cpuContext )
+StackPtr getStack( CPUContextPtr& cpuContext )
 {
     return StackPtr( new Stack( cpuContext ) );
 }

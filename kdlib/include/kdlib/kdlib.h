@@ -10,6 +10,7 @@
 #include "kdlib/eventhandler.h"
 #include "kdlib/memaccess.h"
 #include "kdlib/module.h"
+#include "kdlib/stack.h"
 #include "kdlib/typeinfo.h"
 #include "kdlib/typedvar.h"
 
