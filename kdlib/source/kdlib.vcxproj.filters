@@ -128,5 +128,6 @@
       <Filter>win</Filter>
     </ClCompile>
     <ClCompile Include="stack.cpp" />
+    <ClCompile Include="customtypes.cpp" />
   </ItemGroup>
 </Project>

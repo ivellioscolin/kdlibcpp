@@ -19,6 +19,8 @@ TypeInfoPtr loadType( const std::wstring &symName );
 TypeInfoPtr loadType( SymbolPtr &symbol );
 TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
 
+TypeInfoPtr defineStruct( const std::wstring &structName );
+
 size_t getSymbolSize( const std::wstring &name );
 MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
 std::wstring findSymbol( MEMOFFSET_64 offset);
