@@ -333,3 +333,41 @@ TEST_F( TypeInfoTest, Str )
     ASSERT_NO_THROW( str = loadType(L"enumType")->str() );
 }
 
+TEST_F( TypeInfoTest, DefineStruct )
+{
+    TypeInfoPtr  testStruct;
+
+    ASSERT_NO_THROW( testStruct = defineStruct(L"TestStruct") );
+    ASSERT_NO_THROW( testStruct->appendField(L"field1", loadType(L"Int1B") ) );
+    ASSERT_NO_THROW( testStruct->appendField(L"field2", loadType(L"Double") ) );
+    EXPECT_EQ( ptrSize() + sizeof(double), testStruct->getSize() );
+    EXPECT_EQ( ptrSize(), testStruct->getElementOffset(L"field2") );
+
+    ASSERT_NO_THROW( testStruct = defineStruct(L"TestStruct", 1) );
+    ASSERT_NO_THROW( testStruct->appendField(L"field1", loadType(L"Int1B") ) );
+    ASSERT_NO_THROW( testStruct->appendField(L"field2", loadType(L"Double") ) );
+    EXPECT_EQ( sizeof(char) + sizeof(double), testStruct->getSize() );
+    EXPECT_EQ( sizeof(char), testStruct->getElementOffset(L"field2") );
+
+    ASSERT_NO_THROW( testStruct = defineStruct(L"TestStruct") );
+    EXPECT_THROW( testStruct->appendField(L"field", testStruct ), TypeException );
+    ASSERT_NO_THROW( testStruct->appendField(L"field", loadType(L"Bool") ) );
+    EXPECT_THROW( testStruct->appendField(L"field", loadType(L"Long") ), TypeException );
+}
+
+
+TEST_F( TypeInfoTest, DefineUnion )
+{
+    TypeInfoPtr  testUnion;
+
+    ASSERT_NO_THROW( testUnion = defineUnion(L"TestUnion") );
+    ASSERT_NO_THROW( testUnion->appendField(L"field1", loadType(L"Int1B") ) );
+    ASSERT_NO_THROW( testUnion->appendField(L"field2", loadType(L"Double") ) );
+    EXPECT_EQ( sizeof(double), testUnion->getSize() );
+    EXPECT_EQ( 0, testUnion->getElementOffset(L"field2") );
+
+    ASSERT_NO_THROW( testUnion = defineUnion(L"TestUnion") );
+    EXPECT_THROW( testUnion->appendField(L"field", testUnion ), TypeException );
+    ASSERT_NO_THROW( testUnion->appendField(L"field", loadType(L"Bool") ) );
+    EXPECT_THROW( testUnion->appendField(L"field", loadType(L"Long") ), TypeException );
+}

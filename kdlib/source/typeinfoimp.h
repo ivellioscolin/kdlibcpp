@@ -170,6 +170,10 @@ protected:
         throw TypeException( getName(), L"type is not a function" ); 
     }
 
+    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) {
+        throw TypeException( getName(), L"type is not editable" ); 
+    }
+
 public:
 
     void setConstant( const NumVariant& constVal )

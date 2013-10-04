@@ -19,7 +19,8 @@ TypeInfoPtr loadType( const std::wstring &symName );
 TypeInfoPtr loadType( SymbolPtr &symbol );
 TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
 
-TypeInfoPtr defineStruct( const std::wstring &structName );
+TypeInfoPtr defineStruct( const std::wstring &structName, size_t align = 0 );
+TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align = 0 );
 
 size_t getSymbolSize( const std::wstring &name );
 MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
@@ -83,6 +84,8 @@ public:
     virtual CallingConventionType getCallingConvention() = 0; // <- CallingConventionType
     virtual bool hasThis() = 0;
     virtual TypeInfoPtr getReturnType() = 0;
+
+    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) = 0;
 
 protected:
 

@@ -61,8 +61,9 @@ std::string __fastcall stackTestRun2( int&a, double b, const char* c )
 
 float stackTestRun1( int a, const float& b, const std::string& c )
 {
+    static long sa = 1;
     stackTestRun2( a, b, c.c_str() );
-    return 1.1f;
+    return 1.1f + sa;
 }
 
 int stackTestRun()

@@ -69,7 +69,9 @@ public:
 
     virtual TypeInfoPtr getTypeInfo() = 0;
 
-    virtual NumVariant getValue() const = 0;
+    virtual NumVariant getValue() const {
+        throw TypeException(  m_name, L"filed has no value" );
+    }
 
 protected:
 
@@ -160,10 +162,6 @@ private:
         {}
 
     virtual TypeInfoPtr getTypeInfo();
-
-    virtual NumVariant getValue() const {
-        throw TypeException(  m_name, L"filed has no value" );
-    }
 
     SymbolPtr  m_symbol;
 };
