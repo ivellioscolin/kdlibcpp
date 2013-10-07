@@ -492,9 +492,9 @@ TypeInfoPtr TypeInfo::getRecursiveComplexType( const std::wstring &typeName, Typ
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoImp::ptrTo()
+TypeInfoPtr TypeInfoImp::ptrTo( size_t ptrSize )
 {
-    return TypeInfoPtr( new TypeInfoPointer( shared_from_this(), getPtrSize() ) );
+    return TypeInfoPtr( new TypeInfoPointer( shared_from_this(), ptrSize ? ptrSize : getPtrSize() ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

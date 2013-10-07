@@ -39,10 +39,10 @@ protected:
     }
 
     virtual size_t getPtrSize() {
-        NOT_IMPLEMENTED();
+        return ptrSize();
     }
 
-    virtual TypeInfoPtr ptrTo();
+    virtual TypeInfoPtr ptrTo( size_t ptrSize = 0 );
 
     virtual TypeInfoPtr deref() {
         throw TypeException( getName(), L"type can not be dereffered" );

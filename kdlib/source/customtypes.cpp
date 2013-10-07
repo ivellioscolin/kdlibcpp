@@ -13,7 +13,7 @@ class CustomBase : public TypeInfoFields {
 
 protected:
     
-    CustomBase( const std::wstring &name, size_t align ) :
+    CustomBase( const std::wstring &name, size_t align = 0 ) :
         TypeInfoFields(name)
         {
             m_align = align ? align : ptrSize();
@@ -35,7 +35,7 @@ protected:
 protected:
 
     size_t  m_align;
-    size_t  m_size;
+    MEMOFFSET_32  m_size;
 
 };
 
@@ -61,8 +61,8 @@ class CustomUnion : public CustomBase
 {
 public:
     
-    CustomUnion( const std::wstring &name, size_t align = 0 ) :
-        CustomBase( name, align )
+    CustomUnion( const std::wstring &name ) :
+        CustomBase( name )
         {}
 
 private:
@@ -103,9 +103,9 @@ TypeInfoPtr defineStruct( const std::wstring &structName, size_t align )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align )
+TypeInfoPtr defineUnion( const std::wstring& unionName )
 {
-    return TypeInfoPtr( new CustomUnion(unionName, align) );
+    return TypeInfoPtr( new CustomUnion(unionName) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,15 +165,15 @@ void CustomStruct::appendField(const std::wstring &fieldName, TypeInfoPtr &field
     CustomUdtField  *field = new CustomUdtField( fieldType, fieldName );
 
     size_t  fieldSize = fieldType->getSize();
-    size_t  offset = m_size;
+    MEMOFFSET_32  offset = m_size;
     size_t  align = fieldSize < m_align ? fieldSize : m_align;
 
     if (align)
-        offset += offset % align > 0 ? align - offset % align : 0;
+        offset += (MEMOFFSET_32)( offset % align > 0 ? align - offset % align : 0 );
 
     field->setOffset( offset );
 
-    m_size = offset + fieldSize;
+    m_size = (MEMOFFSET_32)( offset + fieldSize );
 
     m_fields.push_back( TypeFieldPtr( field ) );
 }
