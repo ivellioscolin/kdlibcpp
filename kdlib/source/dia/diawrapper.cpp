@@ -309,6 +309,7 @@ SymbolPtr DiaSymbol::getChildByIndex(ULONG symTag, ULONG _index )
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
 SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
 {
     // ищем прямое совпадение
@@ -345,7 +346,7 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
         m_symbol->findChildren(
             ::SymTagNull,
             underscoreName.c_str(),
-            nsfCaseSensitive | nsfUndecoratedName,
+            nsfCaseSensitive,
             &symbols);
 
     hres = symbols->get_Count(&count);
@@ -372,7 +373,7 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
         m_symbol->findChildren(
             ::SymTagNull,
             pattern.c_str(),
-            nsfRegularExpression | nsfCaseSensitive | nsfUndecoratedName,
+            nsfRegularExpression | nsfCaseSensitive,
             &symbols);
 
     if (S_OK != hres)
@@ -382,8 +383,35 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
     if (S_OK != hres)
         throw DiaException(L"Call IDiaEnumSymbols::get_Count", hres);
 
-    if (count == 0)
-         throw DiaException(L"symbol not found");
+    if (count >0 )
+    {
+        DiaSymbolPtr child;
+        hres = symbols->Item(0, &child);
+        if (S_OK != hres)
+            throw DiaException(L"Call IDiaEnumSymbols::Item", hres);
+
+        return SymbolPtr( new DiaSymbol(child, m_machineType) );
+    }
+
+    // ?имя@@декор
+    pattern = L"?";
+    pattern += name;
+    pattern += L"@@*";
+    symbols = 0;
+
+    hres = 
+        m_symbol->findChildren(
+            ::SymTagNull,
+            pattern.c_str(),
+            nsfRegularExpression | nsfCaseSensitive,
+            &symbols);
+
+    if (S_OK != hres)
+        throw DiaException(L"Call IDiaSymbol::findChildren", hres);
+
+    hres = symbols->get_Count(&count);
+    if (S_OK != hres)
+        throw DiaException(L"Call IDiaEnumSymbols::get_Count", hres);
 
     if (count >0 )
     {
