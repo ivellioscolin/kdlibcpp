@@ -250,47 +250,75 @@ std::wstring debugCommand( const std::wstring &command )
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-unsigned long long evaluate( const std::wstring  &expression )
+NumVariant evaluate( const std::wstring  &expression, bool cplusplus )
 {
     HRESULT             hres;
     ULONG64             value = 0;
-    DEBUG_VALUE         debugValue = {};
-    ULONG               remainderIndex = 0;
 
-    hres = g_dbgMgr->control->IsPointer64Bit();
-    if ( FAILED( hres ) )
-        throw  DbgEngException( L"IDebugControl::IsPointer64Bit", hres );
+    DEBUG_VALUE  debugValue = {};
+    ULONG        remainderIndex = 0;
+    ULONG        expresionSyntax;
     
-    if ( hres == S_OK )
+    hres = g_dbgMgr->control->GetExpressionSyntax( &expresionSyntax );
+    if ( FAILED(hres) )
     {
-        hres = g_dbgMgr->control->EvaluateWide( 
-            expression.c_str(), 
-            DEBUG_VALUE_INT64,
-            &debugValue,
-            &remainderIndex );
-            
-        if ( FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::Evaluate", hres );
-            
-        if ( remainderIndex == expression.length() )
-            value = debugValue.I64;
-    }
-    else
-    {
-        hres = g_dbgMgr->control->EvaluateWide( 
-            expression.c_str(), 
-            DEBUG_VALUE_INT32,
-            &debugValue,
-            &remainderIndex );
-            
-        if (  FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::Evaluated", hres );
-            
-        if ( remainderIndex == expression.length() )
-            value = debugValue.I32;
+        throw  DbgEngException( L"IDebugControl3::GetExpressionSyntax", hres );
     }
 
-    return value;
+    hres = g_dbgMgr->control->SetExpressionSyntax( cplusplus ? DEBUG_EXPR_CPLUSPLUS : DEBUG_EXPR_MASM );
+    if ( FAILED(hres) )
+    {
+        throw  DbgEngException( L"IDebugControl3::GetExpressionSyntax", hres );
+    }
+
+    hres = g_dbgMgr->control->EvaluateWide( 
+        expression.c_str(), 
+        DEBUG_VALUE_INVALID,
+        &debugValue,
+        &remainderIndex );
+
+    if ( FAILED( hres ) )
+    {
+        g_dbgMgr->control->SetExpressionSyntax( expresionSyntax );
+        throw  DbgEngException( L"IDebugControl::Evaluate", hres );
+    }
+
+    NumVariant   var;
+
+    switch( debugValue.Type )
+    {
+    case DEBUG_VALUE_INT8:
+        var =  NumVariant( debugValue.I8 );
+        break;
+        
+    case DEBUG_VALUE_INT16:
+        var =  NumVariant( debugValue.I16 );
+        break;
+        
+    case DEBUG_VALUE_INT32:
+        var = NumVariant( debugValue.I32 );
+        break;
+        
+    case DEBUG_VALUE_INT64:
+        var =  NumVariant( debugValue.I64 );
+        break;
+
+    case DEBUG_VALUE_FLOAT32: 
+        var =  NumVariant( debugValue.F32 );
+        break;
+
+    case DEBUG_VALUE_FLOAT64: 
+        var =  NumVariant( debugValue.F64 );
+        break;
+
+    default:
+        g_dbgMgr->control->SetExpressionSyntax( expresionSyntax );
+        throw DbgException("unsupported type");
+    } 
+
+    g_dbgMgr->control->SetExpressionSyntax( expresionSyntax );
+
+    return var;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
