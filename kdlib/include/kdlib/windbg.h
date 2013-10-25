@@ -7,6 +7,7 @@
 #include <DbgEng.h>
 
 #include "kdlib/exceptions.h"
+#include "kdlib/dbgio.h"
 
 namespace kdlib {
 namespace windbg {
@@ -67,6 +68,38 @@ private:
     HANDLE  m_thread;
 
     HANDLE  m_stopEvent;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+class WindbgOut : public DbgOut
+{
+public:
+
+    virtual void write( const std::wstring& str );
+
+    virtual void writedml( const std::wstring& str );
+    
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class WindbgErr : public DbgOut
+{
+public:
+
+    virtual void write( const std::wstring& str );
+
+    virtual void writedml( const std::wstring& str );
+};
+///////////////////////////////////////////////////////////////////////////////
+
+class WindbgIn : public DbgIn
+{
+public:
+
+    virtual std::wstring readline();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

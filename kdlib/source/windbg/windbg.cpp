@@ -20,74 +20,66 @@ namespace windbg {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class WindbgOut : public DbgOut
+void WindbgOut::write( const std::wstring& str )
 {
-    virtual void write( const std::wstring& str )
-    {
 
-        g_dbgMgr->control->ControlledOutputWide(  
-            DEBUG_OUTCTL_AMBIENT_TEXT,
-            DEBUG_OUTPUT_NORMAL, 
-            L"%ws",
-            str.c_str()
-            );
-    }
+    g_dbgMgr->control->ControlledOutputWide(  
+        DEBUG_OUTCTL_AMBIENT_TEXT,
+        DEBUG_OUTPUT_NORMAL, 
+        L"%ws",
+        str.c_str()
+        );
+}
 
-    virtual void writedml( const std::wstring& str )
-    {
+void WindbgOut::writedml( const std::wstring& str )
+{
 
-        g_dbgMgr->control->ControlledOutputWide(  
-            DEBUG_OUTCTL_AMBIENT_DML,
-            DEBUG_OUTPUT_NORMAL, 
-            L"%ws",
-            str.c_str()
-            );
-    }
-};
+    g_dbgMgr->control->ControlledOutputWide(  
+        DEBUG_OUTCTL_AMBIENT_DML,
+        DEBUG_OUTPUT_NORMAL, 
+        L"%ws",
+        str.c_str()
+        );
+}
+
 
 WindbgOut  windbgOut;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class WindbgErr : public DbgOut
+void WindbgErr::write( const std::wstring& str )
 {
-    virtual void write( const std::wstring& str )
-    {
-        g_dbgMgr->control->OutputWide(  
-            DEBUG_OUTPUT_ERROR, 
-            L"%ws",
-            str.c_str()
-            );
-    }
+    g_dbgMgr->control->OutputWide(  
+        DEBUG_OUTPUT_ERROR, 
+        L"%ws",
+        str.c_str()
+        );
+}
 
-    virtual void writedml( const std::wstring& str )
-    {
-        g_dbgMgr->control->OutputWide(  
-            DEBUG_OUTPUT_ERROR, 
-            L"%ws",
-            str.c_str()
-            );
-    }
-};
+void WindbgErr::writedml( const std::wstring& str )
+{
+    g_dbgMgr->control->OutputWide(  
+        DEBUG_OUTPUT_ERROR, 
+        L"%ws",
+        str.c_str()
+        );
+}
 
 WindbgOut  windbgErr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class WindbgIn : public DbgIn
+std::wstring WindbgIn::readline()
 {
-    virtual std::wstring readline()
-    {
-        std::vector<wchar_t>  inputBuffer(0x10000);
+    std::vector<wchar_t>  inputBuffer(0x10000);
 
-        ULONG  read = 0;
-        g_dbgMgr->control->InputWide( &inputBuffer[0], static_cast<ULONG>(inputBuffer.size()), &read );
+    ULONG  read = 0;
+    g_dbgMgr->control->InputWide( &inputBuffer[0], static_cast<ULONG>(inputBuffer.size()), &read );
 
-         std::wstring  inputstr = std::wstring( &inputBuffer[0] );
+        std::wstring  inputstr = std::wstring( &inputBuffer[0] );
 
-         return inputstr.empty() ? L"\n" : inputstr;
-    }
-};
+        return inputstr.empty() ? L"\n" : inputstr;
+}
 
 WindbgIn  windbgIn;
 
