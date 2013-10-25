@@ -72,10 +72,12 @@ TEST_F( TypedVarTest, BitFields )
     EXPECT_EQ( g_structWithBits.m_bit0_4, *typedVar->getElement(L"m_bit0_4") );
     EXPECT_EQ( g_structWithBits.m_bit5, *typedVar->getElement(L"m_bit5") );
     EXPECT_EQ( g_structWithBits.m_bit6_8, *typedVar->getElement(L"m_bit6_8") );
+    EXPECT_EQ( g_structWithBits.m_bit0_60, *tyoedVar->getElement(L"m_bit0_60") );
 
     EXPECT_NO_THROW( typedVar = loadTypedVar(L"g_structWithSignBits") );
     EXPECT_EQ( g_structWithSignBits.m_bit5, *typedVar->getElement(L"m_bit5") );
     EXPECT_EQ( g_structWithSignBits.m_bit6_8, *typedVar->getElement(L"m_bit6_8") );
+    EXPECT_EQ( g_structWithSignBits.m_bit0_60, *tyoedVar->getElement(L"m_bit0_60") );
 }
 
 TEST_F( TypedVarTest, GetAddress )

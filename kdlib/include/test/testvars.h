@@ -116,6 +116,7 @@ struct structWithBits {
     unsigned long m_bit0_4  : 5;
     unsigned long m_bit5    : 1;
     unsigned long m_bit6_8  : 3;
+    unsigned long long m_bit0_60 : 60;
 };
 
 extern structWithBits g_structWithBits;
@@ -125,6 +126,7 @@ struct structWithSignBits {
     long m_bit0_4  : 5;
     long m_bit5    : 1;
     long m_bit6_8  : 3;
+    unsigned long long m_bit0_60 : 60;
 };
 
 extern structWithSignBits g_structWithSignBits;
