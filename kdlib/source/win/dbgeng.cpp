@@ -50,7 +50,7 @@ static void setInitialBreakOption()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID startProcess( const std::wstring  &processName )
+PROCESS_DEBUG_ID startProcess( const std::wstring  &processName,  bool debugChildren )
 {
     HRESULT     hres;
 
@@ -59,7 +59,11 @@ PROCESS_DEBUG_ID startProcess( const std::wstring  &processName )
     std::vector< std::wstring::value_type >      cmdLine( processName.size() + 1 );
     wcscpy_s( &cmdLine[0], cmdLine.size(), processName.c_str() );
 
-    hres = g_dbgMgr->client->CreateProcessWide( 0, &cmdLine[0], DEBUG_PROCESS | DETACHED_PROCESS );
+    hres = g_dbgMgr->client->CreateProcessWide(
+        0,
+        &cmdLine[0],
+        ( debugChildren ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS ) | DETACHED_PROCESS 
+        );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient4::CreateProcessWide", hres );
 
@@ -91,6 +95,10 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
     hres = g_dbgMgr->client->TerminateCurrentProcess();
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
+
+    hres = g_dbgMgr->client->DetachCurrentProcess();
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugClient::DetachCurrentProcess", hres );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
