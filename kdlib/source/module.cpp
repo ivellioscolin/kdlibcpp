@@ -275,9 +275,6 @@ TypedVarPtr Module::containingRecord( MEMOFFSET_64 offset, const std::wstring &t
 {
     offset = addr64(offset);
 
-    if ( offset < m_base || offset >= m_base + m_size )
-        throw SymbolException(L"offset dont has to module");
-
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
     return kdlib::containingRecord( offset, typeInfo, fieldName );
@@ -289,9 +286,6 @@ TypedVarList Module::loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &
 {
     offset = addr64(offset);
 
-    if ( offset < m_base || offset >= m_base + m_size )
-        throw SymbolException(L"offset dont has to module");
-
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
     return kdlib::loadTypedVarList( offset, typeName, fieldName );
@@ -302,9 +296,6 @@ TypedVarList Module::loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &
 TypedVarList Module::loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring &typeName, size_t count )
 {
     offset = addr64(offset);
-
-    if ( offset < m_base || offset >= m_base + m_size )
-        throw SymbolException(L"offset dont has to module");
 
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
