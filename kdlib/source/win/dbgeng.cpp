@@ -143,6 +143,32 @@ void detachProcess( PROCESS_DEBUG_ID processId )
         throw DbgEngException( L"IDebugClient::DetachCurrentProcess", hres );
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void detachAllProcesses()
+{
+    HRESULT     hres;
+
+    hres = g_dbgMgr->client->DetachProcesses();
+
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void terminateAllProcesses()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->client->TerminateProcesses();
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugClient::TerminateProcesses", hres );
+
+    hres = g_dbgMgr->client->DetachProcesses();
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

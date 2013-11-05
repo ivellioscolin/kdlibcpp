@@ -20,6 +20,8 @@ PROCESS_DEBUG_ID startProcess( const std::wstring  &processName, bool debugChild
 PROCESS_DEBUG_ID attachProcess( PROCESS_ID pid );
 void detachProcess( PROCESS_DEBUG_ID processId = -1);
 void terminateProcess( PROCESS_DEBUG_ID processId = -1);
+void detachAllProcesses();
+void terminateAllProcesses();
 
 void loadDump( const std::wstring &fileName );
 void writeDump( const std::wstring &fileNamem, bool smallDump );
