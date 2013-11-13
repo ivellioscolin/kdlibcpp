@@ -234,10 +234,7 @@ TypedVarPtr Module::getTypedVarByAddr( MEMOFFSET_64 offset )
         throw SymbolException(L"offset dont has to module");
 
     SymbolPtr symVar = getSymSession()->findByRva( (MEMOFFSET_32)(offset - m_base ) );
-
-    TypeInfoPtr typeInfo = loadType( symVar->getType() );
-
-    return loadTypedVar( typeInfo, offset );
+    return loadTypedVar( symVar );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
