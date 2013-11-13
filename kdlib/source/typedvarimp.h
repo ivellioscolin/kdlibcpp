@@ -375,7 +375,6 @@ public:
     }
 
     virtual std::wstring str();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -389,11 +388,13 @@ public:
     MEMOFFSET_REL getElementOffset( size_t index );
 
     unsigned long getElementOffsetRelative(size_t index );
-    
+
+    virtual size_t getSize() const {
+        return m_symbol->getSize();
+    }
 protected:
 
     SymbolPtr  m_symbol;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
