@@ -279,6 +279,8 @@ std::wstring debugCommand( const std::wstring &command )
     if ( FAILED( hres ) )
         throw  DbgEngException( L"IDebugControl::Execute", hres ); 
 
+    g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
+
     return std::wstring( outReader.Line() ); 
 }
 
