@@ -53,3 +53,6 @@ void ( *CdeclFuncPtr)( int a, float b) = &CdeclFunc;
 
 void (FuncTestClass::*MethodPtr)() = &FuncTestClass::method;
 void (__cdecl*CdeclStaticMethodPtr)() = &FuncTestClass::staticMethod;
+
+void (*ArrayOfCdeclFuncPtr[])(int, float) = { &CdeclFunc, &CdeclFunc, &CdeclFunc };
+void (FuncTestClass::*ArrayOfMethodPtr[])() = { &FuncTestClass::method, &FuncTestClass::method };
