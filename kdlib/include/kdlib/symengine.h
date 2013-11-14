@@ -199,6 +199,7 @@ public:
     virtual unsigned long getRegRealativeId() = 0;  // <- RegRealativeId
     virtual SymbolPtr getObjectPointerType() = 0; // "this" for method
     virtual unsigned long getCallingConvention() = 0; // <- CallingConventionType
+    virtual SymbolPtr getClassParent() = 0; // "this" for method
 };
 
 ///////////////////////////////////////////////////////////////////////////////

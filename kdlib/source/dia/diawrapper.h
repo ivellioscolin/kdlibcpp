@@ -112,6 +112,8 @@ public:
 
     virtual ULONG getCallingConvention() override;
 
+    virtual SymbolPtr getClassParent() override;
+
     MachineTypes getMachineType() {
         return m_machineType;
     }

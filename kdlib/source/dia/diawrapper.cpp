@@ -471,6 +471,15 @@ ULONG DiaSymbol::getCallingConvention()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+SymbolPtr DiaSymbol::getClassParent()
+{
+    DiaSymbolPtr diaSymbol(callSymbol(get_classParent));
+    return SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
 ULONG DiaSymbol::getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative)
 {
     DiaRegToRegRelativeBase::const_iterator it = 

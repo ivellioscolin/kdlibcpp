@@ -176,6 +176,11 @@ class ExportSymbolBase : public Symbol
     {
         NOT_IMPLEMENTED();
     }
+
+    virtual SymbolPtr getClassParent()
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -174,6 +174,10 @@ protected:
         throw TypeException( getName(), L"type is not editable" ); 
     }
 
+    virtual TypeInfoPtr getClassParent() {
+        throw TypeException( getName(), L"has no class parent" ); 
+    }
+
 public:
 
     void setConstant( const NumVariant& constVal )
@@ -292,6 +296,8 @@ protected:
         return true;
     }
 
+    virtual TypeInfoPtr getClassParent();
+
 protected:
 
     SymbolPtr  m_symbol;
@@ -326,14 +332,15 @@ public:
         m_symbol( symbol )
         {}
 
-protected:
-
     virtual std::wstring str();
 
-    virtual bool isEnum() 
-    {
+    virtual bool isEnum() {
         return true;
     }
+
+    virtual TypeInfoPtr getClassParent();
+
+protected:
 
     virtual size_t getPtrSize() {
         return getPtrSizeBySymbol( m_symbol );
@@ -385,6 +392,8 @@ protected:
     virtual size_t getSize() {
         return m_symbol->getSize();
     }
+
+    virtual TypeInfoPtr getClassParent();
 private:
     SymbolPtr m_symbol;
 
@@ -481,8 +490,6 @@ public:
     TypeInfoVtbl( SymbolPtr &symbol ) : m_symbol( symbol ) {}
 
 
-protected:
-
     virtual std::wstring str() {
         return getName();
     }
@@ -491,6 +498,9 @@ protected:
         return L"VTable";
     }
 
+    virtual TypeInfoPtr getClassParent();
+
+protected:
     SymbolPtr   m_symbol;
 };
 
@@ -526,8 +536,11 @@ protected:
          return m_bitType;
     }
 
+    virtual TypeInfoPtr getClassParent();
+
 private:
 
+    SymbolPtr  m_symbol;
     TypeInfoPtr  m_bitType;
     BITOFFSET  m_bitWidth;
     BITOFFSET  m_bitPos;
@@ -558,6 +571,7 @@ public:
 
     TypeInfoPointer( SymbolPtr& symbol )
     {
+        m_symbol = symbol;
         m_derefType = loadType( symbol->getType() );
         m_ptrSize = symbol->getSize();
     }
@@ -569,6 +583,8 @@ public:
     const std::wstring getDerefName() const {
         return m_derefType->getName();
     }
+
+    virtual TypeInfoPtr getClassParent();
 
 protected:
 
@@ -591,6 +607,7 @@ protected:
 
 protected:
 
+    SymbolPtr  m_symbol;
     TypeInfoPtr  m_derefType;
     size_t  m_ptrSize;
 };
@@ -610,6 +627,7 @@ public:
 
     TypeInfoArray( SymbolPtr& symbol )
     {
+        m_symbol = symbol;
         m_derefType = loadType( symbol->getType() );
         m_count = symbol->getCount();
         m_ptrSize = getPtrSizeBySymbol(symbol);
@@ -618,6 +636,8 @@ public:
     TypeInfoPtr getDerefType() {
         return m_derefType;
     }
+
+    virtual TypeInfoPtr getClassParent();
 
 protected:
 
@@ -646,6 +666,7 @@ protected:
 
 protected:
 
+    SymbolPtr  m_symbol;
     TypeInfoPtr  m_derefType;
     size_t  m_count;
     size_t  m_ptrSize;

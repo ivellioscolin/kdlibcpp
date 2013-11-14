@@ -804,6 +804,13 @@ std::wstring TypeInfoUdt::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr TypeInfoUdt::getClassParent()
+{
+    return loadType(m_symbol->getClassParent());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoUdt::getFields()
 {
     getFields( m_symbol, SymbolPtr() );
@@ -925,6 +932,13 @@ std::wstring TypeInfoEnum::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr TypeInfoEnum::getClassParent()
+{
+    return loadType(m_symbol->getClassParent());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoEnum::getFields()
 {
     size_t   childCount = m_symbol->getChildCount();
@@ -969,7 +983,8 @@ std::wstring TypeInfoFunction::getName()
     sstr << getReturnType()->getName();
 
     sstr << L"(";
-    switch (getCallingConvention())
+    const CallingConventionType ccType = getCallingConvention();
+    switch (ccType)
     {
     case CallConv_NearC:
         sstr << L"__cdecl";
@@ -995,9 +1010,23 @@ std::wstring TypeInfoFunction::getName()
         sstr << L"__userpurge";
         break;
     }
+    TypeInfoPtr classParent;
+    try
+    {
+        classParent = getClassParent();
+    }
+    catch(const SymbolException &)
+    {
+    }
+    if (classParent)
+    {
+        sstr << L" " << classParent->getName() << "::";
+    }
     sstr << L")(";
 
     Args::iterator itArg = m_args.begin();
+    if (CallConv_ThisCall == ccType && m_hasThis)
+        ++itArg;
     for (; itArg != m_args.end(); ++itArg)
     {
         if (itArg != m_args.begin())
@@ -1035,7 +1064,15 @@ TypeInfoPtr TypeInfoFunction::getReturnType()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr TypeInfoFunction::getClassParent()
+{
+    return loadType(m_symbol->getClassParent());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoBitField::TypeInfoBitField( SymbolPtr &symbol )
+    : m_symbol(symbol)
 {
     m_bitWidth = static_cast<BITOFFSET>(symbol->getSize());
     m_bitPos = symbol->getBitPosition();
@@ -1051,6 +1088,40 @@ std::wstring TypeInfoBitField::getName()
 
     sstr << m_bitType->getName()  << L":" <<  m_bitWidth;
     return  sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoBitField::getClassParent()
+{
+    return loadType(m_symbol->getClassParent());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoVtbl::getClassParent()
+{
+    return loadType(m_symbol->getClassParent());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoPointer::getClassParent()
+{
+    if (m_symbol)
+        return loadType(m_symbol->getClassParent());
+
+    return TypeInfoImp::getClassParent();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoArray::getClassParent()
+{
+    if (m_symbol)
+        return loadType(m_symbol->getClassParent());
+
+    return TypeInfoImp::getClassParent();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

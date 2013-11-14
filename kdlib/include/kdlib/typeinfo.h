@@ -87,6 +87,8 @@ public:
 
     virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) = 0;
 
+    virtual TypeInfoPtr getClassParent() = 0;
+
 protected:
 
     static bool isBaseType( const std::wstring &typeName );
