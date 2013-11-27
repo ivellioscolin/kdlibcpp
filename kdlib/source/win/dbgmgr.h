@@ -76,7 +76,34 @@ private:
         __in  ULONG FirstChance );
 };
 
-extern DebugManager*  g_dbgMgr;
+
+class DebugManagerWrapper {
+
+public:
+
+    void set( DebugManager*  dbgMgr ) {
+        m_dbgMgr = dbgMgr;
+    }
+
+    void reset() {
+        delete m_dbgMgr;
+        m_dbgMgr = 0;
+    }
+
+    DebugManager* operator->() {
+        if (!m_dbgMgr)
+            throw DbgException("pykd is not initialized");
+
+        return m_dbgMgr;
+    }
+
+private:
+
+    DebugManager*  m_dbgMgr;
+};
+
+
+extern DebugManagerWrapper   g_dbgMgr;
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -14,7 +14,7 @@ namespace  kdlib {
 
 bool initialize()
 {
-    g_dbgMgr = new DebugManager();
+    g_dbgMgr.set( new DebugManager() );
     return true;
 }
 
@@ -22,8 +22,7 @@ bool initialize()
 
 void uninitialize()
 {
-    delete g_dbgMgr;
-    g_dbgMgr = NULL;
+    g_dbgMgr.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
