@@ -67,19 +67,29 @@ void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displac
 // processes end threads
 unsigned long getNumberThreads();
 THREAD_DEBUG_ID getCurrentThreadId();
-void setCurrentThread( THREAD_DEBUG_ID id );
-MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id );
-THREAD_DEBUG_ID getThreadIdByOffset( MEMOFFSET_64 offset );
-THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id );
-THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid );
+THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset);
+THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid);
+
+THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = -1);
+MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = -1);
+
+void setCurrentThread(THREAD_DEBUG_ID id);
+
+void setImplicitThread(MEMOFFSET_64 offset); 
+MEMOFFSET_64 getImplicitThreadOffset();
 
 unsigned long getNumberProcesses();
 PROCESS_DEBUG_ID getCurrentProcessId();
-void setCurrentProcess( PROCESS_DEBUG_ID id );
-MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id );
 PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset );
-PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id );
 PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid );
+
+PROCESS_ID  getProcessSystemId( PROCESS_DEBUG_ID id = -1);
+MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id  = -1);
+
+void setCurrentProcess(PROCESS_DEBUG_ID id);
+
+void setImplicitProcess(MEMOFFSET_64 offset); 
+MEMOFFSET_64 getImplicitProcessOffset();
 
 
 //breakpoints

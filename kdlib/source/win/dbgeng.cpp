@@ -562,6 +562,20 @@ void getSystemInfo( SystemInfo &systemInfo )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+unsigned long getNumberProcesses()
+{
+    HRESULT  hres;
+    ULONG  number;
+
+    hres = g_dbgMgr->system->GetNumberProcesses( &number );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
+
+    return number;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 PROCESS_ID getCurrentProcessId()
 {
     HRESULT      hres;
@@ -572,35 +586,6 @@ PROCESS_ID getCurrentProcessId()
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres ); 
 
     return  PROCESS_ID(id);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
-{
-    HRESULT      hres;
-    ULONG        old_id;
-
-    hres = g_dbgMgr->system->GetCurrentProcessId( &old_id );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
-
-    if ( old_id != id )
-    {
-        hres = g_dbgMgr->system->SetCurrentProcessId( id );
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
-    }
-
-    ULONG  systemId;
-    hres = g_dbgMgr->system->GetCurrentProcessSystemId( &systemId );
-
-    g_dbgMgr->system->SetCurrentProcessId( old_id );
-
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
-
-    return systemId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -633,9 +618,21 @@ PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
+PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
 {
-    HRESULT      hres;
+    HRESULT  hres;
+    ULONG  systemId;
+
+    if ( id == -1 )
+    {
+        hres = g_dbgMgr->system->GetCurrentProcessSystemId( &systemId );
+
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
+
+        return systemId;
+    }
+
     ULONG        old_id;
 
     hres = g_dbgMgr->system->GetCurrentProcessId( &old_id );
@@ -649,7 +646,46 @@ MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
+    hres = g_dbgMgr->system->GetCurrentProcessSystemId( &systemId );
+
+    g_dbgMgr->system->SetCurrentProcessId( old_id );
+
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
+
+    return systemId;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
+{
+    HRESULT  hres;
     MEMOFFSET_64  offset;
+
+    if ( id == -1 )
+    {
+        hres = g_dbgMgr->system->GetCurrentProcessDataOffset( &offset );
+
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
+
+        return offset;
+    }
+
+    ULONG        old_id;
+
+    hres = g_dbgMgr->system->GetCurrentProcessId( &old_id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+
+    if ( old_id != id )
+    {
+        hres = g_dbgMgr->system->SetCurrentProcessId( id );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
+    }
+
     hres = g_dbgMgr->system->GetCurrentProcessDataOffset( &offset );
 
     g_dbgMgr->system->SetCurrentProcessId( old_id );
@@ -662,30 +698,38 @@ MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long getNumberProcesses()
+void setCurrentProcess(PROCESS_DEBUG_ID id)
 {
     HRESULT  hres;
-    ULONG  number;
 
-    hres = g_dbgMgr->system->GetNumberProcesses( &number );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
-
-    return number;
+    hres = g_dbgMgr->system->SetCurrentProcessId(id);
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_ID getCurrentThreadId()
+void setImplicitProcess(MEMOFFSET_64 offset)
 {
-    HRESULT      hres;
-    ULONG        id;
+    HRESULT  hres;
 
-    hres = g_dbgMgr->system->GetCurrentThreadId( &id );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentThreadId", hres ); 
-        
-     return THREAD_ID(id);
+    hres = g_dbgMgr->system->SetImplicitProcessDataOffset(offset);
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugSystemObjects::SetImplicitProcessDataOffset", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getImplicitProcessOffset()
+{
+    HRESULT  hres;
+    MEMOFFSET_64  offset;
+
+    hres = g_dbgMgr->system->GetImplicitProcessDataOffset(&offset);
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugSystemObjects::GetImplicitProcessDataOffset", hres );
+
+    return offset;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -704,16 +748,16 @@ unsigned long getNumberThreads()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid )
+THREAD_DEBUG_ID getCurrentThreadId()
 {
-    HRESULT  hres;
-    ULONG  id;
+    HRESULT      hres;
+    ULONG        id;
 
-    hres = g_dbgMgr->system->GetThreadIdBySystemId( tid, &id );
+    hres = g_dbgMgr->system->GetCurrentThreadId( &id );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetThreadIdBySystemId", hres );
-
-    return id;
+        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentThreadId", hres ); 
+        
+     return THREAD_DEBUG_ID(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -727,14 +771,40 @@ THREAD_DEBUG_ID getThreadIdByOffset( MEMOFFSET_64 offset )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetThreadIdBySystemId", hres );
 
-    return id;
+    return THREAD_DEBUG_ID(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid )
+{
+    HRESULT  hres;
+    ULONG  id;
+
+    hres = g_dbgMgr->system->GetThreadIdBySystemId( tid, &id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetThreadIdBySystemId", hres );
+
+    return THREAD_DEBUG_ID(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id )
 {
-    HRESULT      hres;
+    HRESULT  hres;
+    ULONG  systemId;
+
+    if ( id == -1 )
+    {
+        hres = g_dbgMgr->system->GetCurrentThreadSystemId( &systemId );
+
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadSystemId", hres );
+
+        return systemId;
+    }
+
     ULONG        old_id;
 
     hres = g_dbgMgr->system->GetCurrentThreadId( &old_id );
@@ -748,7 +818,6 @@ THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
     }
 
-    ULONG  systemId;
     hres = g_dbgMgr->system->GetCurrentThreadSystemId( &systemId );
 
     g_dbgMgr->system->SetCurrentThreadId( old_id );
@@ -763,7 +832,17 @@ THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id )
 
 MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id )
 {
-    HRESULT      hres;
+    HRESULT  hres;
+    MEMOFFSET_64  offset;
+
+    if ( id == -1 )
+    {
+        hres = g_dbgMgr->system->GetCurrentThreadDataOffset( &offset );
+
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadSystemId", hres );
+    }
+
     ULONG        old_id;
 
     hres = g_dbgMgr->system->GetCurrentThreadId( &old_id );
@@ -777,13 +856,49 @@ MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
     }
 
-    MEMOFFSET_64  offset;
     hres = g_dbgMgr->system->GetCurrentThreadDataOffset( &offset );
 
     g_dbgMgr->system->SetCurrentThreadId( old_id );
 
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadSystemId", hres );
+
+    return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentThread(THREAD_DEBUG_ID id)
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->system->SetCurrentThreadId( id );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setImplicitThread(MEMOFFSET_64 offset)
+{   
+    HRESULT  hres;
+
+    hres = g_dbgMgr->system->SetImplicitThreadDataOffset(offset);
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetImplicitThreadDataOffset", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getImplicitThreadOffset()
+{
+    HRESULT  hres;
+    MEMOFFSET_64  offset;
+
+    hres = g_dbgMgr->system->GetImplicitThreadDataOffset(&offset);
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::SetImplicitThreadDataOffset", hres );
 
     return offset;
 }
