@@ -312,7 +312,8 @@ public:
         {}
 
     virtual NumVariant getValue() const {
-        return NumVariant( m_typeInfo->getPtrSize() == 4 ?  m_varData->readPtr4() : m_varData->readPtr8() );
+       // return NumVariant( m_typeInfo->getPtrSize() == 4 ?  m_varData->readPtr4() : m_varData->readPtr8() );
+        return NumVariant(m_varData->getAddress() );
     }
 
     virtual size_t getElementCount() {
