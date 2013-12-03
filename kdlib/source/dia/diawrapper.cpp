@@ -423,7 +423,7 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
         return SymbolPtr( new DiaSymbol(child, m_machineType) );
     }
     
-    throw DiaException(L"symbol is not found");
+    throw DiaException(std::wstring(L"symbol \"") + name + L"\" is not found");
 }
 
 //////////////////////////////////////////////////////////////////////////////
