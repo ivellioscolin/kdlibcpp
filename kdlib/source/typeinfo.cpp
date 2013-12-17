@@ -739,6 +739,19 @@ bool TypeInfoFields::isVirtualMember( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t TypeInfoFields::getAlignReq()
+{
+    size_t alignReq = 1;
+    for (size_t i = 0; i < getElementCount(); ++i)
+    {
+        const size_t fieldAlignReq = getElement(i)->getAlignReq();
+        alignReq = (fieldAlignReq > alignReq) ? fieldAlignReq : alignReq;
+    }
+    return alignReq;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoUdt::getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
 {
     TypeFieldPtr  fieldPtr = m_fields.lookup( fieldName );

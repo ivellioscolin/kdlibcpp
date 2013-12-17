@@ -13,7 +13,7 @@ class CustomBase : public TypeInfoFields {
 
 protected:
     
-    CustomBase( const std::wstring &name, size_t align = 0 ) :
+    CustomBase( const std::wstring &name, size_t align ) :
         TypeInfoFields(name)
         {
             m_align = align ? align : ptrSize();
@@ -21,13 +21,17 @@ protected:
         }
 
     void throwIfFiledExist(const std::wstring &fieldName);
-
     void throwIfTypeRecursive(TypeInfoPtr type);
 
+    void checkAppendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
+
 protected:
+    static size_t alignUp(size_t val, size_t align) {
+        return val + (val % align ? align - (val % align) : 0);
+    }
 
     virtual size_t getSize() {
-        return m_size;
+        return alignUp(m_size, getAlignReq());
     }
 
     virtual void getFields() {}
@@ -52,7 +56,7 @@ public:
 
 private:
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType );
+    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,13 +65,13 @@ class CustomUnion : public CustomBase
 {
 public:
     
-    CustomUnion( const std::wstring &name ) :
-        CustomBase( name )
+    CustomUnion( const std::wstring &name, size_t align = 0 ) :
+        CustomBase( name, align )
         {}
 
 private:
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType );
+    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,27 +107,24 @@ TypeInfoPtr defineStruct( const std::wstring &structName, size_t align )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr defineUnion( const std::wstring& unionName )
+TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align )
 {
-    return TypeInfoPtr( new CustomUnion(unionName) );
+    return TypeInfoPtr( new CustomUnion(unionName, align) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void CustomBase::throwIfFiledExist(const std::wstring &fieldName)
 {
-    bool fieldExist = false;
     try
     {
         m_fields.lookup(fieldName);
-        fieldExist = true;
     }
     catch (const TypeException&)
     {
+        return;
     }
-
-    if (fieldExist)
-        throw TypeException(getName(), L"duplicate field name: " + fieldName);
+    throw TypeException(getName(), L"duplicate field name: " + fieldName);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,44 +137,37 @@ void CustomBase::throwIfTypeRecursive(TypeInfoPtr type)
     if ( !type->isUserDefined() )
         return;
 
-    try
-    {
-        size_t  fieldsCount = type->getElementCount();
-        for (size_t i = 0; i < fieldsCount; ++i)
-        {
-            TypeInfoPtr fieldType = type->getElement(i);
-            if ( fieldType.get() == this )
-                throw TypeException(getName(), L"recursive type definition");
-
-            throwIfTypeRecursive(fieldType);
-        }
-    }
-    catch (const TypeException &)
-    {}
+    size_t  fieldsCount = type->getElementCount();
+    for (size_t i = 0; i < fieldsCount; ++i)
+        throwIfTypeRecursive(type->getElement(i));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CustomStruct::appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType )
+void CustomBase::checkAppendField(const std::wstring &fieldName, TypeInfoPtr &fieldType)
 {
     if ( !fieldType )
          throw DbgException( "typeInfo can not be None" );
 
     throwIfFiledExist(fieldName);
     throwIfTypeRecursive(fieldType);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void CustomStruct::appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType )
+{
+    checkAppendField(fieldName, fieldType);
 
     CustomUdtField  *field = new CustomUdtField( fieldType, fieldName );
 
-    size_t  fieldSize = fieldType->getSize();
-    MEMOFFSET_32  offset = m_size;
-    size_t  align = fieldSize < m_align ? fieldSize : m_align;
+    const size_t fieldAlignReq = fieldType->getAlignReq();
+    const size_t align = fieldAlignReq < m_align ? fieldAlignReq : m_align;
+    MEMOFFSET_32  fieldOffset = alignUp(m_size, align);
 
-    if (align)
-        offset += (MEMOFFSET_32)( offset % align > 0 ? align - offset % align : 0 );
+    field->setOffset( fieldOffset );
 
-    field->setOffset( offset );
-
-    m_size = (MEMOFFSET_32)( offset + fieldSize );
+    m_size = (MEMOFFSET_32)( fieldOffset + fieldType->getSize() );
 
     m_fields.push_back( TypeFieldPtr( field ) );
 }
@@ -182,11 +176,7 @@ void CustomStruct::appendField(const std::wstring &fieldName, TypeInfoPtr &field
 
 void CustomUnion::appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType )
 {
-    if ( !fieldType )
-         throw DbgException( "typeInfo can not be None" );
-
-    throwIfFiledExist(fieldName);
-    throwIfTypeRecursive(fieldType);
+    checkAppendField(fieldName, fieldType);
 
     CustomUdtField  *field = new CustomUdtField( fieldType, fieldName );
 

@@ -240,6 +240,8 @@ protected:
     virtual bool isVirtualMember( const std::wstring &name );
     virtual bool isVirtualMember( size_t index );
 
+    virtual size_t getAlignReq();
+
 protected:
 
     TypeInfoFields( const std::wstring &name ) :
@@ -394,6 +396,11 @@ protected:
     }
 
     virtual TypeInfoPtr getClassParent();
+
+    virtual size_t getAlignReq() {
+        return getPtrSize();
+    }
+
 private:
     SymbolPtr m_symbol;
 
@@ -437,6 +444,10 @@ protected:
         return m_ptrSize;
     }
 
+    virtual size_t getAlignReq() {
+        return getSize();
+    }
+
 protected:
 
     std::wstring  m_name;
@@ -476,10 +487,13 @@ protected:
         return m_ptrSize;
     }
 
+    virtual size_t getAlignReq() {
+        throw TypeException( L"Void", L"This type has no alignment-requirement" );
+    }
+
 private:
 
     size_t  m_ptrSize;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -499,6 +513,10 @@ public:
     }
 
     virtual TypeInfoPtr getClassParent();
+
+    virtual size_t getAlignReq() {
+        return getPtrSizeBySymbol( m_symbol );
+    }
 
 protected:
     SymbolPtr   m_symbol;
@@ -537,6 +555,10 @@ protected:
     }
 
     virtual TypeInfoPtr getClassParent();
+
+    virtual size_t getAlignReq() {
+        return getSize();
+    }
 
 private:
 
@@ -585,6 +607,10 @@ public:
     }
 
     virtual TypeInfoPtr getClassParent();
+
+    virtual size_t getAlignReq() {
+        return getSize();
+    }
 
 protected:
 
@@ -638,6 +664,10 @@ public:
     }
 
     virtual TypeInfoPtr getClassParent();
+
+    virtual size_t getAlignReq() {
+        return getDerefType()->getAlignReq();
+    }
 
 protected:
 

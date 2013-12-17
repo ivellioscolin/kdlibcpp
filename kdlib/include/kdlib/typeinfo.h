@@ -20,7 +20,7 @@ TypeInfoPtr loadType( SymbolPtr &symbol );
 TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
 
 TypeInfoPtr defineStruct( const std::wstring &structName, size_t align = 0 );
-TypeInfoPtr defineUnion( const std::wstring& unionName );
+TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align = 0 );
 
 size_t getSymbolSize( const std::wstring &name );
 MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
@@ -88,6 +88,10 @@ public:
     virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) = 0;
 
     virtual TypeInfoPtr getClassParent() = 0;
+
+    // http://msdn.microsoft.com/en-us/library/hx1b6kkd.aspx
+    // "Padding and Alignment of Structure Members"
+    virtual size_t getAlignReq() = 0;
 
 protected:
 
