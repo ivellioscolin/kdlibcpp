@@ -94,7 +94,7 @@ MEMOFFSET_64 getImplicitProcessOffset();
 
 //breakpoints
 BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset );
-BREAKPOINT_ID hardwareBreakPointSet( MEMOFFSET_64 offset, size_t = 0, ACCESS_TYPE accessType = 0 );
+BREAKPOINT_ID hardwareBreakPointSet( MEMOFFSET_64 offset, size_t size = 0, ACCESS_TYPE accessType = 0 );
 void breakPointRemove( BREAKPOINT_ID id );
 void breakPointRemoveAll();
 
