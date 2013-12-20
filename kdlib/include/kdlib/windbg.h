@@ -135,7 +135,7 @@ METHOD_NAME ( __in PDEBUG_CLIENT client,  __in_opt PCSTR args)               \
     }                                                                        \
     catch(...)                                                               \
     {                                                                        \
-        ctrl->Output( DEBUG_OUTPUT_ERROR,  "Unknown pykd exception" );  \
+        ctrl->Output( DEBUG_OUTPUT_ERROR,  "Unknown kdlib exception" );  \
     }                                                                        \
     client->SetOutputMask( mask );                                           \
     return S_OK;                                                             \
