@@ -55,10 +55,11 @@ public:
     virtual TypedVarPtr getElement( size_t index ) = 0;
     virtual MEMOFFSET_REL getElementOffset(const std::wstring& fieldName ) = 0;
     virtual MEMOFFSET_REL getElementOffset(size_t index ) = 0;
-    virtual unsigned long getElementOffsetRelative(const std::wstring& fieldName ) = 0;
-    virtual unsigned long getElementOffsetRelative(size_t index ) = 0;
+    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) = 0;
+    virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) = 0;
     virtual size_t getElementCount() = 0;
     virtual std::wstring getElementName( size_t index ) = 0;
+    virtual size_t getElementIndex(const std::wstring&  elementName) = 0;
     virtual TypeInfoPtr getType() const = 0;
     virtual NumVariant getValue() const = 0;
     virtual TypedVarPtr deref() = 0;

@@ -318,8 +318,7 @@ TEST_F( TypeInfoTest, Function )
 {
     TypeInfoPtr func;
     ASSERT_NO_THROW( func = loadType(L"CdeclFunc") );
-    EXPECT_EQ( L"CdeclFunc", func->getName() );
-    EXPECT_EQ( m_targetModule->getSymbolVa(L"CdeclFunc"), *func);
+    EXPECT_EQ( L"Void(__cdecl)(Int4B, Float)", func->getName() ); 
     EXPECT_EQ( 2, func->getElementCount() );
     EXPECT_EQ( L"Float", func->getElement(1)->getName() );
     

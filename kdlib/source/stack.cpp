@@ -65,11 +65,33 @@ TypedVarPtr StackFrame::getTypedParam( unsigned long index )
 
     MEMOFFSET_REL relOffset = func->getElementOffset(index);
 
-    unsigned long regRel = func->getElementOffsetRelative(index);
+    RELREG_ID regRel = func->getElementOffsetRelativeReg(index);
 
     MEMOFFSET_64  offset = getOffset( regRel, relOffset );
 
     return loadTypedVar( func->getType()->getElement(index), offset );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr StackFrame::getTypedParam(  const std::wstring& paramName )
+{
+    ModulePtr mod = loadModule(m_ip);
+
+    MEMDISPLACEMENT displ;
+    SymbolPtr sym = mod->getSymbolByVa(m_ip, &displ);
+
+    TypedVarPtr func = loadTypedVar( sym );
+
+    MEMOFFSET_REL relOffset = func->getElementOffset(paramName);
+
+    RELREG_ID regRel = func->getElementOffsetRelativeReg(paramName);
+
+    MEMOFFSET_64  offset = getOffset( regRel, relOffset );
+
+    size_t  paramIndex = func->getElementIndex( paramName );
+
+    return loadTypedVar( func->getType()->getElement(paramIndex), offset );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,5 +114,6 @@ MEMOFFSET_64 StackFrame::getOffset( unsigned long regRel, MEMOFFSET_REL relOffse
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 
 }; // kdlib namespace end

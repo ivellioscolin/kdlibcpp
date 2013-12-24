@@ -56,7 +56,6 @@ TEST_F( StackTest, TypedParam )
     ASSERT_NO_THROW( param = frame->getTypedParam(2) );
     EXPECT_EQ( "Bye", loadCStr( param->getValue().asULongLong() ) );
 
-
     ASSERT_NO_THROW( frame = getStack()->getFrame(1) );
 
     EXPECT_EQ( 3, frame->getTypedParamCount() ); 
@@ -66,4 +65,26 @@ TEST_F( StackTest, TypedParam )
 
     ASSERT_NO_THROW( param = frame->getTypedParam(1) );
     EXPECT_FLOAT_EQ( 0.8f, param->deref()->getValue().asFloat() );
+
+    EXPECT_THROW( frame->getTypedParam(3), IndexException );
+}
+
+TEST_F( StackTest, TypedParamByName )
+{
+    StackFramePtr  frame;
+    ASSERT_NO_THROW( frame = getStackFrame() );
+
+    TypedVarPtr  param;
+    ASSERT_NO_THROW( param = frame->getTypedParam(L"a") );
+    EXPECT_EQ( 10, param->deref()->getValue() );
+
+    ASSERT_NO_THROW( param = frame->getTypedParam(L"b") );
+    EXPECT_FLOAT_EQ( 0.8f, param->getValue().asFloat() );
+
+    ASSERT_NO_THROW( param = frame->getTypedParam(L"c") );
+    EXPECT_EQ( "Bye", loadCStr( param->getValue().asULongLong() ) );
+
+
+    EXPECT_THROW( frame->getTypedParam(L""), DbgException );
+    EXPECT_THROW( frame->getTypedParam(L"notexist"), DbgException );
 }

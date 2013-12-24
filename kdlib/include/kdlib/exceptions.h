@@ -108,10 +108,18 @@ class IndexException : public DbgException
 {
 public:
 
-    IndexException( size_t index ) :
-        DbgException( "index is out of range" )
-        {
-        }
+    IndexException( size_t index ) 
+        : DbgException(buildDesc(index))
+    {}
+
+private:
+
+    static std::string buildDesc( size_t index )
+    {
+        std::stringstream   sstr;
+        sstr << "index is out of range";
+        return sstr.str();
+    }
 };
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -48,21 +48,8 @@ public:
 
     TypedVarPtr getTypedParam( unsigned long index );
 
-    TypedVarPtr getTypedParam( const std::wstring& paramName ) {
-        NOT_IMPLEMENTED();
-    }
+    TypedVarPtr getTypedParam( const std::wstring& paramName );
 
-    //unsigned long long getUntypedParam( unsigned long index ) { 
-    //    NOT_IMPLEMENTED();
-    //}
-
-    //MEMOFFSET_64  getUntypedParamOffset( unsigned long index ) { 
-    //    NOT_IMPLEMENTED();
-    //}
-
-    //unsigned long getUntypedParamLength() {
-    //    NOT_IMPLEMENTED();
-    //}
 
     unsigned long getTypedLocalCount() {
         NOT_IMPLEMENTED();

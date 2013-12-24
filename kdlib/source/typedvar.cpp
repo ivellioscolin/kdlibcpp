@@ -763,7 +763,7 @@ MEMOFFSET_REL SymbolFunction::getElementOffset( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long  SymbolFunction::getElementOffsetRelative(size_t index )
+RELREG_ID SymbolFunction::getElementOffsetRelativeReg(size_t index )
 {
     SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
     if ( paramLst.size() < index )
@@ -789,6 +789,45 @@ unsigned long  SymbolFunction::getElementOffsetRelative(size_t index )
         throw IndexException( index );
 
     return paramSym->getRegRealativeId();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL SymbolFunction::getElementOffset( const std::wstring& paramName )
+{
+    SymbolPtr  paramSym = m_symbol->getChildByName(paramName);
+
+    return paramSym->getOffset();
+}
+ 
+///////////////////////////////////////////////////////////////////////////////
+
+RELREG_ID SymbolFunction::getElementOffsetRelativeReg(const std::wstring& paramName )
+{
+    SymbolPtr  paramSym = m_symbol->getChildByName(paramName);
+
+    return paramSym->getRegRealativeId();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t SymbolFunction::getElementIndex(const std::wstring& paramName )
+{
+    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
+
+    SymbolPtrList::iterator itVar = paramLst.begin();
+
+    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
+    {
+        if ( (*itVar)->getDataKind() == DataIsParam  )
+        {
+            if (  (*itVar)->getName() == paramName )
+                return i;
+            i++;
+        }
+    }
+
+    throw DbgException("parameter is not found");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

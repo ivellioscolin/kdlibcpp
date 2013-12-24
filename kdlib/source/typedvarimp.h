@@ -169,12 +169,12 @@ protected:
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
-    virtual unsigned long getElementOffsetRelative(const std::wstring& fieldName ) 
+    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) 
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
-    virtual unsigned long getElementOffsetRelative(size_t index ) 
+    virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) 
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
@@ -185,6 +185,11 @@ protected:
     }
 
     virtual std::wstring getElementName( size_t index ) 
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no named fields");
+    }
+
+    virtual size_t getElementIndex( const std::wstring&  elementName )
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
@@ -386,13 +391,20 @@ public:
 
     SymbolFunction( SymbolPtr& symbol );
 
-    MEMOFFSET_REL getElementOffset( size_t index );
+    virtual MEMOFFSET_REL getElementOffset( size_t index );
 
-    unsigned long getElementOffsetRelative(size_t index );
+    virtual RELREG_ID getElementOffsetRelativeReg(size_t index );
+
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring& paramName );
+ 
+    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& paramName );
+
+    virtual size_t SymbolFunction::getElementIndex(const std::wstring& paramName );
 
     virtual size_t getSize() const {
         return m_symbol->getSize();
     }
+
 protected:
 
     SymbolPtr  m_symbol;
