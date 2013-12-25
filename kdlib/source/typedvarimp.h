@@ -139,6 +139,13 @@ protected:
         return m_typeInfo->getSize();
     }
 
+    virtual std::wstring getName() const
+    {
+        if (m_name.empty() )
+            throw TypeException( m_typeInfo->getName(), L" can not get variable name");
+        return m_name;
+    }
+
     virtual TypeInfoPtr getType() const 
     {
        return m_typeInfo;
@@ -196,14 +203,17 @@ protected:
 
 protected:
 
-    TypedVarImp( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData ) :
+    TypedVarImp( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
         m_typeInfo( typeInfo ),
-        m_varData( varData )
+        m_varData( varData ),
+        m_name( name )
         {}
 
     TypeInfoPtr  m_typeInfo;
 
     VarDataProviderPtr  m_varData;
+
+    std::wstring  m_name;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -212,8 +222,8 @@ class TypedVarBase : public TypedVarImp
 {
 public:
 
-    TypedVarBase( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData ) :
-        TypedVarImp( typeInfo, varData )
+    TypedVarBase( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, varData, name )
         {}
 
     std::wstring printValue() const;
@@ -232,8 +242,8 @@ class TypedVarUdt :  public TypedVarImp
 {
 public:
 
-    TypedVarUdt( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData ) :
-        TypedVarImp( typeInfo, varData )
+    TypedVarUdt( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, varData, name )
         {}
 
 protected:
@@ -277,8 +287,8 @@ class TypedVarPointer : public TypedVarImp
 {
 public:
 
-    TypedVarPointer( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData ) :
-        TypedVarImp( typeInfo, varData )
+    TypedVarPointer( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, varData, name )
         {}
 
 
@@ -312,12 +322,11 @@ class TypedVarArray : public TypedVarImp
 {
 public:
 
-    TypedVarArray( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData ) :
-        TypedVarImp( typeInfo, varData )
+    TypedVarArray( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"") :
+        TypedVarImp( typeInfo, varData, name )
         {}
 
     virtual NumVariant getValue() const {
-       // return NumVariant( m_typeInfo->getPtrSize() == 4 ?  m_varData->readPtr4() : m_varData->readPtr8() );
         return NumVariant(m_varData->getAddress() );
     }
 
@@ -335,8 +344,8 @@ public:
 class TypedVarBitField : public TypedVarImp
 {
 public:
-    TypedVarBitField( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData ) :
-      TypedVarImp( typeInfo, varData )
+    TypedVarBitField( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
+      TypedVarImp( typeInfo, varData, name)
       {}
 
     virtual NumVariant getValue() const;
@@ -347,8 +356,8 @@ public:
 class TypedVarEnum : public TypedVarImp
 {
 public:
-    TypedVarEnum( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData ) :
-      TypedVarImp( typeInfo, varData )
+    TypedVarEnum( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
+      TypedVarImp( typeInfo, varData, name )
       {}
 
     virtual NumVariant getValue() const {
@@ -367,8 +376,8 @@ class TypedVarFunction : public TypedVarImp
 {
 public:
 
-    TypedVarFunction( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData ) :
-        TypedVarImp( typeInfo, varData )
+    TypedVarFunction( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, varData, name )
     {}
 
 

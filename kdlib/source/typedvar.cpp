@@ -33,6 +33,18 @@ std::wstring printFieldValue( const kdlib::TypeInfoPtr& fieldType, const kdlib::
 }
 
 
+std::wstring getSymbolName( kdlib::SymbolPtr& symbol )
+{
+    try {
+        return symbol->getName();
+    }
+    catch( kdlib::SymbolException& )
+    {}
+
+    return L"";
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end noname namespace
@@ -41,36 +53,28 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData )
+TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, const std::wstring& name = L"" )
 {
     if ( typeInfo->isBase() )
-        return TypedVarPtr( new TypedVarBase( typeInfo, varData ) );
+        return TypedVarPtr( new TypedVarBase( typeInfo, varData, name ) );
 
     if ( typeInfo->isUserDefined() )
-        return TypedVarPtr( new TypedVarUdt( typeInfo, varData ) );
+        return TypedVarPtr( new TypedVarUdt( typeInfo, varData, name ) );
 
     if ( typeInfo->isPointer() )
-        return TypedVarPtr( new TypedVarPointer( typeInfo, varData ) );
+        return TypedVarPtr( new TypedVarPointer( typeInfo, varData, name ) );
 
     if ( typeInfo->isArray() )
-        return TypedVarPtr( new TypedVarArray( typeInfo, varData ) );
+        return TypedVarPtr( new TypedVarArray( typeInfo, varData, name ) );
 
     if ( typeInfo->isBitField() )
-        return TypedVarPtr( new TypedVarBitField( typeInfo, varData ) );
+        return TypedVarPtr( new TypedVarBitField( typeInfo, varData, name ) );
 
     if ( typeInfo->isEnum() )
-        return TypedVarPtr( new TypedVarEnum( typeInfo, varData ) );
+        return TypedVarPtr( new TypedVarEnum( typeInfo, varData, name ) );
 
     if ( typeInfo->isFunction() )
-        return TypedVarPtr( new TypedVarFunction( typeInfo, varData ) );
-
-    //{
-    //    //if (!symVar)
-    //    //    throw DbgException( "impossible to create a function" );
-
-    //   // return TypedVarPtr( new TypedVarFunction( typeInfo, varData, symVar ) );
-    //    NOT_IMPLEMENTED();
-    //}
+        return TypedVarPtr( new TypedVarFunction( typeInfo, varData, name ) );
 
     NOT_IMPLEMENTED();
 }
@@ -91,7 +95,7 @@ TypedVarPtr loadTypedVar( SymbolPtr &symbol )
 
         TypeInfoPtr varType = loadType( symbol );
 
-        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
+        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), ::getSymbolName(symbol) );
     }
 
     NOT_IMPLEMENTED();
@@ -121,26 +125,6 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
     SymbolPtr  symVar = module->getSymbolScope()->getChildByName( symName );
 
     return loadTypedVar( symVar );
-
-
-
-    //if ( symVar->getSymTag() == SymTagFunction )
-    //{
-    //    return module->
-    //        
-    //        getFunction( module, symVar );
-    //}
-
-    //TypeInfoPtr varType = loadType( symVar );
-
-    //if ( LocIsConstant != symVar->getLocType() )
-    //{
-    //    MEMOFFSET_64 offset = module->getBase() + symVar->getRva();
-
-    //    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
-    //}
-
-    //NOT_IMPLEMENTED();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -692,7 +676,10 @@ std::wstring TypedVarFunction::str()
 ///////////////////////////////////////////////////////////////////////////////
 
 SymbolFunction::SymbolFunction( SymbolPtr& symbol ) :
-    TypedVarFunction( loadType( symbol ), VarDataProviderPtr( new VarDataMemoryProvider( symbol->getVa() ) ) ),
+    TypedVarFunction( 
+        loadType( symbol ),
+        VarDataProviderPtr( new VarDataMemoryProvider( symbol->getVa() ) ),
+        ::getSymbolName(symbol) ),
     m_symbol( symbol )
 {
 }

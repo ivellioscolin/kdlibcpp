@@ -60,7 +60,7 @@ TEST_F( TypedVarTest, TypedVarArray )
     MEMOFFSET_64  varAddr = m_targetModule->getSymbolVa( L"g_testArray" );
 
     EXPECT_NO_THROW( var = loadTypedVar(L"g_testArray") );
-    EXPECT_EQ( ptrPtr(varAddr), *var);
+    EXPECT_EQ( varAddr, *var);
     EXPECT_EQ( varAddr, var->getAddress() );
 }
 
@@ -93,6 +93,16 @@ TEST_F( TypedVarTest, GetSize )
     EXPECT_EQ( sizeof(g_structTest), loadTypedVar(L"g_structTest")->getSize() );
     EXPECT_EQ( sizeof(pbigValue), loadTypedVar(L"pbigValue")->getSize() );
     EXPECT_EQ( sizeof(ulonglongArray), loadTypedVar(L"ulonglongArray")->getSize() );
+}
+
+TEST_F( TypedVarTest, GetName )
+{
+    EXPECT_EQ( L"ucharVar", loadTypedVar(L"ucharVar")->getName() );
+    EXPECT_EQ( L"g_constEnumThree", loadTypedVar(L"g_constEnumThree")->getName() );
+    EXPECT_EQ( L"CdeclFunc", loadTypedVar(L"CdeclFunc")->getName() );
+
+    EXPECT_THROW( loadTypedVar(L"g_structTest")->getElement(L"m_field1")->getName(), DbgException );
+    EXPECT_THROW( loadTypedVar(loadType(L"UInt4B"), 0x0)->getName(), DbgException );
 }
 
 TEST_F( TypedVarTest, GetField )

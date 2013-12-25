@@ -51,6 +51,7 @@ public:
     virtual std::wstring str() = 0;
     virtual MEMOFFSET_64 getAddress() const = 0;
     virtual size_t getSize() const = 0;
+    virtual std::wstring getName() const = 0;
     virtual TypedVarPtr getElement( const std::wstring& fieldName ) = 0;
     virtual TypedVarPtr getElement( size_t index ) = 0;
     virtual MEMOFFSET_REL getElementOffset(const std::wstring& fieldName ) = 0;
