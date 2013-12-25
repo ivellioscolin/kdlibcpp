@@ -130,6 +130,20 @@ TEST_F( TypedVarTest, GetElementByIndex )
     EXPECT_THROW( loadTypedVar(L"g_testArray")->getElement( ARRAYSIZE(g_testArray) ), IndexException  );
 }
 
+TEST_F( TypedVarTest, GetElementName )
+{
+    EXPECT_EQ( L"m_field1", loadTypedVar(L"g_structTest")->getElementName(1) );
+    EXPECT_THROW( loadTypedVar(L"g_structTest")->getElementName(10), IndexException );
+
+    EXPECT_EQ( L"b", loadTypedVar(L"FastcallFunc")->getElementName(1) );
+    EXPECT_THROW( loadTypedVar(L"FastcallFunc")->getElementName(10), IndexException );
+
+    EXPECT_EQ( L"m_field1", loadTypedVar(L"g_structTestPtr")->deref()->getElementName(1) );
+
+    EXPECT_THROW( loadTypedVar(L"charArray")->getElementName(1), TypeException );
+    EXPECT_THROW( loadTypedVar(L"charArray")->getElementName(20), TypeException );
+    EXPECT_THROW( loadTypedVar(L"ucharVar")->getElementName(0), TypeException );
+}
 
 TEST_F( TypedVarTest, ArithmOp )
 {
@@ -217,3 +231,4 @@ TEST_F( TypedVarTest, FuncPtr )
     TypedVarPtr  funcptr;
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncPtr" ) );
 }
+

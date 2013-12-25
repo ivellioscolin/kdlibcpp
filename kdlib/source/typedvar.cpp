@@ -819,4 +819,28 @@ size_t SymbolFunction::getElementIndex(const std::wstring& paramName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring SymbolFunction::getElementName( size_t index )
+{
+    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
+    if ( paramLst.size() < index )
+        throw IndexException( index );
+
+    SymbolPtr paramSym;
+    SymbolPtrList::iterator itVar = paramLst.begin();
+    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
+    {
+        if ( (*itVar)->getDataKind() == DataIsParam  )
+        {
+            if ( i == index )
+                return  (*itVar)->getName();
+
+            i++;
+        }
+    }
+
+    throw IndexException( index );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // end kdlib namesapce

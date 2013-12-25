@@ -408,7 +408,9 @@ public:
  
     virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& paramName );
 
-    virtual size_t SymbolFunction::getElementIndex(const std::wstring& paramName );
+    virtual size_t getElementIndex(const std::wstring& paramName );
+
+    virtual std::wstring getElementName( size_t index );
 
     virtual size_t getSize() const {
         return m_symbol->getSize();
