@@ -48,6 +48,8 @@ public:
 
     TypedVarPtr getTypedParam( unsigned long index );
 
+    std::wstring  getTypedParamName( unsigned long index );
+
     TypedVarPtr getTypedParam( const std::wstring& paramName );
 
 

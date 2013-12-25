@@ -74,6 +74,20 @@ TypedVarPtr StackFrame::getTypedParam( unsigned long index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring  StackFrame::getTypedParamName( unsigned long index )
+{
+    ModulePtr mod = loadModule(m_ip);
+
+    MEMDISPLACEMENT displ;
+    SymbolPtr sym = mod->getSymbolByVa(m_ip, &displ);
+
+    TypedVarPtr func = loadTypedVar( sym );
+
+    return func->getElementName(index);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr StackFrame::getTypedParam(  const std::wstring& paramName )
 {
     ModulePtr mod = loadModule(m_ip);
