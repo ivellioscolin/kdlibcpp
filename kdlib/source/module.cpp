@@ -279,6 +279,26 @@ TypedVarPtr Module::containingRecord( MEMOFFSET_64 offset, const std::wstring &t
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr Module::getFunctionByAddr( MEMOFFSET_64 offset )
+{
+    offset = addr64(offset);
+
+    MEMDISPLACEMENT  displacement;
+    SymbolPtr  symVar = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base ), SymTagFunction, &displacement );
+
+    if ( !symVar || displacement < 0 )
+         throw SymbolException(L"failed to find function symbols by address");
+
+    size_t  funcLength = symVar->getSize();
+
+    if ( static_cast<size_t>(displacement) > funcLength )
+         throw SymbolException(L"failed to find function symbols by address");
+
+    return  loadTypedVar( symVar );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarList Module::loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName )
 {
     offset = addr64(offset);

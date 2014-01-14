@@ -332,21 +332,45 @@ TEST_F( TypeInfoTest, Str )
     ASSERT_NO_THROW( str = loadType(L"enumType")->str() );
 }
 
+
+#pragma pack (push, 8 )
+
+struct DefineStructTest1  {
+
+    unsigned char  field1;
+    double  field2;
+};
+
+#pragma pack(pop)
+
+
+
+#pragma pack (push, 1)
+
+struct DefineStructTest2  {
+
+    unsigned char  field1;
+    double  field2;
+};
+
+#pragma pack(pop)
+
+
 TEST_F( TypeInfoTest, DefineStruct )
 {
     TypeInfoPtr  testStruct;
 
-    ASSERT_NO_THROW( testStruct = defineStruct(L"TestStruct") );
+    ASSERT_NO_THROW( testStruct = defineStruct(L"TestStruct", 8) );
     ASSERT_NO_THROW( testStruct->appendField(L"field1", loadType(L"Int1B") ) );
     ASSERT_NO_THROW( testStruct->appendField(L"field2", loadType(L"Double") ) );
-    EXPECT_EQ( ptrSize() + sizeof(double), testStruct->getSize() );
-    EXPECT_EQ( ptrSize(), testStruct->getElementOffset(L"field2") );
+    EXPECT_EQ( sizeof(DefineStructTest1), testStruct->getSize() );
+    EXPECT_EQ( FIELD_OFFSET(DefineStructTest1, field2), testStruct->getElementOffset(L"field2") );
 
     ASSERT_NO_THROW( testStruct = defineStruct(L"TestStruct", 1) );
     ASSERT_NO_THROW( testStruct->appendField(L"field1", loadType(L"Int1B") ) );
     ASSERT_NO_THROW( testStruct->appendField(L"field2", loadType(L"Double") ) );
-    EXPECT_EQ( sizeof(char) + sizeof(double), testStruct->getSize() );
-    EXPECT_EQ( sizeof(char), testStruct->getElementOffset(L"field2") );
+    EXPECT_EQ( sizeof(DefineStructTest2), testStruct->getSize() );
+    EXPECT_EQ( FIELD_OFFSET(DefineStructTest2, field2), testStruct->getElementOffset(L"field2") );
 
     ASSERT_NO_THROW( testStruct = defineStruct(L"TestStruct") );
     EXPECT_THROW( testStruct->appendField(L"field", testStruct ), TypeException );

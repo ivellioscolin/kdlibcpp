@@ -93,7 +93,8 @@ public:
     TypedVarPtr getTypedVarByName( const std::wstring &symName );
     TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr );
     TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,  const std::wstring &fieldName );
-       
+    TypedVarPtr getFunctionByAddr( MEMOFFSET_64 offset );
+
     TypedVarList loadTypedVarList( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
     TypedVarList loadTypedVarArray( MEMOFFSET_64 addr, const std::wstring &typeName, size_t count );
 

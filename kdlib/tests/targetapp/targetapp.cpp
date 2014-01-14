@@ -55,6 +55,7 @@ int breakpointTestRun()
 
 std::string __fastcall stackTestRun2( int&a, double b, const char* c )
 {
+    int  localInt = 10;
     __debugbreak();
     return std::string("Hello!");
 }
@@ -62,8 +63,26 @@ std::string __fastcall stackTestRun2( int&a, double b, const char* c )
 float stackTestRun1( int a, const float& b, const std::string& c )
 {
     static long sa = 1;
-    stackTestRun2( a, b, c.c_str() );
-    return 1.1f + sa;
+    double localDouble = 0.0;
+
+    try {
+
+        float localFloat = b;
+
+        if ( sa == 1 )
+        {
+            char  localChars[0x100];
+           //c.copy(localChars, c.size());
+            strcpy_s(localChars, 0x100, c.c_str() );
+            stackTestRun2( a, localFloat, localChars );
+            return 1.1f + sa;
+        }
+    }
+    catch(...)
+    {
+    }
+
+    return (float)localDouble;
 }
 
 int stackTestRun()

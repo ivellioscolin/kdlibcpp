@@ -17,6 +17,46 @@ typedef boost::shared_ptr<Stack>  StackPtr;
 class StackFrame;
 typedef boost::shared_ptr<StackFrame>  StackFramePtr;
 
+class LocalScope;
+typedef boost::shared_ptr<LocalScope>  LocalScopePtr;
+
+///////////////////////////////////////////////////////////////////////////////
+
+class LocalScope {
+
+    friend LocalScopePtr getLocalScope();
+
+public:
+
+    unsigned long getLocalVarCount() {
+        NOT_IMPLEMENTED();
+    }
+
+    TypedVarPtr getLocalVar( unsigned long index ) {
+        NOT_IMPLEMENTED();
+    }
+
+    TypedVarPtr getLocalVar( const std::wstring& paramName ) {
+        NOT_IMPLEMENTED();
+    }
+
+    std::wstring  getLocalVarName( unsigned long index ) {
+        NOT_IMPLEMENTED();
+    }
+
+    unsigned long getChildScopeCount() {
+        NOT_IMPLEMENTED();
+    }
+
+    LocalScopePtr getChildScope( unsigned long index ) {
+        NOT_IMPLEMENTED();
+    }
+
+    bool isCurrent() {
+        NOT_IMPLEMENTED();
+    }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class StackFrame {
@@ -52,16 +92,7 @@ public:
 
     TypedVarPtr getTypedParam( const std::wstring& paramName );
 
-
-    unsigned long getTypedLocalCount() {
-        NOT_IMPLEMENTED();
-    }
-
-    TypedVarPtr getTypedLocal( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
-
-    TypedVarPtr getTypedLocal( const std::wstring& paramName ) {
+    LocalScopePtr getLocalScope() {
         NOT_IMPLEMENTED();
     }
 

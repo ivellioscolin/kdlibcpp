@@ -152,3 +152,24 @@ TEST_F( ModuleTest, getSourceLine )
     //EXPECT_EQ( 10, lineNo );
     //EXPECT_EQ( 0, displacement );
 }
+
+
+TEST_F( ModuleTest, getFunction )
+{
+    MEMOFFSET_64  addr;
+    TypedVarPtr  funcPtr;
+
+    ASSERT_NO_THROW( addr = m_targetModule->getTypedVarByName(L"stackTestRun1")->getAddress() );
+
+    EXPECT_EQ( addr, m_targetModule->getFunctionByAddr(addr)->getAddress() );
+    EXPECT_EQ( addr, m_targetModule->getFunctionByAddr(addr + 10)->getAddress() );
+    EXPECT_EQ( addr, m_targetModule->getFunctionByAddr(addr + 50)->getAddress() );
+    EXPECT_EQ( addr, m_targetModule->getFunctionByAddr(addr + 100)->getAddress() );
+
+    size_t  funcSize;
+    ASSERT_NO_THROW(funcSize =  m_targetModule->getFunctionByAddr(addr)->getSize() );
+
+    EXPECT_THROW( m_targetModule->getFunctionByAddr( addr - 1 ), SymbolException );
+    EXPECT_THROW( m_targetModule->getFunctionByAddr( addr + funcSize ), SymbolException );
+}
+

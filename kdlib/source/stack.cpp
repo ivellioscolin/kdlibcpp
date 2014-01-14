@@ -28,12 +28,7 @@ TypedVarPtr StackFrame::getFunction()
 {
     ModulePtr mod = loadModule(m_ip);
 
-    MEMDISPLACEMENT displ;
-    SymbolPtr sym = mod->getSymbolByVa(m_ip, &displ);
-
-    TypeInfoPtr typeInfo = loadType( sym->getType() );
-
-    return loadTypedVar( typeInfo, m_ip - displ );
+    return mod->getFunctionByAddr(m_ip);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,12 +37,7 @@ unsigned long StackFrame::getTypedParamCount()
 {
     ModulePtr mod = loadModule(m_ip);
 
-    MEMDISPLACEMENT displ;
-    SymbolPtr sym = mod->getSymbolByVa(m_ip, &displ);
-
-    TypeInfoPtr typeInfo = loadType( sym->getType() );
-
-    TypedVarPtr func = loadTypedVar( typeInfo, m_ip - displ );
+    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
     return func->getElementCount();
 }
@@ -58,10 +48,7 @@ TypedVarPtr StackFrame::getTypedParam( unsigned long index )
 {
     ModulePtr mod = loadModule(m_ip);
 
-    MEMDISPLACEMENT displ;
-    SymbolPtr sym = mod->getSymbolByVa(m_ip, &displ);
-
-    TypedVarPtr func = loadTypedVar( sym );
+    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
     MEMOFFSET_REL relOffset = func->getElementOffset(index);
 
@@ -78,10 +65,7 @@ std::wstring  StackFrame::getTypedParamName( unsigned long index )
 {
     ModulePtr mod = loadModule(m_ip);
 
-    MEMDISPLACEMENT displ;
-    SymbolPtr sym = mod->getSymbolByVa(m_ip, &displ);
-
-    TypedVarPtr func = loadTypedVar( sym );
+    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
     return func->getElementName(index);
 }
@@ -92,10 +76,7 @@ TypedVarPtr StackFrame::getTypedParam(  const std::wstring& paramName )
 {
     ModulePtr mod = loadModule(m_ip);
 
-    MEMDISPLACEMENT displ;
-    SymbolPtr sym = mod->getSymbolByVa(m_ip, &displ);
-
-    TypedVarPtr func = loadTypedVar( sym );
+    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
     MEMOFFSET_REL relOffset = func->getElementOffset(paramName);
 
