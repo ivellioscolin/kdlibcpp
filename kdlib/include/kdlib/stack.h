@@ -1,9 +1,11 @@
 #pragma once
 
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <kdlib/cpucontext.h>
+#include <kdlib/scope.h>
 #include <kdlib/typedvar.h>
 #include <kdlib/exceptions.h>
 
@@ -17,49 +19,9 @@ typedef boost::shared_ptr<Stack>  StackPtr;
 class StackFrame;
 typedef boost::shared_ptr<StackFrame>  StackFramePtr;
 
-class LocalScope;
-typedef boost::shared_ptr<LocalScope>  LocalScopePtr;
-
 ///////////////////////////////////////////////////////////////////////////////
 
-class LocalScope {
-
-    friend LocalScopePtr getLocalScope();
-
-public:
-
-    unsigned long getLocalVarCount() {
-        NOT_IMPLEMENTED();
-    }
-
-    TypedVarPtr getLocalVar( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
-
-    TypedVarPtr getLocalVar( const std::wstring& paramName ) {
-        NOT_IMPLEMENTED();
-    }
-
-    std::wstring  getLocalVarName( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
-
-    unsigned long getChildScopeCount() {
-        NOT_IMPLEMENTED();
-    }
-
-    LocalScopePtr getChildScope( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
-
-    bool isCurrent() {
-        NOT_IMPLEMENTED();
-    }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class StackFrame {
+class StackFrame : public boost::enable_shared_from_this<StackFrame>, public boost::noncopyable {
 
     friend StackFramePtr getStackFrame();
     friend StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
@@ -92,17 +54,15 @@ public:
 
     TypedVarPtr getTypedParam( const std::wstring& paramName );
 
-    LocalScopePtr getLocalScope() {
-        NOT_IMPLEMENTED();
-    }
+    TypedVarScopePtr getLocalScope();
+
+    MEMOFFSET_64 getOffset( unsigned long regRel, MEMOFFSET_REL relOffset );
 
 protected:
 
     StackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) :
         m_ip(ip), m_ret(ret), m_fp(fp), m_sp(sp)
         {}
-
-    MEMOFFSET_64 getOffset( unsigned long regRel, MEMOFFSET_REL relOffset );
 
      MEMOFFSET_64  m_ip;
      MEMOFFSET_64  m_ret;

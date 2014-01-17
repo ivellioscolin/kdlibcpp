@@ -103,9 +103,11 @@ TEST_F( StackTest, ScopeTest )
     StackFramePtr  frame;
     ASSERT_NO_THROW( frame = getStackFrame() );
 
-    LocalScopePtr  frameScope;
+    TypedVarScopePtr  frameScope;
     ASSERT_NO_THROW( frameScope = frame->getLocalScope() );
 
-    EXPECT_EQ( 1, frameScope->getLocalVarCount() );
+    EXPECT_EQ( 1, frameScope->getVarCount() );
+    EXPECT_EQ( 10, *frameScope->getVarByIndex(0) );
+    EXPECT_EQ( 10, *frameScope->getVarByName(L"localInt") );
     EXPECT_EQ( 0, frameScope->getChildScopeCount() );
 }

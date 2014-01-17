@@ -86,6 +86,10 @@
     <ClInclude Include="..\include\kdlib\stack.h">
       <Filter>include/kdlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\kdlib\scope.h">
+      <Filter>include/kdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="scopeimp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">
@@ -129,5 +133,6 @@
     </ClCompile>
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="customtypes.cpp" />
+    <ClCompile Include="scope.cpp" />
   </ItemGroup>
 </Project>

@@ -16,6 +16,14 @@ class TypedVar;
 typedef boost::shared_ptr<TypedVar>  TypedVarPtr;
 typedef std::vector<TypedVarPtr> TypedVarList;
 
+class TypedVarScope;
+typedef boost::shared_ptr<TypedVarScope>  TypedVarScopePtr;
+
+class StackFrame;
+typedef boost::shared_ptr<StackFrame>  StackFramePtr;
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr loadTypedVar( const std::wstring &varName );
 
 TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr );
@@ -66,7 +74,6 @@ public:
     virtual TypedVarPtr deref() = 0;
 
 protected:
-
 
     TypedVar() 
     {}

@@ -1,7 +1,10 @@
 #include "stdafx.h"
 
+#include "kdlib\scope.h"
 #include "kdlib\stack.h"
 #include "kdlib\module.h"
+
+#include "scopeimp.h"
 
 namespace kdlib {
 
@@ -110,5 +113,11 @@ MEMOFFSET_64 StackFrame::getOffset( unsigned long regRel, MEMOFFSET_REL relOffse
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarScopePtr StackFrame::getLocalScope()
+{
+    return TypedVarScopePtr( new FunctionScope( shared_from_this() ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 }; // kdlib namespace end

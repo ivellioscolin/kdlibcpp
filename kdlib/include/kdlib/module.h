@@ -81,6 +81,7 @@ public:
     SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, MEMDISPLACEMENT* displacement = 0 );
     SymbolPtr getSymbolByName( const std::wstring &symbolName );
     SymbolPtr getSymbolScope();
+    SymbolPtr getSymbolScope(MEMOFFSET_64 offset);
 
     size_t getSymbolSize( const std::wstring &symName );
 
