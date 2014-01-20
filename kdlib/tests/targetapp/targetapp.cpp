@@ -57,25 +57,31 @@ std::string __fastcall stackTestRun2( int&a, double b, const char* c )
 {
     int  localInt = 10;
     __debugbreak();
-    return std::string("Hello!");
+    
+    if ( localInt/5 > 0 )
+        return std::string("Hello!");
+    else
+        return std::string("Buy!");
 }
 
 float stackTestRun1( int a, const float& b, const std::string& c )
 {
-    static long sa = 1;
+    static long staticLong = 1;
     double localDouble = 0.0;
 
     try {
 
         float localFloat = b;
 
-        if ( sa == 1 )
+        if ( staticLong == 1 )
         {
+
             char  localChars[0x100];
            //c.copy(localChars, c.size());
             strcpy_s(localChars, 0x100, c.c_str() );
             stackTestRun2( a, localFloat, localChars );
-            return 1.1f + sa;
+            static float staticFloat = 3.5f;
+            return 1.1f + staticLong + staticFloat;
         }
     }
     catch(...)

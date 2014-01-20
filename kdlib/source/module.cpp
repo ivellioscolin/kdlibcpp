@@ -54,25 +54,6 @@ SymbolPtr Module::getSymbolScope()
     return getSymSession()->getSymbolScope();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-SymbolPtr  Module::getSymbolScope(MEMOFFSET_64 offset)
-{
-    offset = addr64(offset);
-
-    MEMDISPLACEMENT  displacement;
-    SymbolPtr  symVar = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base ), SymTagFunction, &displacement );
-
-    if ( !symVar || displacement < 0 )
-         throw SymbolException(L"failed to find function symbols by address");
-
-    size_t  funcLength = symVar->getSize();
-
-    if ( static_cast<size_t>(displacement) > funcLength )
-         throw SymbolException(L"failed to find function symbols by address");
-    
-    return symVar;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -167,20 +148,34 @@ void Module::reloadSymbols()
 
 SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset,  MEMDISPLACEMENT* displacemnt )
 {
+    return getSymbolByVa( offset, SymTagNull, displacemnt );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement )
+{
     offset = addr64(offset);
 
     if ( offset < m_base || offset > getEnd() )
         throw DbgException( "address is out of the module space" );
 
-    return getSymbolByRva( (MEMOFFSET_32)(offset - m_base ), displacemnt );
+    return getSymbolByRva( (MEMOFFSET_32)(offset - m_base ), symTag, displacement );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 SymbolPtr Module::getSymbolByRva( MEMOFFSET_32 rva, MEMDISPLACEMENT* displacemnt  )
 {
-   return getSymSession()->findByRva( rva, SymTagNull, displacemnt );
+   return getSymbolByRva( rva, SymTagNull, displacemnt );
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolPtr Module::getSymbolByRva( MEMOFFSET_32 rva, unsigned long symTag, MEMDISPLACEMENT* displacement )
+{
+   return getSymSession()->findByRva( rva, symTag, displacement );
+} 
 
 ///////////////////////////////////////////////////////////////////////////////
 

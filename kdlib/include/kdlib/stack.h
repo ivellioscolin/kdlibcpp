@@ -5,7 +5,6 @@
 #include <boost/noncopyable.hpp>
 
 #include <kdlib/cpucontext.h>
-#include <kdlib/scope.h>
 #include <kdlib/typedvar.h>
 #include <kdlib/exceptions.h>
 
@@ -54,15 +53,41 @@ public:
 
     TypedVarPtr getTypedParam( const std::wstring& paramName );
 
-    TypedVarScopePtr getLocalScope();
+    unsigned long getLocalVarCount();
 
-    MEMOFFSET_64 getOffset( unsigned long regRel, MEMOFFSET_REL relOffset );
+    TypedVarPtr getLocalVar( unsigned long index );
+
+    TypedVarPtr getLocalVar( const std::wstring& paramName );
+
+    std::wstring  getLocalVarName( unsigned long index );
+
+    unsigned long getStaticVarCount() {
+        NOT_IMPLEMENTED();
+    }
+
+    TypedVarPtr getStaticVar( unsigned long index ) {
+        NOT_IMPLEMENTED();
+    }
+
+    TypedVarPtr getStaticVar( const std::wstring& paramName ) {
+        NOT_IMPLEMENTED();
+    }
+
+    std::wstring  getStaticVarName( unsigned long index ) {
+        NOT_IMPLEMENTED();
+    }
 
 protected:
 
     StackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) :
         m_ip(ip), m_ret(ret), m_fp(fp), m_sp(sp)
         {}
+
+     SymbolPtrList  getLocalVars();
+
+     SymbolPtrList  getBlockLocalVars(SymbolPtr&  sym);
+
+     MEMOFFSET_64 getOffset( unsigned long regRel, MEMOFFSET_REL relOffset );
 
      MEMOFFSET_64  m_ip;
      MEMOFFSET_64  m_ret;
