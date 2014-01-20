@@ -1491,6 +1491,10 @@ EXTENSION_ID loadExtension(const std::wstring &extPath )
     HRESULT  hres;
     ULONG64  handle = 0;
 
+    HMODULE hmodule = LoadLibraryW(extPath.c_str());
+    if ( !hmodule )
+        throw DbgWideException( std::wstring(L"extension not found: ") + extPath );
+
     hres = g_dbgMgr->control->AddExtensionWide( extPath.c_str(), 0, &handle );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::AddExtension", hres );
