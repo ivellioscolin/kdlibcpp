@@ -486,7 +486,7 @@ ULONG DiaSymbol::getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRe
         DiaRegToRegRelative.find(callSymbol(get_registerId));
 
     if (it == DiaRegToRegRelative.end())
-        throw DiaException(L"Cannot convert DAI register ID to relative register ID");
+        throw DiaException(L"Cannot convert DIA register ID to relative register ID");
 
     return it->second;
 }
