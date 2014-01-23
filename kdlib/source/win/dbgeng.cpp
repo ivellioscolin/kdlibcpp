@@ -1486,18 +1486,73 @@ MEMOFFSET_64 getNearInstruction( MEMOFFSET_64 offset, LONG delta )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring getExtensionSearchPath()
+{
+    ULONG chars = MAX_PATH;
+    for (; ; )
+    {
+        std::vector< wchar_t > rawPath(chars + 1, L'\0');
+        HRESULT hres = 
+            g_dbgMgr->advanced->Request(
+                DEBUG_REQUEST_GET_EXTENSION_SEARCH_PATH_WIDE,
+                NULL,
+                0,
+                &rawPath[0],
+                chars * sizeof(wchar_t),
+                NULL);
+        if (S_OK == hres)
+        {
+            std::wstring result = &rawPath[0];
+            return result;
+        }
+
+        if (S_FALSE == hres)
+        {
+            // The method was successful. However, the output would not fit in the 
+            // output buffer OutBuffer, so truncated output was returned
+            chars *= 2; 
+            continue;
+        }
+
+        throw DbgEngException( L"IDebugAdvanced::Request", hres );
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 EXTENSION_ID loadExtension(const std::wstring &extPath )
 {
     HRESULT  hres;
     ULONG64  handle = 0;
 
-    HMODULE hmodule = LoadLibraryW(extPath.c_str());
-    if ( !hmodule )
+    std::vector< wchar_t > rawPath(MAX_PATH + 1, L'\0');
+    DWORD ret = 
+        ::SearchPath(
+            getExtensionSearchPath().c_str(),
+            extPath.c_str(),
+            L".dll",
+            MAX_PATH,
+            &rawPath[0],
+            NULL);
+    if (!ret)
+        throw DbgWideException( std::wstring(L"extension not found: ") + extPath );
+
+    struct _scoped_lib
+    {
+        _scoped_lib(const wchar_t *wsz) : m_hmod(::LoadLibrary(wsz)) {}
+        ~_scoped_lib() { if (m_hmod) ::FreeLibrary(m_hmod);}
+        HMODULE m_hmod;
+    } scoped_lib(&rawPath[0]);
+    if (!scoped_lib.m_hmod)
         throw DbgWideException( std::wstring(L"extension not found: ") + extPath );
 
     hres = g_dbgMgr->control->AddExtensionWide( extPath.c_str(), 0, &handle );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::AddExtension", hres );
+
+    // inderect call of dbgeng!ExtensionInfo::Load
+    FARPROC dummy = NULL;
+    g_dbgMgr->control->GetExtensionFunctionWide(handle, L"dummy", &dummy);
 
     return handle;
 }

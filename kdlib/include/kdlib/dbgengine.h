@@ -125,6 +125,7 @@ void getStackFrame( THREAD_ID id, unsigned long frameIndex, MEMOFFSET_64 &ip, ME
 
 //
 // Extensions
+std::wstring getExtensionSearchPath();
 EXTENSION_ID loadExtension(const std::wstring &extPath );
 void removeExtension( EXTENSION_ID extHandle );
 std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  );
