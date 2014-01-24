@@ -1692,6 +1692,51 @@ THREAD_DEBUG_ID getLastEventThreadId()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ExceptionInfo  getLastException()
+{
+    HRESULT hres;
+
+    ULONG  eventType;
+    ULONG  processId;
+    ULONG  threadId;
+    DEBUG_LAST_EVENT_INFO_EXCEPTION  lastException;
+    ULONG  retLength = sizeof(lastException);
+
+    if ( getLastEventType() != EventTypeException )
+        throw DbgException("Last event is not exception");
+
+    hres = 
+        g_dbgMgr->control->GetLastEventInformation(
+            &eventType,
+            &processId,
+            &threadId,
+            &lastException,
+            sizeof(lastException),
+            &retLength,
+            NULL,
+            0,
+            NULL);
+
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetLastEventInformation", hres);
+
+    ExceptionInfo  excinfo = {};
+
+    excinfo.firstChance = lastException.FirstChance != 0;
+
+    excinfo.exceptionCode = lastException.ExceptionRecord.ExceptionCode;
+    excinfo.exceptionFlags = lastException.ExceptionRecord.ExceptionFlags;
+    excinfo.exceptionRecord = lastException.ExceptionRecord.ExceptionRecord;
+    excinfo.exceptionAddress = lastException.ExceptionRecord.ExceptionAddress;
+    excinfo.parameterCount = lastException.ExceptionRecord.NumberParameters;
+
+    for (ULONG i = 0; i < lastException.ExceptionRecord.NumberParameters; ++i)
+        excinfo.parameters[i] = lastException.ExceptionRecord.ExceptionInformation[i];
+
+    return excinfo;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end 
 

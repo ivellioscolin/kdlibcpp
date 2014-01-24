@@ -108,9 +108,9 @@ void targetBreak();
 EventType getLastEventType();
 PROCESS_DEBUG_ID getLastEventProcessId();
 THREAD_DEBUG_ID getLastEventThreadId(); 
+ExceptionInfo  getLastException();
 
 // registers
-
 MEMOFFSET_64 getInstructionOffset( THREAD_ID id = -1 );
 MEMOFFSET_64 getStackOffset( THREAD_ID id = -1);
 MEMOFFSET_64 getFrameOffset( THREAD_ID id = -1);

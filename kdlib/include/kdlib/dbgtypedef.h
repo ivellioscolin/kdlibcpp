@@ -70,7 +70,6 @@ enum EventType {
     EventTypeChangeSymbolState
 };
 
-
 struct SystemInfo {
     unsigned long  majorVersion;
     unsigned long  minorVersion;
@@ -84,7 +83,8 @@ struct ExceptionInfo {
     unsigned long  exceptionFlags;
     MEMOFFSET_64  exceptionRecord;
     MEMOFFSET_64  exceptionAddress;
-
+    PROCESS_DEBUG_ID  process;
+    THREAD_DEBUG_ID  thread;
     unsigned long parameterCount;
     unsigned long long parameters[0x10];
 };
