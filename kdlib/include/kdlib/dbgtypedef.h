@@ -53,6 +53,24 @@ enum CPURegType {
     RegVector128
 };
 
+
+enum EventType {
+    EventTypeBreakpoint,
+    EventTypeException,
+    EventTypeCreateThread,
+    EventTypeExitThread,
+    EventTypeCreateProcess,
+    EventTypeExitProcess,
+    EventTypeLoadModule,
+    EventTypeUnloadModule,
+    EventTypeSystemError,
+    EventTypeSessionStatus,
+    EventTypeChangeDebuggeeState,
+    EventTypeChangeEngineState,
+    EventTypeChangeSymbolState
+};
+
+
 struct SystemInfo {
     unsigned long  majorVersion;
     unsigned long  minorVersion;

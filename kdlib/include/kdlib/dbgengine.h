@@ -104,6 +104,11 @@ ExecutionStatus targetStep();
 ExecutionStatus targetStepIn();
 void targetBreak();
 
+// events
+EventType getLastEventType();
+PROCESS_DEBUG_ID getLastEventProcessId();
+THREAD_DEBUG_ID getLastEventThreadId(); 
+
 // registers
 
 MEMOFFSET_64 getInstructionOffset( THREAD_ID id = -1 );

@@ -1581,6 +1581,117 @@ std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, 
 
 ///////////////////////////////////////////////////////////////////////////////
 
+EventType getLastEventType()
+{
+    HRESULT  hres;
+
+    ULONG  eventType;
+    ULONG  processId;
+    ULONG  threadId;
+        
+    hres = 
+        g_dbgMgr->control->GetLastEventInformation(
+            &eventType,
+            &processId,
+            &threadId,
+            NULL,
+            0,
+            NULL,
+            NULL,
+            0,
+            NULL);
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetLastEventInformation", hres);
+
+    switch (eventType)
+    {
+    case DEBUG_EVENT_BREAKPOINT:
+        return EventTypeBreakpoint;
+    case DEBUG_EVENT_EXCEPTION:
+        return EventTypeException;
+    case DEBUG_EVENT_CREATE_THREAD:
+        return EventTypeCreateThread;
+    case DEBUG_EVENT_EXIT_THREAD:
+        return EventTypeExitThread;
+    case DEBUG_EVENT_CREATE_PROCESS:
+        return EventTypeCreateProcess;
+    case DEBUG_EVENT_EXIT_PROCESS:
+        return EventTypeExitProcess;
+    case DEBUG_EVENT_LOAD_MODULE:
+        return EventTypeLoadModule;
+    case DEBUG_EVENT_UNLOAD_MODULE:
+        return EventTypeUnloadModule;
+    case DEBUG_EVENT_SYSTEM_ERROR:
+        return EventTypeSystemError;
+    case DEBUG_EVENT_SESSION_STATUS:
+        return EventTypeSessionStatus;
+    case DEBUG_EVENT_CHANGE_DEBUGGEE_STATE:
+        return EventTypeChangeDebuggeeState;
+    case DEBUG_EVENT_CHANGE_ENGINE_STATE:
+        return EventTypeChangeEngineState;
+    case DEBUG_EVENT_CHANGE_SYMBOL_STATE:
+        return EventTypeChangeSymbolState;
+    }
+
+    throw DbgException( "unknow wvwnrt type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+PROCESS_DEBUG_ID getLastEventProcessId()
+{
+    HRESULT  hres;
+
+    ULONG  eventType;
+    ULONG  processId;
+    ULONG  threadId;
+        
+    hres = 
+        g_dbgMgr->control->GetLastEventInformation(
+            &eventType,
+            &processId,
+            &threadId,
+            NULL,
+            0,
+            NULL,
+            NULL,
+            0,
+            NULL);
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetLastEventInformation", hres);
+
+    return PROCESS_DEBUG_ID(processId);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+THREAD_DEBUG_ID getLastEventThreadId()
+{
+    HRESULT  hres;
+
+    ULONG  eventType;
+    ULONG  processId;
+    ULONG  threadId;
+        
+    hres = 
+        g_dbgMgr->control->GetLastEventInformation(
+            &eventType,
+            &processId,
+            &threadId,
+            NULL,
+            0,
+            NULL,
+            NULL,
+            0,
+            NULL);
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetLastEventInformation", hres);
+
+    return THREAD_DEBUG_ID(threadId);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 } // kdlib namespace end 
 
