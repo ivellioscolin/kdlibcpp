@@ -9,6 +9,7 @@
 #include "win/dbgmgr.h"
 
 #include <vector>
+#include <iomanip>
 
 namespace  kdlib {
 
@@ -239,6 +240,113 @@ std::wstring getModuleSymbolFileName( MEMOFFSET_64 baseOffset )
     }
 
     return std::wstring( moduleInfo.LoadedPdbName );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string getModuleVersionInfo( MEMOFFSET_64 baseOffset, const std::string &value )
+{
+    struct LANGANDCODEPAGE {
+        WORD wLanguage;
+        WORD wCodePage;
+    };
+
+    HRESULT  hres;
+
+    ULONG codePagesSize = 0;
+
+    hres = g_dbgMgr->symbols->GetModuleVersionInformation( 
+        DEBUG_ANY_ID,
+        baseOffset,
+        "\\VarFileInfo\\Translation",
+        NULL,
+        0,
+        &codePagesSize );
+
+    if ( FAILED( hres ) )
+         throw DbgEngException( L"IDebugSymbol2::GetModuleVersionInformation", hres ); 
+
+    size_t codePageNum = codePagesSize / sizeof(LANGANDCODEPAGE);
+
+    std::vector<LANGANDCODEPAGE> codePages(codePageNum);
+
+    hres = g_dbgMgr->symbols->GetModuleVersionInformation( 
+        DEBUG_ANY_ID,
+        baseOffset,
+        "\\VarFileInfo\\Translation",
+        &codePages[0],
+        codePagesSize,
+        NULL );
+
+    if ( FAILED( hres ) )
+         throw DbgEngException( L"IDebugSymbol2::GetModuleVersionInformation", hres );
+
+    ULONG productNameLength = 0;
+
+    std::stringstream  sstr;
+    sstr << "\\StringFileInfo\\" << std::hex 
+            << std::setw(4) << std::setfill('0') <<  codePages[0].wLanguage 
+            << std::setw(4) << std::setfill('0') << codePages[0].wCodePage 
+            << "\\" << value;
+
+    ULONG  valueLength = 0;
+
+    g_dbgMgr->symbols->GetModuleVersionInformation( 
+        DEBUG_ANY_ID,
+        baseOffset,
+        sstr.str().c_str(),
+        NULL,
+        0,
+        &valueLength );
+
+    if (!valueLength)
+        return "";
+
+    std::vector<char>  valueStr(valueLength);
+
+    hres = g_dbgMgr->symbols->GetModuleVersionInformation( 
+        DEBUG_ANY_ID,
+        baseOffset,
+        sstr.str().c_str(),
+        &valueStr[0],
+        valueLength,
+        NULL );
+
+    if ( hres == S_OK )
+        return std::string( &valueStr[0] );
+
+   return "";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void getModuleFixedFileInfo( MEMOFFSET_64 baseOffset, FixedFileInfo &fixedFileInfo )
+{
+    VS_FIXEDFILEINFO Pod;
+    HRESULT hres = 
+        g_dbgMgr->symbols->GetModuleVersionInformation( 
+            DEBUG_ANY_ID,
+            baseOffset,
+            "\\",
+            &Pod,
+            sizeof(Pod),
+            NULL );
+    if ( hres != S_OK )
+        throw DbgEngException( L"IDebugSymbols::GetModuleVersionInformation", hres );
+
+    fixedFileInfo.Signature = Pod.dwSignature;
+    fixedFileInfo.StrucVersion = Pod.dwStrucVersion;
+    fixedFileInfo.FileVersionMS = Pod.dwFileVersionMS;
+    fixedFileInfo.FileVersionLS = Pod.dwFileVersionLS;
+    fixedFileInfo.ProductVersionMS = Pod.dwProductVersionMS;
+    fixedFileInfo.ProductVersionLS = Pod.dwProductVersionLS;
+    fixedFileInfo.FileFlagsMask = Pod.dwFileFlagsMask;
+    fixedFileInfo.FileFlags = Pod.dwFileFlags;
+    fixedFileInfo.FileOS = Pod.dwFileOS;
+    fixedFileInfo.FileType = Pod.dwFileType;
+    fixedFileInfo.FileSubtype = Pod.dwFileSubtype;
+    fixedFileInfo.FileDateMS = Pod.dwFileDateMS;
+    fixedFileInfo.FileDateLS = Pod.dwFileDateLS;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

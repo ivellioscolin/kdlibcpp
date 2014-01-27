@@ -89,6 +89,31 @@ struct ExceptionInfo {
     unsigned long long parameters[0x10];
 };
 
+struct FixedFileInfo {
+    unsigned long Signature;
+    unsigned long StrucVersion;
+    unsigned long FileVersionMS;
+    unsigned long FileVersionLS;
+    unsigned long ProductVersionMS;
+    unsigned long ProductVersionLS;
+    unsigned long FileFlagsMask;
+    unsigned long FileFlags;
+    unsigned long FileOS;
+    unsigned long FileType;
+    unsigned long FileSubtype;
+    unsigned long FileDateMS;
+    unsigned long FileDateLS;
+};
+
+enum FileFlag {
+    FileFlagDebug           = 0x00000001,
+    FileFlagPreRelease      = 0x00000002,
+    FileFlagPatched         = 0x00000004,
+    FileFlagPrivateBuild    = 0x00000008,
+    FileFlagInfoInferred    = 0x00000010,
+    FileFlagSpecialBuild    = 0x00000020,
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

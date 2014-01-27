@@ -119,6 +119,9 @@ public:
 
     void getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement );
 
+    std::string getVersionInfo( const std::string &value );
+    void getFixedFileInfo( FixedFileInfo &fixedFileInfo );
+
 protected:
 
     Module( const std::wstring &name );

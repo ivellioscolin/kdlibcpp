@@ -57,6 +57,8 @@ unsigned long getModuleCheckSum( MEMOFFSET_64 baseOffset );
 bool isModuleUnloaded( MEMOFFSET_64 baseOffset );
 bool isModuleUserMode( MEMOFFSET_64 baseOffset );
 std::wstring getModuleSymbolFileName( MEMOFFSET_64 baseOffset );
+std::string getModuleVersionInfo( MEMOFFSET_64 baseOffset, const std::string &value );
+void getModuleFixedFileInfo( MEMOFFSET_64 baseOffset, FixedFileInfo &fixedFileInfo );
 
 // Symbol path
 std::wstring getSymbolPath();

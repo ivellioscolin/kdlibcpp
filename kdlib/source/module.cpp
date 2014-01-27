@@ -367,6 +367,20 @@ void Module::getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigne
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::string Module::getVersionInfo( const std::string &value )
+{
+    return getModuleVersionInfo( m_base, value );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Module::getFixedFileInfo( FixedFileInfo &fixedFileInfo )
+{
+    return getModuleFixedFileInfo( m_base, fixedFileInfo );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 {
     std::vector<MEMOFFSET_64>   moduleList = getModuleBasesList();
