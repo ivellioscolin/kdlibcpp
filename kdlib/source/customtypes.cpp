@@ -12,7 +12,7 @@ namespace kdlib {
 class CustomBase : public TypeInfoFields {
 
 protected:
-    
+
     CustomBase( const std::wstring &name, size_t align ) :
         TypeInfoFields(name)
         {
@@ -26,12 +26,14 @@ protected:
     void checkAppendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
 
 protected:
+
     static size_t alignUp(size_t val, size_t align) {
         return val + (val % align ? align - (val % align) : 0);
     }
 
     virtual size_t getSize() {
-        return alignUp(m_size, getAlignReq());
+        const size_t alignReq = getAlignReq();
+        return alignUp(m_size, alignReq < m_align ? alignReq : m_align);
     }
 
     virtual void getFields() {}
@@ -40,7 +42,6 @@ protected:
 
     size_t  m_align;
     MEMOFFSET_32  m_size;
-
 };
 
 
