@@ -68,6 +68,14 @@ public:
         return m_timeDataStamp;
     }
 
+    bool isUnloaded() const {
+        return m_isUnloaded;
+    }
+
+    bool isUserMode() const {
+        return m_isUserMode;
+    }
+
     std::wstring getSymFile();
 
     void
@@ -117,6 +125,8 @@ protected:
 
     Module( MEMOFFSET_64 offset );
 
+    void fillFields(); // ctor-helper
+
     SymbolSessionPtr& getSymSession();
 
     virtual NumVariant getValue() const {
@@ -130,7 +140,8 @@ protected:
     unsigned long  m_timeDataStamp;
     unsigned long  m_checkSum;
     SymbolSessionPtr  m_symSession;
-
+    bool m_isUnloaded;
+    bool m_isUserMode;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

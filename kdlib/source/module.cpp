@@ -14,10 +14,7 @@ Module::Module(const std::wstring &moduleName )
 {
     m_base = findModuleBase( moduleName );
     m_name = moduleName;
-    m_imageName = getModuleImageName( m_base );
-    m_timeDataStamp = getModuleTimeStamp( m_base );
-    m_checkSum = getModuleCheckSum( m_base );
-    m_size = getModuleSize( m_base );
+    fillFields();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,10 +23,19 @@ Module::Module(MEMOFFSET_64 offset )
 {
     m_base = findModuleBase( addr64(offset) );
     m_name = getModuleName( m_base );
+    fillFields();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Module::fillFields()
+{
     m_imageName = getModuleImageName( m_base );
     m_timeDataStamp = getModuleTimeStamp( m_base );
     m_checkSum = getModuleCheckSum( m_base );
     m_size = getModuleSize( m_base );
+    m_isUnloaded = isModuleUnloaded( m_base );
+    m_isUserMode = isModuleUserMode( m_base );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

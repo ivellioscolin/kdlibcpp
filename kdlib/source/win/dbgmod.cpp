@@ -14,6 +14,26 @@ namespace  kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace
+{
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct ModuleParameters : public DEBUG_MODULE_PARAMETERS
+{
+    ModuleParameters(MEMOFFSET_64 baseOffset) {
+        HRESULT hres = g_dbgMgr->symbols->GetModuleParameters( 1, &baseOffset, 0, this );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugSymbol::GetModuleParameters", hres );
+    }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 findModuleBase( const std::wstring &moduleName )
 {
     HRESULT     hres;
@@ -142,42 +162,35 @@ std::wstring getModuleImageName( MEMOFFSET_64 baseOffset )
 
 MEMOFFSET_32 getModuleSize( MEMOFFSET_64 baseOffset )
 {
-    HRESULT  hres;
-    DEBUG_MODULE_PARAMETERS     moduleParam = { 0 };
-
-    hres = g_dbgMgr->symbols->GetModuleParameters( 1, &baseOffset, 0, &moduleParam );
-    if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugSymbol::GetModuleParameters", hres );
-
-    return moduleParam.Size;
+    return ModuleParameters(baseOffset).Size;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 unsigned long getModuleTimeStamp( MEMOFFSET_64 baseOffset )
 {
-    HRESULT  hres;
-    DEBUG_MODULE_PARAMETERS     moduleParam = { 0 };
-
-    hres = g_dbgMgr->symbols->GetModuleParameters( 1, &baseOffset, 0, &moduleParam );
-    if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugSymbol::GetModuleParameters", hres );
-
-    return moduleParam.TimeDateStamp;
+    return ModuleParameters(baseOffset).TimeDateStamp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 unsigned long getModuleCheckSum( MEMOFFSET_64 baseOffset )
 {
-    HRESULT  hres;
-    DEBUG_MODULE_PARAMETERS     moduleParam = { 0 };
+    return ModuleParameters(baseOffset).Checksum;
+}
 
-    hres = g_dbgMgr->symbols->GetModuleParameters( 1, &baseOffset, 0, &moduleParam );
-    if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugSymbol::GetModuleParameters", hres );
+///////////////////////////////////////////////////////////////////////////////
 
-    return moduleParam.Checksum;
+bool isModuleUnloaded( MEMOFFSET_64 baseOffset )
+{
+    return !!(ModuleParameters(baseOffset).Flags & DEBUG_MODULE_UNLOADED);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool isModuleUserMode( MEMOFFSET_64 baseOffset )
+{
+    return !!(ModuleParameters(baseOffset).Flags & DEBUG_MODULE_USER_MODE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
