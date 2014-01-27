@@ -38,7 +38,7 @@ static const struct DiaRegToRegRelativeI386 : DiaRegToRegRelativeBase
 DiaRegToRegRelativeI386::DiaRegToRegRelativeI386()
 {
     (*this)[CV_REG_EIP] = rriInstructionPointer;
-    (*this)[CV_REG_EBP] = rriStackFrame;
+    (*this)[CV_REG_EBP] = (*this)[CV_ALLREG_VFRAME] = rriStackFrame;
     (*this)[CV_REG_ESP] = rriStackPointer;
 }
 
@@ -482,12 +482,10 @@ SymbolPtr DiaSymbol::getClassParent()
 
 ULONG DiaSymbol::getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative)
 {
-    DiaRegToRegRelativeBase::const_iterator it = 
-        DiaRegToRegRelative.find(callSymbol(get_registerId));
-
+    const DWORD registerId = callSymbol(get_registerId);
+    DiaRegToRegRelativeBase::const_iterator it = DiaRegToRegRelative.find(registerId);
     if (it == DiaRegToRegRelative.end())
         throw DiaException(L"Cannot convert DIA register ID to relative register ID");
-
     return it->second;
 }
 
