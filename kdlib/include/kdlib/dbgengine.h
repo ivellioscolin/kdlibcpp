@@ -137,9 +137,9 @@ void getStackFrame( THREAD_ID id, unsigned long frameIndex, MEMOFFSET_64 &ip, ME
 std::wstring getExtensionSearchPath();
 EXTENSION_ID loadExtension(const std::wstring &extPath );
 void removeExtension( EXTENSION_ID extHandle );
+void removeExtension( const std::wstring &extPath );
+EXTENSION_ID getExtension(const std::wstring &extPath );
 std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  );
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

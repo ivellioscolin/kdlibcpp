@@ -22,13 +22,20 @@ namespace windbg {
 
 void WindbgOut::write( const std::wstring& str )
 {
+    std::wstringstream  sstr(str);
+    std::wstring  line;
 
-    g_dbgMgr->control->ControlledOutputWide(  
-        DEBUG_OUTCTL_AMBIENT_TEXT,
-        DEBUG_OUTPUT_NORMAL, 
-        L"%ws",
-        str.c_str()
-        );
+    while (std::getline(sstr, line)) 
+    {
+        line += L'\n';
+
+        g_dbgMgr->control->ControlledOutputWide(  
+           DEBUG_OUTCTL_AMBIENT_TEXT,
+           DEBUG_OUTPUT_NORMAL, 
+           L"%ws",
+           str.c_str()
+           );
+    }
 }
 
 void WindbgOut::writedml( const std::wstring& str )

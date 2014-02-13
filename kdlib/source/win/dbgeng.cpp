@@ -1543,8 +1543,13 @@ EXTENSION_ID loadExtension(const std::wstring &extPath )
         ~_scoped_lib() { if (m_hmod) ::FreeLibrary(m_hmod);}
         HMODULE m_hmod;
     } scoped_lib(&rawPath[0]);
+    
     if (!scoped_lib.m_hmod)
-        throw DbgWideException( std::wstring(L"extension not found: ") + extPath );
+    {
+        std::wstringstream  sstr;
+        sstr << L"failed to load extension with error " << std::dec << GetLastError();
+        throw DbgWideException( sstr.str() );
+    }
 
     hres = g_dbgMgr->control->AddExtensionWide( extPath.c_str(), 0, &handle );
     if ( FAILED( hres ) )
@@ -1557,11 +1562,39 @@ EXTENSION_ID loadExtension(const std::wstring &extPath )
     return handle;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+EXTENSION_ID getExtension(const std::wstring &extPath )
+{
+    HRESULT  hres;
+    ULONG64  handle = 0;
+
+    hres = g_dbgMgr->control->GetExtensionByPathWide( extPath.c_str(), &handle );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugControl::GetExtensionByPath", hres );
+
+    return handle;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void removeExtension( EXTENSION_ID extHandle )
 {
     g_dbgMgr->control->RemoveExtension( extHandle );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void removeExtension(const std::wstring &extPath )
+{
+    HRESULT  hres;
+   
+    EXTENSION_ID   extid = getExtension(extPath);
+
+    hres = g_dbgMgr->control->RemoveExtension( extid );
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugControl::RemoveExtension", hres );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
