@@ -214,5 +214,47 @@ MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const
 
 ///////////////////////////////////////////////////////////////////////////////
 
+MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOffset, size_t& regionLength )
+{
+    beginOffset = addr64(beginOffset);
+
+    HRESULT  hres =  g_dbgMgr->dataspace->GetNextDifferentlyValidOffsetVirtual( beginOffset, &regionOffset );
+
+    if ( FAILED(hres) )
+        throw DbgException( "findMemoryRegion: failed to find next region" );
+
+    regionOffset =  addr64(regionOffset);
+
+    MEMORY_BASIC_INFORMATION64  meminfo = {};
+
+    hres = g_dbgMgr->dataspace->QueryVirtual( regionOffset, &meminfo );
+
+    if ( FAILED(hres) )
+       throw MemoryException( regionOffset );
+
+    regionLength = meminfo.RegionSize;
+
+    return regionOffset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+kdlib::MemoryProtect getVaProtect( kdlib::MEMOFFSET_64 offset )
+{
+    offset = addr64(offset);
+
+    HRESULT  hres;
+    MEMORY_BASIC_INFORMATION64  meminfo = {};
+
+    hres = g_dbgMgr->dataspace->QueryVirtual( offset, &meminfo );
+
+    if ( FAILED(hres) )
+       throw MemoryException( offset );
+
+    return static_cast<MemoryProtect>(meminfo.Protect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 

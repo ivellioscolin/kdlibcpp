@@ -16,6 +16,8 @@ bool readMemoryUnsafe( MEMOFFSET_64 offset, void* buffer, size_t length, bool ph
 bool isVaValid( MEMOFFSET_64 addr );
 bool compareMemory( MEMOFFSET_64 addr1, MEMOFFSET_64 addr2, size_t length, bool phyAddr = false );
 MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const std::vector<char>& pattern );
+MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOffset, size_t& regionLength );
+kdlib::MemoryProtect getVaProtect( kdlib::MEMOFFSET_64 offset );
 
 ///////////////////////////////////////////////////////////////////////////////
 
