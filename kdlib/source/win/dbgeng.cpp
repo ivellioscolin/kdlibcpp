@@ -577,6 +577,8 @@ void getSystemCrashInfo( SystemCrashInfo &crashInfo )
 
     if ( FAILED( hres ) )
         throw DbgEngException(L"IDebugControl::ReadBugCheckData", hres);
+
+    crashInfo.paramterCount = 4;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
