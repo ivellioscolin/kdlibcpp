@@ -604,6 +604,24 @@ PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index)
+{
+    HRESULT  hres;
+
+    if ( index >= getNumberProcesses() )
+        throw IndexException( index );
+
+    ULONG  processId = -1;
+
+    hres = g_dbgMgr->system->GetProcessIdsByIndex( index, 1, &processId, NULL );
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugSystemObjects::GetProcessIdsByIndex failed", hres );
+
+    return THREAD_DEBUG_ID(processId);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset )
 {
     HRESULT  hres;
@@ -786,6 +804,25 @@ THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid )
         throw DbgEngException( L"IDebugSystemObjects::GetThreadIdBySystemId", hres );
 
     return THREAD_DEBUG_ID(id);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index)
+{
+    HRESULT  hres;
+
+    if ( index >= getNumberThreads() )
+        throw IndexException( index );
+
+    ULONG  threadId = -1;
+
+    hres = g_dbgMgr->system->GetThreadIdsByIndex( index, 1, &threadId, NULL );
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugSystemObjects::GetThreadIdsByIndex failed", hres );
+
+    return THREAD_DEBUG_ID(threadId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

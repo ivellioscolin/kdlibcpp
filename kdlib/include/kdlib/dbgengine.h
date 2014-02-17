@@ -73,6 +73,7 @@ unsigned long getNumberThreads();
 THREAD_DEBUG_ID getCurrentThreadId();
 THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset);
 THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid);
+THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index);
 
 THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = -1);
 MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = -1);
@@ -86,6 +87,7 @@ unsigned long getNumberProcesses();
 PROCESS_DEBUG_ID getCurrentProcessId();
 PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset );
 PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid );
+PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index);
 
 PROCESS_ID  getProcessSystemId( PROCESS_DEBUG_ID id = -1);
 MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id  = -1);
