@@ -562,6 +562,25 @@ void getSystemInfo( SystemInfo &systemInfo )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void getSystemCrashInfo( SystemCrashInfo &crashInfo )
+{
+    HRESULT  hres;
+
+    crashInfo = SystemCrashInfo();
+
+    hres = g_dbgMgr->control->ReadBugCheckData(
+            (PULONG)&crashInfo.code,
+            (PULONG64)&crashInfo.parameters[0],
+            (PULONG64)&crashInfo.parameters[1],
+            (PULONG64)&crashInfo.parameters[2],
+            (PULONG64)&crashInfo.parameters[3]);
+
+    if ( FAILED( hres ) )
+        throw DbgEngException(L"IDebugControl::ReadBugCheckData", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 unsigned long getNumberProcesses()
 {
     HRESULT  hres;

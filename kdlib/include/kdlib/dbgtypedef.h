@@ -77,6 +77,12 @@ struct SystemInfo {
     std::wstring  buildDescription;
 };
 
+struct SystemCrashInfo {
+    unsigned long long  code;
+    unsigned long paramterCount;
+    unsigned long long parameters[0x10];
+};
+
 struct ExceptionInfo {
     bool  firstChance;
     unsigned long  exceptionCode;

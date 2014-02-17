@@ -42,6 +42,7 @@ size_t getPageSize();
 unsigned long getSystemUptime();
 unsigned long getCurrentTime();
 void getSystemInfo( SystemInfo &systemInfo );
+void getSystemCrashInfo( SystemCrashInfo &crashInfo );
 
 //manage target modules
 unsigned long getNumberModules();
