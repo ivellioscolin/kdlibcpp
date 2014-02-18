@@ -33,14 +33,13 @@ void WindbgOut::write( const std::wstring& str )
            DEBUG_OUTCTL_AMBIENT_TEXT,
            DEBUG_OUTPUT_NORMAL, 
            L"%ws",
-           str.c_str()
+           line.c_str()
            );
     }
 }
 
 void WindbgOut::writedml( const std::wstring& str )
 {
-
     g_dbgMgr->control->ControlledOutputWide(  
         DEBUG_OUTCTL_AMBIENT_DML,
         DEBUG_OUTPUT_NORMAL, 
