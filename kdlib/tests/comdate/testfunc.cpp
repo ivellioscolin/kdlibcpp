@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 #pragma optimize("g", off)
 
 #include "test/testfunc.h"
