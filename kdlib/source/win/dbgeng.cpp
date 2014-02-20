@@ -597,7 +597,7 @@ unsigned long getNumberProcesses()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_ID getCurrentProcessId()
+PROCESS_DEBUG_ID getCurrentProcessId()
 {
     HRESULT      hres;
     ULONG        id;
@@ -606,7 +606,7 @@ PROCESS_ID getCurrentProcessId()
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres ); 
 
-    return  PROCESS_ID(id);
+    return  PROCESS_DEBUG_ID(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -615,6 +615,11 @@ PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid )
 {
     HRESULT  hres;
     ULONG  id;
+
+    if ( pid == -1 )
+    {
+       return getCurrentProcessId();
+    }
 
     hres = g_dbgMgr->system->GetProcessIdBySystemId( pid, &id );
     if ( FAILED( hres ) )
@@ -819,6 +824,9 @@ THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid )
 {
     HRESULT  hres;
     ULONG  id;
+
+    if ( tid == -1 )
+        return getCurrentThreadId();
 
     hres = g_dbgMgr->system->GetThreadIdBySystemId( tid, &id );
     if ( FAILED( hres ) )
