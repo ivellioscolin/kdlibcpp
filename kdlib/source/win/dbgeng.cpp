@@ -4,6 +4,8 @@
 
 #include <comutil.h>
 
+#include <boost/smart_ptr/scoped_array.hpp>
+
 #include "kdlib/dbgengine.h"
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
@@ -764,6 +766,23 @@ void setImplicitProcess(MEMOFFSET_64 offset)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring getCurrentProcessExecutableName()
+{
+    const ULONG bufChars = (MAX_PATH * 2);
+
+    boost::scoped_array< WCHAR > exeName( new WCHAR[bufChars] );
+    memset(&exeName[0], 0, bufChars * sizeof(WCHAR));
+
+    ULONG tmp;
+    HRESULT hres = g_dbgMgr->system->GetCurrentProcessExecutableNameWide(&exeName[0], bufChars, &tmp);
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessExecutableNameWide", hres );
+
+    return std::wstring( &exeName[0] );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 getImplicitProcessOffset()
 {
     HRESULT  hres;
@@ -799,7 +818,7 @@ THREAD_DEBUG_ID getCurrentThreadId()
 
     hres = g_dbgMgr->system->GetCurrentThreadId( &id );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects2::GetCurrentThreadId", hres ); 
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
         
      return THREAD_DEBUG_ID(id);
 }
@@ -1227,7 +1246,7 @@ std::wstring getRegisterName( THREAD_ID id, unsigned long index )
     hres = g_dbgMgr->system->SetCurrentThreadId( id );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
-    
+
     wchar_t  regName[0x100];
 
     hres = g_dbgMgr->registers->GetDescriptionWide( static_cast<ULONG>(index), regName, 0x100, NULL, NULL );

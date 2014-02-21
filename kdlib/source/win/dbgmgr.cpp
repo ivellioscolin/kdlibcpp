@@ -21,7 +21,7 @@ DebugManager::DebugManager()
         throw DbgEngException(L"DebugCreate", hres);
 
     control = CComQIPtr<IDebugControl4>(client);
-    system = CComQIPtr<IDebugSystemObjects2>(client);
+    system = CComQIPtr<IDebugSystemObjects4>(client);
     dataspace = CComQIPtr<IDebugDataSpaces4>(client);
     symbols = CComQIPtr<IDebugSymbols3>(client);
     advanced = CComQIPtr<IDebugAdvanced2>(client);

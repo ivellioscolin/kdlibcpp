@@ -98,6 +98,7 @@ void setCurrentProcess(PROCESS_DEBUG_ID id);
 void setImplicitProcess(MEMOFFSET_64 offset); 
 MEMOFFSET_64 getImplicitProcessOffset();
 
+std::wstring getCurrentProcessExecutableName();
 
 //breakpoints
 BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset );
