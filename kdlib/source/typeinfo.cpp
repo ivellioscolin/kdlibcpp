@@ -209,12 +209,19 @@ TypeInfoPtr loadType( const std::wstring &typeName )
 
 TypeInfoPtr loadType(  SymbolPtr &symbolScope, const std::wstring &symbolName )
 {
+    SymbolPtr  symbol;
+
+    try {
+        symbol  = symbolScope->getChildByName( symbolName );
+        return loadType(symbol);
+    } 
+    catch(SymbolException& )
+    {}
+
     if ( TypeInfo::isComplexType( symbolName ) )
         return TypeInfo::getComplexTypeInfo( symbolName, symbolScope );
 
-     SymbolPtr  symbol  = symbolScope->getChildByName( symbolName );
-
-     return loadType(symbol);
+    throw SymbolException(L"symbol not found");
 }
 
 
