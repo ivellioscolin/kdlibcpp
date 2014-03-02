@@ -27,7 +27,8 @@ void WindbgOut::write( const std::wstring& str )
 
     while (std::getline(sstr, line)) 
     {
-        line += L'\n';
+        if (!sstr.eof())
+            line += L'\n';
 
         g_dbgMgr->control->ControlledOutputWide(  
            DEBUG_OUTCTL_AMBIENT_TEXT,
