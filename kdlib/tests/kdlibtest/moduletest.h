@@ -143,7 +143,7 @@ TEST_F( ModuleTest, getSourceLine )
 
     EXPECT_NO_THROW( m_targetModule->getSourceLine( m_targetModule->getSymbolVa(L"CdeclFunc") + 2, fileName, lineNo, displacement ) );
     EXPECT_TRUE( fileName.find(L"testfunc.cpp") != std::wstring::npos );
-    EXPECT_EQ( 15, lineNo );
+    EXPECT_EQ( 17, lineNo );
     EXPECT_EQ( 2, displacement );
 
     //EXPECT_NO_THROW( m_targetModule->getSourceLine( m_targetModule->getSymbolVa(L"ucharVar"), fileName, lineNo, displacement ) );
