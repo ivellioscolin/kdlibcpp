@@ -22,6 +22,14 @@ public:
     virtual void onExecutionStatusChange( ExecutionStatus executionStatus ) 
     {}
 
+    virtual DebugCallbackResult onModuleLoad( MEMOFFSET_64 offset, const std::wstring &name ) {
+        return DebugCallbackNoChange;
+    }
+
+    virtual DebugCallbackResult onModuleUnload( MEMOFFSET_64 offset, const std::wstring &name ) {
+        return DebugCallbackNoChange;
+    }
+
     EventHandler() {
        registerEventsCallback(this);
     }
