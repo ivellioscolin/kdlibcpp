@@ -56,14 +56,14 @@ std::wstring DiaException::makeFullDesc(const std::wstring &desc, HRESULT hres, 
         HRESULT locRes = symbol->get_undecoratedName(&bstrName);
         if (S_OK == locRes && bstrName)
         {
-            sstream << L"Symbol name: \"" << _bstr_t(bstrName) << L"\"";
+            sstream << L"Symbol name: \"" << _bstr_t(bstrName, false) << L"\"";
         }
         else
         {
             locRes = symbol->get_name(&bstrName);
             if (S_OK == locRes && bstrName)
             {
-                sstream << L"Symbol name: " << _bstr_t(bstrName);
+                sstream << L"Symbol name: " << _bstr_t(bstrName, false);
             }
             else
             {
@@ -444,7 +444,7 @@ bool DiaSymbol::isUndecorated(const std::wstring &undecName)
     if (S_OK != hres)
         return true;
 
-    return !( undecName == std::wstring(_bstr_t(bstrName)) );
+    return !( undecName == std::wstring( _bstr_t(bstrName, false) ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -493,7 +493,7 @@ std::wstring DiaSymbol::getName()
 
         if ( bstrName )
         {
-            std::wstring retStr = _bstr_t(bstrName);
+            std::wstring retStr = _bstr_t(bstrName, false);
 
             if ( (symTag == SymTagPublicSymbol) && !isUndecorated(retStr) )
             {
@@ -512,7 +512,7 @@ std::wstring DiaSymbol::getName()
 
     bstrName = callSymbol(get_name);
 
-    return std::wstring( _bstr_t(bstrName ) );
+    return std::wstring( _bstr_t(bstrName, false) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -742,7 +742,7 @@ void DiaSession::getSourceLine( ULONG64 offset, std::wstring &fileName, ULONG &l
     hres = sourceFile->get_fileName ( &fileNameBstr );
     if (S_OK != hres)
         throw DiaException(L"failed to find source line");
-    fileName = _bstr_t(fileNameBstr);
+    fileName = _bstr_t(fileNameBstr, false);
 
     hres = sourceLine->get_lineNumber( &lineNo );
     if (S_OK != hres)
