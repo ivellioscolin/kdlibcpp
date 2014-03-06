@@ -5,12 +5,15 @@
 
 #include <string>
 
+#include <windows.h>
+
 #include "test/testfunc.h"
 
 int breakOnRun();
 int breakpointTestRun();
 int memTestRun();
 int stackTestRun();
+int loadUnloadModuleRun();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -33,6 +36,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
     if ( testGroup == L"stacktest" )
         return stackTestRun();
+
+    if ( testGroup == L"loadunloadmodule" )
+        return loadUnloadModuleRun();
 
     return breakOnRun();
 }
@@ -94,6 +100,17 @@ float stackTestRun1( int a, const float& b, const std::string& c )
 int stackTestRun()
 {
     stackTestRun1( 10, 0.8f, "Bye" );
+
+    return 0;
+}
+
+
+int loadUnloadModuleRun()
+{
+    __debugbreak();
+
+    HMODULE  hlib = LoadLibrary(L"ws2_32.dll");
+    FreeLibrary(hlib);
 
     return 0;
 }

@@ -10,4 +10,6 @@ public:
     MOCK_METHOD1( onBreakpoint, kdlib::DebugCallbackResult ( kdlib::BREAKPOINT_ID bpId ) );
     MOCK_METHOD1( onException, kdlib::DebugCallbackResult ( kdlib::ExceptionInfo &exceptionInfo ) );
     MOCK_METHOD1( onExecutionStatusChange, void ( kdlib::ExecutionStatus executionStatus ) );
+    MOCK_METHOD2( onModuleLoad, kdlib::DebugCallbackResult ( kdlib::MEMOFFSET_64, const std::wstring&) );
+    MOCK_METHOD2( onModuleUnload, kdlib::DebugCallbackResult ( kdlib::MEMOFFSET_64, const std::wstring&) );
 };

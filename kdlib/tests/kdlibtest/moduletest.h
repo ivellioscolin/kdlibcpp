@@ -9,8 +9,10 @@
 #include "test/testvars.h"
 
 #include "processtest.h"
+#include "eventhandler.h"
 
 using namespace kdlib;
+using namespace testing;
 
 class ModuleTest : public ProcessTest 
 {
@@ -171,5 +173,32 @@ TEST_F( ModuleTest, getFunction )
 
     EXPECT_THROW( m_targetModule->getFunctionByAddr( addr - 1 ), SymbolException );
     EXPECT_THROW( m_targetModule->getFunctionByAddr( addr + funcSize ), SymbolException );
+}
+
+class ModuleCallbackTest : public ProcessTest 
+{
+public:
+
+    ModuleCallbackTest() : ProcessTest( L"loadunloadmodule" ) {}
+
+    virtual void TearDown() {
+    }
+};
+
+
+TEST_F( ModuleCallbackTest, loadModule)
+{
+    EventHandlerMock    eventHandler;
+
+    DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
+
+    EXPECT_CALL(eventHandler, onExecutionStatusChange(_) ).Times(AnyNumber());
+
+    EXPECT_CALL(eventHandler, onModuleLoad( _, std::wstring(L"ws2_32")) ).Times(1);
+    EXPECT_CALL(eventHandler, onModuleLoad( _,  Ne(std::wstring(L"ws2_32")))).Times(AnyNumber());
+
+    EXPECT_CALL(eventHandler, onModuleUnload( _, _ )).Times(AnyNumber());
+
+    targetGo();
 }
 

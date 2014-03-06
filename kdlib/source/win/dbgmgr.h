@@ -17,7 +17,7 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DebugManager : private DebugBaseEventCallbacks
+class DebugManager : private DebugBaseEventCallbacksWide
 {
 
 public:
@@ -60,11 +60,14 @@ private:
         *Mask |= DEBUG_EVENT_BREAKPOINT;
         *Mask |= DEBUG_EVENT_CHANGE_ENGINE_STATE;
         *Mask |= DEBUG_EVENT_EXCEPTION;
+        *Mask |= DEBUG_EVENT_LOAD_MODULE;
+        *Mask |= DEBUG_EVENT_UNLOAD_MODULE;
+
         return S_OK;
     }
 
     STDMETHOD(Breakpoint)(
-        __in IDebugBreakpoint *bp
+        __in IDebugBreakpoint2 *bp
     );
 
     STDMETHOD(ChangeEngineState)(
@@ -74,6 +77,22 @@ private:
     STDMETHOD(Exception)(
         __in PEXCEPTION_RECORD64 Exception,
         __in  ULONG FirstChance );
+
+    STDMETHOD(LoadModule)(
+        __in ULONG64 ImageFileHandle,
+        __in ULONG64 BaseOffset,
+        __in ULONG ModuleSize,
+        __in PCWSTR ModuleName,
+        __in PCWSTR ImageName,
+        __in ULONG CheckSum,
+        __in ULONG TimeDateStamp
+        );
+
+    STDMETHOD(UnloadModule)(
+        __in PCWSTR ImageBaseName,
+        __in ULONG64 BaseOffset
+        );
+    
 };
 
 

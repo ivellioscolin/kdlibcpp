@@ -27,7 +27,7 @@ DebugManager::DebugManager()
     advanced = CComQIPtr<IDebugAdvanced2>(client);
     registers = CComQIPtr<IDebugRegisters2>(client);
 
-    client->SetEventCallbacks( this );
+    client->SetEventCallbacksWide( this );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ ULONG ConvertCallbackResult( DebugCallbackResult result )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint *bp ) 
+HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint2 *bp ) 
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
@@ -182,6 +182,53 @@ HRESULT STDMETHODCALLTYPE DebugManager::Exception(
     for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
     {
         DebugCallbackResult  ret = (*it)->onException( excinfo );
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
+
+    return ConvertCallbackResult( result );
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
+    __in ULONG64 ImageFileHandle,
+    __in ULONG64 BaseOffset,
+    __in ULONG ModuleSize,
+    __in PCWSTR ModuleName,
+    __in PCWSTR ImageName,
+    __in ULONG CheckSum,
+    __in ULONG TimeDateStamp
+    )
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
+    {
+        DebugCallbackResult  ret = (*it)->onModuleLoad(BaseOffset, ModuleName);
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
+
+    return ConvertCallbackResult( result );
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
+    __in PCWSTR ImageBaseName,
+    __in ULONG64 BaseOffset
+    )
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
+    {
+        DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset,ImageBaseName);
         result = ret != DebugCallbackNoChange ? ret : result;
     }
 
