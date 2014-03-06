@@ -320,13 +320,15 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
             _bstr_t(name.c_str()),
             nsfCaseSensitive,
             &symbols);
+    if (S_OK != hres)
+        throw DiaException(L"Call IDiaSymbol::findChildren", hres);
 
     LONG count;
     hres = symbols->get_Count(&count);
     if (S_OK != hres)
         throw DiaException(L"Call IDiaEnumSymbols::get_Count", hres);
 
-    if (count >0 )
+    if (count > 0)
     {
         DiaSymbolPtr child;
         hres = symbols->Item(0, &child);
@@ -336,46 +338,13 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
         return SymbolPtr( new DiaSymbol(child, m_machineType) );
     }
 
-    // _имя
-    std::wstring underscoreName;
-    underscoreName += L'_';
-    underscoreName += name;
-    symbols = 0;
-
+    symbols = NULL;
     hres = 
         m_symbol->findChildren(
             ::SymTagNull,
-            underscoreName.c_str(),
-            nsfCaseSensitive,
+            _bstr_t((std::wstring(L"*") + name + L"*").c_str()),
+            nsfCaseSensitive | nsfRegularExpression | nsfUndecoratedName,
             &symbols);
-
-    hres = symbols->get_Count(&count);
-    if (S_OK != hres)
-        throw DiaException(L"Call IDiaEnumSymbols::get_Count", hres);
-
-    if (count >0 )
-    {
-        DiaSymbolPtr child;
-        hres = symbols->Item(0, &child);
-        if (S_OK != hres)
-            throw DiaException(L"Call IDiaEnumSymbols::Item", hres);
-
-        return SymbolPtr( new DiaSymbol(child, m_machineType) );
-    }
-    
-    // _имя@парам
-    std::wstring   pattern = L"_";
-    pattern += name;
-    pattern += L"@*";
-    symbols = 0;
-
-    hres = 
-        m_symbol->findChildren(
-            ::SymTagNull,
-            pattern.c_str(),
-            nsfRegularExpression | nsfCaseSensitive,
-            &symbols);
-
     if (S_OK != hres)
         throw DiaException(L"Call IDiaSymbol::findChildren", hres);
 
@@ -383,46 +352,20 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
     if (S_OK != hres)
         throw DiaException(L"Call IDiaEnumSymbols::get_Count", hres);
 
-    if (count >0 )
+    if (count > 0)
     {
         DiaSymbolPtr child;
-        hres = symbols->Item(0, &child);
-        if (S_OK != hres)
-            throw DiaException(L"Call IDiaEnumSymbols::Item", hres);
+        ULONG celt;
+        while ( SUCCEEDED(symbols->Next(1, &child, &celt)) && (celt == 1) )
+        {
+            SymbolPtr symbol ( new DiaSymbol(child, m_machineType) );
+            if (symbol->getName() == name)
+                return symbol;
 
-        return SymbolPtr( new DiaSymbol(child, m_machineType) );
+            child = NULL;
+        }
     }
 
-    // ?имя@@декор
-    pattern = L"?";
-    pattern += name;
-    pattern += L"@@*";
-    symbols = 0;
-
-    hres = 
-        m_symbol->findChildren(
-            ::SymTagNull,
-            pattern.c_str(),
-            nsfRegularExpression | nsfCaseSensitive,
-            &symbols);
-
-    if (S_OK != hres)
-        throw DiaException(L"Call IDiaSymbol::findChildren", hres);
-
-    hres = symbols->get_Count(&count);
-    if (S_OK != hres)
-        throw DiaException(L"Call IDiaEnumSymbols::get_Count", hres);
-
-    if (count >0 )
-    {
-        DiaSymbolPtr child;
-        hres = symbols->Item(0, &child);
-        if (S_OK != hres)
-            throw DiaException(L"Call IDiaEnumSymbols::Item", hres);
-
-        return SymbolPtr( new DiaSymbol(child, m_machineType) );
-    }
-    
     throw DiaException(std::wstring(L"symbol \"") + name + L"\" is not found");
 }
 
