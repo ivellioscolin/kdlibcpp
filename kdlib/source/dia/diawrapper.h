@@ -153,6 +153,8 @@ protected:
 
     ULONG getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative);
 
+    bool isUndecorated(const std::wstring &undecName);
+
     template <typename TRet>
     TRet callSymbolT(
         HRESULT(STDMETHODCALLTYPE IDiaSymbol::*method)(TRet *),

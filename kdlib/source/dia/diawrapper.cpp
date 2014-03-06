@@ -434,6 +434,21 @@ ULONG DiaSymbol::getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRe
 
 ////////////////////////////////////////////////////////////////////////////////
 
+bool DiaSymbol::isUndecorated(const std::wstring &undecName)
+{
+    if (m_machineType != machine_I386)
+        return true;
+
+    BSTR bstrName = NULL;
+    HRESULT hres = m_symbol->get_name(&bstrName);
+    if (S_OK != hres)
+        return true;
+
+    return !( undecName == std::wstring(_bstr_t(bstrName)) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 ULONG DiaSymbol::getIndexId()
 {
     return callSymbol(get_symIndexId);
@@ -476,25 +491,23 @@ std::wstring DiaSymbol::getName()
         if ( FAILED( hres ) )
             throw DiaException(L"Call IDiaSymbol::get_undecoratedNameEx", hres);
 
-        std::wstring  retStr;
         if ( bstrName )
         {
-            retStr = _bstr_t( bstrName );
-            return retStr;
+            std::wstring retStr = _bstr_t(bstrName);
+
+            if ( (symTag == SymTagPublicSymbol) && !isUndecorated(retStr) )
+            {
+                boost::wsmatch  matchResult;
+
+                if ( boost::regex_match( retStr, matchResult, stdcallMatch ) )
+                    return std::wstring( matchResult[1].first, matchResult[1].second );
+
+                if ( boost::regex_match( retStr, matchResult, fastcallMatch ) )
+                    return std::wstring( matchResult[1].first, matchResult[1].second );
+            }
+
+            return retStr; 
         }
-
-        //if ( !retStr.empty() )
-        //{
-        //    boost::wsmatch  matchResult;
-
-        //    if ( boost::regex_match( retStr, matchResult, stdcallMatch ) )
-        //        return std::wstring( matchResult[1].first, matchResult[1].second );
-
-        //    if ( boost::regex_match( retStr, matchResult, fastcallMatch ) )
-        //        return std::wstring( matchResult[1].first, matchResult[1].second );
-    
-        //    return retStr; 
-        //}
     }
 
     bstrName = callSymbol(get_name);
@@ -697,7 +710,7 @@ SymbolPtr DiaSession::findByRva( ULONG rva, ULONG symTag, LONG* pdisplacement )
     if (!child)
         throw DiaException(L"Call IDiaSession::findSymbolByRVAEx", E_UNEXPECTED);
     if ( !pdisplacement && displacement)
-        throw DiaException(L"Call IDiaSession::findSymbolByRVAEx failed to find suymbol" );
+        throw DiaException(L"Call IDiaSession::findSymbolByRVAEx failed to find symbol" );
 
     if (pdisplacement)
         *pdisplacement = displacement;
