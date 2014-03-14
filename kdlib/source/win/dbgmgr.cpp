@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "dbgmgr.h"
+#include "moduleimp.h"
 
 #include "win/exceptions.h"
 
@@ -202,6 +203,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
+    ModuleImp::onModuleLoad(BaseOffset);
+
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
     EventsCallbackList::iterator  it;
@@ -223,6 +226,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
+    ModuleImp::onModuleUnload(BaseOffset);
+
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
     EventsCallbackList::iterator  it;
@@ -231,6 +236,43 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
         DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset,ImageBaseName);
         result = ret != DebugCallbackNoChange ? ret : result;
     }
+
+    return ConvertCallbackResult( result );
+}
+
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::CreateProcess(
+    __in ULONG64 ImageFileHandle,
+    __in ULONG64 Handle,
+    __in ULONG64 BaseOffset,
+    __in ULONG ModuleSize,
+    __in PCWSTR ModuleName,
+    __in PCWSTR ImageName,
+    __in ULONG CheckSum,
+    __in ULONG TimeDateStamp,
+    __in ULONG64 InitialThreadHandle,
+    __in ULONG64 ThreadDataOffset,
+    __in ULONG64 StartOffset
+    )
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    ModuleImp::onProcessStart(BaseOffset);
+
+    return ConvertCallbackResult( result );
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
+    __in ULONG ExitCode
+    )
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    ModuleImp::onProcessExit();
 
     return ConvertCallbackResult( result );
 }

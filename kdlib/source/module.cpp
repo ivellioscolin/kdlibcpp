@@ -2,15 +2,128 @@
 
 #include <boost/regex.hpp>
 
-#include "kdlib/module.h"
 #include "kdlib/memaccess.h"
 #include "kdlib/exceptions.h"
+
+#include "moduleimp.h"
 
 namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Module::Module(const std::wstring &moduleName )
+boost::recursive_mutex  ModuleImp::m_moduleCacheLock;
+ModuleImp::ModuleCache  ModuleImp::m_moduleCache;
+
+///////////////////////////////////////////////////////////////////////////////
+
+ModulePtr loadModule( const std::wstring &name )
+{
+    return ModuleImp::getModule(name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ModulePtr loadModule( MEMOFFSET_64 offset )
+{
+    return ModuleImp::getModule(offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ModulePtr ModuleImp::getModule( const std::wstring &name )
+{
+    return getModule( findModuleBase(name) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ModulePtr ModuleImp::getModule( MEMOFFSET_64 offset )
+{
+    offset = findModuleBase(offset);
+
+    ModuleCacheKey  key( getCurrentProcessId(), offset );
+
+    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
+
+    ModuleCache::iterator  it = m_moduleCache.find(key);
+
+    if ( it != m_moduleCache.end() )
+        return it->second;
+
+    ModulePtr  m =  ModulePtr( new ModuleImp( offset ) );
+
+    m_moduleCache.insert(std::make_pair( key, m ));
+
+    return m;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void  ModuleImp::onModuleLoad( MEMOFFSET_64 offset )
+{
+    ModuleCacheKey  key( getCurrentProcessId(), offset );
+
+    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
+
+    m_moduleCache[key] = ModulePtr( new ModuleImp( offset ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void  ModuleImp::onModuleUnload( MEMOFFSET_64 offset )
+{
+    ModuleCacheKey  key( getCurrentProcessId(), offset );
+
+    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
+
+    ModuleCache::iterator  it = m_moduleCache.find(key);
+
+    if ( it != m_moduleCache.end() )
+        m_moduleCache.erase(it);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ModuleImp::onProcessStart(MEMOFFSET_64 offset )
+{
+    onModuleLoad(offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ModuleImp::onProcessExit()
+{
+    PROCESS_DEBUG_ID  processId = getCurrentProcessId();
+
+    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
+
+    ModuleCache::iterator  it = m_moduleCache.begin();
+
+    while( it != m_moduleCache.end() )
+    {
+        if ( it->first.processId == processId )
+        {
+            m_moduleCache.erase(it);
+            it = m_moduleCache.begin();
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ModuleImp::clearModuleCache()
+{
+    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
+    m_moduleCache.clear();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ModuleImp::ModuleImp(const std::wstring &moduleName )
 {
     m_base = findModuleBase( moduleName );
     m_name = moduleName;
@@ -19,7 +132,7 @@ Module::Module(const std::wstring &moduleName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Module::Module(MEMOFFSET_64 offset )
+ModuleImp::ModuleImp(MEMOFFSET_64 offset )
 {
     m_base = findModuleBase( addr64(offset) );
     m_name = getModuleName( m_base );
@@ -28,7 +141,7 @@ Module::Module(MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Module::fillFields()
+void ModuleImp::fillFields()
 {
     m_imageName = getModuleImageName( m_base );
     m_timeDataStamp = getModuleTimeStamp( m_base );
@@ -40,14 +153,14 @@ void Module::fillFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_64 Module::getSymbolVa( const std::wstring& symbolName )
+MEMOFFSET_64 ModuleImp::getSymbolVa( const std::wstring& symbolName )
 {
     return m_base + getSymbolRva(symbolName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_32 Module::getSymbolRva( const std::wstring& symbolName )
+MEMOFFSET_32 ModuleImp::getSymbolRva( const std::wstring& symbolName )
 {
     SymbolPtr  sym = getSymbolScope()->getChildByName( symbolName );
     return sym->getRva();
@@ -55,7 +168,7 @@ MEMOFFSET_32 Module::getSymbolRva( const std::wstring& symbolName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolScope()
+SymbolPtr ModuleImp::getSymbolScope()
 {
     return getSymSession()->getSymbolScope();
 }
@@ -63,33 +176,21 @@ SymbolPtr Module::getSymbolScope()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolSessionPtr& Module::getSymSession()
+SymbolSessionPtr& ModuleImp::getSymSession()
 {
     if (m_symSession)
         return m_symSession;
-
-    //SymCacheModuleKey cacheKey = { m_name, m_size, m_timeDataStamp, m_checkSum };
-    //if ( findSymCacheEntry( cacheKey, m_symSession ) )
-    //{
-    //    if ( !m_symSession )
-    //        throw SymbolException( "failed to load symbol file" );
-
-    //    return m_symSession;
-    //}
 
     try
     {
         m_symSession = loadSymbolFile( m_base, m_imageName);
         if (m_symSession)
         {
-           // insertSymCacheEntry( m_base, cacheKey, m_symSession );
             return m_symSession;
         }
     }
     catch(const SymbolException &)
     {}
-
-    // TODO: read image file path and load using IDiaReadExeAtOffsetCallback
 
     try
     {
@@ -101,7 +202,6 @@ SymbolSessionPtr& Module::getSymSession()
 
         if (m_symSession)
         {
-            //insertSymCacheEntry( m_base, cacheKey, m_symSession );
             return m_symSession;
         }
     }
@@ -113,20 +213,18 @@ SymbolSessionPtr& Module::getSymSession()
         m_symSession = loadSymbolFromExports(m_base);
         if (m_symSession)
         {
-           // insertSymCacheEntry( m_base, cacheKey, m_symSession );
             return m_symSession;
         }
     }
     catch(const DbgException&)
     {}
 
-    //insertSymCacheEntry( m_base, cacheKey, SymbolSessionPtr() );
     throw SymbolException( L"failed to load symbol file" );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring Module::getSymFile()
+std::wstring ModuleImp::getSymFile()
 {
     try {
        
@@ -141,25 +239,22 @@ std::wstring Module::getSymFile()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Module::reloadSymbols()
+void ModuleImp::reloadSymbols()
 {
-    //SymCacheModuleKey cacheKey = { m_name, m_size, m_timeDataStamp, m_checkSum };
-    //eraseSymCacheEntry( cacheKey );
-
     m_symSession.reset();
     getSymSession();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset,  MEMDISPLACEMENT* displacemnt )
+SymbolPtr ModuleImp::getSymbolByVa( MEMOFFSET_64 offset,  MEMDISPLACEMENT* displacemnt )
 {
     return getSymbolByVa( offset, SymTagNull, displacemnt );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement )
+SymbolPtr ModuleImp::getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement )
 {
     offset = addr64(offset);
 
@@ -171,28 +266,28 @@ SymbolPtr Module::getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEM
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolByRva( MEMOFFSET_32 rva, MEMDISPLACEMENT* displacemnt  )
+SymbolPtr ModuleImp::getSymbolByRva( MEMOFFSET_32 rva, MEMDISPLACEMENT* displacemnt  )
 {
    return getSymbolByRva( rva, SymTagNull, displacemnt );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolByRva( MEMOFFSET_32 rva, unsigned long symTag, MEMDISPLACEMENT* displacement )
+SymbolPtr ModuleImp::getSymbolByRva( MEMOFFSET_32 rva, unsigned long symTag, MEMDISPLACEMENT* displacement )
 {
    return getSymSession()->findByRva( rva, symTag, displacement );
 } 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr Module::getSymbolByName( const std::wstring &symbolName )
+SymbolPtr ModuleImp::getSymbolByName( const std::wstring &symbolName )
 { 
     return getSymbolScope()->getChildByName( symbolName );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t Module::getSymbolSize( const std::wstring &symName )
+size_t ModuleImp::getSymbolSize( const std::wstring &symName )
 {
     TypeInfoPtr typeInfo = getTypeByName( symName );
 
@@ -201,7 +296,7 @@ size_t Module::getSymbolSize( const std::wstring &symName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolOffsetList Module::enumSymbols( const std::wstring  &mask )
+SymbolOffsetList ModuleImp::enumSymbols( const std::wstring  &mask )
 {
     SymbolOffsetList offsetLst;
 
@@ -227,7 +322,7 @@ SymbolOffsetList Module::enumSymbols( const std::wstring  &mask )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring Module::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
+std::wstring ModuleImp::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
 {
     displacement = 0;
     std::wstring name;
@@ -247,7 +342,7 @@ std::wstring Module::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacem
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr Module::getTypedVarByAddr( MEMOFFSET_64 offset )
+TypedVarPtr ModuleImp::getTypedVarByAddr( MEMOFFSET_64 offset )
 {
     offset = addr64(offset);
 
@@ -260,27 +355,16 @@ TypedVarPtr Module::getTypedVarByAddr( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr Module::getTypedVarByName( const std::wstring &symName )
+TypedVarPtr ModuleImp::getTypedVarByName( const std::wstring &symName )
 {
     SymbolPtr  symVar = getSymbolScope()->getChildByName( symName );
 
     return loadTypedVar( symVar );
-
-    //TypeInfoPtr typeInfo = loadType( symVar->getType() );
-
-    //if ( LocIsConstant != symVar->getLocType() )
-    //{
-    //    MEMOFFSET_64  offset = getSymbolVa( symName );
-
-    //    return loadTypedVar( typeInfo, offset );
-    //}
-
-    //TODO( "constant support");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr Module::getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 offset )
+TypedVarPtr ModuleImp::getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 offset )
 {
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
@@ -289,7 +373,7 @@ TypedVarPtr Module::getTypedVarByTypeName( const std::wstring &typeName, MEMOFFS
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr Module::containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,  const std::wstring &fieldName )
+TypedVarPtr ModuleImp::containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,  const std::wstring &fieldName )
 {
     offset = addr64(offset);
 
@@ -300,7 +384,7 @@ TypedVarPtr Module::containingRecord( MEMOFFSET_64 offset, const std::wstring &t
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr Module::getFunctionByAddr( MEMOFFSET_64 offset )
+TypedVarPtr ModuleImp::getFunctionByAddr( MEMOFFSET_64 offset )
 {
     offset = addr64(offset);
 
@@ -320,7 +404,7 @@ TypedVarPtr Module::getFunctionByAddr( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarList Module::loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName )
+TypedVarList ModuleImp::loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName )
 {
     offset = addr64(offset);
 
@@ -331,7 +415,7 @@ TypedVarList Module::loadTypedVarList( MEMOFFSET_64 offset, const std::wstring &
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarList Module::loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring &typeName, size_t count )
+TypedVarList ModuleImp::loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring &typeName, size_t count )
 {
     offset = addr64(offset);
 
@@ -342,7 +426,7 @@ TypedVarList Module::loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring Module::getSourceFile( MEMOFFSET_64 offset )
+std::wstring ModuleImp::getSourceFile( MEMOFFSET_64 offset )
 {
     std::wstring  fileName;
     unsigned long  lineno;
@@ -355,7 +439,7 @@ std::wstring Module::getSourceFile( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Module::getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement )
+void ModuleImp::getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement )
 {
     offset = addr64(offset);
 
@@ -367,14 +451,14 @@ void Module::getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigne
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Module::getVersionInfo( const std::string &value )
+std::string ModuleImp::getVersionInfo( const std::string &value )
 {
     return getModuleVersionInfo( m_base, value );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Module::getFixedFileInfo( FixedFileInfo &fixedFileInfo )
+void ModuleImp::getFixedFileInfo( FixedFileInfo &fixedFileInfo )
 {
     return getModuleFixedFileInfo( m_base, fixedFileInfo );
 }
@@ -416,11 +500,6 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 
 std::wstring getSourceFile( MEMOFFSET_64 offset )
 {
-    //if ( offset == 0 )
-    //    offset = getRegInstructionPointer();
-    //else
-    //    offset = addr64( offset );
-
     ModulePtr module = loadModule( offset );
     
     return module->getSourceFile( offset );
@@ -430,11 +509,6 @@ std::wstring getSourceFile( MEMOFFSET_64 offset )
 
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset )
 {
-    //if ( offset == 0 )
-    //    offset = getRegInstructionPointer();
-    //else
-    //    offset = addr64( offset );
-
     ModulePtr module = loadModule( offset );
     
     module->getSourceLine( offset, fileName, lineno, displacement );

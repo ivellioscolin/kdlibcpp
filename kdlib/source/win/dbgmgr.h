@@ -62,6 +62,8 @@ private:
         *Mask |= DEBUG_EVENT_EXCEPTION;
         *Mask |= DEBUG_EVENT_LOAD_MODULE;
         *Mask |= DEBUG_EVENT_UNLOAD_MODULE;
+        *Mask |= DEBUG_EVENT_CREATE_PROCESS;
+        *Mask |= DEBUG_EVENT_EXIT_PROCESS;
 
         return S_OK;
     }
@@ -91,6 +93,24 @@ private:
     STDMETHOD(UnloadModule)(
         __in PCWSTR ImageBaseName,
         __in ULONG64 BaseOffset
+        );
+
+    STDMETHOD(CreateProcess)(
+        __in ULONG64 ImageFileHandle,
+        __in ULONG64 Handle,
+        __in ULONG64 BaseOffset,
+        __in ULONG ModuleSize,
+        __in PCWSTR ModuleName,
+        __in PCWSTR ImageName,
+        __in ULONG CheckSum,
+        __in ULONG TimeDateStamp,
+        __in ULONG64 InitialThreadHandle,
+        __in ULONG64 ThreadDataOffset,
+        __in ULONG64 StartOffset
+        );
+
+    STDMETHOD(ExitProcess)(
+        __in ULONG ExitCode
         );
     
 };

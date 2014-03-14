@@ -10,6 +10,8 @@
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
 
+#include "moduleimp.h"
+
 namespace  kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,9 +159,12 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
 
+    ModuleImp::onProcessExit();
+
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::DetachCurrentProcess", hres );
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -199,9 +204,12 @@ void detachProcess( PROCESS_DEBUG_ID processId )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
+    ModuleImp::onProcessExit();
+
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::DetachCurrentProcess", hres );
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,6 +222,8 @@ void detachAllProcesses()
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
+
+    ModuleImp::clearModuleCache();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -229,6 +239,8 @@ void terminateAllProcesses()
     hres = g_dbgMgr->client->DetachProcesses();
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
+
+    ModuleImp::clearModuleCache();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

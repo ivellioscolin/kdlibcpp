@@ -32,119 +32,73 @@ class Module : private boost::noncopyable, public NumBehavior {
     
 public:
 
-    friend ModulePtr loadModule( const std::wstring &name ) {
-        return ModulePtr( new Module( name ) );
-    }
+    virtual std::wstring  getName() = 0;
 
-    friend ModulePtr loadModule( MEMOFFSET_64 offset ) {
-        return  ModulePtr( new Module( offset ) );
-    }
+    virtual MEMOFFSET_64  getBase() const = 0;
 
-    std::wstring  getName() {
-        return m_name;
-    }
+    virtual MEMOFFSET_64  getEnd() const = 0;
 
-    MEMOFFSET_64  getBase() const {
-        return m_base;
-    }
+    virtual size_t getSize() const = 0;
 
-    MEMOFFSET_64  getEnd() const {
-        return m_base + m_size;
-    }
+    virtual std::wstring getImageName() const = 0;
+    
+    virtual unsigned long getCheckSum() const = 0;
 
-    size_t getSize() const {
-        return m_size;
-    }
+    virtual unsigned long getTimeDataStamp() const = 0;
 
-    std::wstring getImageName() const {
-        return m_imageName;
-    }
+    virtual bool isUnloaded() const = 0;
 
-    unsigned long getCheckSum() const {
-        return m_checkSum;
-    }
+    virtual bool isUserMode() const = 0;
 
-    unsigned long getTimeDataStamp() const {
-        return m_timeDataStamp;
-    }
+    virtual std::wstring getSymFile() = 0;
 
-    bool isUnloaded() const {
-        return m_isUnloaded;
-    }
+    virtual void reloadSymbols() = 0;
 
-    bool isUserMode() const {
-        return m_isUserMode;
-    }
+    virtual MEMOFFSET_64 getSymbolVa( const std::wstring &symbolName ) = 0;
+    
+    virtual MEMOFFSET_32 getSymbolRva( const std::wstring &symbolName ) = 0;
 
-    std::wstring getSymFile();
+    virtual SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, MEMDISPLACEMENT* displacement = 0 ) = 0;
 
-    void
-    reloadSymbols();
+    virtual SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement ) = 0;
 
+    virtual SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, MEMDISPLACEMENT* displacement = 0 ) = 0;
 
-    MEMOFFSET_64 getSymbolVa( const std::wstring &symbolName );
-    MEMOFFSET_32 getSymbolRva( const std::wstring &symbolName );
+    virtual SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement ) = 0;
 
-    SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, MEMDISPLACEMENT* displacement = 0 );
-    SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement );
-    SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, MEMDISPLACEMENT* displacement = 0 );
-    SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement );
+    virtual SymbolPtr getSymbolByName( const std::wstring &symbolName ) = 0;
 
-    SymbolPtr getSymbolByName( const std::wstring &symbolName );
+    virtual SymbolPtr getSymbolScope() = 0;
 
-    SymbolPtr getSymbolScope();
+    virtual size_t getSymbolSize( const std::wstring &symName ) = 0;
 
-    size_t getSymbolSize( const std::wstring &symName );
+    virtual TypeInfoPtr getTypeByName( const std::wstring &typeName ) = 0;
 
+    virtual TypedVarPtr getTypedVarByAddr( MEMOFFSET_64 offset ) = 0;
 
-    TypeInfoPtr getTypeByName( const std::wstring &typeName ) {
-        return loadType( getSymbolScope(), typeName );
-    }
+    virtual TypedVarPtr getTypedVarByName( const std::wstring &symName ) = 0;
 
-    TypedVarPtr getTypedVarByAddr( MEMOFFSET_64 offset );
-    TypedVarPtr getTypedVarByName( const std::wstring &symName );
-    TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr );
-    TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,  const std::wstring &fieldName );
-    TypedVarPtr getFunctionByAddr( MEMOFFSET_64 offset );
+    virtual TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr ) = 0;
 
-    TypedVarList loadTypedVarList( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
-    TypedVarList loadTypedVarArray( MEMOFFSET_64 addr, const std::wstring &typeName, size_t count );
+    virtual TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName ) = 0;
+    
+    virtual TypedVarPtr getFunctionByAddr( MEMOFFSET_64 offset ) = 0;
 
-    SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" );
+    virtual TypedVarList loadTypedVarList( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName ) = 0;
 
-    std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
+    virtual TypedVarList loadTypedVarArray( MEMOFFSET_64 addr, const std::wstring &typeName, size_t count ) = 0;
 
+    virtual SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" ) = 0;
 
-    std::wstring getSourceFile( MEMOFFSET_64 offset );
+    virtual std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement ) = 0;
 
-    void getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement );
+    virtual std::wstring getSourceFile( MEMOFFSET_64 offset ) = 0;
 
-    std::string getVersionInfo( const std::string &value );
-    void getFixedFileInfo( FixedFileInfo &fixedFileInfo );
+    virtual void getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement ) = 0;
 
-protected:
+    virtual std::string getVersionInfo( const std::string &value ) = 0;
 
-    Module( const std::wstring &name );
-
-    Module( MEMOFFSET_64 offset );
-
-    void fillFields(); // ctor-helper
-
-    SymbolSessionPtr& getSymSession();
-
-    virtual NumVariant getValue() const {
-        return NumVariant( m_base );
-    }
-
-    std::wstring  m_name;
-    std::wstring  m_imageName;
-    MEMOFFSET_64  m_base;
-    size_t  m_size;
-    unsigned long  m_timeDataStamp;
-    unsigned long  m_checkSum;
-    SymbolSessionPtr  m_symSession;
-    bool m_isUnloaded;
-    bool m_isUserMode;
+    virtual void getFixedFileInfo( FixedFileInfo &fixedFileInfo ) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

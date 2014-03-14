@@ -215,7 +215,7 @@ TEST_F( TypedVarTest, LoadTypedVarList )
 {
     TypedVarList   lst;
     ASSERT_NO_THROW( lst = loadTypedVarList( m_targetModule->getSymbolVa(L"g_listHead"), L"listStruct", L"next.flink" ) );
-    EXPECT_EQ( 5, lst.size() );
+    ASSERT_EQ( 5UL, lst.size() );
     EXPECT_EQ( 2, *lst[2]->getElement(L"num") );
 }
 

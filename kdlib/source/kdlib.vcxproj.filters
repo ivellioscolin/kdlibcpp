@@ -89,6 +89,7 @@
     <ClInclude Include="..\include\kdlib\scope.h">
       <Filter>include/kdlib</Filter>
     </ClInclude>
+    <ClInclude Include="moduleimp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">
