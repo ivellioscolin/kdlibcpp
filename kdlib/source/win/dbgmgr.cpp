@@ -203,6 +203,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
+    std::wstring  moduleName = ModuleName ? std::wstring(ModuleName) : std::wstring();
+
     ModuleImp::onModuleLoad(BaseOffset);
 
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
@@ -210,7 +212,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
     EventsCallbackList::iterator  it;
     for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
     {
-        DebugCallbackResult  ret = (*it)->onModuleLoad(BaseOffset, ModuleName);
+        DebugCallbackResult  ret = (*it)->onModuleLoad(BaseOffset, moduleName);
         result = ret != DebugCallbackNoChange ? ret : result;
     }
 
@@ -226,6 +228,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
+    ModulePtr mod = loadModule(BaseOffset);
+
     ModuleImp::onModuleUnload(BaseOffset);
 
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
@@ -233,7 +237,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
     EventsCallbackList::iterator  it;
     for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
     {
-        DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset,ImageBaseName);
+        DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset, mod->getName());
         result = ret != DebugCallbackNoChange ? ret : result;
     }
 
@@ -272,7 +276,15 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    ModuleImp::onProcessExit();
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it = m_callbacks.begin();
+
+    for ( ; it != m_callbacks.end(); ++it )
+    {
+        DebugCallbackResult  ret = (*it)->onProcessExit( getCurrentProcessId(), ProcessExit, ExitCode );
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
 
     return ConvertCallbackResult( result );
 }

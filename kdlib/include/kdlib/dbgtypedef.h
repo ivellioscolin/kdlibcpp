@@ -132,6 +132,13 @@ enum MemoryProtect {
     PageExecuteWriteCopy    = 0x00000080
 };
 
+
+enum ProcessExitReason {
+    ProcessExit,
+    ProcessTerminate,
+    ProcessDetach
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

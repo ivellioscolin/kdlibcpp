@@ -30,6 +30,10 @@ public:
         return DebugCallbackNoChange;
     }
 
+    virtual DebugCallbackResult onProcessExit( PROCESS_DEBUG_ID processid, ProcessExitReason  reason, unsigned long exitCode ) {
+        return DebugCallbackNoChange;
+    }
+
     EventHandler() {
        registerEventsCallback(this);
     }

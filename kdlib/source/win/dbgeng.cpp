@@ -1067,6 +1067,61 @@ BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+BREAKPOINT_ID hardwareBreakPointSet( MEMOFFSET_64 offset, size_t size, ACCESS_TYPE accessType )
+{
+    HRESULT  hres;
+
+    IDebugBreakpoint  *bp;
+    hres = g_dbgMgr->control->AddBreakpoint(
+        DEBUG_BREAKPOINT_DATA,
+        DEBUG_ANY_ID,
+        &bp);
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::AddBreakpoint", hres);
+
+    hres = bp->SetOffset(offset);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException(L"IDebugBreakpoint::SetOffset", hres);
+    }
+
+    ULONG bpFlags;
+    hres = bp->GetFlags(&bpFlags);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException(L"IDebugBreakpoint::GetFlags", hres);
+    }
+
+    hres = bp->SetDataParameters(size, accessType);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException(L"IDebugBreakpoint::SetDataParameters", hres);
+    }
+
+    bpFlags |= DEBUG_BREAKPOINT_ENABLED | DEBUG_BREAKPOINT_ADDER_ONLY | DEBUG_BREAKPOINT_GO_ONLY;
+    hres = bp->SetFlags(bpFlags);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException(L"IDebugBreakpoint::SetFlags", hres);
+    }
+
+    ULONG  breakId;
+    hres = bp->GetId(&breakId);
+    if (S_OK != hres)
+    {
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException(L"IDebugBreakpoint::GetId", hres);
+    }
+
+    return breakId;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void breakPointRemove( BREAKPOINT_ID id )
 {
     IDebugBreakpoint *bp;
