@@ -484,7 +484,14 @@ std::wstring DiaSymbol::getName()
 
     if ( FAILED( hres ) )
         throw DiaException(L"Call IDiaSymbol::get_symTag", hres);
-      
+
+    if (symTag == SymTagData || symTag == SymTagFunction)
+    {
+        hres = m_symbol->get_name(&bstrName);
+        if (S_OK == hres)
+            return std::wstring( _bstr_t(bstrName, false) );
+    }
+
     if( symTag == SymTagData || symTag == SymTagFunction || symTag == SymTagPublicSymbol )
     {
         hres = m_symbol->get_undecoratedNameEx( UNDNAME_NAME_ONLY, &bstrName);

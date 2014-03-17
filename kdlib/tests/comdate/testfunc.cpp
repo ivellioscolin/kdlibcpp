@@ -58,3 +58,22 @@ void (__cdecl*CdeclStaticMethodPtr)() = &FuncTestClass::staticMethod;
 
 void (*ArrayOfCdeclFuncPtr[])(int, float) = { &CdeclFunc, &CdeclFunc, &CdeclFunc };
 void (FuncTestClass::*ArrayOfMethodPtr[])() = { &FuncTestClass::method, &FuncTestClass::method };
+
+
+extern "C" 
+{
+
+void __stdcall PureCStdcallFunc( int a, float b )
+{
+    LocalStaticFunc(a,b);
+}
+void __cdecl PureCCdeclFunc( int a, float b )
+{
+    LocalStaticFunc(a,b);
+}
+void __fastcall PureCFastcallFunc( int a, float b )
+{
+    LocalStaticFunc(a,b);
+}
+
+}
