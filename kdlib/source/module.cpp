@@ -410,7 +410,7 @@ TypedVarList ModuleImp::loadTypedVarList( MEMOFFSET_64 offset, const std::wstrin
 
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
-    return kdlib::loadTypedVarList( offset, typeName, fieldName );
+    return kdlib::loadTypedVarList( offset, typeInfo, fieldName );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -421,7 +421,7 @@ TypedVarList ModuleImp::loadTypedVarArray( MEMOFFSET_64 offset, const std::wstri
 
     TypeInfoPtr typeInfo = getTypeByName( typeName );
 
-    return kdlib::loadTypedVarArray( offset, typeName, count );
+    return kdlib::loadTypedVarArray( offset, typeInfo, count );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
