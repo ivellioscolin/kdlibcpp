@@ -86,7 +86,7 @@ unsigned long StackFrame::getTypedParamCount()
 
     TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
-    return func->getElementCount();
+    return static_cast<unsigned long>(func->getElementCount());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

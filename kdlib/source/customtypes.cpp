@@ -164,11 +164,11 @@ void CustomStruct::appendField(const std::wstring &fieldName, TypeInfoPtr &field
 
     const size_t fieldAlignReq = fieldType->getAlignReq();
     const size_t align = fieldAlignReq < m_align ? fieldAlignReq : m_align;
-    MEMOFFSET_32  fieldOffset = alignUp(m_size, align);
+    MEMOFFSET_32  fieldOffset = static_cast<MEMOFFSET_32>(alignUp(m_size, align));
 
     field->setOffset( fieldOffset );
 
-    m_size = (MEMOFFSET_32)( fieldOffset + fieldType->getSize() );
+    m_size = static_cast<MEMOFFSET_32>( fieldOffset + fieldType->getSize() );
 
     m_fields.push_back( TypeFieldPtr( field ) );
 }
@@ -183,7 +183,7 @@ void CustomUnion::appendField(const std::wstring &fieldName, TypeInfoPtr &fieldT
 
     size_t  fieldSize = fieldType->getSize();
 
-    m_size = fieldSize > m_size ? fieldSize : m_size;
+    m_size = static_cast<MEMOFFSET_32>(fieldSize > m_size ? fieldSize : m_size);
 
     m_fields.push_back( TypeFieldPtr( field ) );
 }
