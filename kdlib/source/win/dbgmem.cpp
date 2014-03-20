@@ -214,7 +214,7 @@ MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOffset, size_t& regionLength )
+MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOffset, unsigned long long &regionLength )
 {
     beginOffset = addr64(beginOffset);
 
