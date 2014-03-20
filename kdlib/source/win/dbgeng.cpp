@@ -62,7 +62,7 @@ public:
 
         if ( SUCCEEDED(hres) )
         {
-            g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, m_regValues.size(), NULL, 0, &m_regValues[0] );
+            g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0] );
         }
     }
 
@@ -729,7 +729,7 @@ PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset )
 
     hres = g_dbgMgr->system->GetProcessIdByDataOffset( offset, &id );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetProcessIdBySystemId", hres );
+        throw DbgEngException( L"IDebugSystemObjects::GetProcessIdByDataOffset", hres );
 
     return id;
 }
@@ -816,13 +816,26 @@ MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void setCurrentProcess(PROCESS_DEBUG_ID id)
+void setCurrentProcessById(PROCESS_DEBUG_ID id)
 {
     HRESULT  hres;
+
+    if ( isKernelDebugging() )
+        throw DbgException("setCurrentProcessById - only for user mode");
 
     hres = g_dbgMgr->system->SetCurrentProcessId(id);
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentProcessByOffset( MEMOFFSET_64 offset )
+{
+    if ( isKernelDebugging() )
+        throw DbgException("setCurrentProcessByOffset - only for user mode");
+
+    setCurrentProcessById(  getProcessIdByOffset(offset) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -834,6 +847,35 @@ void setImplicitProcess(MEMOFFSET_64 offset)
     hres = g_dbgMgr->system->SetImplicitProcessDataOffset(offset);
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugSystemObjects::SetImplicitProcessDataOffset", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getCurrentProcess()
+{
+    if ( isKernelDebugging() )
+    {
+        return getImplicitProcessOffset();
+    }
+    else
+    {
+        return getProcessOffset();
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentProcess( MEMOFFSET_64  offset )
+{
+    if ( isKernelDebugging() )
+    {
+        return setImplicitProcess(offset);
+    }
+    else
+    {
+        return setCurrentProcessByOffset(offset);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -981,13 +1023,20 @@ MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void setCurrentThread(THREAD_DEBUG_ID id)
+void setCurrentThreadById(THREAD_DEBUG_ID id)
 {
     HRESULT  hres;
 
     hres = g_dbgMgr->system->SetCurrentThreadId( id );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentThreadByOffset(MEMOFFSET_64 offset)
+{
+   setCurrentThreadById( getThreadIdByOffset(offset) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1013,6 +1062,34 @@ MEMOFFSET_64 getImplicitThreadOffset()
         throw DbgEngException( L"IDebugSystemObjects::SetImplicitThreadDataOffset", hres );
 
     return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getCurrentThread()
+{
+    if ( isKernelDebugging() )
+    {
+        return getImplicitThreadOffset();
+    }
+    else
+    {
+        return getThreadOffset();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentThread(MEMOFFSET_64 offset)
+{
+    if ( isKernelDebugging() )
+    {
+        setImplicitThread(offset);
+    }
+    else
+    {
+        setCurrentThreadByOffset(offset);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1094,7 +1171,7 @@ BREAKPOINT_ID hardwareBreakPointSet( MEMOFFSET_64 offset, size_t size, ACCESS_TY
         throw DbgEngException(L"IDebugBreakpoint::GetFlags", hres);
     }
 
-    hres = bp->SetDataParameters(size, accessType);
+    hres = bp->SetDataParameters(static_cast<ULONG>(size), accessType);
     if (S_OK != hres)
     {
         g_dbgMgr->control->RemoveBreakpoint(bp);

@@ -79,10 +79,14 @@ THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index);
 THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = -1);
 MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = -1);
 
-void setCurrentThread(THREAD_DEBUG_ID id);
+void setCurrentThreadById( PROCESS_DEBUG_ID id );
+void setCurrentThreadByOffset( MEMOFFSET_64 offset );
 
 void setImplicitThread(MEMOFFSET_64 offset); 
 MEMOFFSET_64 getImplicitThreadOffset();
+
+MEMOFFSET_64 getCurrentThread();
+void setCurrentThread(MEMOFFSET_64 offset);
 
 unsigned long getNumberProcesses();
 PROCESS_DEBUG_ID getCurrentProcessId();
@@ -93,10 +97,14 @@ PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index);
 PROCESS_ID  getProcessSystemId( PROCESS_DEBUG_ID id = -1);
 MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id  = -1);
 
-void setCurrentProcess(PROCESS_DEBUG_ID id);
+void setCurrentProcessById( PROCESS_DEBUG_ID id );
+void setCurrentProcessByOffset( MEMOFFSET_64 offset );
 
-void setImplicitProcess(MEMOFFSET_64 offset); 
+void setImplicitProcess( MEMOFFSET_64 offset ); 
 MEMOFFSET_64 getImplicitProcessOffset();
+
+MEMOFFSET_64 getCurrentProcess();
+void setCurrentProcess( MEMOFFSET_64  offset );
 
 std::wstring getCurrentProcessExecutableName();
 
