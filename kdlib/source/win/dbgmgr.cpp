@@ -4,6 +4,7 @@
 #include "moduleimp.h"
 
 #include "win/exceptions.h"
+#include "win/breakpointimp.h"
 
 namespace kdlib {
 
@@ -89,6 +90,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint2 *bp )
         return DEBUG_STATUS_NO_CHANGE;
 
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    result =  BaseBreakpoint::onBreakpoint(id);
 
     EventsCallbackList::iterator  it;
     for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )

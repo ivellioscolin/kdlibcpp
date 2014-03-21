@@ -32,6 +32,9 @@ class Module : private boost::noncopyable, public NumBehavior {
     
 public:
 
+    virtual ~Module()
+    {}
+
     virtual std::wstring  getName() = 0;
 
     virtual MEMOFFSET_64  getBase() const = 0;
@@ -99,6 +102,8 @@ public:
     virtual std::string getVersionInfo( const std::string &value ) = 0;
 
     virtual void getFixedFileInfo( FixedFileInfo &fixedFileInfo ) = 0;
+
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
