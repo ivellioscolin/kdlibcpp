@@ -8,6 +8,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "targetapp", "kdlib\tests\targetapp\targetapp_vc110.vcxproj", "{0E4CC688-F2F5-499F-9C07-0F2CAEE0D3EF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kdlibtest", "kdlib\tests\kdlibtest\kdlibtest_vc110.vcxproj", "{32CB9F5C-E114-40C1-8416-ACCC7CF5B0A1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0E4CC688-F2F5-499F-9C07-0F2CAEE0D3EF} = {0E4CC688-F2F5-499F-9C07-0F2CAEE0D3EF}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
