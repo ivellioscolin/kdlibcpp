@@ -115,6 +115,7 @@ ExecutionStatus ConvertDbgEngineExecutionStatus( ULONG status )
     case DEBUG_STATUS_STEP_OVER:
     case DEBUG_STATUS_STEP_INTO:
     case DEBUG_STATUS_STEP_BRANCH:
+    case DEBUG_STATUS_IGNORE_EVENT:
         return DebugStatusGo;
 
     case DEBUG_STATUS_BREAK:
