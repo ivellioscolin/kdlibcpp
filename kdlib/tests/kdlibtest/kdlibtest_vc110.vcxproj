@@ -108,7 +108,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\source\kdlib.vcxproj">
+    <ProjectReference Include="..\..\source\kdlib_vc110.vcxproj">
       <Project>{3e9c538f-f060-4e86-ab7d-d44439615b63}</Project>
     </ProjectReference>
   </ItemGroup>
