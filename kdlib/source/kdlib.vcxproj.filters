@@ -90,12 +90,6 @@
       <Filter>include/kdlib</Filter>
     </ClInclude>
     <ClInclude Include="moduleimp.h" />
-    <ClInclude Include="..\include\kdlib\breakpoint.h">
-      <Filter>include/kdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="win\breakpointimp.h">
-      <Filter>win</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">
@@ -139,8 +133,5 @@
     </ClCompile>
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="customtypes.cpp" />
-    <ClCompile Include="win\breakpoint.cpp">
-      <Filter>win</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
