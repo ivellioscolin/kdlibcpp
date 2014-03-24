@@ -40,6 +40,7 @@
     <ClCompile Include="typeinfo.cpp" />
     <ClCompile Include="udtfiled.cpp" />
     <ClCompile Include="windbg\windbg.cpp" />
+    <ClCompile Include="win\breakpoint.cpp" />
     <ClCompile Include="win\dbgeng.cpp" />
     <ClCompile Include="win\dbgmem.cpp" />
     <ClCompile Include="win\dbgmgr.cpp" />
@@ -47,6 +48,7 @@
     <ClCompile Include="win\sympath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\kdlib\breakpoint.h" />
     <ClInclude Include="..\include\kdlib\cpucontext.h" />
     <ClInclude Include="..\include\kdlib\dbgcallbacks.h" />
     <ClInclude Include="..\include\kdlib\dbgengine.h" />
@@ -74,6 +76,7 @@
     <ClInclude Include="typedvarimp.h" />
     <ClInclude Include="typeinfoimp.h" />
     <ClInclude Include="udtfield.h" />
+    <ClInclude Include="win\breakpointimp.h" />
     <ClInclude Include="win\dbgmgr.h" />
     <ClInclude Include="win\exceptions.h" />
   </ItemGroup>
