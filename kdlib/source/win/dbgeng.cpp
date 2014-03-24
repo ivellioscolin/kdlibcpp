@@ -86,6 +86,8 @@ bool initialize()
 
 void uninitialize()
 {
+    ModuleImp::clearModuleCache();
+
     g_dbgMgr.reset();
 }
 
