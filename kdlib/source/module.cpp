@@ -37,15 +37,18 @@ ModulePtr ModuleImp::getModule( const std::wstring &name )
 ModulePtr ModuleImp::getModule( MEMOFFSET_64 offset )
 {
     ProcessInfoPtr  processInfo = ProcessMonitor::getProcessInfo();
+
+    if ( !processInfo )
+        throw DbgException( "failed to get module");
     
     ModulePtr  module = processInfo->getModule(offset);
 
-    if ( module )
-        return module;
+    if ( !module )
+    {
+        module = ModulePtr( new ModuleImp(offset) );
 
-    module = ModulePtr( new ModuleImp(offset) );
-
-    processInfo->insertModule(module);
+        processInfo->insertModule(module);
+    }
 
     return module;
 }

@@ -84,7 +84,16 @@ ProcessInfoPtr ProcessMonitor::getProcessInfo( PROCESS_DEBUG_ID id)
 
     boost::recursive_mutex::scoped_lock  l(m_processLock);
 
-    return m_processMap[id];
+    ProcessInfoPtr  procInfo = m_processMap[id];
+
+    if ( !procInfo )
+    {
+        procInfo = ProcessInfoPtr( new ProcessInfo() );
+
+        m_processMap.insert( std::make_pair(id, procInfo) );
+    }
+
+    return procInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
