@@ -90,6 +90,7 @@
       <Filter>include/kdlib</Filter>
     </ClInclude>
     <ClInclude Include="moduleimp.h" />
+    <ClInclude Include="processmon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="win\dbgeng.cpp">
@@ -133,5 +134,6 @@
     </ClCompile>
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="customtypes.cpp" />
+    <ClCompile Include="processmon.cpp" />
   </ItemGroup>
 </Project>
