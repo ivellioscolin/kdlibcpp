@@ -6,13 +6,10 @@
 #include "kdlib/exceptions.h"
 
 #include "moduleimp.h"
+#include "processmon.h"
 
 namespace kdlib {
 
-///////////////////////////////////////////////////////////////////////////////
-
-boost::recursive_mutex  ModuleImp::m_moduleCacheLock;
-ModuleImp::ModuleCache  ModuleImp::m_moduleCache;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -39,86 +36,18 @@ ModulePtr ModuleImp::getModule( const std::wstring &name )
 
 ModulePtr ModuleImp::getModule( MEMOFFSET_64 offset )
 {
-    offset = findModuleBase(offset);
+    ProcessInfoPtr  processInfo = ProcessMonitor::getProcessInfo();
+    
+    ModulePtr  module = processInfo->getModule(offset);
 
-    ModuleCacheKey  key( getCurrentProcessId(), offset );
+    if ( module )
+        return module;
 
-    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
+    module = ModulePtr( new ModuleImp(offset) );
 
-    ModuleCache::iterator  it = m_moduleCache.find(key);
+    processInfo->insertModule(module);
 
-    if ( it != m_moduleCache.end() )
-        return it->second;
-
-    ModulePtr  m =  ModulePtr( new ModuleImp( offset ) );
-
-    m_moduleCache.insert(std::make_pair( key, m ));
-
-    return m;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void  ModuleImp::onModuleLoad( MEMOFFSET_64 offset )
-{
-    ModuleCacheKey  key( getCurrentProcessId(), offset );
-
-    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
-
-    m_moduleCache[key] = ModulePtr( new ModuleImp( offset ) );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void  ModuleImp::onModuleUnload( MEMOFFSET_64 offset )
-{
-    ModuleCacheKey  key( getCurrentProcessId(), offset );
-
-    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
-
-    ModuleCache::iterator  it = m_moduleCache.find(key);
-
-    if ( it != m_moduleCache.end() )
-        m_moduleCache.erase(it);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ModuleImp::onProcessStart(MEMOFFSET_64 offset )
-{
-    onModuleLoad(offset);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ModuleImp::onProcessExit()
-{
-    PROCESS_DEBUG_ID  processId = getCurrentProcessId();
-
-    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
-
-    ModuleCache::iterator  it = m_moduleCache.begin();
-
-    while( it != m_moduleCache.end() )
-    {
-        if ( it->first.processId == processId )
-        {
-            m_moduleCache.erase(it);
-            it = m_moduleCache.begin();
-        }
-        else
-        {
-            ++it;
-        }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void ModuleImp::clearModuleCache()
-{
-    boost::recursive_mutex::scoped_lock l(m_moduleCacheLock);
-    m_moduleCache.clear();
+    return module;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

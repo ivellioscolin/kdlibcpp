@@ -33,16 +33,6 @@ public:
 
     static ModulePtr getModule( MEMOFFSET_64 offset ); 
 
-    static void onModuleLoad( MEMOFFSET_64 offset ); 
-
-    static void onModuleUnload( MEMOFFSET_64 offset ); 
-
-    static void onProcessStart( MEMOFFSET_64 offset );
-
-    static void onProcessExit();
-
-    static void clearModuleCache();
-
 protected:
 
     explicit ModuleImp( const std::wstring &name );
@@ -134,11 +124,6 @@ protected:
     void getFixedFileInfo( FixedFileInfo &fixedFileInfo );
 
 protected:
-
-    typedef std::map<ModuleCacheKey, ModulePtr>  ModuleCache;
-
-    static boost::recursive_mutex  m_moduleCacheLock;
-    static ModuleCache  m_moduleCache;
 
     void fillFields(); // ctor-helper
 

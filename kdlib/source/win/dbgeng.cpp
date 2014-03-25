@@ -11,6 +11,7 @@
 #include "win/dbgmgr.h"
 
 #include "moduleimp.h"
+#include "processmon.h"
 
 namespace  kdlib {
 
@@ -79,6 +80,9 @@ private:
 bool initialize()
 {
     g_dbgMgr.set( new DebugManager() );
+
+    ProcessMonitor::init();
+
     return true;
 }
 
@@ -86,7 +90,7 @@ bool initialize()
 
 void uninitialize()
 {
-    ModuleImp::clearModuleCache();
+    ProcessMonitor::deinit();
 
     g_dbgMgr.reset();
 }
@@ -161,7 +165,7 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
 
-    ModuleImp::onProcessExit();
+    ProcessMonitor::processStop( processId );
 
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
@@ -206,7 +210,7 @@ void detachProcess( PROCESS_DEBUG_ID processId )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
-    ModuleImp::onProcessExit();
+    ProcessMonitor::processStop( processId );
 
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
@@ -225,7 +229,7 @@ void detachAllProcesses()
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
 
-    ModuleImp::clearModuleCache();
+    ProcessMonitor::processAllStop();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,7 +246,7 @@ void terminateAllProcesses()
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
 
-    ModuleImp::clearModuleCache();
+    ProcessMonitor::processAllStop();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

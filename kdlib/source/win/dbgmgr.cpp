@@ -2,6 +2,7 @@
 
 #include "dbgmgr.h"
 #include "moduleimp.h"
+#include "processmon.h"
 
 #include "win/exceptions.h"
 
@@ -206,7 +207,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
 
     std::wstring  moduleName = ModuleName ? std::wstring(ModuleName) : std::wstring();
 
-    ModuleImp::onModuleLoad(BaseOffset);
+    ProcessMonitor::moduleLoad( GetCurrentProcessId(), BaseOffset);
 
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
@@ -231,8 +232,6 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
 
     ModulePtr mod = loadModule(BaseOffset);
 
-    ModuleImp::onModuleUnload(BaseOffset);
-
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
     EventsCallbackList::iterator  it;
@@ -241,6 +240,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
         DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset, mod->getName());
         result = ret != DebugCallbackNoChange ? ret : result;
     }
+
+    ProcessMonitor::moduleUnload(GetCurrentProcessId(), BaseOffset);
 
     return ConvertCallbackResult( result );
 }
@@ -264,7 +265,11 @@ HRESULT STDMETHODCALLTYPE DebugManager::CreateProcess(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    ModuleImp::onProcessStart(BaseOffset);
+    PROCESS_DEBUG_ID  processId = getCurrentProcessId();
+
+    ProcessMonitor::processStart( processId );
+
+    ProcessMonitor::moduleLoad( processId, BaseOffset );
 
     return ConvertCallbackResult( result );
 }
@@ -277,15 +282,19 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
+    PROCESS_DEBUG_ID  procId = getCurrentProcessId();
+
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
     EventsCallbackList::iterator  it = m_callbacks.begin();
 
     for ( ; it != m_callbacks.end(); ++it )
     {
-        DebugCallbackResult  ret = (*it)->onProcessExit( getCurrentProcessId(), ProcessExit, ExitCode );
+        DebugCallbackResult  ret = (*it)->onProcessExit( procId, ProcessExit, ExitCode );
         result = ret != DebugCallbackNoChange ? ret : result;
     }
+
+    ProcessMonitor::processStop( procId );
 
     return ConvertCallbackResult( result );
 }

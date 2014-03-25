@@ -62,6 +62,9 @@
     <ClCompile Include="udtfiled.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="processmon.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -145,6 +148,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="udtfield.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="processmon.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
