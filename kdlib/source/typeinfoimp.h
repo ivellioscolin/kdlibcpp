@@ -336,6 +336,10 @@ public:
 
     virtual std::wstring str();
 
+    virtual size_t getSize() {
+        return  m_symbol->getSize();
+    }
+
     virtual bool isEnum() {
         return true;
     }
