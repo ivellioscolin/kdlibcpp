@@ -1,15 +1,15 @@
 #pragma once
 
-#include "processtest.h"
+#include "procfixture.h"
 #include "kdlib/cpucontext.h"
 
 using namespace kdlib;
 
-class CPUContextTest : public ProcessTest 
+class CPUContextTest : public ProcessFixture 
 {
 public:
 
-    CPUContextTest() : ProcessTest( L"cputest" ) {}
+    CPUContextTest() : ProcessFixture( L"cputest" ) {}
 };
 
 TEST_F( CPUContextTest, GetRegisters )

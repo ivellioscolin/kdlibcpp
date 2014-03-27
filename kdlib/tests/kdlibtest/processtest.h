@@ -1,50 +1,64 @@
 #pragma once
 
-#include <string>
+#include <Windows.h>
 
 #include "gtest/gtest.h"
 #include "kdlib/dbgengine.h"
-#include "kdlib/module.h"
 
-class ProcessTest : public ::testing::Test 
+class ProcessTest : public ::testing::Test
 {
 public:
 
-    ProcessTest( const std::wstring &cmdline = std::wstring() ) :
-        m_cmdLine( cmdline )
-        {}
+    kdlib::PROCESS_ID  StartTargetappWithParam( const std::wstring& cmdline ) 
+    {
+        std::vector<wchar_t>   buffer(0x1000);
+        DWORD   len = GetCurrentDirectory( buffer.size(), &buffer[0] );
 
-protected:
+        std::wstring  path = std::wstring( &buffer[0], len );
+        path += L"\\targetapp.exe"; 
 
-    const std::wstring m_processName;
+        buffer.clear();
+        buffer.insert( buffer.begin(), path.begin(), path.end() );
+        buffer.insert( buffer.end(), L' ' );
+        buffer.insert( buffer.end(), cmdline.begin(), cmdline.end() );
+        buffer.insert( buffer.end(), 0);
 
-    virtual void SetUp() {
-        if ( m_cmdLine.empty() )
-            m_processId = kdlib::startProcess(L"targetapp.exe");
-        else
-            m_processId = kdlib::startProcess(L"targetapp.exe " + m_cmdLine );
+        STARTUPINFO   startupInfo = {0};
+        startupInfo.cb = sizeof(startupInfo);
 
-        kdlib::targetGo(); // go to work break point
+        PROCESS_INFORMATION  processInfo = {0};
 
+        BOOL result = CreateProcessW(
+            path.c_str(),
+            &buffer[0],
+            NULL,
+            NULL,
+            FALSE,
+            CREATE_NO_WINDOW,
+            NULL,
+            NULL,
+            &startupInfo,
+            &processInfo );
 
-        m_targetModule = kdlib::loadModule( L"targetapp" );
+        CloseHandle( processInfo.hProcess );
+        CloseHandle( processInfo.hThread );
+
+        return processInfo.dwProcessId;
     }
-
-    virtual void TearDown() {
-        kdlib::terminateProcess( m_processId );
-    }
-
-    kdlib::PROCESS_DEBUG_ID m_processId;
-
-    kdlib::ModulePtr m_targetModule;
-
-    std::wstring  m_cmdLine;
 };
 
-#ifndef FIELD_OFFSET
-#define FIELD_OFFSET(type, field)    ((long)&(((type *)0)->field))
-#endif
+TEST_F( ProcessTest, StartProcess )
+{
+    kdlib::PROCESS_DEBUG_ID   id;
+    ASSERT_NO_THROW( id =  kdlib::startProcess(L"targetapp.exe") );
+    EXPECT_NO_THROW( kdlib::terminateProcess(id) );
+}
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
+TEST_F( ProcessTest, AttachProcess )
+{
+    kdlib::PROCESS_ID  pid = StartTargetappWithParam(L"processtest");
+
+    kdlib::PROCESS_DEBUG_ID   id;
+    ASSERT_NO_THROW( id = kdlib::attachProcess(pid) );
+    EXPECT_NO_THROW( kdlib::terminateProcess(id) );
+}

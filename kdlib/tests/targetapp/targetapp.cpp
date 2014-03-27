@@ -40,6 +40,9 @@ int _tmain(int argc, _TCHAR* argv[])
     if ( testGroup == L"loadunloadmodule" )
         return loadUnloadModuleRun();
 
+    if ( testGroup == L"processtest" )
+        Sleep( INFINITE );
+
     return breakOnRun();
 }
 

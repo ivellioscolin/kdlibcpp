@@ -1,6 +1,6 @@
 #pragma once
 
-#include "processtest.h"
+#include "procfixture.h"
 
 #include "kdlib/typeinfo.h"
 #include "kdlib/exceptions.h"
@@ -11,11 +11,11 @@
 using namespace kdlib;
 
 
-class TypeInfoTest : public ProcessTest 
+class TypeInfoTest : public ProcessFixture 
 {
 public:
 
-    TypeInfoTest() : ProcessTest( L"typetest" ) {}
+    TypeInfoTest() : ProcessFixture( L"typetest" ) {}
 
 };
 

@@ -1,24 +1,17 @@
 #pragma once
 
-#include "processtest.h"
+#include "procfixture.h"
 #include "kdlib/memaccess.h"
 #include "kdlib/exceptions.h"
 #include "test/testvars.h"
 
 using namespace kdlib;
 
-class MemoryTest : public ProcessTest 
+class MemoryTest : public ProcessFixture 
 {
 public:
 
-    MemoryTest() : ProcessTest( L"memtest" ) {}
-
-protected:
-
-   virtual void SetUp() 
-   {
-       ProcessTest::SetUp();
-    }
+    MemoryTest() : ProcessFixture( L"memtest" ) {}
 };
 
 TEST_F( MemoryTest, ReadMemory )

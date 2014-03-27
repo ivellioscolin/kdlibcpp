@@ -8,13 +8,13 @@
 
 #include "test/testvars.h"
 
-#include "processtest.h"
+#include "procfixture.h"
 #include "eventhandler.h"
 
 using namespace kdlib;
 using namespace testing;
 
-class ModuleTest : public ProcessTest 
+class ModuleTest : public ProcessFixture 
 {
 };
 
@@ -175,11 +175,11 @@ TEST_F( ModuleTest, getFunction )
     EXPECT_THROW( m_targetModule->getFunctionByAddr( addr + funcSize ), SymbolException );
 }
 
-class ModuleCallbackTest : public ProcessTest 
+class ModuleCallbackTest : public ProcessFixture 
 {
 public:
 
-    ModuleCallbackTest() : ProcessTest( L"loadunloadmodule" ) {}
+    ModuleCallbackTest() : ProcessFixture( L"loadunloadmodule" ) {}
 
     virtual void TearDown() {
     }

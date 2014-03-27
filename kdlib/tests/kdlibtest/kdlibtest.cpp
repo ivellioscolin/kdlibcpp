@@ -12,6 +12,7 @@
 #include "varianttest.h"
 #include "breakhandler.h"
 #include "cputest.h"
+#include "processtest.h"
 #include "stacktest.h"
 
 class Environment : public ::testing::Environment {
@@ -35,4 +36,4 @@ int _tmain(int argc, _TCHAR* argv[])
 
     return RUN_ALL_TESTS();
 }
- 
+

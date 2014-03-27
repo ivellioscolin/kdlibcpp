@@ -1,6 +1,6 @@
 #pragma once
 
-#include "processtest.h"
+#include "procfixture.h"
 
 #include "kdlib/typedvar.h"
 #include "kdlib/exceptions.h"
@@ -9,11 +9,11 @@
 
 using namespace kdlib;
 
-class TypedVarTest : public ProcessTest 
+class TypedVarTest : public ProcessFixture 
 {
 public:
 
-    TypedVarTest() : ProcessTest( L"typedvartest" ) {}
+    TypedVarTest() : ProcessFixture( L"typedvartest" ) {}
 };
 
 

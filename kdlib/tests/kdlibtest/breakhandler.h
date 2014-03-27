@@ -1,26 +1,25 @@
 #pragma once
 
+#include "kdlib/breakpoint.h"
 
-#include "kdlib/dbgengine.h"
-
-#include "processtest.h"
+#include "procfixture.h"
 #include "eventhandler.h"
 
 using namespace kdlib;
 using namespace testing;
 
-class BreakHandlerTest : public ProcessTest 
+class BreakPointTest : public ProcessFixture
 {
 public:
 
-    BreakHandlerTest() : ProcessTest( L"breakhandlertest" ) {}
+    BreakPointTest() : ProcessFixture( L"breakhandlertest" ) {}
 
     virtual void TearDown() {
     }
 };
 
 
-TEST_F( BreakHandlerTest, StopOnBreak )
+TEST_F( BreakPointTest, StopOnBreak )
 {
     EventHandlerMock    eventHandler;
 
@@ -35,7 +34,7 @@ TEST_F( BreakHandlerTest, StopOnBreak )
     targetGo();
 }
 
-TEST_F( BreakHandlerTest, RemoveBreak )
+TEST_F( BreakPointTest, RemoveBreak )
 {
     EventHandlerMock    eventHandler;
 
@@ -54,6 +53,27 @@ TEST_F( BreakHandlerTest, RemoveBreak )
 }
 
 
+class SoftwareBreakpointMock : public kdlib::SoftwareBreakpoint
+{
+public:
+
+    SoftwareBreakpointMock(MEMOFFSET_64 offset) : kdlib::SoftwareBreakpoint(offset)
+    {}
+
+    MOCK_METHOD0( onHit, kdlib::DebugCallbackResult () );
+};
 
 
 
+TEST_F( BreakPointTest, BreakpointObject )
+{
+    BreakpointPtr  bp;
+
+    DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackBreak );
+
+    ASSERT_NO_THROW( bp = setBp<SoftwareBreakpointMock>( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
+
+    EXPECT_CALL( static_cast<SoftwareBreakpointMock&>(*bp), onHit() ).Times(1);
+
+    targetGo();
+}

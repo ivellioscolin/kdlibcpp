@@ -8,11 +8,11 @@
 
 using namespace kdlib;
 
-class StackTest : public ProcessTest 
+class StackTest : public ProcessFixture 
 {
 public:
 
-    StackTest() : ProcessTest( L"stacktest" ) {}
+    StackTest() : ProcessFixture( L"stacktest" ) {}
 };
 
 TEST_F( StackTest, Ctor )
