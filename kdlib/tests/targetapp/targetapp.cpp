@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #include <string>
+#include <vector>
 
 #include <windows.h>
 
@@ -14,11 +15,14 @@ int breakpointTestRun();
 int memTestRun();
 int stackTestRun();
 int loadUnloadModuleRun();
+int startChildProcess();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
     if ( argc <= 1 )
+    {
         return breakOnRun();
+    }
 
     std::wstring testGroup = std::wstring( argv[1] );
 
@@ -41,7 +45,13 @@ int _tmain(int argc, _TCHAR* argv[])
         return loadUnloadModuleRun();
 
     if ( testGroup == L"processtest" )
+    {
         Sleep( INFINITE );
+        return 0;
+    }
+
+    if ( testGroup == L"childprocess" )
+        return startChildProcess();
 
     return breakOnRun();
 }
@@ -114,6 +124,50 @@ int loadUnloadModuleRun()
 
     HMODULE  hlib = LoadLibrary(L"ws2_32.dll");
     FreeLibrary(hlib);
+
+    return 0;
+}
+
+int startChildProcess()
+{
+    std::vector<wchar_t>   buffer(0x1000);
+    DWORD   len = GetCurrentDirectory( buffer.size(), &buffer[0] );
+
+
+    std::wstring  path = std::wstring( &buffer[0], len );
+    path += L"\\targetapp.exe"; 
+
+    std::wstring  cmdline = L"processtest";
+
+    buffer.clear();
+    buffer.insert( buffer.begin(), path.begin(), path.end() );
+    buffer.insert( buffer.end(), L' ' );
+    buffer.insert( buffer.end(), cmdline.begin(), cmdline.end() );
+    buffer.insert( buffer.end(), 0);
+
+    STARTUPINFO   startupInfo = {0};
+    startupInfo.cb = sizeof(startupInfo);
+
+    PROCESS_INFORMATION  processInfo = {0};
+
+    BOOL result = CreateProcessW(
+        path.c_str(),
+        &buffer[0],
+        NULL,
+        NULL,
+        FALSE,
+        CREATE_NO_WINDOW | DETACHED_PROCESS, 
+        NULL,
+        NULL,
+        &startupInfo,
+        &processInfo );
+
+    DWORD  err = GetLastError();
+
+    WaitForSingleObject( processInfo.hProcess, INFINITE );
+
+    CloseHandle( processInfo.hProcess );
+    CloseHandle( processInfo.hThread );
 
     return 0;
 }

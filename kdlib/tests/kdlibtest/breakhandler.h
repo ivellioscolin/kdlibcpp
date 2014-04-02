@@ -53,16 +53,12 @@ TEST_F( BreakPointTest, RemoveBreak )
 }
 
 
-class SoftwareBreakpointMock : public kdlib::SoftwareBreakpoint
+class BreakpointMock : public kdlib::BaseBreakpoint
 {
 public:
 
-    SoftwareBreakpointMock(MEMOFFSET_64 offset) : kdlib::SoftwareBreakpoint(offset)
-    {}
-
     MOCK_METHOD0( onHit, kdlib::DebugCallbackResult () );
 };
-
 
 
 TEST_F( BreakPointTest, BreakpointObject )
@@ -71,9 +67,9 @@ TEST_F( BreakPointTest, BreakpointObject )
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackBreak );
 
-    ASSERT_NO_THROW( bp = setBp<SoftwareBreakpointMock>( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
+    ASSERT_NO_THROW( bp = setBp<BreakpointMock>( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
 
-    EXPECT_CALL( static_cast<SoftwareBreakpointMock&>(*bp), onHit() ).Times(1);
+    EXPECT_CALL( static_cast<BreakpointMock&>(*bp), onHit() ).Times(1);
 
     targetGo();
 }

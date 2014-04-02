@@ -29,6 +29,28 @@ private:
 };
 
 
+class Win32Exception : public DbgException
+{
+public: 
+    Win32Exception( const std::string  &str ) :
+        DbgException( buildExcDesc(str) )
+    {}
+
+private:
+
+    static std::string buildExcDesc( const std::string  &str )
+    {
+        DWORD  lastErr = GetLastError();
+
+        std::stringstream  sstr;
+        sstr << str << std::endl;
+        sstr << "Win32 error: 0x" << std::hex << lastErr;
+        return sstr.str();
+
+    }
+};
+
+
 } // kdlib namespace end 
 
 

@@ -26,7 +26,6 @@ protected:
 
         kdlib::targetGo(); // go to work break point
 
-
         m_targetModule = kdlib::loadModule( L"targetapp" );
     }
 

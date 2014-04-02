@@ -128,24 +128,83 @@ PROCESS_DEBUG_ID startProcess( const std::wstring  &processName,  bool debugChil
     std::vector< std::wstring::value_type >      cmdLine( processName.size() + 1 );
     wcscpy_s( &cmdLine[0], cmdLine.size(), processName.c_str() );
 
-    hres = g_dbgMgr->client->CreateProcessWide(
-        0,
+    STARTUPINFO  startupInfo = {};
+    startupInfo.cb = sizeof(startupInfo);
+
+    PROCESS_INFORMATION  processInfo = {};
+
+    BOOL  createResult = CreateProcessW( 
+        NULL,
         &cmdLine[0],
-        ( debugChildren ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS ) | DETACHED_PROCESS 
-        );
+        NULL, 
+        NULL,
+        FALSE, 
+        DETACHED_PROCESS | CREATE_SUSPENDED,
+        NULL,
+        NULL,
+        &startupInfo,
+        &processInfo );
+
+    if ( !createResult )
+        throw Win32Exception( "Failed to start process");
+
+    hres = g_dbgMgr->client->AttachProcess( 0, processInfo.dwProcessId,  DEBUG_ATTACH_DEFAULT ); //DEBUG_ATTACH_EXISTING );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugClient4::CreateProcessWide", hres );
+        throw DbgEngException( L"IDebugClient::AttachProcess", hres );
 
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
 
-    ULONG processId = -1;
-    hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+    PROCESS_DEBUG_ID  processId = getProcessIdBySystemId(processInfo.dwProcessId);
+
+    setCurrentProcessById(processId);
+
+    if ( debugChildren )
+    {
+        hres = g_dbgMgr->client->RemoveProcessOptions( DEBUG_PROCESS_ONLY_THIS_PROCESS );
+        if ( FAILED( hres ) )
+            throw DbgEngException( L"IDebugControl::RemoveProcessOptions", hres );
+    }
+
+    ProcessMonitor::processStart(processId);
+
+    ResumeThread(processInfo.hThread);
+
+    CloseHandle(processInfo.hProcess);
+    CloseHandle(processInfo.hThread);
+
 
     return processId;
+
+    //HRESULT     hres;
+
+    //setInitialBreakOption();
+
+    //std::vector< std::wstring::value_type >      cmdLine( processName.size() + 1 );
+    //wcscpy_s( &cmdLine[0], cmdLine.size(), processName.c_str() );
+
+    //hres = g_dbgMgr->client->CreateProcessWide(
+    //    0,
+    //    &cmdLine[0],
+    //    ( debugChildren ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS ) | DETACHED_PROCESS 
+    //    );
+
+    //if ( FAILED( hres ) )
+    //    throw DbgEngException( L"IDebugClient4::CreateProcessWide", hres );
+
+    //hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
+    //if ( FAILED( hres ) )
+    //    throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
+
+    //ULONG processId = -1;
+    //hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
+    //if ( FAILED( hres ) )
+    //    throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+
+    //ProcessMonitor::processStart(processId);
+
+    //return processId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,10 +248,11 @@ PROCESS_DEBUG_ID attachProcess( PROCESS_ID pid )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
 
-    ULONG processId = -1;
-    hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+    PROCESS_DEBUG_ID  processId = getProcessIdBySystemId(pid);
+
+    setCurrentProcessById(processId);
+
+    ProcessMonitor::processStart(processId);
 
     return processId;
 }
@@ -251,7 +311,7 @@ void terminateAllProcesses()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void loadDump( const std::wstring &fileName )
+PROCESS_DEBUG_ID loadDump( const std::wstring &fileName )
 {
     HRESULT     hres;
 
@@ -262,6 +322,37 @@ void loadDump( const std::wstring &fileName )
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
+
+    ULONG processId = -1;
+    hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+
+    ProcessMonitor::processStart(processId);
+
+    return processId;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+void closeDump( PROCESS_DEBUG_ID processId )
+{
+    HRESULT     hres;
+
+    if ( processId != -1 )
+    {
+        hres = g_dbgMgr->system->SetCurrentProcessId(processId);
+        if ( FAILED(hres) )
+            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
+    }
+
+    hres = g_dbgMgr->client->TerminateCurrentProcess();
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
+
+    ProcessMonitor::processStop( processId );
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -300,7 +391,7 @@ bool isLocalKernelDebuggerEnabled()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-void attachKernel( const std::wstring &connectOptions )
+PROCESS_DEBUG_ID attachKernel( const std::wstring &connectOptions )
 {
     setInitialBreakOption();
 
@@ -314,6 +405,15 @@ void attachKernel( const std::wstring &connectOptions )
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
+
+    ULONG processId = -1;
+    hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
+
+    ProcessMonitor::processStart(processId);
+
+    return processId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1096,125 +1196,6 @@ void setCurrentThread(MEMOFFSET_64 offset)
     {
         setCurrentThreadByOffset(offset);
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-BREAKPOINT_ID softwareBreakPointSet( MEMOFFSET_64 offset )
-{
-    HRESULT  hres;
-
-    IDebugBreakpoint  *bp;
-    hres = g_dbgMgr->control->AddBreakpoint(
-        DEBUG_BREAKPOINT_CODE,
-        DEBUG_ANY_ID,
-        &bp);
-
-    if (S_OK != hres)
-        throw DbgEngException(L"IDebugControl::AddBreakpoint", hres);
-
-    hres = bp->SetOffset(offset);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException(L"IDebugBreakpoint::SetOffset", hres);
-    }
-
-    ULONG bpFlags;
-    hres = bp->GetFlags(&bpFlags);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException(L"IDebugBreakpoint::GetFlags", hres);
-    }
-
-
-    bpFlags |= DEBUG_BREAKPOINT_ENABLED | DEBUG_BREAKPOINT_ADDER_ONLY | DEBUG_BREAKPOINT_GO_ONLY;
-    hres = bp->SetFlags(bpFlags);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException( L"IDebugBreakpoint::SetFlags", hres);
-    }
-
-    ULONG  breakId;
-    hres = bp->GetId(&breakId);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException( L"IDebugBreakpoint::GetId", hres);
-    }
-
-    return breakId;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-BREAKPOINT_ID hardwareBreakPointSet( MEMOFFSET_64 offset, size_t size, ACCESS_TYPE accessType )
-{
-    HRESULT  hres;
-
-    IDebugBreakpoint  *bp;
-    hres = g_dbgMgr->control->AddBreakpoint(
-        DEBUG_BREAKPOINT_DATA,
-        DEBUG_ANY_ID,
-        &bp);
-    if (S_OK != hres)
-        throw DbgEngException(L"IDebugControl::AddBreakpoint", hres);
-
-    hres = bp->SetOffset(offset);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException(L"IDebugBreakpoint::SetOffset", hres);
-    }
-
-    ULONG bpFlags;
-    hres = bp->GetFlags(&bpFlags);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException(L"IDebugBreakpoint::GetFlags", hres);
-    }
-
-    hres = bp->SetDataParameters(static_cast<ULONG>(size), accessType);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException(L"IDebugBreakpoint::SetDataParameters", hres);
-    }
-
-    bpFlags |= DEBUG_BREAKPOINT_ENABLED | DEBUG_BREAKPOINT_ADDER_ONLY | DEBUG_BREAKPOINT_GO_ONLY;
-    hres = bp->SetFlags(bpFlags);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException(L"IDebugBreakpoint::SetFlags", hres);
-    }
-
-    ULONG  breakId;
-    hres = bp->GetId(&breakId);
-    if (S_OK != hres)
-    {
-        g_dbgMgr->control->RemoveBreakpoint(bp);
-        throw DbgEngException(L"IDebugBreakpoint::GetId", hres);
-    }
-
-    return breakId;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void breakPointRemove( BREAKPOINT_ID id )
-{
-    IDebugBreakpoint *bp;
-    HRESULT hres = g_dbgMgr->control->GetBreakpointById(id, &bp);
-    if (S_OK != hres)
-        throw DbgEngException(L"IDebugControl::GetBreakpointById", hres);
-
-    hres = g_dbgMgr->control->RemoveBreakpoint(bp);
-    if (S_OK != hres)
-        throw DbgEngException(L"IDebugControl::RemoveBreakpoint", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

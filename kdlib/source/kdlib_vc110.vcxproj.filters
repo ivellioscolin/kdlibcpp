@@ -65,6 +65,9 @@
     <ClCompile Include="processmon.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="win\breakpoint.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -151,6 +154,12 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="processmon.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\kdlib\breakpoint.h">
+      <Filter>kdlib/include</Filter>
+    </ClInclude>
+    <ClInclude Include="breakpointimpl.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

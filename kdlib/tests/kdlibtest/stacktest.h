@@ -2,9 +2,10 @@
 
 #include <math.h>
 
-#include "processtest.h"
+#include "procfixture.h"
 
 #include "kdlib/stack.h"
+#include "kdlib/memaccess.h"
 
 using namespace kdlib;
 

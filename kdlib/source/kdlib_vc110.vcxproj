@@ -41,6 +41,7 @@
     <ClCompile Include="typeinfo.cpp" />
     <ClCompile Include="udtfiled.cpp" />
     <ClCompile Include="windbg\windbg.cpp" />
+    <ClCompile Include="win\breakpoint.cpp" />
     <ClCompile Include="win\dbgeng.cpp" />
     <ClCompile Include="win\dbgmem.cpp" />
     <ClCompile Include="win\dbgmgr.cpp" />
@@ -48,6 +49,7 @@
     <ClCompile Include="win\sympath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\kdlib\breakpoint.h" />
     <ClInclude Include="..\include\kdlib\cpucontext.h" />
     <ClInclude Include="..\include\kdlib\dbgcallbacks.h" />
     <ClInclude Include="..\include\kdlib\dbgengine.h" />
@@ -67,6 +69,7 @@
     <ClInclude Include="..\include\kdlib\typeinfo.h" />
     <ClInclude Include="..\include\kdlib\variant.h" />
     <ClInclude Include="..\include\kdlib\windbg.h" />
+    <ClInclude Include="breakpointimpl.h" />
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />
     <ClInclude Include="moduleimp.h" />

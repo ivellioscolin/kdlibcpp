@@ -83,18 +83,25 @@ HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint2 *bp )
     DebugCallbackResult  result = DebugCallbackNoChange;
 
     HRESULT hres;
-    ULONG id;
 
-    hres = bp->GetId( &id );
-    if ( FAILED( hres ) )
+    DEBUG_BREAKPOINT_PARAMETERS  breakParams = {};
+
+    hres = bp->GetParameters(&breakParams);
+    if ( FAILED(hres) )
         return DEBUG_STATUS_NO_CHANGE;
+
+    result = ProcessMonitor::breakpointHit(
+        getCurrentProcessId(),
+        breakParams.Offset,
+        breakParams.BreakType == DEBUG_BREAKPOINT_DATA ? DataAccessBreakpoint : SoftwareBreakpoint
+        );
 
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
     EventsCallbackList::iterator  it;
     for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
     {
-        DebugCallbackResult  ret = (*it)->onBreakpoint(id);
+        DebugCallbackResult  ret = (*it)->onBreakpoint( breakParams.Id);
         result = ret != DebugCallbackNoChange ? ret : result;
     }
 
@@ -207,7 +214,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
 
     std::wstring  moduleName = ModuleName ? std::wstring(ModuleName) : std::wstring();
 
-    ProcessMonitor::moduleLoad( GetCurrentProcessId(), BaseOffset);
+    ProcessMonitor::moduleLoad( getCurrentProcessId(), BaseOffset);
 
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
@@ -241,7 +248,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
         result = ret != DebugCallbackNoChange ? ret : result;
     }
 
-    ProcessMonitor::moduleUnload(GetCurrentProcessId(), BaseOffset);
+    ProcessMonitor::moduleUnload(getCurrentProcessId(), BaseOffset);
 
     return ConvertCallbackResult( result );
 }
