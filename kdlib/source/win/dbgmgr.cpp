@@ -237,14 +237,18 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    ModulePtr mod = loadModule(BaseOffset);
+    std::wstring  moduleName;
+    try {
+        moduleName = getModuleName(BaseOffset);
+    } catch( DbgException& )
+    {}
 
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
     EventsCallbackList::iterator  it;
     for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
     {
-        DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset, mod->getName());
+        DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset, moduleName );
         result = ret != DebugCallbackNoChange ? ret : result;
     }
 
