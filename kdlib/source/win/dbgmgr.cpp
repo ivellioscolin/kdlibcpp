@@ -253,10 +253,9 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
     }
 
     ProcessMonitor::moduleUnload(getCurrentProcessId(), BaseOffset);
-
+         
     return ConvertCallbackResult( result );
 }
-
 
 ///////////////////////////////////////////////////////////////////
 
