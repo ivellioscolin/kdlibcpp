@@ -56,7 +56,7 @@ public:
 
     void set( MEMOFFSET_64 offset, size_t size, ACCESS_TYPE accessType );
 
-private:
+protected:
 
     BREAKPOINT_ID  m_id;
 
