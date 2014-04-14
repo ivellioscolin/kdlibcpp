@@ -28,3 +28,8 @@ KDLIB_EXT_COMMAND_METHOD_IMPL(SKdlibExt, input)
     std::wstring answer = dreadline();
     dprintln( L"Your name is " + answer );
 }
+
+
+
+
+

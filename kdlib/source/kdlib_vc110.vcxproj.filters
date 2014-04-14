@@ -164,9 +164,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="kdlib/include">
       <UniqueIdentifier>{dd7a9e28-b943-4573-8b0e-3d656091727d}</UniqueIdentifier>
     </Filter>
@@ -182,5 +179,8 @@
     <Filter Include="common">
       <UniqueIdentifier>{7161a918-e1c8-4242-b320-562306844fe3}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

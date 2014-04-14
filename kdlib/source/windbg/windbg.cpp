@@ -145,6 +145,60 @@ void WindbgExtension::parseArgs(const char* args)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void WindbgExtension::registerStructFormatter( WindbgStructFormatter* fmt )
+{
+    m_formatterList.push_back(fmt);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string WindbgExtension::getFormatterNames()
+{
+    std::stringstream  sstr;
+
+    for ( FormatterList::iterator it = m_formatterList.begin(); it != m_formatterList.end(); ++it )
+    {
+        sstr <<  (*it)->getName();
+        sstr << '\0';
+    }
+    sstr << '\0';
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string WindbgExtension::getFormatterValue( const std::string& structName, MEMOFFSET_64 offset)
+{
+    for (FormatterList::iterator it = m_formatterList.begin();  it != m_formatterList.end(); ++it )
+    {
+        if ( (*it)->getName() == structName )
+        {
+            std::string resultStr;
+
+            try {
+                resultStr = (*it)->printValue(offset);
+            } 
+            catch(kdlib::MemoryException& )
+            {
+                resultStr = "memory access error";
+            }
+            catch(kdlib::DbgException&)
+            {
+                resultStr = "unknown error";
+            }
+
+            resultStr += '\0';
+
+            return resultStr;
+        }
+    }
+
+    return "";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } } // kdlib::windbg namespace end
 
 
@@ -190,6 +244,57 @@ DebugExtensionUninitialize()
     }
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
+HRESULT
+CALLBACK 
+KnownStructOutput(
+    ULONG Flag,
+    ULONG64 Address,
+    PSTR StructName,
+    PSTR Buffer,
+    PULONG BufferSize
+    )
+{
+    switch(Flag)
+    {
+    case DEBUG_KNOWN_STRUCT_GET_NAMES:
+        {
+            std::string  resultStr = WinDbgExt->getFormatterNames();
+
+            if ( *BufferSize  < resultStr.size() )
+            {
+                *BufferSize = resultStr.size();
+                return S_FALSE;
+            }
+
+            memcpy_s( Buffer, *BufferSize, resultStr.c_str(), resultStr.size() );
+
+            *BufferSize = resultStr.size();
+            return S_OK;
+        }
+
+
+    case DEBUG_KNOWN_STRUCT_SUPPRESS_TYPE_NAME:
+        return S_OK;
+
+    case DEBUG_KNOWN_STRUCT_GET_SINGLE_LINE_OUTPUT:
+
+            std::string  resultStr = WinDbgExt->getFormatterValue(StructName, Address);
+
+            if ( *BufferSize  < resultStr.size() )
+            {
+                *BufferSize = resultStr.size();
+                return S_FALSE;
+            }
+
+            memcpy_s( Buffer, *BufferSize, resultStr.c_str(), resultStr.size() );
+
+            *BufferSize = resultStr.size();
+            return S_OK;
+    }
+
+    return S_FALSE;
+}
+
+///////////////////////////////////////////////////////////////////////////////

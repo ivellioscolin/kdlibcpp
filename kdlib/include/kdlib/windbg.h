@@ -2,15 +2,41 @@
 
 #include <vector>
 #include <string>
+#include <list>
 
 #include <atlcomcli.h>
 #include <DbgEng.h>
 
+#include "kdlib/dbgtypedef.h"
 #include "kdlib/exceptions.h"
 #include "kdlib/dbgio.h"
 
 namespace kdlib {
 namespace windbg {
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct WindbgStructFormatter 
+{
+    virtual std::string  getName() = 0;
+    virtual std::string  printValue( MEMOFFSET_64 offset ) = 0;
+};
+
+template<typename T>
+class WindbgStructFormatterRegistrator 
+{
+public:
+
+    WindbgStructFormatterRegistrator()
+    {
+        m_impl.reset( new T );
+        WinDbgExt->registerStructFormatter(m_impl.get());
+    }
+
+private:
+
+    std::auto_ptr<T>  m_impl;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,6 +59,11 @@ public:
         m_init = state;
     }
 
+    
+    void registerStructFormatter( WindbgStructFormatter* fmt );
+    std::string getFormatterNames();
+    std::string getFormatterValue( const std::string& structName, MEMOFFSET_64 offset);
+
 protected:
 
     typedef std::vector< std::string > ArgsList;
@@ -44,6 +75,8 @@ protected:
 
     bool m_init;
 
+    typedef std::list<WindbgStructFormatter*> FormatterList;
+    FormatterList  m_formatterList;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,8 +139,9 @@ public:
 
 } } // end kdlib::windbg namespace
 
-
 ///////////////////////////////////////////////////////////////////////////////
+
+extern kdlib::windbg::WindbgExtension  *WinDbgExt;
 
 #define KDLIB_WINDBG_EXTENSION_INIT(X)                                       \
 X* KdlibExtImpl = new X();                                                   \
@@ -141,5 +175,12 @@ METHOD_NAME ( __in PDEBUG_CLIENT client,  __in_opt PCSTR args)               \
     return S_OK;                                                             \
 }                                                                            \
 void CLASS_NAME::METHOD_NAME()
+
+///////////////////////////////////////////////////////////////////////////////
+
+#define KDLIB_WINDBG_REGISTER_FORMATER(X)                                     \
+namespace {                                                                   \
+    kdlib::windbg::WindbgStructFormatterRegistrator<X>  fmt##X  ;             \
+} 
 
 ///////////////////////////////////////////////////////////////////////////////
