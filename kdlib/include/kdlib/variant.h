@@ -399,7 +399,7 @@ public:
     }
 
     bool isSigned() {
-        return NumVariant(-1).cast( m_numType ) < 0;
+        return NumVariant(-1).cast( m_numType ) < NumVariant(0);
     }
 
     void setChar(char val) {
@@ -646,7 +646,6 @@ public:
         throw NumVariantError();
     }
 
-
 private:
 
     enum NumType { charT, ucharT, shortT, ushortT, longT, ulongT, longlongT, ulonglongT, intT, uintT, floatT, doubleT, maxT };
@@ -825,11 +824,118 @@ public:
         return getValue();
     }
 
+    char asChar() {
+        return getValue().asChar();
+    }
+
+    unsigned char asUChar() {
+        return getValue().asUChar();
+    }
+
+    short asShort() {
+        return getValue().asShort();
+    }
+
+    unsigned short asUShort() {
+        return getValue().asUShort();
+    }
+
+    long asLong() {
+        return getValue().asLong();
+    }
+
+    unsigned long asULong() {
+        return getValue().asULong();
+    }
+
+    long long asLongLong() {
+        return getValue().asLongLong();
+    }
+
+    unsigned long long asULongLong() {
+        return getValue().asULongLong();
+    }
+
+    int asInt() {
+        return getValue().asInt();
+    }
+
+    unsigned int asUInt() {
+        return getValue().asUInt();
+    }
+
+    float asFloat() {
+        return getValue().asFloat();
+    }
+
+    double asDouble() {
+        return getValue().asDouble();
+    }
+
+    template <typename T>
+    operator T() {
+    }
+
 protected:
 
     virtual NumVariant getValue() const  = 0;
 
 };
+
+inline 
+NumBehavior::operator char() {
+    return asChar();
+}
+
+inline 
+NumBehavior::operator unsigned char() {
+    return asUChar();
+}
+
+inline 
+NumBehavior::operator short() {
+    return asShort();
+}
+
+inline 
+NumBehavior::operator unsigned short() {
+    return asUShort();
+}
+
+inline
+NumBehavior::operator unsigned long() {
+     return asULong();
+}
+
+inline
+NumBehavior::operator long() {
+     return asLong();
+}
+
+inline
+NumBehavior::operator unsigned long long() {
+     return asULongLong();
+}
+
+inline
+NumBehavior::operator long long() {
+     return asLongLong();
+}
+
+inline
+NumBehavior::operator float() {
+     return asFloat();
+}
+
+inline
+NumBehavior::operator double() {
+     return asDouble();
+}
+
+inline
+NumBehavior::operator bool() {
+     return asChar() != 0;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

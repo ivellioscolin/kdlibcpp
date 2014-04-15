@@ -232,3 +232,43 @@ TEST_F( TypedVarTest, FuncPtr )
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncPtr" ) );
 }
 
+
+TEST_F( TypedVarTest, Assign )
+{
+    char a1 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( char(ulonglongVar), a1 );
+
+    unsigned char a2 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( unsigned char(ulonglongVar), a2 );
+
+    short a3 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( short(ulonglongVar), a3 );
+
+    unsigned short a4 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( unsigned short(ulonglongVar), a4 );
+
+    long a5 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( long(ulonglongVar), a5 );
+
+    unsigned long a6 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( unsigned long(ulonglongVar), a6 );
+
+    long long a7 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( long long(ulonglongVar), a7 );
+
+    unsigned long long a8 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( unsigned long long(ulonglongVar), a8 );
+
+    float a9 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( float(ulonglongVar), a9 );
+
+    double a10 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( double(ulonglongVar), a10 );
+
+    bool a11 = *loadTypedVar(L"ulonglongVar");
+    ASSERT_EQ( ulonglongVar!=0, a11 );
+}
+
+
+
+

@@ -27,14 +27,10 @@ public:
 
         if ( *tp->getElement(L"_Mysize") <= 10 )
         {
-            return loadChars( tp->getElement(L"_Bx._Buf")->getAddress(), tp->getElement(L"_Mysize")->getValue().asULong() );
-        }
-        else
-        {
-            return loadChars( tp->getElement(L"_Bx._Ptr")->getValue().asULongLong(), tp->getElement(L"_Mysize")->getValue().asULong() );
+             loadChars( tp->getElement(L"_Bx._Buf")->getAddress(), *tp->getElement(L"_Mysize") );
         }
 
-        return "hello";
+        return loadChars( *tp->getElement(L"_Bx._Ptr"), *tp->getElement(L"_Mysize") );
     }
 };
 
