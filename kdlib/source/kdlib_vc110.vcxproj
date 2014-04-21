@@ -81,6 +81,7 @@
     <ClInclude Include="udtfield.h" />
     <ClInclude Include="win\dbgmgr.h" />
     <ClInclude Include="win\exceptions.h" />
+    <ClInclude Include="win\threadctx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

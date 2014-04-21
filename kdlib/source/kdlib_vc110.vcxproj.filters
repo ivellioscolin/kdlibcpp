@@ -162,6 +162,9 @@
     <ClInclude Include="breakpointimpl.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="win\threadctx.h">
+      <Filter>win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="kdlib/include">
