@@ -873,8 +873,7 @@ public:
     }
 
     template <typename T>
-    operator T() {
-    }
+    operator T() ;
 
 protected:
 

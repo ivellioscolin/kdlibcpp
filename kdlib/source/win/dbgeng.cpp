@@ -1475,15 +1475,33 @@ unsigned long getNumberFrames(THREAD_ID id)
 
 void getStackFrame( THREAD_ID id, unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
 {
+    HRESULT  hres;
+
     SwitchThreadContext  threadContext(id);
 
-    HRESULT  hres;
+    CONTEXT   context;
+    hres = g_dbgMgr->advanced->GetThreadContext( &context, sizeof(context) );
+
     ULONG   filledFrames = 1024;
     std::vector<DEBUG_STACK_FRAME> dbgFrames(filledFrames);
 
-    hres = g_dbgMgr->control->GetStackTrace( 0, 0, 0, &dbgFrames[0], filledFrames, &filledFrames);
+    //hres = g_dbgMgr->control->GetStackTrace( 0, 0, 0,  filledFrames, &filledFrames);
+    //if (S_OK != hres)
+    //    throw DbgEngException( L"IDebugControl::GetStackTrace", hres );
+
+    hres = g_dbgMgr->control->GetContextStackTrace( 
+        &context,
+        sizeof(context),
+        &dbgFrames[0],
+        filledFrames,
+        NULL, 
+        filledFrames*sizeof(CONTEXT),
+        sizeof(CONTEXT),
+        &filledFrames );
+
     if (S_OK != hres)
-        throw DbgEngException( L"IDebugControl::GetStackTrace", hres );
+        throw DbgEngException( L"IDebugControl4::GetContextStackTrace", hres );
+
 
     if ( frameIndex >= filledFrames )
         throw IndexException( frameIndex );
