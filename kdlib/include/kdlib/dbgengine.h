@@ -122,22 +122,22 @@ THREAD_DEBUG_ID getLastEventThreadId();
 ExceptionInfo  getLastException();
 
 // registers
-MEMOFFSET_64 getInstructionOffset( THREAD_ID id = -1 );
-MEMOFFSET_64 getStackOffset( THREAD_ID id = -1);
-MEMOFFSET_64 getFrameOffset( THREAD_ID id = -1);
+MEMOFFSET_64 getInstructionOffset();
+MEMOFFSET_64 getStackOffset();
+MEMOFFSET_64 getFrameOffset();
 
-unsigned long getRegisterNumber( THREAD_ID id );
-unsigned long getRegsiterIndex( THREAD_ID id, const std::wstring &name );
-CPURegType getRegisterType( THREAD_ID id, unsigned long index );
-std::wstring getRegisterName( THREAD_ID id, unsigned long index );
-void getRegisterValue( THREAD_ID id, unsigned long index, void* buffer, size_t bufferSize );
-CPUType getCPUType( THREAD_ID id );
-CPUType getCPUMode( THREAD_ID id );
-void setCPUMode( THREAD_ID id, CPUType mode );
-unsigned long long loadMSR( THREAD_ID id, unsigned long msrIndex );
-void setMSR( THREAD_ID id, unsigned long msrIndex, unsigned long long value );
-unsigned long getNumberFrames(THREAD_ID id);
-void getStackFrame( THREAD_ID id, unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
+unsigned long getRegisterNumber();
+unsigned long getRegsiterIndex(const std::wstring &name );
+CPURegType getRegisterType(unsigned long index );
+std::wstring getRegisterName(unsigned long index );
+void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize );
+CPUType getCPUType();
+CPUType getCPUMode();
+void setCPUMode(CPUType mode );
+unsigned long long loadMSR(unsigned long msrIndex );
+void setMSR(unsigned long msrIndex, unsigned long long value );
+unsigned long getNumberFrames();
+void getStackFrame(unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
 
 //
 // Extensions

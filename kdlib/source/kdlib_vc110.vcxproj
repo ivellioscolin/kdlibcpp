@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cpucontext.cpp" />
     <ClCompile Include="customtypes.cpp" />
     <ClCompile Include="dbgio.cpp" />
     <ClCompile Include="dia\diadata.cpp" />
@@ -42,6 +41,7 @@
     <ClCompile Include="udtfiled.cpp" />
     <ClCompile Include="windbg\windbg.cpp" />
     <ClCompile Include="win\breakpoint.cpp" />
+    <ClCompile Include="win\cpucontext.cpp" />
     <ClCompile Include="win\dbgeng.cpp" />
     <ClCompile Include="win\dbgmem.cpp" />
     <ClCompile Include="win\dbgmgr.cpp" />
@@ -72,6 +72,7 @@
     <ClInclude Include="breakpointimpl.h" />
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />
+    <ClInclude Include="Header.h" />
     <ClInclude Include="moduleimp.h" />
     <ClInclude Include="processmon.h" />
     <ClInclude Include="stdafx.h" />
@@ -79,6 +80,7 @@
     <ClInclude Include="typedvarimp.h" />
     <ClInclude Include="typeinfoimp.h" />
     <ClInclude Include="udtfield.h" />
+    <ClInclude Include="win\cpucontextimpl.h" />
     <ClInclude Include="win\dbgmgr.h" />
     <ClInclude Include="win\exceptions.h" />
     <ClInclude Include="win\threadctx.h" />

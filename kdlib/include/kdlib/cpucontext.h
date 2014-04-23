@@ -13,58 +13,42 @@ namespace kdlib {
 class CPUContext;
 typedef boost::shared_ptr<CPUContext>  CPUContextPtr;
 
-class CPUContext : private boost::noncopyable {
+class  CPUContext : private boost::noncopyable {
 
 public:
 
-    CPUType getCPUType();
-    CPUType getCPUMode();
-    void setCPUMode( CPUType mode );
-    void switchCPUMode();
+    static CPUContextPtr loadCPUCurrentContext();
+    static CPUContextPtr loadCPUContextByIndex( unsigned long index );
+    static CPUContextPtr loadCPUContextImplicit( MEMOFFSET_64 offset);
 
-    NumVariant getRegisterByName( const std::wstring &name);
-    NumVariant getRegisterByIndex( unsigned long index );
-    std::wstring getRegisterName( unsigned long index );
+public:
 
-    MEMOFFSET_64 getIP();
-    MEMOFFSET_64 getSP();
-    MEMOFFSET_64 getFP();
+    virtual CPUType getCPUType() = 0;
+    virtual CPUType getCPUMode() = 0;
+    virtual void setCPUMode( CPUType mode ) = 0;
+    virtual void switchCPUMode() = 0;
 
-    unsigned long getStackLength();
-    void getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
-    void getCurrentStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) {
-        getStackFrame( 0, ip, ret, fp, sp );
-    }
+    virtual NumVariant getRegisterByName( const std::wstring &name) = 0;
+    virtual NumVariant getRegisterByIndex( unsigned long index ) = 0;
+    virtual std::wstring getRegisterName( unsigned long index ) = 0;
 
-    unsigned long long loadMSR( unsigned long msrIndex );
-    void setMSR( unsigned long msrIndex, unsigned long long value );
+    virtual MEMOFFSET_64 getIP() = 0;
+    virtual MEMOFFSET_64 getSP() = 0;
+    virtual MEMOFFSET_64 getFP() = 0;
 
-protected:
+    virtual unsigned long getStackLength() = 0;
+    virtual void getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) = 0;
+    
+    virtual void getCurrentStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) = 0;
 
-    friend CPUContextPtr loadCPUCurrentContext();
-    friend CPUContextPtr loadCPUContextByIndex( unsigned long index );
-
-    CPUContext( unsigned long index = -1 );
-
-    THREAD_ID  m_contextIndex;
+    virtual unsigned long long loadMSR( unsigned long msrIndex ) = 0;
+    virtual void setMSR( unsigned long msrIndex, unsigned long long value ) = 0;
 };
 
-
-inline CPUContextPtr loadCPUCurrentContext() {
-   return CPUContextPtr( new CPUContext() );
-}
-
-inline CPUContextPtr loadCPUContextByIndex( unsigned long index ) {
-    return CPUContextPtr( new CPUContext(index) );
-}
-
 inline CPUContextPtr loadCPUContext() {
-    return loadCPUCurrentContext();
+    return CPUContext::loadCPUCurrentContext();
 }
 
-inline CPUContextPtr loadCPUContext( unsigned long index ) {
-    return loadCPUContextByIndex(index);
-}
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

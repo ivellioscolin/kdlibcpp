@@ -32,9 +32,6 @@
     <ClCompile Include="dia\symexport.cpp">
       <Filter>dia</Filter>
     </ClCompile>
-    <ClCompile Include="cpucontext.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="customtypes.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -66,6 +63,9 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="win\breakpoint.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="win\cpucontext.cpp">
       <Filter>win</Filter>
     </ClCompile>
   </ItemGroup>
@@ -161,6 +161,12 @@
     </ClInclude>
     <ClInclude Include="breakpointimpl.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="win\cpucontextimpl.h">
+      <Filter>win</Filter>
     </ClInclude>
     <ClInclude Include="win\threadctx.h">
       <Filter>win</Filter>
