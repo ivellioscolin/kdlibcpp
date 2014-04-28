@@ -4,7 +4,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <kdlib/cpucontext.h>
+#include <kdlib/dbgengine.h>
 #include <kdlib/typedvar.h>
 #include <kdlib/exceptions.h>
 
@@ -100,43 +100,43 @@ protected:
 class Stack {
 
     friend StackPtr getStack();
-    friend StackPtr getStack( CPUContextPtr& cpuContext );
 
 public:
 
     unsigned long getFrameCount() {
-       return m_cpuContext->getStackLength();
+        return m_stackTrace.size();
     }
 
-    StackFramePtr getFrame( unsigned long frameNumber ) {
-        MEMOFFSET_64 ip, ret, fp, sp;
-        m_cpuContext->getStackFrame( frameNumber, ip, ret, fp, sp );
-        return getStackFrame( ip, ret, fp, sp );
+    StackFramePtr getFrame( unsigned long frameNumber ) 
+    {
+        return getStackFrame( 
+                m_stackTrace[frameNumber].instructionOffset,
+                m_stackTrace[frameNumber].returnOffset,
+                m_stackTrace[frameNumber].frameOffset,
+                m_stackTrace[frameNumber].stackOffset );
     }
 
 protected:
 
-    Stack() : m_cpuContext( loadCPUContext() )
-    {}
+    Stack() 
+    {
+       getStackTrace(m_stackTrace);
+    }
 
-    Stack( const CPUContextPtr& cpuContext ) : m_cpuContext( cpuContext )
-    {}
-
-    CPUContextPtr  m_cpuContext;
+    std::vector<FrameDesc>  m_stackTrace;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-StackPtr getStack();
-
-StackPtr getStack( CPUContextPtr& cpuContext );
+inline
+StackPtr getStack() {
+    return StackPtr( new Stack() );
+}
 
 inline
 StackFramePtr getStackFrame() {
     return getStack()->getFrame(0);
 }
-
-StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
 
 ///////////////////////////////////////////////////////////////////////////////
 

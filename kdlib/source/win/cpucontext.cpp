@@ -39,7 +39,8 @@ CPUContextPtr CPUContext::loadCPUCurrentContext()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CPUContextImpl::CPUContextImpl()
+CPUContextImpl::CPUContextImpl() :
+    m_wow64( false )
 {
     HRESULT  hres;
 
@@ -49,9 +50,7 @@ CPUContextImpl::CPUContextImpl()
 
     if ( m_processorType == IMAGE_FILE_MACHINE_I386 )
     {
-        m_ctx_x86.ContextFlags = WOW64_CONTEXT_FULL;
-
-        hres = g_dbgMgr->advanced->GetThreadContext( &m_ctx_wow64, sizeof(m_ctx_wow64) );
+        hres = g_dbgMgr->advanced->GetThreadContext( &m_ctx_x86, sizeof(m_ctx_x86) );
         if ( FAILED( hres ) )
             throw DbgEngException( L"IDebugAdvanced::GetThreadContext", hres );
 
@@ -259,7 +258,6 @@ void CPUContextImpl::getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, 
     if (S_OK != hres)
         throw DbgEngException( L"IDebugControl4::GetContextStackTrace", hres );
 
-
     if ( frameIndex >= filledFrames )
         throw IndexException( frameIndex );
 
@@ -271,235 +269,80 @@ void CPUContextImpl::getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, 
 
 ///////////////////////////////////////////////////////////////////////////////
 
+NumVariant getRegisterByName(const std::wstring& regName)
+{
+    unsigned long index = getRegsiterIndex(regName);
+    return getRegisterByIndex(index);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant getRegisterByIndex(unsigned long index)
+{
+    CPURegType  regType = getRegisterType(index);
+
+    switch( regType )
+    {
+    case  RegInt8:
+        {
+            unsigned char  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+    case  RegInt16:
+        {
+            unsigned short  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+    case  RegInt32:
+        {
+            unsigned long  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
 
 
+    case  RegInt64:
+        {
+            unsigned long long  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
+
+    case  RegFloat32:
+        {
+            float  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
 
 
+    case  RegFloat64:
+        {
+            double  val;
+            getRegisterValue( index, &val, sizeof(val) );
+            return NumVariant(val);
+        }
+        break;
 
+    case RegFloat80:
+    case RegFloat128:
+    case RegVector64:
+    case RegVector128:
+        return NumVariant();
+    }
 
+    throw DbgException( "unsupported registry type");
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-///////////////////////////////////////////////////////////////
-//
-//CPUContext::CPUContext( unsigned long index )
-//{
-//    if ( index == -1 )
-//    {
-//        index = getCurrentThreadId();
-//    }
-//    else
-//    {
-//        if ( index >= getNumberThreads() )
-//            throw IndexException(index);
-//    }
-//
-//    m_contextIndex = index;
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//MEMOFFSET_64 CPUContext::getIP()
-//{
-//    return  getInstructionOffset( m_contextIndex );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//MEMOFFSET_64 CPUContext::getSP()
-//{
-//     return  getStackOffset( m_contextIndex );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//MEMOFFSET_64 CPUContext::getFP()
-//{
-//    return  getFrameOffset( m_contextIndex );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//NumVariant CPUContext::getRegisterByName( const std::wstring &name)
-//{
-//    unsigned long index = getRegsiterIndex( m_contextIndex, name );
-//    return getRegisterByIndex( index );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//std::wstring CPUContext::getRegisterName( unsigned long index )
-//{
-//    return kdlib::getRegisterName( m_contextIndex, index );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//NumVariant CPUContext::getRegisterByIndex( unsigned long index )
-//{
-//    CPURegType  regType = getRegisterType(m_contextIndex, index);
-//
-//    switch( regType )
-//    {
-//    case  RegInt8:
-//        {
-//            unsigned char  val;
-//            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
-//            return NumVariant(val);
-//        }
-//        break;
-//
-//    case  RegInt16:
-//        {
-//            unsigned short  val;
-//            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
-//            return NumVariant(val);
-//        }
-//        break;
-//
-//    case  RegInt32:
-//        {
-//            unsigned long  val;
-//            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
-//            return NumVariant(val);
-//        }
-//        break;
-//
-//
-//    case  RegInt64:
-//        {
-//            unsigned long long  val;
-//            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
-//            return NumVariant(val);
-//        }
-//        break;
-//
-//    case  RegFloat32:
-//        {
-//            float  val;
-//            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
-//            return NumVariant(val);
-//        }
-//        break;
-//
-//
-//    case  RegFloat64:
-//        {
-//            double  val;
-//            getRegisterValue( m_contextIndex, index, &val, sizeof(val) );
-//            return NumVariant(val);
-//        }
-//        break;
-//
-//    case RegFloat80:
-//    case RegFloat128:
-//    case RegVector64:
-//    case RegVector128:
-//        return NumVariant();
-//    }
-//
-//    throw DbgException( "unsupported registry type");
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//unsigned long long CPUContext::loadMSR( unsigned long msrIndex )
-//{
-//    return kdlib::loadMSR(m_contextIndex, msrIndex );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void CPUContext::setMSR( unsigned long msrIndex, unsigned long long value )
-//{
-//    return kdlib::setMSR( m_contextIndex, msrIndex, value );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//CPUType CPUContext::getCPUType()
-//{
-//    return kdlib::getCPUType( m_contextIndex );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//CPUType CPUContext::getCPUMode()
-//{
-//    return kdlib::getCPUMode( m_contextIndex );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void CPUContext::setCPUMode( CPUType mode )
-//{
-//    kdlib::setCPUMode( m_contextIndex, mode );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void CPUContext::switchCPUMode()
-//{
-//    switch ( getCPUMode() )
-//    {
-//    case CPU_I386:
-//        setCPUMode(CPU_AMD64);
-//        return;
-//    
-//    case CPU_AMD64:
-//        setCPUMode(CPU_I386);
-//        return;
-//    }
-//
-//    DbgException( "can not switch CPU mode");
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//unsigned long CPUContext::getStackLength()
-//{
-//    return kdlib::getNumberFrames( m_contextIndex );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void CPUContext::getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
-//{
-//    kdlib::getStackFrame( m_contextIndex, frameIndex, ip, ret, fp, sp );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

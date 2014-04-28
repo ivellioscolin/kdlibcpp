@@ -26,14 +26,6 @@ protected:
         NOT_IMPLEMENTED();
     }
 
-    virtual void setCPUMode( CPUType mode ) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual void switchCPUMode() {
-        NOT_IMPLEMENTED();
-    }
-
     virtual NumVariant getRegisterByName( const std::wstring &name) {
         NOT_IMPLEMENTED();
     }

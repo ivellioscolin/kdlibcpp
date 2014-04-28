@@ -139,6 +139,13 @@ enum ProcessExitReason {
     ProcessDetach
 };
 
+struct FrameDesc {
+    MEMOFFSET_64            instructionOffset;;
+    MEMOFFSET_64            returnOffset;
+    MEMOFFSET_64            frameOffset;
+    MEMOFFSET_64            stackOffset; 
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

@@ -80,8 +80,8 @@ THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index);
 THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = -1);
 MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = -1);
 
-void setCurrentThreadById( PROCESS_DEBUG_ID id );
-void setCurrentThreadByOffset( MEMOFFSET_64 offset );
+void setCurrentThreadById(THREAD_DEBUG_ID id);
+void setCurrentThreadByOffset(MEMOFFSET_64 offset);
 
 void setImplicitThread(MEMOFFSET_64 offset); 
 MEMOFFSET_64 getImplicitThreadOffset();
@@ -134,10 +134,11 @@ void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize );
 CPUType getCPUType();
 CPUType getCPUMode();
 void setCPUMode(CPUType mode );
+void switchCPUMode();
+
 unsigned long long loadMSR(unsigned long msrIndex );
 void setMSR(unsigned long msrIndex, unsigned long long value );
-unsigned long getNumberFrames();
-void getStackFrame(unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
+void getStackTrace(std::vector<FrameDesc> &stackTrace);
 
 //
 // Extensions

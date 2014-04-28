@@ -54,16 +54,6 @@ bool inDebugRange( const DebugRange& range, MEMOFFSET_64 offset)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-StackPtr getStack()
-{
-    return StackPtr( new Stack() );
-}
-
-StackPtr getStack( CPUContextPtr& cpuContext )
-{
-    return StackPtr( new Stack( cpuContext ) );
-}
-
 StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
 {
     return StackFramePtr( new StackFrame(ip,ret,fp,sp) );

@@ -25,8 +25,6 @@ public:
 
     virtual CPUType getCPUType() = 0;
     virtual CPUType getCPUMode() = 0;
-    virtual void setCPUMode( CPUType mode ) = 0;
-    virtual void switchCPUMode() = 0;
 
     virtual NumVariant getRegisterByName( const std::wstring &name) = 0;
     virtual NumVariant getRegisterByIndex( unsigned long index ) = 0;
@@ -50,5 +48,12 @@ inline CPUContextPtr loadCPUContext() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+
+NumVariant getRegisterByName(const std::wstring& regName);
+NumVariant getRegisterByIndex(unsigned long regIndex);
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 } // kdlib namespace end

@@ -320,7 +320,6 @@ void ProcessMonitorImpl::removeBreakpoint( BREAKPOINT_ID  bpid )
             }
         }
     }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -328,7 +327,16 @@ void ProcessMonitorImpl::removeBreakpoint( BREAKPOINT_ID  bpid )
 ProcessInfoPtr ProcessMonitorImpl::getProcess( PROCESS_DEBUG_ID id )
 {
     boost::recursive_mutex::scoped_lock l(m_lock);
-    return  m_processMap[id];
+
+    ProcessMap::iterator  it  = m_processMap.find(id);
+
+    if ( it != m_processMap.end() )
+        return it->second;
+
+    ProcessInfoPtr  proc = ProcessInfoPtr( new ProcessInfo() );
+    m_processMap[id] = proc;
+
+    return proc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -336,7 +344,21 @@ ProcessInfoPtr ProcessMonitorImpl::getProcess( PROCESS_DEBUG_ID id )
 ModulePtr ProcessInfo::getModule(MEMOFFSET_64  offset)
 {
     boost::recursive_mutex::scoped_lock l(m_moduleLock);
-    return m_moduleMap[ offset ];
+
+    ModuleMap::iterator it = m_moduleMap.find(offset);
+
+    if ( it != m_moduleMap.end() )
+        return it->second;
+
+    for ( ModuleMap::iterator it = m_moduleMap.begin(); it != m_moduleMap.end(); ++it )
+    {
+        if ( it->second->getBase() <= offset && offset < it->second->getEnd() )
+        {
+           return it->second;
+        }
+    }
+
+    return ModulePtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -427,93 +449,6 @@ DebugCallbackResult ProcessInfo::breakpointHit( MEMOFFSET_64 offset, BreakpointT
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-//
-//ProcessInfoPtr ProcessMonitor::getProcessInfo( PROCESS_DEBUG_ID id)
-//{
-//    if ( id == -1 )
-//        id = getCurrentProcessId();
-//
-//    boost::recursive_mutex::scoped_lock  l(m_processLock);
-//
-//    ProcessInfoPtr  procInfo = m_processMap[id];
-//
-//    if ( !procInfo )
-//    {
-//        procInfo = ProcessInfoPtr( new ProcessInfo() );
-//
-//        m_processMap.insert( std::make_pair(id, procInfo) );
-//    }
-//
-//    return procInfo;
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//ModulePtr ProcessInfo::getModule(MEMOFFSET_64  offset)
-//{
-//    boost::recursive_mutex::scoped_lock  l(m_moduleLock);
-//    return m_moduleMap[offset];
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void ProcessInfo::insertModule(ModulePtr& module)
-//{
-//    MEMOFFSET_64  offset = module->getBase();
-//    boost::recursive_mutex::scoped_lock  l(m_moduleLock);
-//    m_moduleMap[offset] = module;
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void ProcessInfo::insertSoftwareBp(Breakpoint* bp)
-//{
-//    MEMOFFSET_64  offset = bp->getOffset();
-//    m_softBpMap[offset] = bp;
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void ProcessInfo::moduleLoad(MEMOFFSET_64  offset)
-//{
-//    insertModule( loadModule(offset) );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//void ProcessInfo::moduleUnload(MEMOFFSET_64  offset)
-//{
-//    boost::recursive_mutex::scoped_lock  l(m_moduleLock);
-//    m_moduleMap.erase(offset);
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-//
-//DebugCallbackResult ProcessInfo::breakpointHit(MEMOFFSET_64 offset, bool hardware)
-//{
-//    boost::recursive_mutex::scoped_lock l(m_bpLock);
-//
-//    Breakpoint  *bp = hardware ? m_hardBpMap[offset] : m_softBpMap[offset];
-//
-//    if ( bp )
-//        return bp->onHit();
-//
-//    return DebugCallbackNoChange;
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
 
 
 } //namesapce kdlib
