@@ -87,6 +87,10 @@ class TypeException : public SymbolException
 {
 public:
 
+    TypeException( const std::wstring  &errorStr )
+        : SymbolException(errorStr)
+        {}
+
     TypeException( const std::wstring &typeName, const std::wstring  &errorStr )
         : SymbolException( buildDesc( typeName, errorStr ) )
         {}

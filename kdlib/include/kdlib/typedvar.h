@@ -7,6 +7,7 @@
 
 #include "kdlib/typeinfo.h"
 #include "kdlib/variant.h"
+#include "kdlib/dataaccessor.h"
 
 namespace kdlib {
 
@@ -32,6 +33,10 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
 
 TypedVarPtr loadTypedVar( SymbolPtr &symbol );
 
+TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSource);
+
+TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, DataAccessorPtr& dataSource);
+
 TypedVarPtr containingRecord( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
 
 TypedVarPtr containingRecord( MEMOFFSET_64 addr, TypeInfoPtr &typeInfo, const std::wstring &fieldName );
@@ -53,6 +58,10 @@ class TypedVar : private boost::noncopyable, public NumBehavior {
     friend TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr );
 
     friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
+
+    friend TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSource );
+
+    friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, DataAccessorPtr& dataSource );
 
 public:
     

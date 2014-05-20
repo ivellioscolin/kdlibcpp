@@ -68,6 +68,9 @@
     <ClCompile Include="win\cpucontext.cpp">
       <Filter>win</Filter>
     </ClCompile>
+    <ClCompile Include="dataaccessor.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -170,6 +173,12 @@
     </ClInclude>
     <ClInclude Include="win\threadctx.h">
       <Filter>win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\kdlib\dataaccessor.h">
+      <Filter>kdlib/include</Filter>
+    </ClInclude>
+    <ClInclude Include="dataaccessorimpl.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

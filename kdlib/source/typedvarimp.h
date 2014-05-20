@@ -8,110 +8,6 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class VarDataProvider;
-typedef boost::shared_ptr<VarDataProvider> VarDataProviderPtr;
-
-class VarDataProvider
-{
-public:
-
-    virtual unsigned char readByte() const = 0;
-    virtual char readSignByte() const = 0;
-    virtual unsigned short readWord() const = 0;
-    virtual short readSignWord() const = 0;
-    virtual unsigned long readDWord() const = 0;
-    virtual long readSignDWord() const = 0;
-    virtual unsigned long long readQWord() const = 0;
-    virtual long long readSignQWord() const = 0;
-    virtual float readFloat() const = 0;
-    virtual double readDouble() const = 0;
-    virtual MEMOFFSET_64 getAddress() const = 0;
-    virtual MEMOFFSET_64 readPtr4() const = 0;
-    virtual MEMOFFSET_64 readPtr8() const = 0;
-    virtual std::wstring asString() const = 0;
-
-protected:
-    virtual ~VarDataProvider()
-    {}
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-class VarDataMemoryProvider : public VarDataProvider 
-{
-
-public:
-
-    VarDataMemoryProvider( MEMOFFSET_64 offset ) :
-        m_offset( offset )
-        {}
-
-    virtual unsigned char readByte() const {
-        return ptrByte(m_offset);
-    }
-
-    virtual char readSignByte() const {
-        return ptrSignByte(m_offset);
-    }
-
-    virtual unsigned short readWord() const {
-        return ptrWord(m_offset);
-    }
-
-    virtual short readSignWord() const {
-        return ptrSignWord(m_offset);
-    }
-
-    virtual unsigned long  readDWord() const {
-        return ptrDWord(m_offset); 
-    }
-
-    virtual long readSignDWord() const {
-        return ptrSignDWord(m_offset); 
-    }
-
-    virtual unsigned long long readQWord() const {
-        return ptrQWord(m_offset); 
-    }
-
-    virtual long long readSignQWord() const {
-        return ptrSignQWord(m_offset); 
-    }
-
-    virtual float readFloat() const {
-        return ptrSingleFloat(m_offset);
-    }
-
-    virtual double readDouble() const {
-        return ptrDoubleFloat(m_offset);
-    }
-
-    virtual MEMOFFSET_64 getAddress() const {
-        return m_offset;
-    }
-
-    virtual MEMOFFSET_64 readPtr4() const {
-        return addr64(ptrDWord(m_offset));
-    }
-
-    virtual MEMOFFSET_64 readPtr8() const {
-        return addr64(ptrQWord(m_offset));
-    }
-
-    virtual std::wstring asString() const {
-        std::wstringstream sstr;
-        sstr << L"at 0x" << std::hex << m_offset;
-        return sstr.str();
-    }
-
-protected:
-
-    MEMOFFSET_64  m_offset;
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 class TypedVarImp : public TypedVar
 {
 
@@ -202,15 +98,15 @@ protected:
 
 protected:
 
-    TypedVarImp( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
+    TypedVarImp( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
         m_typeInfo( typeInfo ),
-        m_varData( varData ),
+        m_varData( dataSource ),
         m_name( name )
         {}
 
     TypeInfoPtr  m_typeInfo;
 
-    VarDataProviderPtr  m_varData;
+    DataAccessorPtr  m_varData;
 
     std::wstring  m_name;
 };
@@ -221,8 +117,8 @@ class TypedVarBase : public TypedVarImp
 {
 public:
 
-    TypedVarBase( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
-        TypedVarImp( typeInfo, varData, name )
+    TypedVarBase( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, dataSource, name )
         {}
 
     std::wstring printValue() const;
@@ -241,8 +137,8 @@ class TypedVarUdt :  public TypedVarImp
 {
 public:
 
-    TypedVarUdt( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
-        TypedVarImp( typeInfo, varData, name )
+       TypedVarUdt( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, dataSource, name )
         {}
 
 protected:
@@ -286,15 +182,15 @@ class TypedVarPointer : public TypedVarImp
 {
 public:
 
-    TypedVarPointer( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
-        TypedVarImp( typeInfo, varData, name )
+    TypedVarPointer( const TypeInfoPtr& typeInfo, DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, dataSource, name )
         {}
 
 
 public:
 
     virtual NumVariant getValue() const {
-        return NumVariant( getSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8() );
+        return NumVariant( getSize() == 4 ? m_varData->readDWord() : m_varData->readQWord() );
     }
 
     virtual TypedVarPtr deref();
@@ -321,8 +217,8 @@ class TypedVarArray : public TypedVarImp
 {
 public:
 
-    TypedVarArray( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"") :
-        TypedVarImp( typeInfo, varData, name )
+    TypedVarArray( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"") :
+        TypedVarImp( typeInfo, dataSource, name )
         {}
 
     virtual NumVariant getValue() const {
@@ -343,8 +239,8 @@ public:
 class TypedVarBitField : public TypedVarImp
 {
 public:
-    TypedVarBitField( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
-      TypedVarImp( typeInfo, varData, name)
+    TypedVarBitField( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
+      TypedVarImp( typeInfo, dataSource, name)
       {}
 
     virtual NumVariant getValue() const;
@@ -355,8 +251,8 @@ public:
 class TypedVarEnum : public TypedVarImp
 {
 public:
-    TypedVarEnum( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
-      TypedVarImp( typeInfo, varData, name )
+    TypedVarEnum( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
+      TypedVarImp( typeInfo, dataSource, name )
       {}
 
     virtual NumVariant getValue() const {
@@ -375,8 +271,8 @@ class TypedVarFunction : public TypedVarImp
 {
 public:
 
-    TypedVarFunction( const TypeInfoPtr& typeInfo, const VarDataProviderPtr &varData, const std::wstring& name = L"" ) :
-        TypedVarImp( typeInfo, varData, name )
+    TypedVarFunction( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
+        TypedVarImp( typeInfo, dataSource, name )
     {}
 
 

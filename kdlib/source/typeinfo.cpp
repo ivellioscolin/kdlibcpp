@@ -183,6 +183,9 @@ TypeInfoPtr loadType( const std::wstring &typeName )
     std::wstring     moduleName;
     std::wstring     symName;
 
+    if ( typeName.empty() )
+        throw TypeException(L"type name is empty");
+
     if ( TypeInfo::isBaseType( typeName ) )
         return TypeInfo::getBaseTypeInfo( typeName, ptrSize() );
 
@@ -207,9 +210,12 @@ TypeInfoPtr loadType( const std::wstring &typeName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr loadType(  SymbolPtr &symbolScope, const std::wstring &symbolName )
+TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName )
 {
     SymbolPtr  symbol;
+
+    if ( symbolName.empty() )
+        throw SymbolException(L"symbol name is empty");
 
     try {
         symbol  = symbolScope->getChildByName( symbolName );

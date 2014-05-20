@@ -53,28 +53,28 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, VarDataProviderPtr &varData, const std::wstring& name = L"" )
+TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, DataAccessorPtr &dataSource, const std::wstring& name = L"" )
 {
     if ( typeInfo->isBase() )
-        return TypedVarPtr( new TypedVarBase( typeInfo, varData, name ) );
+        return TypedVarPtr( new TypedVarBase( typeInfo, dataSource, name ) );
 
     if ( typeInfo->isUserDefined() )
-        return TypedVarPtr( new TypedVarUdt( typeInfo, varData, name ) );
+        return TypedVarPtr( new TypedVarUdt( typeInfo, dataSource, name ) );
 
     if ( typeInfo->isPointer() )
-        return TypedVarPtr( new TypedVarPointer( typeInfo, varData, name ) );
+        return TypedVarPtr( new TypedVarPointer( typeInfo, dataSource, name ) );
 
     if ( typeInfo->isArray() )
-        return TypedVarPtr( new TypedVarArray( typeInfo, varData, name ) );
+        return TypedVarPtr( new TypedVarArray( typeInfo, dataSource, name ) );
 
     if ( typeInfo->isBitField() )
-        return TypedVarPtr( new TypedVarBitField( typeInfo, varData, name ) );
+        return TypedVarPtr( new TypedVarBitField( typeInfo, dataSource, name ) );
 
     if ( typeInfo->isEnum() )
-        return TypedVarPtr( new TypedVarEnum( typeInfo, varData, name ) );
+        return TypedVarPtr( new TypedVarEnum( typeInfo, dataSource, name ) );
 
     if ( typeInfo->isFunction() )
-        return TypedVarPtr( new TypedVarFunction( typeInfo, varData, name ) );
+        return TypedVarPtr( new TypedVarFunction( typeInfo, dataSource, name ) );
 
     NOT_IMPLEMENTED();
 }
@@ -95,7 +95,7 @@ TypedVarPtr loadTypedVar( SymbolPtr &symbol )
 
         TypeInfoPtr varType = loadType( symbol );
 
-        return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ), ::getSymbolName(symbol) );
+        return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()), ::getSymbolName(symbol) );
     }
 
     NOT_IMPLEMENTED();
@@ -133,7 +133,7 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
 {
     TypeInfoPtr varType = loadType( typeName );
 
-    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
+    return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
     if ( !varType )
         throw DbgException( "type info is null");
 
-    return getTypedVar( varType, VarDataProviderPtr( new VarDataMemoryProvider(offset) ) );
+    return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ std::wstring TypedVarBase::str()
 {
     std::wstringstream  sstr;
 
-    sstr << m_typeInfo->getName() << L" " << m_varData->asString();
+    sstr << m_typeInfo->getName() << L"at 0x" << m_varData->getAddress();
     sstr << " Value: " <<  L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
 
     return sstr.str();
@@ -455,7 +455,7 @@ std::wstring TypedVarUdt::str()
 {
     std::wstringstream  sstr;
 
-    sstr << L"struct/class: " << m_typeInfo->getName() << " " << m_varData->asString() << std::endl;
+    sstr << L"struct/class: " << m_typeInfo->getName() << " at 0x" << std::hex << m_varData->getAddress() << std::endl;
     
     for ( size_t i = 0; i < m_typeInfo->getElementCount(); ++i )
     {
@@ -532,7 +532,7 @@ TypedVarPtr TypedVarPointer::deref()
 {
     return loadTypedVar( 
                 m_typeInfo->deref(), 
-                m_typeInfo->getPtrSize() == 4 ? m_varData->readPtr4() : m_varData->readPtr8());
+                m_typeInfo->getPtrSize() == 4 ? m_varData->readDWord() : m_varData->readQWord());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -541,7 +541,7 @@ std::wstring TypedVarPointer::str()
 {
     std::wstringstream   sstr;
 
-    sstr << L"Ptr " << m_typeInfo->getName() << L" " << m_varData->asString();
+    sstr << L"Ptr " << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
     sstr << L" Value: " <<  printValue();
 
     return sstr.str();
@@ -582,7 +582,7 @@ std::wstring TypedVarArray::str()
 {
     std::wstringstream   sstr;
 
-    sstr << m_typeInfo->getName() << L" " << m_varData->asString();
+    sstr << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
 
     return sstr.str();
 }
@@ -625,7 +625,7 @@ std::wstring TypedVarEnum::str()
 {
     std::wstringstream       sstr;
 
-    sstr << L"enum: " << m_typeInfo->getName() << L" " << m_varData->asString();
+    sstr << L"enum: " << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
     sstr << L" Value: " << printValue();
 
     return sstr.str();
@@ -676,10 +676,7 @@ std::wstring TypedVarFunction::str()
 ///////////////////////////////////////////////////////////////////////////////
 
 SymbolFunction::SymbolFunction( SymbolPtr& symbol ) :
-    TypedVarFunction( 
-        loadType( symbol ),
-        VarDataProviderPtr( new VarDataMemoryProvider( symbol->getVa() ) ),
-        ::getSymbolName(symbol) ),
+    TypedVarFunction( loadType( symbol ), getMemoryAccessor( symbol->getVa(), 0 ), ::getSymbolName(symbol) ),
     m_symbol( symbol )
 {
 }
