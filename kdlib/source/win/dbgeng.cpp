@@ -27,7 +27,7 @@ public:
 
         HRESULT      hres;
 
-        if ( id != -1 || id == GetCurrentThreadId() )
+        if ( id == -1 || id == getCurrentThreadId() )
         {
             m_previousId = -1;
             return;
@@ -44,9 +44,10 @@ public:
 
         m_regValues.resize(registerNumber);
 
+        m_savedRegCtx = false;
+
         hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0] );
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugRegister::GetNumberRegisters", hres ); 
+        m_savedRegCtx = SUCCEEDED(hres);
 
         hres = g_dbgMgr->system->SetCurrentThreadId( id );
         if ( FAILED( hres ) )
@@ -65,7 +66,8 @@ public:
 
         if ( SUCCEEDED(hres) )
         {
-            g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0] );
+            if ( m_savedRegCtx )
+                g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0] );
         }
     }
 
@@ -74,6 +76,8 @@ private:
     THREAD_DEBUG_ID  m_previousId;
 
     std::vector<DEBUG_VALUE>  m_regValues;
+
+    bool  m_savedRegCtx;
 };
 
 
