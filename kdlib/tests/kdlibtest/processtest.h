@@ -7,6 +7,9 @@
 
 #include "gtest/gtest.h"
 #include "kdlib/dbgengine.h"
+#include "kdlib/exceptions.h"
+
+using namespace kdlib;
 
 class ProcessTest : public ::testing::Test
 {
@@ -52,57 +55,57 @@ public:
 
 TEST_F( ProcessTest, StartProcess )
 {
-    kdlib::PROCESS_DEBUG_ID   id;
-    ASSERT_NO_THROW( id =  kdlib::startProcess(L"targetapp.exe") );
-    EXPECT_NO_THROW( kdlib::terminateProcess(id) );
+    PROCESS_DEBUG_ID   id;
+    ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
+    EXPECT_NO_THROW( terminateProcess(id) );
 }
 
 TEST_F( ProcessTest, AttachProcess )
 {
-    kdlib::PROCESS_ID  pid = StartTargetappWithParam(L"processtest");
+    PROCESS_ID  pid = StartTargetappWithParam(L"processtest");
 
-    kdlib::PROCESS_DEBUG_ID   id;
-    ASSERT_NO_THROW( id = kdlib::attachProcess(pid) );
-    EXPECT_NO_THROW( kdlib::terminateProcess(id) );
+    PROCESS_DEBUG_ID   id;
+    ASSERT_NO_THROW( id = attachProcess(pid) );
+    EXPECT_NO_THROW( terminateProcess(id) );
 }
 
 TEST_F( ProcessTest, CreateOpenDump )
 {
-    kdlib::PROCESS_DEBUG_ID   id;
-    ASSERT_NO_THROW( id =  kdlib::startProcess(L"targetapp.exe") );
-    EXPECT_NO_THROW( kdlib::writeDump(L"targetapp.dmp", false) );
-    EXPECT_NO_THROW( kdlib::terminateProcess(id) );
+    PROCESS_DEBUG_ID   id;
+    ASSERT_NO_THROW( id = startProcess(L"targetapp.exe") );
+    EXPECT_NO_THROW( writeDump(L"targetapp.dmp", false) );
+    EXPECT_NO_THROW( terminateProcess(id) );
 
-    ASSERT_NO_THROW( id = kdlib::loadDump(L"targetapp.dmp") );
-    EXPECT_NO_THROW( kdlib::closeDump(id) );
+    ASSERT_NO_THROW( id = loadDump(L"targetapp.dmp") );
+    EXPECT_NO_THROW( closeDump(id) );
 }
 
 
 TEST_F( ProcessTest, StartMultiProcess )
 {
-    std::vector<kdlib::PROCESS_DEBUG_ID>  ids;
+    std::vector<PROCESS_DEBUG_ID>  ids;
 
     for ( int i = 0; i < 5; ++i )
     {
-        kdlib::PROCESS_DEBUG_ID   id;
-        ASSERT_NO_THROW( id =  kdlib::startProcess(L"targetapp.exe") );
+        PROCESS_DEBUG_ID   id;
+        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
         ids.push_back(id);
     }
 
-    std::vector<kdlib::PROCESS_DEBUG_ID>::iterator  it;
+    std::vector<PROCESS_DEBUG_ID>::iterator  it;
 
     for ( it = ids.begin(); it != ids.end(); ++it )
     {
-        EXPECT_NO_THROW( kdlib::terminateProcess(*it) );
+        EXPECT_NO_THROW( terminateProcess(*it) );
     }
 }
 
 
 TEST_F( ProcessTest, OpenMultiDump )
 {
-    std::vector<kdlib::PROCESS_DEBUG_ID>  ids;
+    std::vector<PROCESS_DEBUG_ID>  ids;
 
-    std::vector< std::wstring > dumpNames;
+    std::vector<std::wstring> dumpNames;
 
     for ( int i = 0; i < 5; ++i )
     {
@@ -113,31 +116,31 @@ TEST_F( ProcessTest, OpenMultiDump )
 
     for ( int i = 0; i < 5; ++i )
     {
-        kdlib::PROCESS_DEBUG_ID   id;
-        ASSERT_NO_THROW( id =  kdlib::startProcess(L"targetapp.exe") );
-        EXPECT_NO_THROW( kdlib::writeDump(dumpNames[i], false) );
-        EXPECT_NO_THROW( kdlib::terminateProcess(id) );
+        PROCESS_DEBUG_ID   id;
+        ASSERT_NO_THROW( id = startProcess(L"targetapp.exe") );
+        EXPECT_NO_THROW( writeDump(dumpNames[i], false) );
+        EXPECT_NO_THROW( terminateProcess(id) );
 
-        ASSERT_NO_THROW( id = kdlib::loadDump(dumpNames[i]) );
+        ASSERT_NO_THROW( id = loadDump(dumpNames[i]) );
         ids.push_back(id);
     }
 
-    std::vector<kdlib::PROCESS_DEBUG_ID>::iterator  it;
+    std::vector<PROCESS_DEBUG_ID>::iterator  it;
 
     for ( it = ids.begin(); it != ids.end(); ++it )
     {
-        EXPECT_NO_THROW( kdlib::closeDump(*it) );
+        EXPECT_NO_THROW( closeDump(*it) );
     }
 }
 
 TEST_F( ProcessTest, DISABLED_MixedProcessDump )
 {
-    kdlib::PROCESS_DEBUG_ID   id;
+    PROCESS_DEBUG_ID   id;
 
-    std::vector<kdlib::PROCESS_DEBUG_ID>  dumpIds;
-    std::vector<kdlib::PROCESS_DEBUG_ID>  processIds;
+    std::vector<PROCESS_DEBUG_ID>  dumpIds;
+    std::vector<PROCESS_DEBUG_ID>  processIds;
 
-    std::vector< std::wstring > dumpNames;
+    std::vector<std::wstring> dumpNames;
 
     for ( int i = 0; i < 5; ++i )
     {
@@ -148,49 +151,111 @@ TEST_F( ProcessTest, DISABLED_MixedProcessDump )
 
     for ( int i = 0; i < 5; ++i )
     {
-        ASSERT_NO_THROW( id =  kdlib::startProcess(L"targetapp.exe") );
-        EXPECT_NO_THROW( kdlib::writeDump(dumpNames[i], false) );
-        EXPECT_NO_THROW( kdlib::terminateProcess(id) );
+        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
+        EXPECT_NO_THROW( writeDump(dumpNames[i], false) );
+        EXPECT_NO_THROW( terminateProcess(id) );
     }
 
     for ( int i = 0; i < 5; ++i )
     {
-        ASSERT_NO_THROW( id = kdlib::loadDump(dumpNames[i]) );
+        ASSERT_NO_THROW( id = loadDump(dumpNames[i]) );
         dumpIds.push_back(id);
 
-        ASSERT_NO_THROW( id =  kdlib::startProcess(L"targetapp.exe") );
+        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
         processIds.push_back(id);
     }
 
-    EXPECT_EQ( 10, kdlib::getNumberProcesses() );
+    EXPECT_EQ( 10, getNumberProcesses() );
 
     for ( int i = 0; i < 5; ++i )
     {
-        EXPECT_NO_THROW( kdlib::closeDump( dumpIds[i] ) );
-        EXPECT_NO_THROW( kdlib::terminateProcess(processIds[i]) );
+        EXPECT_NO_THROW( closeDump( dumpIds[i] ) );
+        EXPECT_NO_THROW( terminateProcess(processIds[i]) );
     }
 
-    EXPECT_EQ( 0, kdlib::getNumberProcesses() );
+    EXPECT_EQ( 0, getNumberProcesses() );
 }
 
 
 TEST_F(ProcessTest,  ChildProcess)
 {
-    kdlib::PROCESS_DEBUG_ID   id1;
-    ASSERT_NO_THROW( id1 =  kdlib::startProcess(L"targetapp.exe childprocess", true) );
+    PROCESS_DEBUG_ID   id1;
+    ASSERT_NO_THROW( id1 =  startProcess(L"targetapp.exe childprocess", true) );
 
-    EXPECT_EQ( 1, kdlib::getNumberProcesses() );
-    kdlib::targetGo();
-    EXPECT_EQ( 2, kdlib::getNumberProcesses() );
+    EXPECT_EQ( 1, getNumberProcesses() );
+    targetGo();
+    EXPECT_EQ( 2, getNumberProcesses() );
 
-    kdlib::PROCESS_DEBUG_ID   id2;
-    ASSERT_NO_THROW( id2 =  kdlib::startProcess(L"targetapp.exe  childprocess", true) );
+    PROCESS_DEBUG_ID   id2;
+    ASSERT_NO_THROW( id2 =  startProcess(L"targetapp.exe  childprocess", true) );
 
-    EXPECT_EQ( 3, kdlib::getNumberProcesses() );
-    kdlib::targetGo();
-    EXPECT_EQ( 4, kdlib::getNumberProcesses() );
+    EXPECT_EQ( 3, getNumberProcesses() );
+    targetGo();
+    EXPECT_EQ( 4, getNumberProcesses() );
 
-    EXPECT_NO_THROW( kdlib::terminateAllProcesses() );
+    EXPECT_NO_THROW( terminateAllProcesses() );
 
-    EXPECT_EQ( 0, kdlib::getNumberProcesses() );
+    EXPECT_EQ( 0, getNumberProcesses() );
 }
+
+TEST_F(ProcessTest, ThreadInfo)
+{
+    ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
+    ASSERT_EQ( DebugStatusBreak, kdlib::targetGo() );
+
+    unsigned long threadNumber;
+    ASSERT_NO_THROW( threadNumber = getNumberThreads() );
+
+    THREAD_DEBUG_ID   threadId;
+    ASSERT_NO_THROW( threadId = getCurrentThreadId() );
+
+    THREAD_ID  threadSysId;
+    ASSERT_NO_THROW( threadSysId = getThreadSystemId(threadId));
+    EXPECT_EQ(threadSysId, getThreadSystemId());
+    EXPECT_THROW( getThreadSystemId(-2), DbgException );
+
+    MEMOFFSET_64  threadOffset;
+    ASSERT_NO_THROW( threadOffset = getThreadOffset() );
+    EXPECT_EQ( threadOffset, getThreadOffset(threadId) );
+    EXPECT_EQ( threadOffset, getCurrentThread() );
+    EXPECT_THROW( getThreadOffset(-3), DbgException );
+
+    EXPECT_EQ( threadId, getThreadIdByOffset(threadOffset) );
+    EXPECT_THROW( getThreadIdByOffset(0xFFFF), DbgException );
+
+    EXPECT_EQ( threadId, getThreadIdBySystemId(threadSysId) );
+    EXPECT_THROW( getThreadIdBySystemId(0xFFFFFFF), DbgException );
+
+    EXPECT_EQ( threadId, getThreadIdByIndex(0) );
+    EXPECT_THROW( getThreadIdByIndex(0xFFFFFFF), DbgException );
+}
+
+
+TEST_F(ProcessTest, ProcessInfo)
+{
+    PROCESS_DEBUG_ID  processId;
+    ASSERT_NO_THROW( processId = startProcess(L"targetapp.exe") );
+    ASSERT_EQ( DebugStatusBreak, kdlib::targetGo() );
+
+    unsigned long  processNumber;
+    ASSERT_NO_THROW( processNumber = getNumberProcesses() );
+
+    EXPECT_EQ( processId, getCurrentProcessId() );
+
+    MEMOFFSET_64  processOffest;
+    ASSERT_NO_THROW( processOffest = getProcessOffset(processId) );
+    EXPECT_EQ( processOffest, getProcessOffset() );
+    EXPECT_EQ( processOffest, getCurrentProcess() );
+
+    EXPECT_EQ( processId, getProcessIdByOffset(processOffest) );
+    EXPECT_THROW( getProcessIdByOffset(0xFFFF), DbgException );
+
+    PROCESS_ID  processSysId;
+    ASSERT_NO_THROW( processSysId = getProcessSystemId(processId) );
+    EXPECT_EQ( processSysId, getProcessSystemId() );
+    EXPECT_THROW( getProcessSystemId(-5), DbgException );
+
+    EXPECT_EQ( processId, getProcessIdByIndex(0) );
+    EXPECT_THROW( getProcessIdByIndex(0xFFFF), DbgException );
+}
+
