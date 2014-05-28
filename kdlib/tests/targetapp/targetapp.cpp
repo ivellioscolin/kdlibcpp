@@ -16,6 +16,7 @@ int memTestRun();
 int stackTestRun();
 int loadUnloadModuleRun();
 int startChildProcess();
+int exceptionRaise();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -52,6 +53,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
     if ( testGroup == L"childprocess" )
         return startChildProcess();
+
+    if ( testGroup == L"exception" )
+        return exceptionRaise();
 
     return breakOnRun();
 }
@@ -171,3 +175,18 @@ int startChildProcess()
 
     return 0;
 }
+
+
+int exceptionRaise()
+{
+    //int a = 100;
+    //int b =  0;
+    //return a / b;
+
+    char*  b = 0;
+    *b = 1;
+    return 1;
+  
+}
+
+
