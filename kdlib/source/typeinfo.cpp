@@ -1053,9 +1053,13 @@ std::wstring TypeInfoFunction::getName()
     Args::iterator itArg = m_args.begin();
     if (CallConv_ThisCall == ccType && m_hasThis)
         ++itArg;
+
+    bool bIsFirstArg = true;
     for (; itArg != m_args.end(); ++itArg)
     {
-        if (itArg != m_args.begin())
+        if (bIsFirstArg)
+            bIsFirstArg = false;
+        else
             sstr << L", ";
         sstr << loadType( *itArg )->getName();
     }
