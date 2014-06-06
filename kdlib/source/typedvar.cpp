@@ -683,40 +683,6 @@ SymbolFunction::SymbolFunction( SymbolPtr& symbol ) :
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//TypedVarPtr SymbolFunction::getElement( size_t index )
-//{
-//    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
-//    if ( paramLst.size() < index )
-//        throw IndexException( index );
-//
-//    SymbolPtr paramSym;
-//    SymbolPtrList::iterator itVar = paramLst.begin();
-//    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
-//    {
-//        if ( (*itVar)->getDataKind() == DataIsParam  )
-//        {
-//            if ( i == index )
-//            {
-//                paramSym = *itVar;
-//                break;
-//            }
-//
-//            i++;
-//        }
-//    }
-//
-//    if ( !paramSym )
-//        throw IndexException( index );
-//
-//    TypeInfoPtr typeInfo = loadType(paramSym);
-//
-//    //MEMOFFSET_64 offset = (MEMOFFSET_64)( m_symbol->getVa() + paramSym->getOffset() );
-//
-//    //return loadTypedVar( typeInfo, offset );
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
 MEMOFFSET_REL SymbolFunction::getElementOffset( size_t index )
 {
     SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
@@ -838,6 +804,20 @@ std::wstring SymbolFunction::getElementName( size_t index )
     throw IndexException( index );
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 SymbolFunction::getDebugXImpl(SymTags symTag) const
+{
+    SymbolPtrList resLst = m_symbol->findChildren(symTag);
+    switch (resLst.size())
+    {
+    case 0:
+        throw DbgException("child symbol is not found");
+    case 1:
+        return (*resLst.begin())->getVa();
+    }
+    throw DbgException("unexpected count of child symbols");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

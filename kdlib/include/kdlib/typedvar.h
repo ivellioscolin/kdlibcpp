@@ -67,6 +67,8 @@ public:
     
     virtual std::wstring str() = 0;
     virtual MEMOFFSET_64 getAddress() const = 0;
+    virtual MEMOFFSET_64 getDebugStart() const = 0;
+    virtual MEMOFFSET_64 getDebugEnd() const = 0;
     virtual size_t getSize() const = 0;
     virtual std::wstring getName() const = 0;
     virtual TypedVarPtr getElement( const std::wstring& fieldName ) = 0;

@@ -269,6 +269,13 @@ TEST_F( TypedVarTest, Assign )
     ASSERT_EQ( ulonglongVar!=0, a11 );
 }
 
+TEST_F( TypedVarTest, FunctionDebugRange )
+{
+    TypedVarPtr funcptr;
 
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"startChildProcess" ) );
 
+    ASSERT_GE( ULONG_PTR(funcptr->getDebugStart()), ULONG_PTR(funcptr->getAddress()) );
+    ASSERT_LE( ULONG_PTR(funcptr->getDebugEnd()), ULONG_PTR(funcptr->getAddress()) + funcptr->getSize() );
+}
 

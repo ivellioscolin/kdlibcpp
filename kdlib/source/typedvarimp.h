@@ -29,6 +29,16 @@ protected:
         return m_varData->getAddress();
     }
 
+    virtual MEMOFFSET_64 getDebugStart() const
+    {
+        throw TypeException( L"is not a function");
+    }
+
+    virtual MEMOFFSET_64 getDebugEnd() const
+    {
+        throw TypeException( L"is not a function");
+    }
+
     virtual size_t getSize() const
     {
         return m_typeInfo->getSize();
@@ -295,6 +305,13 @@ public:
 
     SymbolFunction( SymbolPtr& symbol );
 
+    virtual MEMOFFSET_64 getDebugStart() const {
+        return getDebugXImpl(SymTagFuncDebugStart);
+    }
+    virtual MEMOFFSET_64 getDebugEnd() const {
+        return getDebugXImpl(SymTagFuncDebugEnd);
+    }
+
     virtual MEMOFFSET_REL getElementOffset( size_t index );
 
     virtual RELREG_ID getElementOffsetRelativeReg(size_t index );
@@ -312,6 +329,7 @@ public:
     }
 
 protected:
+    MEMOFFSET_64 getDebugXImpl(SymTags symTag) const;
 
     SymbolPtr  m_symbol;
 };
