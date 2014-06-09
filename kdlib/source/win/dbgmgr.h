@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <string>
 
 #include <dbgeng.h>
 #include <dbghelp.h>
@@ -23,6 +24,8 @@ class DebugManager : private DebugBaseEventCallbacksWide
 public:
 
     DebugManager();
+    DebugManager( const std::wstring& remoteOptions );
+
     ~DebugManager();
 
 public:
@@ -134,6 +137,14 @@ public:
             throw DbgException("pykd is not initialized");
 
         return m_dbgMgr;
+    }
+
+    bool operator==(DebugManager* ptr) {
+        return m_dbgMgr == ptr;
+    }
+
+    bool operator!=(DebugManager* ptr) {
+        return !(m_dbgMgr == ptr);
     }
 
 private:

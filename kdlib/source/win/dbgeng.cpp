@@ -85,6 +85,9 @@ private:
 
 bool initialize()
 {
+    if ( g_dbgMgr != 0  )
+         throw DbgException("pykd is already initialized");
+
     g_dbgMgr.set( new DebugManager() );
 
     ProcessMonitor::init();
@@ -94,8 +97,32 @@ bool initialize()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool remote_initialize( const std::wstring& remoteOptions )
+{
+    if ( g_dbgMgr != 0  )
+         throw DbgException("pykd is already initialized");
+
+    g_dbgMgr.set( new DebugManager( remoteOptions ) );
+
+    ProcessMonitor::init();
+
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool isInintilized()
+{
+    return g_dbgMgr != 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void uninitialize()
 {
+    if ( g_dbgMgr ==  0  )
+         throw DbgException("pykd is not initialized");
+
     ProcessMonitor::deinit();
 
     g_dbgMgr.reset();
@@ -127,6 +154,9 @@ static void setInitialBreakOption()
 
 PROCESS_DEBUG_ID startProcess( const std::wstring  &processName,  bool debugChildren )
 {
+    if ( !isInintilized() )
+        initialize();
+
     HRESULT     hres;
 
     setInitialBreakOption();
@@ -182,35 +212,6 @@ PROCESS_DEBUG_ID startProcess( const std::wstring  &processName,  bool debugChil
 
 
     return processId;
-
-    //HRESULT     hres;
-
-    //setInitialBreakOption();
-
-    //std::vector< std::wstring::value_type >      cmdLine( processName.size() + 1 );
-    //wcscpy_s( &cmdLine[0], cmdLine.size(), processName.c_str() );
-
-    //hres = g_dbgMgr->client->CreateProcessWide(
-    //    0,
-    //    &cmdLine[0],
-    //    ( debugChildren ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS ) | DETACHED_PROCESS 
-    //    );
-
-    //if ( FAILED( hres ) )
-    //    throw DbgEngException( L"IDebugClient4::CreateProcessWide", hres );
-
-    //hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
-    //if ( FAILED( hres ) )
-    //    throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
-
-    //ULONG processId = -1;
-    //hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
-    //if ( FAILED( hres ) )
-    //    throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
-
-    //ProcessMonitor::processStart(processId);
-
-    //return processId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,6 +243,9 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
 
 PROCESS_DEBUG_ID attachProcess( PROCESS_ID pid )
 {
+    if ( !isInintilized() )
+        initialize();
+
     HRESULT     hres;
 
     setInitialBreakOption();
@@ -319,6 +323,9 @@ void terminateAllProcesses()
 
 PROCESS_DEBUG_ID loadDump( const std::wstring &fileName )
 {
+    if ( !isInintilized() )
+        initialize();
+
     HRESULT     hres;
 
     hres = g_dbgMgr->client->OpenDumpFileWide( fileName.c_str(), NULL );
@@ -399,6 +406,9 @@ bool isLocalKernelDebuggerEnabled()
 
 PROCESS_DEBUG_ID attachKernel( const std::wstring &connectOptions )
 {
+    if ( !isInintilized() )
+        initialize();
+
     setInitialBreakOption();
 
     HRESULT hres = 
