@@ -183,6 +183,9 @@ TypeInfoPtr loadType( const std::wstring &typeName )
     std::wstring     moduleName;
     std::wstring     symName;
 
+    if ( typeName.empty() )
+        throw TypeException(L"type name is empty");
+
     if ( TypeInfo::isBaseType( typeName ) )
         return TypeInfo::getBaseTypeInfo( typeName, ptrSize() );
 
@@ -207,9 +210,12 @@ TypeInfoPtr loadType( const std::wstring &typeName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr loadType(  SymbolPtr &symbolScope, const std::wstring &symbolName )
+TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName )
 {
     SymbolPtr  symbol;
+
+    if ( symbolName.empty() )
+        throw SymbolException(L"symbol name is empty");
 
     try {
         symbol  = symbolScope->getChildByName( symbolName );
@@ -1047,9 +1053,13 @@ std::wstring TypeInfoFunction::getName()
     Args::iterator itArg = m_args.begin();
     if (CallConv_ThisCall == ccType && m_hasThis)
         ++itArg;
+
+    bool bIsFirstArg = true;
     for (; itArg != m_args.end(); ++itArg)
     {
-        if (itArg != m_args.begin())
+        if (bIsFirstArg)
+            bIsFirstArg = false;
+        else
             sstr << L", ";
         sstr << loadType( *itArg )->getName();
     }

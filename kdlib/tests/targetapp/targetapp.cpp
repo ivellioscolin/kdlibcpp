@@ -134,9 +134,9 @@ int loadUnloadModuleRun()
 
 int startChildProcess()
 {
-    std::vector<wchar_t>   buffer(0x1000);
-    DWORD   len = GetCurrentDirectory( buffer.size(), &buffer[0] );
-
+    const DWORD nBufferLength = 0x1000;
+    std::vector<wchar_t> buffer(nBufferLength);
+    DWORD   len = GetCurrentDirectoryW( nBufferLength, &buffer[0] );
 
     std::wstring  path = std::wstring( &buffer[0], len );
     path += L"\\targetapp.exe"; 

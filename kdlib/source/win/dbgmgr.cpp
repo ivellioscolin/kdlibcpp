@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <comutil.h>
+
 #include "dbgmgr.h"
 #include "moduleimp.h"
 #include "processmon.h"
@@ -19,6 +21,30 @@ DebugManager::DebugManager()
     CoInitialize(NULL);
 
     HRESULT  hres = DebugCreate( __uuidof(IDebugClient4), (void **)&client );
+    if ( FAILED( hres ) )
+        throw DbgEngException(L"DebugCreate", hres);
+
+    control = CComQIPtr<IDebugControl4>(client);
+    system = CComQIPtr<IDebugSystemObjects4>(client);
+    dataspace = CComQIPtr<IDebugDataSpaces4>(client);
+    symbols = CComQIPtr<IDebugSymbols3>(client);
+    advanced = CComQIPtr<IDebugAdvanced2>(client);
+    registers = CComQIPtr<IDebugRegisters2>(client);
+
+    client->SetEventCallbacksWide( this );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+DebugManager::DebugManager( const std::wstring& remoteOptions )
+{
+    m_previousExecutionStatus = DebugStatusNoChange;
+
+    CoInitialize(NULL);
+
+    _bstr_t  options( remoteOptions.c_str() );
+
+    HRESULT  hres = DebugConnect( options, __uuidof(IDebugClient4), (void **)&client );
     if ( FAILED( hres ) )
         throw DbgEngException(L"DebugCreate", hres);
 

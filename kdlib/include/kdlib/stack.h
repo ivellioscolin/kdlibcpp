@@ -104,7 +104,7 @@ class Stack {
 public:
 
     unsigned long getFrameCount() {
-        return m_stackTrace.size();
+        return static_cast<unsigned long>( m_stackTrace.size() );
     }
 
     StackFramePtr getFrame( unsigned long frameNumber ) 

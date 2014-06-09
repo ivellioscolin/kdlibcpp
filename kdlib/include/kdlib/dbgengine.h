@@ -12,6 +12,8 @@ namespace kdlib {
 
 // Initialization/Uninitialization
 bool initialize();
+bool remote_initialize( const std::wstring& remoteOptions );
+bool isInintilized();
 void uninitialize();
 
 // manage debug target
