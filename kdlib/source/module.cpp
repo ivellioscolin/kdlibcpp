@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include <set>
 #include <boost/regex.hpp>
 
 #include "kdlib/memaccess.h"
@@ -227,6 +228,8 @@ SymbolOffsetList ModuleImp::enumSymbols( const std::wstring  &mask )
 {
     SymbolOffsetList offsetLst;
 
+    std::set< std::wstring > nameSet;
+
     SymbolPtrList  symlst = getSymbolScope()->findChildren( SymTagData, mask );
 
     for ( SymbolPtrList::iterator it = symlst.begin(); it != symlst.end(); ++it )
@@ -234,6 +237,7 @@ SymbolOffsetList ModuleImp::enumSymbols( const std::wstring  &mask )
         if ( (*it)->getDataKind() != DataIsConstant )
         {
             offsetLst.push_back( SymbolOffset( (*it)->getName(), (*it)->getVa() ) );
+            nameSet.insert((*it)->getName());
         }
     }
 
@@ -242,6 +246,16 @@ SymbolOffsetList ModuleImp::enumSymbols( const std::wstring  &mask )
     for ( SymbolPtrList::iterator it = symlst.begin(); it != symlst.end(); ++it )
     {
         offsetLst.push_back( SymbolOffset( (*it)->getName(), (*it)->getVa() ) );
+        nameSet.insert((*it)->getName());
+    }
+
+    // add only "unique" public symbols
+    symlst = getSymbolScope()->findChildren( SymTagPublicSymbol, mask );
+    for ( SymbolPtrList::iterator it = symlst.begin(); it != symlst.end(); ++it )
+    {
+        std::set< std::wstring >::const_iterator searchRes = nameSet.find( (*it)->getName() );
+        if (searchRes == nameSet.end() )
+            offsetLst.push_back( SymbolOffset( (*it)->getName(), (*it)->getVa() ) );
     }
 
     return offsetLst;
