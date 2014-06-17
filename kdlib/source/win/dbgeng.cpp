@@ -130,6 +130,74 @@ void uninitialize()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ExecutionStatus waitForEvent()
+{
+    HRESULT   hres;
+
+    if ( !g_dbgMgr->isRemoteInitialized() )
+    {
+        ULONG    currentStatus;
+
+        do {
+
+            hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
+
+            if ( FAILED( hres ) )
+                throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
+
+            if ( currentStatus == DEBUG_STATUS_BREAK )
+                return DebugStatusBreak;
+
+            if ( currentStatus == DEBUG_STATUS_NO_DEBUGGEE )
+                return DebugStatusNoDebuggee;
+
+            hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
+            if ( FAILED( hres ) )
+            {
+                HRESULT  hres1 = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
+                if ( FAILED( hres1 ) )
+                    throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres1 ); 
+
+                if ( currentStatus == DEBUG_STATUS_NO_DEBUGGEE )
+                    return DebugStatusNoDebuggee;
+            
+                throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
+            }
+
+        } while( TRUE );
+    }
+    else
+    {
+
+        do {
+
+            ULONG    currentStatus;
+
+            hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
+    
+            if ( FAILED( hres ) )
+                throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
+
+            if ( currentStatus == DEBUG_STATUS_GO || currentStatus == DEBUG_STATUS_STEP_OVER || currentStatus == DEBUG_STATUS_STEP_INTO )
+            {
+                Sleep(100);
+                continue;
+            }
+
+            if ( currentStatus == DEBUG_STATUS_NO_DEBUGGEE )
+                return DebugStatusNoDebuggee;
+
+            if ( currentStatus == DEBUG_STATUS_BREAK )
+                return DebugStatusBreak;
+
+            throw DbgException( "Unknown debugger state" );
+
+        } while( TRUE );
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string DbgWideException::getCStrDesc( const std::wstring &desc )
 {
     return std::string( _bstr_t( desc.c_str() ) );
@@ -474,14 +542,7 @@ std::wstring debugCommand( const std::wstring &command )
     if ( FAILED( hres ) )
         throw  DbgEngException( L"IDebugControl::Execute", hres ); 
 
-    ULONG  executionStatus;
-
-    hres = g_dbgMgr->control->GetExecutionStatus( &executionStatus );
-    if ( FAILED( hres ) )
-        throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
-
-    if ( executionStatus != DEBUG_STATUS_BREAK && executionStatus != DEBUG_STATUS_NO_DEBUGGEE )
-       g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
+    waitForEvent();
 
     return std::wstring( outReader.Line() ); 
 }
@@ -586,31 +647,7 @@ ExecutionStatus targetChangeStatus( ULONG status )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::SetExecutionStatus", hres );
 
-    ULONG    currentStatus;
-
-    do {
-        hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
-        if ( FAILED( hres ) )
-        {
-            hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
-            if ( FAILED( hres ) )
-                throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
-
-            if ( currentStatus == DEBUG_STATUS_NO_DEBUGGEE )
-                return DebugStatusNoDebuggee;
-            
-            throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
-        }
-
-        hres = g_dbgMgr->control->GetExecutionStatus( &currentStatus );
-
-        if ( FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::GetExecutionStatus", hres ); 
-
-        if ( currentStatus == DEBUG_STATUS_BREAK )
-            return DebugStatusBreak;
-
-    } while( TRUE );
+    return waitForEvent();
 }
 
 

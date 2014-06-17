@@ -17,6 +17,7 @@ DebugManagerWrapper   g_dbgMgr;
 DebugManager::DebugManager()
 {
     m_previousExecutionStatus = DebugStatusNoChange;
+    m_remote = false;
 
     CoInitialize(NULL);
 
@@ -39,14 +40,17 @@ DebugManager::DebugManager()
 DebugManager::DebugManager( const std::wstring& remoteOptions )
 {
     m_previousExecutionStatus = DebugStatusNoChange;
+    m_remote = true;
 
     CoInitialize(NULL);
 
-    _bstr_t  options( remoteOptions.c_str() );
-
-    HRESULT  hres = DebugConnect( options, __uuidof(IDebugClient4), (void **)&client );
+    HRESULT  hres = DebugConnectWide( remoteOptions.c_str(), __uuidof(IDebugClient4), (void **)&client );
     if ( FAILED( hres ) )
-        throw DbgEngException(L"DebugCreate", hres);
+        throw DbgEngException(L"DebugConnectWide", hres);
+
+    hres = client->ConnectSession( 0, 0x1000 );
+    if ( FAILED( hres ) )
+        throw DbgEngException(L"IDebugClient::ConnectSession", hres );
 
     control = CComQIPtr<IDebugControl4>(client);
     system = CComQIPtr<IDebugSystemObjects4>(client);
@@ -333,6 +337,19 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
     ProcessMonitor::processStop( procId );
 
     return ConvertCallbackResult( result );
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE OutputReader::Output(
+        __in ULONG Mask,
+        __in PCSTR Text )
+{
+    if ( Mask == DEBUG_OUTPUT_NORMAL )
+    {
+        m_readLine += _bstr_t( Text );
+    }
+    return S_OK;
 }
 
 ///////////////////////////////////////////////////////////////////
