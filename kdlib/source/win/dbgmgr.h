@@ -43,6 +43,10 @@ public:
     void registerEventsCallback( DebugEventsCallback *callback );
     void removeEventsCallback( DebugEventsCallback *callback );
 
+    bool isRemoteInitialized() {
+        return m_remote;
+    }
+
 private:
 
     typedef std::list<DebugEventsCallback*>  EventsCallbackList;
@@ -50,6 +54,7 @@ private:
     boost::recursive_mutex      m_callbacksLock;
     EventsCallbackList          m_callbacks;
     ULONG                       m_previousExecutionStatus;
+    bool                        m_remote;
 
     STDMETHOD_(ULONG, AddRef)() { return 1; }
     STDMETHOD_(ULONG, Release)() { return 1; }
@@ -157,7 +162,7 @@ extern DebugManagerWrapper   g_dbgMgr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class OutputReader : public IDebugOutputCallbacksWide, private boost::noncopyable {
+class OutputReader : public IDebugOutputCallbacks, private boost::noncopyable {
 
 public:
 
@@ -167,18 +172,19 @@ public:
 
         m_client = client;
 
-        hres = m_client->GetOutputCallbacksWide( &m_previousCallback );
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugClient::GetOutputCallbacks", hres );
+        m_client->GetOutputCallbacks( &m_previousCallback );
+        // for remote client this method does not impemented
+        //if ( FAILED( hres ) ) 
+        //    throw DbgEngException( L"IDebugClient::GetOutputCallbacksWide", hres );
 
-        hres = m_client->SetOutputCallbacksWide( this );
+        hres = m_client->SetOutputCallbacks( this );
         if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugClient::GetOutputCallbacks", hres);
+            throw DbgEngException( L"IDebugClient::SetOutputCallbacks", hres);
     }
 
     ~OutputReader() 
     {
-        m_client->SetOutputCallbacksWide( m_previousCallback );
+        m_client->SetOutputCallbacks( m_previousCallback );
     }
 
     const std::wstring&
@@ -206,20 +212,13 @@ private:
 
    STDMETHOD(Output)(
         __in ULONG Mask,
-        __in PCWSTR Text )
-   {
-        if ( Mask == DEBUG_OUTPUT_NORMAL )
-        {
-            m_readLine += std::wstring( Text );
-        }
-       return S_OK;
-   }
+        __in PCSTR Text );
 
 private:
 
     std::wstring                         m_readLine;
 
-    CComPtr<IDebugOutputCallbacksWide>   m_previousCallback;
+    CComPtr<IDebugOutputCallbacks>       m_previousCallback;
 
     CComPtr<IDebugClient5>              m_client;
 };
