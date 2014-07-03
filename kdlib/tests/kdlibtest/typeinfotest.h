@@ -394,3 +394,42 @@ TEST_F( TypeInfoTest, DefineUnion )
     ASSERT_NO_THROW( testUnion->appendField(L"field", loadType(L"Bool") ) );
     EXPECT_THROW( testUnion->appendField(L"field", loadType(L"Long") ), TypeException );
 }
+
+TEST_F( TypeInfoTest, FunctionName )
+{
+    TypeInfoPtr ti;
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"CdeclFuncPtr")->getType()->deref() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__cdecl)(Int4B, Float)") );
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"MethodPtr")->getType()->deref() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::)()") );
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfCdeclFuncPtr")->getType()->getElement(0)->deref() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__cdecl)(Int4B, Float)") );
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfMethodPtr")->getType()->getElement(0)->deref() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::)()") );
+}
+
+TEST_F( TypeInfoTest, FunctionPtrName )
+{
+    TypeInfoPtr ti;
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"CdeclFuncPtr")->getType() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__cdecl*)(Int4B, Float)") );
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"MethodPtr")->getType() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::*)()") );
+}
+
+TEST_F( TypeInfoTest, FunctionArrName )
+{
+    TypeInfoPtr ti;
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfCdeclFuncPtr")->getType() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__cdecl*[3])(Int4B, Float)") );
+
+    ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfMethodPtr")->getType() );
+    EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::*[2])()") );
+}

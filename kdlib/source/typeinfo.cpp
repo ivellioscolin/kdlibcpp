@@ -524,7 +524,7 @@ std::wstring TypeInfoReference::getName()
     std::wstring       name;
     TypeInfo          *typeInfo = this;
 
-    std::wstring tiName;
+    std::pair<std::wstring, std::wstring> tiName;
     do {
 
         if ( typeInfo->isArray() )
@@ -557,23 +557,19 @@ std::wstring TypeInfoReference::getName()
             name.insert( 0, 1, L'*' );
 
             TypeInfoPointer *ptrTypeInfo = dynamic_cast<TypeInfoPointer*>(typeInfo);
-  /*          if (!ptrTypeInfo->derefPossible())
-            {
-                tiName = ptrTypeInfo->getDerefName();
-                break;
-            }*/
 
             typeInfo = ptrTypeInfo->deref().get();
 
             continue;
         }
 
-        tiName = typeInfo->getName();
+        tiName = typeInfo->splitName();
         break;
 
     } while ( true );
 
-    name.insert( 0, tiName );
+    name.insert( 0, tiName.first );
+    name += tiName.second;
 
     return name;
 }
@@ -1005,11 +1001,45 @@ TypeInfoFunction::TypeInfoFunction( SymbolPtr& symbol ) :
 
 std::wstring TypeInfoFunction::getName()
 {
-    std::wstringstream sstr;
-    sstr << getReturnType()->getName();
+    std::pair<std::wstring, std::wstring> splittedName = splitName();
+    return splittedName.first + splittedName.second;
+}
 
+///////////////////////////////////////////////////////////////////////////////
+
+std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
+{
+    std::pair<std::wstring, std::wstring> splittedName;
+
+    std::wstringstream sstr;
+
+    sstr << getReturnType()->getName();
     sstr << L"(";
-    const CallingConventionType ccType = getCallingConvention();
+
+
+    TypeInfoPtr classParent;
+    try
+    {
+        classParent = getClassParent();
+    }
+    catch(const SymbolException &)
+    {
+    }
+
+    bool objectPointerTypePresent = false;
+    try
+    {
+        m_symbol->getObjectPointerType();
+        objectPointerTypePresent = true;
+    }
+    catch(const SymbolException &)
+    {
+    }
+
+    CallingConventionType ccType = getCallingConvention();
+    if (ccType == CallConv_NearC && classParent && objectPointerTypePresent)
+        ccType = CallConv_ThisCall;
+
     switch (ccType)
     {
     case CallConv_NearC:
@@ -1036,18 +1066,15 @@ std::wstring TypeInfoFunction::getName()
         sstr << L"__userpurge";
         break;
     }
-    TypeInfoPtr classParent;
-    try
-    {
-        classParent = getClassParent();
-    }
-    catch(const SymbolException &)
-    {
-    }
+
     if (classParent)
     {
         sstr << L" " << classParent->getName() << "::";
     }
+    splittedName.first = sstr.str();
+
+    std::wstringstream().swap(sstr);
+
     sstr << L")(";
 
     Args::iterator itArg = m_args.begin();
@@ -1065,7 +1092,9 @@ std::wstring TypeInfoFunction::getName()
     }
 
     sstr << L")";
-    return sstr.str();
+    splittedName.second = sstr.str();
+
+    return splittedName;
 }
 
 

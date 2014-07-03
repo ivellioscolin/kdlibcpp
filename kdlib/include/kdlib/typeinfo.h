@@ -39,6 +39,8 @@ public:
     virtual std::wstring str() = 0;
 
     virtual std::wstring getName() = 0;
+    virtual std::pair<std::wstring, std::wstring> splitName() = 0;
+
     virtual size_t getSize() = 0;
     virtual size_t getPtrSize() = 0;
 

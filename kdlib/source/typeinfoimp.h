@@ -34,6 +34,10 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual std::pair<std::wstring, std::wstring> splitName() {
+        return std::pair<std::wstring, std::wstring>(getName(), std::wstring());
+    }
+
     virtual size_t getSize() {
         NOT_IMPLEMENTED();
     }
@@ -372,6 +376,7 @@ protected:
     }
 
     virtual std::wstring getName();
+    virtual std::pair<std::wstring, std::wstring> splitName();
 
     virtual size_t getPtrSize() {
         return getPtrSizeBySymbol( m_symbol );
