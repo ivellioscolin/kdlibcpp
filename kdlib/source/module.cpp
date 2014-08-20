@@ -234,7 +234,7 @@ SymbolOffsetList ModuleImp::enumSymbols( const std::wstring  &mask )
 
     for ( SymbolPtrList::iterator it = symlst.begin(); it != symlst.end(); ++it )
     {
-        if ( (*it)->getDataKind() != DataIsConstant )
+        if ( (*it)->getDataKind() != DataIsConstant && (*it)->getLocType() != LocIsTLS )
         {
             offsetLst.push_back( SymbolOffset( (*it)->getName(), (*it)->getVa() ) );
             nameSet.insert((*it)->getName());
