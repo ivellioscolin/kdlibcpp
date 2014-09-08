@@ -441,6 +441,9 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 
 std::wstring getSourceFile( MEMOFFSET_64 offset )
 {
+    if ( offset == 0 )
+        offset = getInstructionOffset();
+
     ModulePtr module = loadModule( offset );
     
     return module->getSourceFile( offset );
@@ -450,6 +453,9 @@ std::wstring getSourceFile( MEMOFFSET_64 offset )
 
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset )
 {
+    if ( offset == 0 )
+        offset = getInstructionOffset();
+
     ModulePtr module = loadModule( offset );
     
     module->getSourceLine( offset, fileName, lineno, displacement );
