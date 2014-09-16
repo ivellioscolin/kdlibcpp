@@ -165,9 +165,6 @@
     <ClInclude Include="breakpointimpl.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="Header.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="win\cpucontextimpl.h">
       <Filter>win</Filter>
     </ClInclude>

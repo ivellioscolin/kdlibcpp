@@ -17,46 +17,32 @@ public:
 
 protected:
 
-
     virtual CPUType getCPUType() {
-        NOT_IMPLEMENTED();
+        return m_cpuType;
     }
 
     virtual CPUType getCPUMode() {
-        NOT_IMPLEMENTED();
+        return m_cpuMode;
     }
 
-    virtual NumVariant getRegisterByName( const std::wstring &name) {
-        NOT_IMPLEMENTED();
-    }
+    virtual NumVariant getRegisterByName( const std::wstring &name);
 
-    virtual NumVariant getRegisterByIndex( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
+    virtual NumVariant getRegisterByIndex( unsigned long index );
 
-    virtual std::wstring getRegisterName( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
+    virtual std::wstring getRegisterName( unsigned long index );
 
     virtual MEMOFFSET_64 getIP() {
-        NOT_IMPLEMENTED();
+        return m_ip;
     }
 
     virtual MEMOFFSET_64 getSP() {
-        NOT_IMPLEMENTED();
+        return m_sp;
     }
 
     virtual MEMOFFSET_64 getFP() {
-        NOT_IMPLEMENTED();
+        return m_fp;
     }
 
-    virtual unsigned long getStackLength();
-
-    virtual void getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
-    
-    virtual void getCurrentStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) {
-        NOT_IMPLEMENTED();
-    }
 
     virtual unsigned long long loadMSR( unsigned long msrIndex ) {
         NOT_IMPLEMENTED();
@@ -66,23 +52,17 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+protected:
 
-private:
+    CPUType  m_cpuType;
+    CPUType  m_cpuMode;
 
-    ULONG  m_processorType;
-    bool  m_wow64;
-
-    union {
-      CONTEXT_X86     m_ctx_x86;
-      WOW64_CONTEXT   m_ctx_wow64;
-      CONTEXT_X64     m_ctx_amd64;
-    };
-
-    void ReadWow64Context();
-
-    void* getContext();
+    std::vector< std::pair<std::wstring, NumVariant> >  m_values;
     
-    unsigned long getContextSize();
+    MEMOFFSET_64  m_ip;
+    MEMOFFSET_64  m_sp;
+    MEMOFFSET_64  m_fp;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

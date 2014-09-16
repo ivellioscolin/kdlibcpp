@@ -75,7 +75,6 @@
     <ClInclude Include="dataaccessorimpl.h" />
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />
-    <ClInclude Include="Header.h" />
     <ClInclude Include="moduleimp.h" />
     <ClInclude Include="processmon.h" />
     <ClInclude Include="stdafx.h" />
