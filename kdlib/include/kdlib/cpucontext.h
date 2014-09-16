@@ -27,6 +27,7 @@ public:
     virtual NumVariant getRegisterByName( const std::wstring &name) = 0;
     virtual NumVariant getRegisterByIndex( unsigned long index ) = 0;
     virtual std::wstring getRegisterName( unsigned long index ) = 0;
+    virtual unsigned long getRegisterNumber() = 0;
 
     virtual MEMOFFSET_64 getIP() = 0;
     virtual MEMOFFSET_64 getSP() = 0;

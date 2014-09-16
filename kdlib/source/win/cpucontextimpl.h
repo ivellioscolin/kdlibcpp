@@ -31,6 +31,10 @@ protected:
 
     virtual std::wstring getRegisterName( unsigned long index );
 
+    virtual unsigned long getRegisterNumber() {
+        return m_values.size();
+    }
+
     virtual MEMOFFSET_64 getIP() {
         return m_ip;
     }
