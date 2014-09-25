@@ -107,13 +107,13 @@ CPUContextImpl::CPUContextImpl()
         throw DbgEngException( L"IDebugControl::GetEffectiveProcessorType", hres );
 
 
-    unsigned long  regsiterNumber = getRegisterNumber();
+    unsigned long  registerNumber = kdlib::getRegisterNumber();
 
-    m_values.resize(regsiterNumber);
+    m_values.resize(registerNumber);
 
-    for ( unsigned long  i = 0; i < regsiterNumber; ++i)
+    for ( unsigned long  i = 0; i < registerNumber; ++i)
     {
-        m_values[i] = std::make_pair( getRegisterName(i), getRegisterByIndex(i) );
+        m_values[i] = std::make_pair( kdlib::getRegisterName(i), kdlib::getRegisterByIndex(i) );
     }
 
     m_ip = getInstructionOffset();
