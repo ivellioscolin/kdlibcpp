@@ -818,14 +818,16 @@ void getSystemCrashInfo( SystemCrashInfo &crashInfo )
 
 unsigned long getNumberProcesses()
 {
-    HRESULT  hres;
-    ULONG  number;
+    //HRESULT  hres;
+    //ULONG  number;
 
-    hres = g_dbgMgr->system->GetNumberProcesses( &number );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
+    //hres = g_dbgMgr->system->GetNumberProcesses( &number );
+    //if ( FAILED( hres ) )
+    //    throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
 
-    return number;
+    //return number;
+
+    return ProcessMonitor::getNumberProcesses();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

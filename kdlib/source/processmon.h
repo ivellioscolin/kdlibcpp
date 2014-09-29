@@ -17,7 +17,7 @@ public:
     static void deinit();
     static void processStart( PROCESS_DEBUG_ID id );
     static void processStop( PROCESS_DEBUG_ID id );
-
+    static unsigned int getNumberProcesses();
 
     static void moduleLoad( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );
     static void moduleUnload( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );

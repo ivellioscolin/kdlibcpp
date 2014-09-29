@@ -60,6 +60,7 @@ public:
     void processStart( PROCESS_DEBUG_ID id );
     void processStop( PROCESS_DEBUG_ID id );
     void processAllStop();
+    unsigned int getNumberProcesses();
 
     void moduleLoad( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );
     void moduleUnload( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );
@@ -130,7 +131,7 @@ void ProcessMonitor::processStart( PROCESS_DEBUG_ID id )
 
 void ProcessMonitor::processStop( PROCESS_DEBUG_ID id )
 {
-    g_procmon->processStart(id);
+    g_procmon->processStop(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -138,6 +139,13 @@ void ProcessMonitor::processStop( PROCESS_DEBUG_ID id )
 void ProcessMonitor::processAllStop()
 {
     g_procmon->processAllStop();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned int ProcessMonitor::getNumberProcesses()
+{
+    return g_procmon->getNumberProcesses();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -221,6 +229,14 @@ void ProcessMonitorImpl::processAllStop()
 {
     boost::recursive_mutex::scoped_lock l(m_lock);
     m_processMap.clear();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned int ProcessMonitorImpl::getNumberProcesses()
+{
+    boost::recursive_mutex::scoped_lock l(m_lock);
+    return m_processMap.size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

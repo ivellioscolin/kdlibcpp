@@ -259,3 +259,36 @@ TEST_F(ProcessTest, ProcessInfo)
     EXPECT_THROW( getProcessIdByIndex(0xFFFF), DbgException );
 }
 
+TEST_F(ProcessTest, GetNumberProcesses)
+{
+    PROCESS_DEBUG_ID   process_id, dump1_id, dump2_id;
+
+    for ( int i = 0; i < 2; ++i )
+    {
+        ASSERT_NO_THROW( process_id =  startProcess(L"targetapp.exe") );
+        std::wstringstream  sstr;
+        sstr << L"targetapp" << i << L".dmp";
+        EXPECT_NO_THROW( writeDump(sstr.str(), false) );
+        EXPECT_NO_THROW( terminateProcess(process_id) );
+    }
+
+    ASSERT_EQ( 0, getNumberProcesses() );
+    ASSERT_NO_THROW( dump1_id = loadDump(L"targetapp0.dmp") );
+    ASSERT_EQ( 1, getNumberProcesses() );
+    ASSERT_NO_THROW( dump2_id = loadDump(L"targetapp1.dmp") );
+    ASSERT_EQ( 2, getNumberProcesses() );
+    ASSERT_NO_THROW( process_id =  startProcess(L"targetapp.exe") );
+    ASSERT_EQ( 3, getNumberProcesses() );
+
+    ASSERT_NO_THROW( closeDump(dump1_id) );
+    ASSERT_EQ( 2, getNumberProcesses() );
+    ASSERT_NO_THROW( terminateProcess(process_id) );
+    ASSERT_EQ( 1, getNumberProcesses() );
+    ASSERT_NO_THROW( closeDump(dump2_id) );
+    ASSERT_EQ( 0, getNumberProcesses() );
+
+    EXPECT_THROW( closeDump(dump2_id), DbgException );
+    EXPECT_THROW( terminateProcess(process_id), DbgException );
+    ASSERT_EQ( 0, getNumberProcesses() );
+}
+
