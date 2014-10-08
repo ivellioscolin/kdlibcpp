@@ -2018,7 +2018,7 @@ void ReadWow64Context( WOW64_CONTEXT& wow64Context )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template < typename T, HRESULT(IDebugSystemObjects4::*getThread1)(T*), HRESULT(IDebugSystemObjects4::*getThread2)(T*) >
+template < typename T, HRESULT(STDMETHODCALLTYPE IDebugSystemObjects4::*getThread1)(T*), HRESULT(STDMETHODCALLTYPE IDebugSystemObjects4::*getThread2)(T*) >
 struct IsThreadChangedImpl
 {
     static bool Do()
