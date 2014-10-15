@@ -1,6 +1,8 @@
 // targetapp.cpp : Defines the entry point for the console application.
 //
 
+//Русские комментарии рулят!!!!
+
 #include "stdafx.h"
 
 #include <string>

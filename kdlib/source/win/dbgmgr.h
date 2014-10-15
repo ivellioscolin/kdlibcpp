@@ -18,7 +18,7 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DebugManager : private DebugBaseEventCallbacksWide
+class DebugManager : public DebugBaseEventCallbacksWide
 {
 
 public:
@@ -55,6 +55,9 @@ private:
     EventsCallbackList          m_callbacks;
     ULONG                       m_previousExecutionStatus;
     bool                        m_remote;
+
+
+public:
 
     STDMETHOD_(ULONG, AddRef)() { return 1; }
     STDMETHOD_(ULONG, Release)() { return 1; }

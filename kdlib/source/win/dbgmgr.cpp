@@ -16,7 +16,7 @@ DebugManagerWrapper   g_dbgMgr;
 
 DebugManager::DebugManager()
 {
-    m_previousExecutionStatus = DebugStatusNoChange;
+    m_previousExecutionStatus = DebugStatusNoDebuggee;
     m_remote = false;
 
     CoInitialize(NULL);

@@ -305,6 +305,9 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::DetachCurrentProcess", hres );
 
+    if ( ProcessMonitor::getNumberProcesses() == 0 )
+        g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -354,6 +357,9 @@ void detachProcess( PROCESS_DEBUG_ID processId )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::DetachCurrentProcess", hres );
 
+    if ( ProcessMonitor::getNumberProcesses() == 0 )
+        g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -368,6 +374,8 @@ void detachAllProcesses()
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
 
     ProcessMonitor::processAllStop();
+
+    g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -385,6 +393,8 @@ void terminateAllProcesses()
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
 
     ProcessMonitor::processAllStop();
+
+    g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -433,6 +443,9 @@ void closeDump( PROCESS_DEBUG_ID processId )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
 
     ProcessMonitor::processStop( processId );
+
+    if ( ProcessMonitor::getNumberProcesses() == 0 )
+        g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
 
 }
 
