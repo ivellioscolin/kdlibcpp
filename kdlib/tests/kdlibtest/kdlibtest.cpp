@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "gmock/gmock.h"
 #include "kdlib/dbgengine.h"
+#include "eventhandlertest.h"
 #include "processtest.h"
 #include "moduletest.h"
 #include "memorytest.h"

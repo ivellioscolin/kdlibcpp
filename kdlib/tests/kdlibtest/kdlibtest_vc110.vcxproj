@@ -149,9 +149,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\test\testvars.h" />
+    <ClInclude Include="basefixture.h" />
     <ClInclude Include="breakhandler.h" />
     <ClInclude Include="cputest.h" />
-    <ClInclude Include="eventhandler.h" />
+    <ClInclude Include="eventhandlermock.h" />
+    <ClInclude Include="eventhandlertest.h" />
     <ClInclude Include="memorytest.h" />
     <ClInclude Include="moduletest.h" />
     <ClInclude Include="processtest.h" />

@@ -3,7 +3,7 @@
 #include "kdlib/breakpoint.h"
 
 #include "procfixture.h"
-#include "eventhandler.h"
+#include "eventhandlermock.h"
 
 using namespace kdlib;
 using namespace testing;

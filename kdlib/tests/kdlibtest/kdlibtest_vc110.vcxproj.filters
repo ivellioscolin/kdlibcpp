@@ -29,9 +29,6 @@
     <ClInclude Include="..\..\include\test\testvars.h">
       <Filter>testdata</Filter>
     </ClInclude>
-    <ClInclude Include="eventhandler.h">
-      <Filter>testfixtures</Filter>
-    </ClInclude>
     <ClInclude Include="processtest.h">
       <Filter>testcases</Filter>
     </ClInclude>
@@ -46,6 +43,15 @@
     </ClInclude>
     <ClInclude Include="typedvartest.h">
       <Filter>testcases</Filter>
+    </ClInclude>
+    <ClInclude Include="basefixture.h">
+      <Filter>testfixtures</Filter>
+    </ClInclude>
+    <ClInclude Include="eventhandlertest.h">
+      <Filter>testcases</Filter>
+    </ClInclude>
+    <ClInclude Include="eventhandlermock.h">
+      <Filter>testfixtures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
