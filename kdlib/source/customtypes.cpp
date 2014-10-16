@@ -19,6 +19,11 @@ protected:
             m_align = align ? align : ptrSize();
             m_size = 0;
         }
+    
+
+    virtual bool isUserDefined() {
+        return true;
+    }
 
     void throwIfFiledExist(const std::wstring &fieldName);
     void throwIfTypeRecursive(TypeInfoPtr type);
