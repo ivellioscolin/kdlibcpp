@@ -3,10 +3,10 @@
 // 
 
 #include "stdafx.h"
-//#include "dbghelp.h"
 
-//#include "dbgengine.h"
 
+#include <dia2.h>
+#include <diacreate.h>
 
 #include <boost/utility.hpp>
 
@@ -46,7 +46,11 @@ static SymbolSessionPtr createSession(
     hres = dataSource.CoCreateInstance(__uuidof(DiaSource), NULL, CLSCTX_INPROC_SERVER);
 
     if ( S_OK != hres )
-        throw DiaException(L"Call ::CoCreateInstance", hres);
+    {
+        hres = NoRegCoCreate( L"msdia110.dll", __uuidof(DiaSource),  __uuidof(IDiaDataSource), (void**)&dataSource);
+        if ( S_OK != hres )
+            throw DiaException(L"Call ::CoCreateInstance", hres);
+    }
 
     hres = DataProvider.load(*dataSource);
     if ( S_OK != hres )
