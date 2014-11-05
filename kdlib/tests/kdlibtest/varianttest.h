@@ -229,3 +229,20 @@ TEST_F( VariantOperationTests, isSigned )
     EXPECT_TRUE( NumVariant( float(0.0f) ).isSigned() );
     EXPECT_TRUE( NumVariant( double(0) ).isSigned() );
 }
+
+TEST_F( VariantOperationTests, isInteger )
+{
+    EXPECT_TRUE( NumVariant( char(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( unsigned char(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( short(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( unsigned short(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( long(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( unsigned long(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( long long(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( unsigned long long(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( int(0) ).isInteger() );
+    EXPECT_TRUE( NumVariant( unsigned int(0) ).isInteger() );
+    EXPECT_FALSE( NumVariant( float(0.0f) ).isInteger() );
+    EXPECT_FALSE( NumVariant( double(0) ).isInteger() );
+}
+

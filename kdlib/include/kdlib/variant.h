@@ -402,6 +402,10 @@ public:
         return NumVariant(-1).cast( m_numType ) < NumVariant(0);
     }
 
+    bool isInteger() {
+        return !isFloat() && !isDouble();
+    }
+
     void setChar(char val) {
         m_numType = charT;
         m_charVal = val;
