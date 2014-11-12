@@ -47,7 +47,27 @@ static SymbolSessionPtr createSession(
 
     if ( S_OK != hres )
     {
-        hres = NoRegCoCreate( L"msdia110.dll", __uuidof(DiaSource),  __uuidof(IDiaDataSource), (void**)&dataSource);
+        HMODULE  hModule = NULL;
+
+        if ( !GetModuleHandleEx(
+                GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, 
+                (LPCTSTR)createSession,
+                &hModule) )
+                    throw DiaException(L"failed to load msdia library");
+
+        DWORD fileNameSize = 0x1000;
+        
+        std::vector<wchar_t>  fileNameBuffer(fileNameSize);
+
+        GetModuleFileNameW(hModule, &fileNameBuffer[0], fileNameSize);
+
+        std::wstring  fileName(&fileNameBuffer[0], fileNameSize);
+
+        size_t pos = fileName.find_last_of(L'\\');
+        
+        fileName.replace(pos, fileName.length() - pos, L"\\msdia110.dll");      
+
+        hres = NoRegCoCreate( fileName.c_str(), __uuidof(DiaSource),  __uuidof(IDiaDataSource), (void**)&dataSource);
         if ( S_OK != hres )
             throw DiaException(L"Call ::CoCreateInstance", hres);
     }
