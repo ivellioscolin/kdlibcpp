@@ -30,7 +30,10 @@ protected:
     }
 
     virtual void TearDown() {
-        kdlib::terminateProcess( m_processId );
+        try {
+            kdlib::terminateProcess( m_processId );
+        } catch(DbgException&)
+        {}
     }
 
     kdlib::PROCESS_DEBUG_ID m_processId;

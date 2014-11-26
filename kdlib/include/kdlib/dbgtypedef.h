@@ -34,6 +34,13 @@ enum ExecutionStatus {
     DebugStatusNoDebuggee
 };
 
+
+enum BreakpointType {
+
+    SoftwareBreakpoint,
+    DataAccessBreakpoint
+};
+
 enum CPUType {
     CPU_I386 = 0,
     CPU_AMD64 = 1,

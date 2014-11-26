@@ -14,15 +14,13 @@ public:
 
     BreakPointTest() : ProcessFixture( L"breakhandlertest" ) {}
 
-    virtual void TearDown() {
-    }
 };
 
 
 TEST_F( BreakPointTest, StopOnBreak )
 {
-    EventHandlerMock    eventHandler;
-
+    EventHandlerMock  eventHandler;
+    
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
 
     EXPECT_CALL( eventHandler, onBreakpoint( _ ) ).Times(1);
@@ -44,16 +42,43 @@ TEST_F( BreakPointTest, RemoveBreak )
     EXPECT_CALL( eventHandler, onExecutionStatusChange( kdlib::DebugStatusGo) ).Times(1);
     EXPECT_CALL( eventHandler, onExecutionStatusChange( kdlib::DebugStatusNoDebuggee) ).Times(1);
 
-
-    BREAKPOINT_ID  bpid;
-    ASSERT_NO_THROW( bpid = softwareBreakPointSet( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
-    ASSERT_NO_THROW( breakPointRemove( bpid ) );
+    BreakpointPtr  bp;
+    ASSERT_NO_THROW( bp = softwareBreakPointSet( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
+    ASSERT_NO_THROW( bp->remove() );
 
     targetGo();
 }
 
 
-class BreakpointMock : public kdlib::BaseBreakpoint
+TEST_F( BreakPointTest, EnumBreak )
+{
+    BreakpointPtr  bp1, bp2, bp3;
+ 
+    EXPECT_EQ( 0, getNumberBreakpoints() );
+    ASSERT_NO_THROW( bp1 = softwareBreakPointSet( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
+    EXPECT_EQ( 1, getNumberBreakpoints() );
+    ASSERT_NO_THROW( bp2 = softwareBreakPointSet( m_targetModule->getSymbolVa( L"StdcallFunc" ) ) );
+    EXPECT_EQ( 2, getNumberBreakpoints() );
+    ASSERT_NO_THROW( bp2->remove() );
+    EXPECT_EQ( 1, getNumberBreakpoints() );
+    ASSERT_NO_THROW( bp3 = softwareBreakPointSet( m_targetModule->getSymbolVa( L"FastcallFunc" ) ) );
+    EXPECT_EQ( 2, getNumberBreakpoints() );
+
+    BreakpointPtr  bpIndex;
+    ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(0) );
+    EXPECT_TRUE( bpIndex == bp1 || bpIndex == bp3 );
+
+    ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(1) );
+    EXPECT_TRUE( bpIndex == bp1 || bpIndex == bp3 );
+
+    ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(2) );
+    EXPECT_TRUE( 0 == bpIndex );
+
+    ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(-1) );
+    EXPECT_TRUE( 0 == bpIndex );
+}
+
+class BreakpointMock 
 {
 public:
 
@@ -61,15 +86,36 @@ public:
 };
 
 
-TEST_F( BreakPointTest, BreakpointObject )
+TEST_F( BreakPointTest, AutoBreakpoint )
 {
-    BreakpointPtr  bp;
+    AutoBreakpoint<BreakpointMock>  bp(m_targetModule->getSymbolVa( L"CdeclFunc"));
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackBreak );
 
-    ASSERT_NO_THROW( bp = setBp<BreakpointMock>( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
+    EXPECT_CALL( bp, onHit() ).Times(1);
 
-    EXPECT_CALL( static_cast<BreakpointMock&>(*bp), onHit() ).Times(1);
+    ASSERT_EQ( DebugStatusBreak, targetGo() );
 
-    targetGo();
+    EXPECT_EQ( DebugStatusBreak, targetExecutionStatus() );
+    EXPECT_EQ( getInstructionOffset(), bp.getOffset() );
+}
+
+
+TEST_F( BreakPointTest, AutoBreakpointSet )
+{
+    AutoBreakpoint<BreakpointMock>  bp0;
+
+    AutoBreakpoint<BreakpointMock>  bp1(m_targetModule->getSymbolVa( L"CdeclFunc"));
+
+    AutoBreakpoint<BreakpointMock>  bp2(AutoBreakpoint<BreakpointMock>(m_targetModule->getSymbolVa( L"CdeclFunc") + 1));
+
+    EXPECT_EQ( 2, getNumberBreakpoints() );
+
+    bp1 = bp2;
+
+    EXPECT_EQ( 1, getNumberBreakpoints() );
+
+    bp1.release();
+
+    EXPECT_EQ( 0, getNumberBreakpoints() );
 }

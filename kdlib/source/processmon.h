@@ -2,8 +2,7 @@
 
 #include "kdlib/dbgtypedef.h"
 #include "kdlib/module.h"
-
-#include "breakpointimpl.h"
+#include "kdlib/breakpoint.h"
 
 namespace kdlib {
 
@@ -30,8 +29,10 @@ public:
     static ModulePtr  getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id = -1 );
     static void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id = -1 );
 
-    static BREAKPOINT_ID insertBreakpoint( BreakpointInfoPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+    static BREAKPOINT_ID insertBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
     static void removeBreakpoint( BREAKPOINT_ID  bpid );
+    static unsigned long getNumberBreakpoints();
+    static BreakpointPtr getBreakpointByIndex(unsigned long index);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

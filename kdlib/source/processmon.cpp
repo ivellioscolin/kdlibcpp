@@ -25,8 +25,10 @@ public:
     void insertModule( ModulePtr& module);
     void removeModule(MEMOFFSET_64  offset );
 
-    void insertBreakpoint(BREAKPOINT_ID bpId,  BreakpointInfoPtr& breakpoint);
-    BreakpointInfoPtr  removeBreakpoint(BREAKPOINT_ID bpId);
+    void insertBreakpoint(BREAKPOINT_ID bpId,  BreakpointPtr& breakpoint);
+    BreakpointPtr removeBreakpoint(BREAKPOINT_ID bpId);
+    unsigned long getNumberBreakpoints();
+    BreakpointPtr getBreakpointByIndex(unsigned long index);
 
     DebugCallbackResult breakpointHit( MEMOFFSET_64 offset, BreakpointType breakpointType);
 
@@ -37,9 +39,9 @@ private:
     boost::recursive_mutex  m_moduleLock;
 
 
-    typedef std::map<BREAKPOINT_ID, BreakpointInfoPtr>  BreakpointMap;
+    typedef std::map<BREAKPOINT_ID, BreakpointPtr>  BreakpointMap;
     BreakpointMap  m_breakpointMap;
-    typedef std::map<MEMOFFSET_64, BreakpointInfoPtr>  BreakpointMap;
+    typedef std::map<MEMOFFSET_64, BreakpointPtr>  BreakpointMap;
     BreakpointMap  m_softBpOffsetMap;
     BreakpointMap  m_accessBpOffsetMap;
 
@@ -65,12 +67,14 @@ public:
     void moduleLoad( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );
     void moduleUnload( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );
     DebugCallbackResult breakpointHit( PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, BreakpointType breakpointType);
+    unsigned long getNumberBreakpoints();
 
     ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id );
     void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id );
 
-    BREAKPOINT_ID insertBreakpoint( BreakpointInfoPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+    BREAKPOINT_ID insertBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
     void removeBreakpoint( BREAKPOINT_ID  bpid );
+    BreakpointPtr getBreakpointByIndex(unsigned long index);
 
 private:
 
@@ -191,7 +195,7 @@ void ProcessMonitor::insertModule( ModulePtr& module, PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BREAKPOINT_ID ProcessMonitor::insertBreakpoint( BreakpointInfoPtr& breakpoint, PROCESS_DEBUG_ID id )
+BREAKPOINT_ID ProcessMonitor::insertBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
 {
     if ( id == -1 )
         id = getCurrentProcessId();
@@ -204,6 +208,20 @@ BREAKPOINT_ID ProcessMonitor::insertBreakpoint( BreakpointInfoPtr& breakpoint, P
 void ProcessMonitor::removeBreakpoint( BREAKPOINT_ID  bpid )
 {
     g_procmon->removeBreakpoint(bpid);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long ProcessMonitor::getNumberBreakpoints()
+{
+    return g_procmon->getNumberBreakpoints();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+BreakpointPtr ProcessMonitor::getBreakpointByIndex(unsigned long index)
+{
+    return g_procmon->getBreakpointByIndex(index);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,6 +305,7 @@ DebugCallbackResult ProcessMonitorImpl::breakpointHit( PROCESS_DEBUG_ID id, MEMO
     return DebugCallbackNoChange;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void ProcessMonitorImpl::insertModule( ModulePtr& module, PROCESS_DEBUG_ID id )
@@ -298,7 +317,7 @@ void ProcessMonitorImpl::insertModule( ModulePtr& module, PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BREAKPOINT_ID ProcessMonitorImpl::insertBreakpoint( BreakpointInfoPtr& breakpoint, PROCESS_DEBUG_ID id )
+BREAKPOINT_ID ProcessMonitorImpl::insertBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
 {
     ProcessInfoPtr  processInfo = getProcess(id);
 
@@ -313,7 +332,7 @@ BREAKPOINT_ID ProcessMonitorImpl::insertBreakpoint( BreakpointInfoPtr& breakpoin
     return bpId;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 void ProcessMonitorImpl::removeBreakpoint( BREAKPOINT_ID  bpid )
 {
@@ -321,7 +340,7 @@ void ProcessMonitorImpl::removeBreakpoint( BREAKPOINT_ID  bpid )
 
     for ( ProcessMap::iterator  it = m_processMap.begin(); it != m_processMap.end(); ++it )
     {
-        BreakpointInfoPtr  bp = it->second->removeBreakpoint(bpid);
+        BreakpointPtr  bp = it->second->removeBreakpoint(bpid);
         if ( bp )
         {
             if ( it->first != getCurrentProcessId() )
@@ -336,6 +355,46 @@ void ProcessMonitorImpl::removeBreakpoint( BREAKPOINT_ID  bpid )
             }
         }
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long ProcessMonitorImpl::getNumberBreakpoints()
+{
+    unsigned long  breakpointNumber = 0;
+
+    boost::recursive_mutex::scoped_lock l(m_lock);
+
+    for ( ProcessMap::iterator  it = m_processMap.begin(); it != m_processMap.end(); ++it )
+    {
+        breakpointNumber += it->second->getNumberBreakpoints();
+    }
+
+    return breakpointNumber;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+BreakpointPtr ProcessMonitorImpl::getBreakpointByIndex(unsigned long index)
+{
+    unsigned long  breakpointNumber = 0;
+
+    boost::recursive_mutex::scoped_lock l(m_lock);
+
+    for ( ProcessMap::iterator  it = m_processMap.begin(); it != m_processMap.end(); ++it )
+    {
+        breakpointNumber = it->second->getNumberBreakpoints();
+        if ( breakpointNumber < index)
+        {
+            index -= breakpointNumber;
+        }
+        else
+        {
+            return it->second->getBreakpointByIndex(index);
+        }
+    }
+
+    return BreakpointPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -395,7 +454,7 @@ void ProcessInfo::removeModule(MEMOFFSET_64  offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void  ProcessInfo::insertBreakpoint(BREAKPOINT_ID bpId,  BreakpointInfoPtr& breakpoint)
+void  ProcessInfo::insertBreakpoint(BREAKPOINT_ID bpId,  BreakpointPtr& breakpoint)
 {
     boost::recursive_mutex::scoped_lock l(m_breakpointLock);
     
@@ -412,13 +471,13 @@ void  ProcessInfo::insertBreakpoint(BREAKPOINT_ID bpId,  BreakpointInfoPtr& brea
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-BreakpointInfoPtr  ProcessInfo::removeBreakpoint(BREAKPOINT_ID bpId)
+BreakpointPtr  ProcessInfo::removeBreakpoint(BREAKPOINT_ID bpId)
 {
     boost::recursive_mutex::scoped_lock l(m_breakpointLock);
 
-    BreakpointInfoPtr breakpoint = m_breakpointMap[bpId];
+    BreakpointPtr breakpoint = m_breakpointMap[bpId];
     if ( breakpoint )
     {
         m_breakpointMap.erase(bpId);
@@ -437,13 +496,37 @@ BreakpointInfoPtr  ProcessInfo::removeBreakpoint(BREAKPOINT_ID bpId)
     return breakpoint;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long ProcessInfo::getNumberBreakpoints()
+{
+    boost::recursive_mutex::scoped_lock l(m_breakpointLock);
+
+    return m_breakpointMap.size();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+BreakpointPtr ProcessInfo::getBreakpointByIndex(unsigned long index)
+{
+    boost::recursive_mutex::scoped_lock l(m_breakpointLock);
+
+    if ( index >= m_breakpointMap.size() )
+        return BreakpointPtr();
+
+    BreakpointMap::iterator  it = m_breakpointMap.begin();
+    std::advance( it, index );
+    return it->second;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DebugCallbackResult ProcessInfo::breakpointHit( MEMOFFSET_64 offset, BreakpointType breakpointType)
 {
     boost::recursive_mutex::scoped_lock l(m_breakpointLock);
 
-    BreakpointInfoPtr breakpoint;
+    BreakpointPtr breakpoint;
 
     switch( breakpointType )
     {
@@ -458,13 +541,14 @@ DebugCallbackResult ProcessInfo::breakpointHit( MEMOFFSET_64 offset, BreakpointT
     if ( !breakpoint )
         return DebugCallbackNoChange;
         
-    if ( !breakpoint->getCallback() )
+    BreakpointCallback*  callback = breakpoint->getCallback();
+    if ( callback == 0 )
         return DebugCallbackBreak;
 
-    return breakpoint->getCallback()->onHit();
+    return callback->onHit();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
 
 } //namesapce kdlib
