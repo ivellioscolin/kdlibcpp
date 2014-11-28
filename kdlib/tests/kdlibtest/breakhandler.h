@@ -45,6 +45,7 @@ TEST_F( BreakPointTest, RemoveBreak )
     BreakpointPtr  bp;
     ASSERT_NO_THROW( bp = softwareBreakPointSet( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
     ASSERT_NO_THROW( bp->remove() );
+    EXPECT_EQ( 0, getNumberBreakpoints() );
 
     targetGo();
 }
@@ -119,3 +120,21 @@ TEST_F( BreakPointTest, AutoBreakpointSet )
 
     EXPECT_EQ( 0, getNumberBreakpoints() );
 }
+
+
+
+TEST_F( BreakPointTest, ScopedBreakpoint )
+{
+    {
+        ScopedBreakpoint  bp1;
+
+        ASSERT_NO_THROW( bp1 = softwareBreakPointSet( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
+        EXPECT_EQ( 1, getNumberBreakpoints() );
+
+        ScopedBreakpoint  bp2( softwareBreakPointSet( m_targetModule->getSymbolVa( L"CdeclFunc") + 1 ) );
+        EXPECT_EQ( 2, getNumberBreakpoints() );
+    }
+
+    EXPECT_EQ( 0, getNumberBreakpoints() );
+}
+

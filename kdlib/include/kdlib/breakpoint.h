@@ -55,7 +55,58 @@ BreakpointPtr getBreakpointByIndex(unsigned long index);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class T>
+class ScopedBreakpoint {
+
+public:
+
+    ScopedBreakpoint() {
+    }
+
+    explicit ScopedBreakpoint(BreakpointPtr& bp) {
+        m_internalBp = bp;
+    }
+
+    ScopedBreakpoint& operator= (BreakpointPtr& bp) 
+    {
+        if ( m_internalBp )
+             m_internalBp->remove();
+
+        m_internalBp = bp;
+        return *this;
+    }
+
+    ~ScopedBreakpoint() {
+        m_internalBp->remove();
+    }
+
+    BreakpointPtr operator->() {
+        return m_internalBp;
+    }
+
+    BreakpointPtr get() {
+        return m_internalBp;
+    }
+
+    void release() {
+       m_internalBp = 0;
+    }
+
+private:
+
+    ScopedBreakpoint(ScopedBreakpoint& bp) {
+        throw;
+    }
+
+    ScopedBreakpoint& operator= (ScopedBreakpoint& bp) {
+        throw;
+    }
+
+    BreakpointPtr  m_internalBp;
+};
+
+
+
+template<typename T>
 class AutoBreakpoint : public T, public Breakpoint, public BreakpointCallback
 {
 public:
@@ -93,7 +144,7 @@ public:
     AutoBreakpoint()
     {}
 
-    AutoBreakpoint(MEMOFFSET_64 offset) {
+    explicit AutoBreakpoint(MEMOFFSET_64 offset) {
         m_internalBp = softwareBreakPointSet(offset,this);
     }
 
@@ -133,6 +184,8 @@ private:
 
     BreakpointPtr  m_internalBp;
 };
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
