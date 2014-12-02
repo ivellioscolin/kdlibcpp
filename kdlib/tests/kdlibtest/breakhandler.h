@@ -138,3 +138,19 @@ TEST_F( BreakPointTest, ScopedBreakpoint )
     EXPECT_EQ( 0, getNumberBreakpoints() );
 }
 
+
+TEST_F( BreakPointTest, ProcessTerminate )
+{
+    {
+        ScopedBreakpoint  bp;
+
+        ASSERT_NO_THROW( bp = softwareBreakPointSet( m_targetModule->getSymbolVa( L"CdeclFunc" ) ) );
+        EXPECT_EQ( 1, getNumberBreakpoints() );
+
+        EXPECT_EQ( DebugStatusBreak, targetGo() );
+
+        ASSERT_NO_THROW( terminateProcess(m_processId) );
+
+        EXPECT_EQ( 0, getNumberBreakpoints() );
+    }
+}

@@ -162,43 +162,41 @@ void SoftwareBreakpointImpl::remove()
     HRESULT  hres;
     ULONG  bpNumber;
 
-    hres =  g_dbgMgr->control->GetNumberBreakpoints(&bpNumber);
-    if ( FAILED(hres) )
-        throw DbgEngException(L"IDebugControl::GetNumberBreakpoints", hres);
-
-    for ( ULONG i = 0; i < bpNumber; ++i )
+    if ( ProcessMonitor::getBreakpointById(m_id) )
     {
-        IDebugBreakpoint  *bp;
-        hres = g_dbgMgr->control->GetBreakpointByIndex(i, &bp );
-        if ( FAILED(hres) )
-            throw DbgEngException(L"IDebugControl::GetBreakpointByIndex", hres);
-
-        MEMOFFSET_64  offset;
-        hres = bp->GetOffset(&offset);
-
-        if ( FAILED(hres) )
-            throw DbgEngException(L"IDebugControl::GetOffset", hres);
-
-        if ( offset != m_offset )
-            continue;
-
-        ULONG breakType, procType;
-        hres = bp->GetType( &breakType, &procType );
-        if ( FAILED(hres) )
-            throw DbgEngException(L"IDebugBreakpoint::GetType", hres );
-
-        if ( breakType != DEBUG_BREAKPOINT_CODE )
-            continue;
-
-        hres= g_dbgMgr->control->RemoveBreakpoint(bp);
-
-        if ( FAILED(hres) )
-            throw DbgEngException( L"IDebugBreakpoint::RemoveBreakpoint", hres);
-
         ProcessMonitor::removeBreakpoint(m_id);
         m_id = BREAKPOINT_UNSET;
 
-        break;
+        hres =  g_dbgMgr->control->GetNumberBreakpoints(&bpNumber);
+        if ( FAILED(hres) )
+            return;
+
+        for ( ULONG i = 0; i < bpNumber; ++i )
+        {
+            IDebugBreakpoint  *bp;
+            hres = g_dbgMgr->control->GetBreakpointByIndex(i, &bp );
+            if ( FAILED(hres) )
+                break;
+
+            MEMOFFSET_64  offset;
+            hres = bp->GetOffset(&offset);
+
+            if ( FAILED(hres) )
+                break;
+
+            if ( offset != m_offset )
+                continue;
+
+            ULONG breakType, procType;
+            hres = bp->GetType( &breakType, &procType );
+            if ( FAILED(hres) )
+                break;
+
+            if ( breakType != DEBUG_BREAKPOINT_CODE )
+                continue;
+
+            g_dbgMgr->control->RemoveBreakpoint(bp);
+        }
     }
 }
 
@@ -245,6 +243,9 @@ void HardwareBreakpointImpl::set()
         g_dbgMgr->control->RemoveBreakpoint(bp);
         throw DbgEngException(L"IDebugBreakpoint::SetFlags", hres);
     }
+
+    BreakpointPtr  ptr = shared_from_this();
+    m_id = ProcessMonitor::insertBreakpoint(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,40 +255,41 @@ void HardwareBreakpointImpl::remove()
     HRESULT  hres;
     ULONG  bpNumber;
 
-    hres =  g_dbgMgr->control->GetNumberBreakpoints(&bpNumber);
-    if ( FAILED(hres) )
-        throw DbgEngException(L"IDebugControl::GetNumberBreakpoints", hres);
-
-    for ( ULONG i = 0; i < bpNumber; ++i )
+    if ( ProcessMonitor::getBreakpointById(m_id) )
     {
-        IDebugBreakpoint  *bp;
-        hres = g_dbgMgr->control->GetBreakpointByIndex(i, &bp );
+        ProcessMonitor::removeBreakpoint(m_id);
+        m_id = BREAKPOINT_UNSET;
+
+        hres =  g_dbgMgr->control->GetNumberBreakpoints(&bpNumber);
         if ( FAILED(hres) )
-            throw DbgEngException(L"IDebugControl::GetBreakpointByIndex", hres);
+            return;
 
-        MEMOFFSET_64  offset;
-        hres = bp->GetOffset(&offset);
+        for ( ULONG i = 0; i < bpNumber; ++i )
+        {
+            IDebugBreakpoint  *bp;
+            hres = g_dbgMgr->control->GetBreakpointByIndex(i, &bp );
+            if ( FAILED(hres) )
+                break;
 
-        if ( FAILED(hres) )
-            throw DbgEngException(L"IDebugControl::GetOffset", hres);
+            MEMOFFSET_64  offset;
+            hres = bp->GetOffset(&offset);
 
-        if ( offset != m_offset )
-            continue;
+            if ( FAILED(hres) )
+                break;
 
-        ULONG breakType, procType;
-        hres = bp->GetType( &breakType, &procType );
-        if ( FAILED(hres) )
-            throw DbgEngException(L"IDebugBreakpoint::GetType", hres );
+            if ( offset != m_offset )
+                continue;
 
-        if ( breakType != DEBUG_BREAKPOINT_DATA )
-            continue;
+            ULONG breakType, procType;
+            hres = bp->GetType( &breakType, &procType );
+            if ( FAILED(hres) )
+                break;
 
-        hres= g_dbgMgr->control->RemoveBreakpoint(bp);
+            if ( breakType != DEBUG_BREAKPOINT_DATA )
+                continue;
 
-        if ( FAILED(hres) )
-            throw DbgEngException( L"IDebugBreakpoint::RemoveBreakpoint", hres);
-
-        break;
+            g_dbgMgr->control->RemoveBreakpoint(bp);
+        }
     }
 }
 

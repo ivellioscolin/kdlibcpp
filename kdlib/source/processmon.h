@@ -33,6 +33,7 @@ public:
     static void removeBreakpoint( BREAKPOINT_ID  bpid );
     static unsigned long getNumberBreakpoints();
     static BreakpointPtr getBreakpointByIndex(unsigned long index);
+    static BreakpointPtr getBreakpointById(BREAKPOINT_ID  bpid );
 };
 
 ///////////////////////////////////////////////////////////////////////////////
