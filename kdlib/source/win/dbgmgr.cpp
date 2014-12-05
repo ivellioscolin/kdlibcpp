@@ -172,6 +172,18 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
 {
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
+    if ((Flags & DEBUG_CES_CURRENT_THREAD) != 0)
+    {
+        EventsCallbackList::iterator  it = m_callbacks.begin();
+
+        for (; it != m_callbacks.end(); ++it)
+        {
+            ULONG  threadId = (ULONG)Argument;
+            if (threadId != DEBUG_ANY_ID)
+                (*it)->onCurrentThreadChange(threadId);
+        }
+    }
+
     if ( ( ( Flags & DEBUG_CES_EXECUTION_STATUS ) != 0 ) &&
          ( ( Argument & DEBUG_STATUS_INSIDE_WAIT ) == 0 ) &&
          (ULONG)Argument != m_previousExecutionStatus )

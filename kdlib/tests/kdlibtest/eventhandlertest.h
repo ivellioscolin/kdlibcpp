@@ -25,6 +25,7 @@ TEST_F(EventHandlerTest, KillProcessTargetChanged)
 
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
 
     PROCESS_DEBUG_ID   process_id;
 
@@ -47,6 +48,7 @@ TEST_F(EventHandlerTest, DetachProcessTargetChanged)
 
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
 
     PROCESS_DEBUG_ID   process_id;
 
@@ -69,17 +71,17 @@ TEST_F(EventHandlerTest, KillProcessesTargetChanged)
 
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
 
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
     
-    EXPECT_NO_THROW(  terminateAllProcesses() );
+    EXPECT_NO_THROW( terminateAllProcesses() );
 }
 
 
 TEST_F(EventHandlerTest, DetachProcessesTargetChanged)
 {
-
     EventHandlerMock    eventHandler;
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
@@ -90,9 +92,29 @@ TEST_F(EventHandlerTest, DetachProcessesTargetChanged)
 
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
 
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
     
     EXPECT_NO_THROW( detachAllProcesses() );
+}
+
+TEST_F(EventHandlerTest, ChangeCurrentThread)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe  processtest"));
+
+    EventHandlerMock    eventHandler;
+    DefaultValue<kdlib::DebugCallbackResult>::Set(DebugCallbackNoChange);
+
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(2);
+
+    unsigned long  threadNumber = kdlib::getNumberThreads();
+
+    for (unsigned int i = 0; i < threadNumber; ++i)
+    {
+        kdlib::THREAD_DEBUG_ID  id = getThreadIdByIndex(i);
+        kdlib::setCurrentThreadById(id);
+        kdlib::setCurrentThreadById(id);
+    }
 }

@@ -193,6 +193,7 @@ TEST_F( ModuleCallbackTest, loadModule)
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
 
     EXPECT_CALL(eventHandler, onExecutionStatusChange(_) ).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
 
     EXPECT_CALL(eventHandler, onModuleLoad( _, std::wstring(L"ws2_32")) ).Times(1);
     EXPECT_CALL(eventHandler, onModuleLoad( _,  Ne(std::wstring(L"ws2_32")))).Times(AnyNumber());

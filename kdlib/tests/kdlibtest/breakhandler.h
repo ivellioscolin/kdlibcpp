@@ -24,6 +24,8 @@ TEST_F( BreakPointTest, StopOnBreak )
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
 
     EXPECT_CALL( eventHandler, onBreakpoint( _ ) ).Times(1);
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
+
     EXPECT_CALL( eventHandler, onExecutionStatusChange( kdlib::DebugStatusGo) ).Times(1);
     EXPECT_CALL( eventHandler, onExecutionStatusChange( kdlib::DebugStatusBreak) ).Times(1);
 
@@ -37,6 +39,8 @@ TEST_F( BreakPointTest, RemoveBreak )
     EventHandlerMock    eventHandler;
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
+
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
 
     EXPECT_CALL( eventHandler, onBreakpoint( _ ) ).Times( 0 );
     EXPECT_CALL( eventHandler, onExecutionStatusChange( kdlib::DebugStatusGo) ).Times(1);

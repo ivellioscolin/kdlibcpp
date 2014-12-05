@@ -71,7 +71,6 @@
     <ClInclude Include="..\include\kdlib\typeinfo.h" />
     <ClInclude Include="..\include\kdlib\variant.h" />
     <ClInclude Include="..\include\kdlib\windbg.h" />
-    <ClInclude Include="breakpointimpl.h" />
     <ClInclude Include="dataaccessorimpl.h" />
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />
