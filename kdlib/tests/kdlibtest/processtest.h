@@ -52,7 +52,7 @@ TEST_F( ProcessTest, StartMultiProcess )
     for ( int i = 0; i < 5; ++i )
     {
         PROCESS_DEBUG_ID   id;
-        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
+        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe  processtest") );
         ids.push_back(id);
     }
 
@@ -81,7 +81,7 @@ TEST_F( ProcessTest, OpenMultiDump )
     for ( int i = 0; i < 5; ++i )
     {
         PROCESS_DEBUG_ID   id;
-        ASSERT_NO_THROW( id = startProcess(L"targetapp.exe") );
+        ASSERT_NO_THROW( id = startProcess(L"targetapp.exe  processtest") );
         EXPECT_NO_THROW( writeDump(dumpNames[i], false) );
         EXPECT_NO_THROW( terminateProcess(id) );
 
@@ -115,7 +115,7 @@ TEST_F( ProcessTest, DISABLED_MixedProcessDump )
 
     for ( int i = 0; i < 5; ++i )
     {
-        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
+        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe processtest") );
         EXPECT_NO_THROW( writeDump(dumpNames[i], false) );
         EXPECT_NO_THROW( terminateProcess(id) );
     }
@@ -125,7 +125,7 @@ TEST_F( ProcessTest, DISABLED_MixedProcessDump )
         ASSERT_NO_THROW( id = loadDump(dumpNames[i]) );
         dumpIds.push_back(id);
 
-        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
+        ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe  processtest") );
         processIds.push_back(id);
     }
 
@@ -229,7 +229,7 @@ TEST_F(ProcessTest, GetNumberProcesses)
 
     for ( int i = 0; i < 2; ++i )
     {
-        ASSERT_NO_THROW( process_id =  startProcess(L"targetapp.exe") );
+        ASSERT_NO_THROW( process_id =  startProcess(L"targetapp.exe  processtest") );
         std::wstringstream  sstr;
         sstr << L"targetapp" << i << L".dmp";
         EXPECT_NO_THROW( writeDump(sstr.str(), false) );
@@ -241,7 +241,7 @@ TEST_F(ProcessTest, GetNumberProcesses)
     ASSERT_EQ( 1, getNumberProcesses() );
     ASSERT_NO_THROW( dump2_id = loadDump(L"targetapp1.dmp") );
     ASSERT_EQ( 2, getNumberProcesses() );
-    ASSERT_NO_THROW( process_id =  startProcess(L"targetapp.exe") );
+    ASSERT_NO_THROW( process_id =  startProcess(L"targetapp.exe  processtest") );
     ASSERT_EQ( 3, getNumberProcesses() );
 
     ASSERT_NO_THROW( closeDump(dump1_id) );
