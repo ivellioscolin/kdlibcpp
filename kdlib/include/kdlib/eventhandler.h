@@ -34,6 +34,9 @@ public:
         return DebugCallbackNoChange;
     }
 
+    virtual void onCurrentThreadChange(THREAD_DEBUG_ID threadid)
+    {}
+
     EventHandler() {
        registerEventsCallback(this);
     }
