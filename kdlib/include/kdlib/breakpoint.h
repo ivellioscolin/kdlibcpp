@@ -25,6 +25,7 @@ class BreakpointCallback {
 public:
 
     virtual DebugCallbackResult onHit() = 0;
+    virtual void onRemove() = 0;
 };
 
 
@@ -76,18 +77,25 @@ public:
     }
 
     ~ScopedBreakpoint() {
-        m_internalBp->remove();
+        if (m_internalBp)
+            m_internalBp->remove();
     }
 
     BreakpointPtr operator->() {
         return m_internalBp;
     }
 
+    const BreakpointPtr operator->() const {
+        return m_internalBp;
+    }
+
+
     BreakpointPtr get() {
         return m_internalBp;
     }
 
     void release() {
+       m_internalBp->remove();
        m_internalBp = 0;
     }
 
@@ -137,6 +145,10 @@ public:
 
     virtual DebugCallbackResult onHit() {
         return T::onHit();
+    }
+
+    virtual void onRemove() {
+        T::onRemove();
     }
 
 public:

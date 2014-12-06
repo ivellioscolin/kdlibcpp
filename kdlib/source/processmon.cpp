@@ -523,9 +523,12 @@ BreakpointPtr  ProcessInfo::removeBreakpoint(BREAKPOINT_ID bpId)
         break;
     }
 
+    BreakpointCallback*  callback = breakpoint->getCallback();
+    if ( callback != 0 )
+        callback->onRemove();
+
     return breakpoint;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
