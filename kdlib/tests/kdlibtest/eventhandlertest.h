@@ -108,6 +108,7 @@ TEST_F(EventHandlerTest, ChangeCurrentThread)
     DefaultValue<kdlib::DebugCallbackResult>::Set(DebugCallbackNoChange);
 
     EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(2);
+    EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
 
     unsigned long  threadNumber = kdlib::getNumberThreads();
 
@@ -117,4 +118,6 @@ TEST_F(EventHandlerTest, ChangeCurrentThread)
         kdlib::setCurrentThreadById(id);
         kdlib::setCurrentThreadById(id);
     }
+
+    EXPECT_NO_THROW( terminateAllProcesses() );
 }

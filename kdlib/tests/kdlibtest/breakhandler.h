@@ -88,6 +88,7 @@ class BreakpointMock
 public:
 
     MOCK_METHOD0( onHit, kdlib::DebugCallbackResult () );
+    MOCK_METHOD0( onRemove, void() );
 };
 
 
@@ -98,6 +99,7 @@ TEST_F( BreakPointTest, AutoBreakpoint )
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackBreak );
 
     EXPECT_CALL( bp, onHit() ).Times(1);
+    EXPECT_CALL( bp, onRemove() ).Times(1);
 
     ASSERT_EQ( DebugStatusBreak, targetGo() );
 
@@ -113,6 +115,9 @@ TEST_F( BreakPointTest, AutoBreakpointSet )
     AutoBreakpoint<BreakpointMock>  bp1(m_targetModule->getSymbolVa( L"CdeclFunc"));
 
     AutoBreakpoint<BreakpointMock>  bp2(AutoBreakpoint<BreakpointMock>(m_targetModule->getSymbolVa( L"CdeclFunc") + 1));
+
+    EXPECT_CALL( bp1, onRemove() ).Times(1);
+    EXPECT_CALL( bp2, onRemove() ).Times(1);
 
     EXPECT_EQ( 2, getNumberBreakpoints() );
 
@@ -155,6 +160,6 @@ TEST_F( BreakPointTest, ProcessTerminate )
 
         ASSERT_NO_THROW( terminateProcess(m_processId) );
 
-        EXPECT_EQ( 0, getNumberBreakpoints() );
+        EXPECT_THROW( getNumberBreakpoints(), DbgException ); // there is no targets 
     }
 }

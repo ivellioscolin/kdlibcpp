@@ -22,6 +22,7 @@ TEST_F( ProcessTest, StartProcess )
     PROCESS_DEBUG_ID   id;
     ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
     EXPECT_NO_THROW( terminateProcess(id) );
+    EXPECT_EQ( 0, kdlib::getNumberProcesses() );
 }
 
 TEST_F( ProcessTest, AttachProcess )
@@ -31,6 +32,7 @@ TEST_F( ProcessTest, AttachProcess )
     PROCESS_DEBUG_ID   id;
     ASSERT_NO_THROW( id = attachProcess(pid) );
     EXPECT_NO_THROW( terminateProcess(id) );
+    EXPECT_EQ( 0, kdlib::getNumberProcesses() );
 }
 
 TEST_F( ProcessTest, CreateOpenDump )
@@ -42,6 +44,7 @@ TEST_F( ProcessTest, CreateOpenDump )
 
     ASSERT_NO_THROW( id = loadDump(L"targetapp.dmp") );
     EXPECT_NO_THROW( closeDump(id) );
+    EXPECT_EQ( 0, kdlib::getNumberProcesses() );
 }
 
 
@@ -56,14 +59,17 @@ TEST_F( ProcessTest, StartMultiProcess )
         ids.push_back(id);
     }
 
+    EXPECT_EQ(5, kdlib::getNumberProcesses() );
+
     std::vector<PROCESS_DEBUG_ID>::iterator  it;
 
     for ( it = ids.begin(); it != ids.end(); ++it )
     {
         EXPECT_NO_THROW( terminateProcess(*it) );
     }
-}
 
+    EXPECT_EQ(0, kdlib::getNumberProcesses() );
+}
 
 TEST_F( ProcessTest, OpenMultiDump )
 {
