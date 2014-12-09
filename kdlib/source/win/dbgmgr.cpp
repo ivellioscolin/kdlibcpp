@@ -17,6 +17,7 @@ DebugManagerWrapper   g_dbgMgr;
 DebugManager::DebugManager()
 {
     m_previousExecutionStatus = DebugStatusNoDebuggee;
+    m_previousCurrentThread = 0;
     m_remote = false;
 
     CoInitialize(NULL);
@@ -40,6 +41,7 @@ DebugManager::DebugManager()
 DebugManager::DebugManager( const std::wstring& remoteOptions )
 {
     m_previousExecutionStatus = DebugStatusNoChange;
+    m_previousCurrentThread = 0;
     m_remote = true;
 
     CoInitialize(NULL);
@@ -69,21 +71,6 @@ DebugManager::~DebugManager()
     CoUninitialize();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-void DebugManager::registerEventsCallback( DebugEventsCallback *callback )
-{
-     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
-     m_callbacks.push_back( callback );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void DebugManager::removeEventsCallback( DebugEventsCallback *callback )
-{
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
-    m_callbacks.remove( callback );
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -126,15 +113,6 @@ HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint2 *bp )
         breakParams.BreakType == DEBUG_BREAKPOINT_DATA ? DataAccessBreakpoint : SoftwareBreakpoint
         );
 
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
-
-    EventsCallbackList::iterator  it;
-    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
-    {
-        DebugCallbackResult  ret = (*it)->onBreakpoint( breakParams.Id);
-        result = ret != DebugCallbackNoChange ? ret : result;
-    }
-
     return ConvertCallbackResult( result );
 }
 
@@ -170,18 +148,14 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
     __in ULONG Flags,
     __in ULONG64 Argument )
 {
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
-    if ((Flags & DEBUG_CES_CURRENT_THREAD) != 0)
+    if ( ((Flags & DEBUG_CES_CURRENT_THREAD) != 0) &&
+        (m_previousCurrentThread != (ULONG)Argument) &&
+        ( DEBUG_ANY_ID != (ULONG)Argument))
     {
-        EventsCallbackList::iterator  it = m_callbacks.begin();
-
-        for (; it != m_callbacks.end(); ++it)
-        {
-            ULONG  threadId = (ULONG)Argument;
-            if (threadId != DEBUG_ANY_ID)
-                (*it)->onCurrentThreadChange(threadId);
-        }
+        ULONG  threadId = (ULONG)Argument;
+        ProcessMonitor::currentThreadChange(threadId);
+        m_previousCurrentThread = threadId;
     }
 
     if ( ( ( Flags & DEBUG_CES_EXECUTION_STATUS ) != 0 ) &&
@@ -194,12 +168,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
 
         ExecutionStatus  executionStatus = ConvertDbgEngineExecutionStatus( (ULONG)Argument );
 
-        EventsCallbackList::iterator  it = m_callbacks.begin();
-
-        for ( ; it != m_callbacks.end(); ++it )
-        {
-            (*it)->onExecutionStatusChange( executionStatus );
-        }
+        ProcessMonitor::executionStatusChange(executionStatus);
 
         m_previousExecutionStatus = (ULONG)Argument;
     }
@@ -228,14 +197,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::Exception(
     for (ULONG i = 0; i < Exception->NumberParameters; ++i)
         excinfo.parameters[i] = Exception->ExceptionInformation[i];
 
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
-
-    EventsCallbackList::iterator  it;
-    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
-    {
-        DebugCallbackResult  ret = (*it)->onException( excinfo );
-        result = ret != DebugCallbackNoChange ? ret : result;
-    }
+    result = ProcessMonitor::exceptionHit(excinfo);
 
     return ConvertCallbackResult( result );
 }
@@ -256,16 +218,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
 
     std::wstring  moduleName = ModuleName ? std::wstring(ModuleName) : std::wstring();
 
-    ProcessMonitor::moduleLoad( getCurrentProcessId(), BaseOffset);
-
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
-
-    EventsCallbackList::iterator  it;
-    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
-    {
-        DebugCallbackResult  ret = (*it)->onModuleLoad(BaseOffset, moduleName);
-        result = ret != DebugCallbackNoChange ? ret : result;
-    }
+    result = ProcessMonitor::moduleLoad( getCurrentProcessId(), BaseOffset, moduleName);
 
     return ConvertCallbackResult( result );
 }
@@ -285,16 +238,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
     } catch( DbgException& )
     {}
 
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
-
-    EventsCallbackList::iterator  it;
-    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
-    {
-        DebugCallbackResult  ret = (*it)->onModuleUnload(BaseOffset, moduleName );
-        result = ret != DebugCallbackNoChange ? ret : result;
-    }
-
-    ProcessMonitor::moduleUnload(getCurrentProcessId(), BaseOffset);
+    result =  ProcessMonitor::moduleUnload(getCurrentProcessId(), BaseOffset, moduleName);
          
     return ConvertCallbackResult( result );
 }
@@ -319,9 +263,9 @@ HRESULT STDMETHODCALLTYPE DebugManager::CreateProcess(
 
     PROCESS_DEBUG_ID  processId = getCurrentProcessId();
 
-    ProcessMonitor::processStart( processId );
+    result = ProcessMonitor::processStart( processId );
 
-    ProcessMonitor::moduleLoad( processId, BaseOffset );
+    ProcessMonitor::moduleLoad(processId, BaseOffset, std::wstring(ModuleName));
 
     return ConvertCallbackResult( result );
 }
@@ -336,17 +280,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
 
     PROCESS_DEBUG_ID  procId = getCurrentProcessId();
 
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
-
-    EventsCallbackList::iterator  it = m_callbacks.begin();
-
-    for ( ; it != m_callbacks.end(); ++it )
-    {
-        DebugCallbackResult  ret = (*it)->onProcessExit( procId, ProcessExit, ExitCode );
-        result = ret != DebugCallbackNoChange ? ret : result;
-    }
-
-    ProcessMonitor::processStop( procId );
+    result = ProcessMonitor::processStop(procId, ProcessExit, ExitCode);
 
     return ConvertCallbackResult( result );
 }

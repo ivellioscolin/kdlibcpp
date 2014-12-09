@@ -20,7 +20,7 @@ public:
 TEST_F( ProcessTest, StartProcess )
 {
     PROCESS_DEBUG_ID   id;
-    ASSERT_NO_THROW( id =  startProcess(L"targetapp.exe") );
+    ASSERT_NO_THROW( id = startProcess(L"targetapp.exe") );
     EXPECT_NO_THROW( terminateProcess(id) );
     EXPECT_EQ( 0, kdlib::getNumberProcesses() );
 }

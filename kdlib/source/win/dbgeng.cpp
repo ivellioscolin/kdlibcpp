@@ -299,7 +299,7 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
 
-    ProcessMonitor::processStop( processId );
+    ProcessMonitor::processStop(processId, ProcessTerminate, 0);
 
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
@@ -351,7 +351,7 @@ void detachProcess( PROCESS_DEBUG_ID processId )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
-    ProcessMonitor::processStop( processId );
+    ProcessMonitor::processStop( processId, ProcessDetach, 0 );
 
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
@@ -442,7 +442,7 @@ void closeDump( PROCESS_DEBUG_ID processId )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
 
-    ProcessMonitor::processStop( processId );
+    ProcessMonitor::processStop(processId, ProcessDetach, 0);
 
     if ( ProcessMonitor::getNumberProcesses() == 0 )
         g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
@@ -1271,14 +1271,14 @@ MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id )
 
 void registerEventsCallback( DebugEventsCallback *callback )
 {
-    g_dbgMgr->registerEventsCallback( callback );
+    ProcessMonitor::registerEventsCallback(callback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void removeEventsCallback( DebugEventsCallback *callback )
 {
-    g_dbgMgr->removeEventsCallback( callback );
+    ProcessMonitor::removeEventsCallback(callback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

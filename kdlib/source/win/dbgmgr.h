@@ -40,22 +40,15 @@ public:
 
 public:
 
-    void registerEventsCallback( DebugEventsCallback *callback );
-    void removeEventsCallback( DebugEventsCallback *callback );
-
     bool isRemoteInitialized() {
         return m_remote;
     }
 
 private:
 
-    typedef std::list<DebugEventsCallback*>  EventsCallbackList;
-
-    boost::recursive_mutex      m_callbacksLock;
-    EventsCallbackList          m_callbacks;
     ULONG                       m_previousExecutionStatus;
+    ULONG                       m_previousCurrentThread;
     bool                        m_remote;
-
 
 public:
 

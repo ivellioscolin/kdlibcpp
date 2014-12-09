@@ -61,14 +61,17 @@ public:
 
 public:
 
-    void processStart( PROCESS_DEBUG_ID id );
-    void processStop( PROCESS_DEBUG_ID id );
+    DebugCallbackResult processStart(PROCESS_DEBUG_ID id);
+    DebugCallbackResult processStop(PROCESS_DEBUG_ID id, ProcessExitReason reason, unsigned int ExitCode);
     void processAllStop();
     unsigned int getNumberProcesses();
 
-    void moduleLoad( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );
-    void moduleUnload( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset );
+    DebugCallbackResult moduleLoad(PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, const std::wstring& moduleName);
+    DebugCallbackResult moduleUnload(PROCESS_DEBUG_ID id, MEMOFFSET_64  offset, const std::wstring& moduleName);
     DebugCallbackResult breakpointHit( PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, BreakpointType breakpointType);
+    void currentThreadChange(THREAD_DEBUG_ID threadid);
+    void executionStatusChange(ExecutionStatus status);
+    DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
 
     ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id );
     void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id );
@@ -78,6 +81,9 @@ public:
     unsigned long getNumberBreakpoints(PROCESS_DEBUG_ID processid);
     BreakpointPtr getBreakpointByIndex(unsigned long index, PROCESS_DEBUG_ID processid);
     BreakpointPtr getBreakpointById(BREAKPOINT_ID bpid);
+
+    void registerEventsCallback(DebugEventsCallback *callback);
+    void removeEventsCallback(DebugEventsCallback *callback);
 
 private:
 
@@ -90,6 +96,12 @@ private:
 
     boost::atomic<unsigned long long>  m_bpUnique;
 
+private:
+
+    typedef std::list<DebugEventsCallback*>  EventsCallbackList;
+
+    boost::recursive_mutex      m_callbacksLock;
+    EventsCallbackList          m_callbacks;
 };
 
 std::auto_ptr<ProcessMonitorImpl>  g_procmon;
@@ -129,16 +141,30 @@ void ProcessMonitor::deinit()
 
 /////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::processStart( PROCESS_DEBUG_ID id )
+void ProcessMonitor::registerEventsCallback(DebugEventsCallback *callback)
 {
-    g_procmon->processStart(id);
+    g_procmon->registerEventsCallback(callback);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::processStop( PROCESS_DEBUG_ID id )
+void ProcessMonitor::removeEventsCallback(DebugEventsCallback *callback)
 {
-    g_procmon->processStop(id);
+    g_procmon->removeEventsCallback(callback);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+DebugCallbackResult ProcessMonitor::processStart(PROCESS_DEBUG_ID id)
+{
+    return g_procmon->processStart(id);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+DebugCallbackResult ProcessMonitor::processStop(PROCESS_DEBUG_ID id, ProcessExitReason reason, unsigned int exitCode)
+{
+    return g_procmon->processStop(id, reason, exitCode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,16 +183,16 @@ unsigned int ProcessMonitor::getNumberProcesses()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::moduleLoad( PROCESS_DEBUG_ID id, MEMOFFSET_64 offset )
+DebugCallbackResult ProcessMonitor::moduleLoad(PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, const std::wstring& moduleName)
 {
-    g_procmon->moduleLoad(id, offset);
+    return g_procmon->moduleLoad(id, offset, moduleName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::moduleUnload( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset )
+DebugCallbackResult ProcessMonitor::moduleUnload(PROCESS_DEBUG_ID id, MEMOFFSET_64  offset, const std::wstring& moduleName)
 {
-    g_procmon->moduleUnload(id, offset);
+    return g_procmon->moduleUnload(id, offset, moduleName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,6 +200,27 @@ void ProcessMonitor::moduleUnload( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset )
 DebugCallbackResult ProcessMonitor::breakpointHit( PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, BreakpointType breakpointType)
 {
     return g_procmon->breakpointHit(id, offset, breakpointType);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::currentThreadChange(THREAD_DEBUG_ID id)
+{
+    g_procmon->currentThreadChange(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::executionStatusChange(ExecutionStatus status)
+{
+    g_procmon->executionStatusChange(status);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+DebugCallbackResult ProcessMonitor::exceptionHit(const ExceptionInfo& excinfo)
+{
+    return g_procmon->exceptionHit(excinfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,19 +289,41 @@ BreakpointPtr ProcessMonitor::getBreakpointById(BREAKPOINT_ID bpid )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::processStart( PROCESS_DEBUG_ID id )
+DebugCallbackResult ProcessMonitorImpl::processStart(PROCESS_DEBUG_ID id)
 {
-    ProcessInfoPtr  proc = ProcessInfoPtr( new ProcessInfo() );
-    boost::recursive_mutex::scoped_lock l(m_lock);
-    m_processMap[id] = proc;
+    {
+        ProcessInfoPtr  proc = ProcessInfoPtr(new ProcessInfo());
+        boost::recursive_mutex::scoped_lock l(m_lock);
+        m_processMap[id] = proc;
+    }
+
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::processStop( PROCESS_DEBUG_ID id )
+DebugCallbackResult ProcessMonitorImpl::processStop(PROCESS_DEBUG_ID id, ProcessExitReason reason, unsigned int exitCode)
 {
-    boost::recursive_mutex::scoped_lock l(m_lock);
-    m_processMap.erase(id);
+    {
+        boost::recursive_mutex::scoped_lock l(m_lock);
+        m_processMap.erase(id);
+    }
+
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it = m_callbacks.begin();
+
+    for (; it != m_callbacks.end(); ++it)
+    {
+        DebugCallbackResult  ret = (*it)->onProcessExit(id, reason, exitCode);
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -289,8 +358,10 @@ ModulePtr ProcessMonitorImpl::getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::moduleLoad( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset )
+DebugCallbackResult ProcessMonitorImpl::moduleLoad(PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, const std::wstring& moduleName)
 {
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
     ProcessInfoPtr  processInfo = getProcess(id);
 
     if ( processInfo )
@@ -298,29 +369,108 @@ void ProcessMonitorImpl::moduleLoad( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset )
         processInfo->removeModule( offset );
         loadModule(offset);
     }
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    {
+        DebugCallbackResult  ret = (*it)->onModuleLoad(offset, moduleName);
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::moduleUnload( PROCESS_DEBUG_ID id, MEMOFFSET_64  offset )
+DebugCallbackResult ProcessMonitorImpl::moduleUnload(PROCESS_DEBUG_ID id, MEMOFFSET_64  offset, const std::wstring &moduleName)
 {
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
     ProcessInfoPtr  processInfo = getProcess(id);
 
     if ( processInfo )
         processInfo->removeModule( offset );
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for ( it = m_callbacks.begin(); it != m_callbacks.end(); ++it )
+    {
+        DebugCallbackResult  ret = (*it)->onModuleUnload(offset, moduleName );
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 DebugCallbackResult ProcessMonitorImpl::breakpointHit( PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, BreakpointType breakpointType)
 {
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
     ProcessInfoPtr  processInfo = getProcess(id);
     if ( processInfo )
-        return processInfo->breakpointHit( offset, breakpointType );
+        result = processInfo->breakpointHit( offset, breakpointType );
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    {
+        DebugCallbackResult  ret = (*it)->onBreakpoint(id);
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
 
     return DebugCallbackNoChange;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::currentThreadChange(THREAD_DEBUG_ID threadid)
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it = m_callbacks.begin();
+
+    for (; it != m_callbacks.end(); ++it)
+    {
+        (*it)->onCurrentThreadChange(threadid);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::executionStatusChange(ExecutionStatus status)
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it = m_callbacks.begin();
+
+    for (; it != m_callbacks.end(); ++it)
+    {
+        (*it)->onExecutionStatusChange(status);
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
+
+DebugCallbackResult  ProcessMonitorImpl::exceptionHit(const ExceptionInfo& excinfo)
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    {
+        DebugCallbackResult  ret = (*it)->onException(excinfo);
+        result = ret != DebugCallbackNoChange ? ret : result;
+    }
+
+    return result;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -436,6 +586,23 @@ ProcessInfoPtr ProcessMonitorImpl::getProcess( PROCESS_DEBUG_ID id )
     m_processMap[id] = proc;
 
     return proc;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::registerEventsCallback(DebugEventsCallback *callback)
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+    m_callbacks.push_back(callback);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::removeEventsCallback(DebugEventsCallback *callback)
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+    m_callbacks.remove(callback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
