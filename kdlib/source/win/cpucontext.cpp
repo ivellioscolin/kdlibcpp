@@ -109,11 +109,19 @@ CPUContextImpl::CPUContextImpl()
 
     unsigned long  registerNumber = kdlib::getRegisterNumber();
 
-    m_values.resize(registerNumber);
+    m_values.reserve(registerNumber);
 
     for ( unsigned long  i = 0; i < registerNumber; ++i)
     {
-        m_values[i] = std::make_pair( kdlib::getRegisterName(i), kdlib::getRegisterByIndex(i) );
+        const std::wstring name = kdlib::getRegisterName(i);
+        try
+        {
+            m_values.push_back( std::move( std::make_pair( name, kdlib::getRegisterByIndex(i) ) ) );
+        }
+        catch (const DbgException &)
+        {
+            // some registers values are not available (for crash dump)
+        }
     }
 
     m_ip = getInstructionOffset();
