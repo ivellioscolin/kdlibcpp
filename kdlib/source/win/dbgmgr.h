@@ -167,11 +167,12 @@ class OutputReader : public IDebugOutputCallbacks, private boost::noncopyable {
 
 public:
 
-    explicit OutputReader( IDebugClient5 *client ) 
+    explicit OutputReader( IDebugClient5 *client, bool passThrough = false ) 
     {
         HRESULT   hres;
 
         m_client = client;
+        m_passThrough = passThrough;
 
         m_client->GetOutputCallbacks( &m_previousCallback );
         // for remote client this method does not impemented
@@ -217,11 +218,13 @@ private:
 
 private:
 
-    std::wstring                         m_readLine;
+    std::wstring                        m_readLine;
 
-    CComPtr<IDebugOutputCallbacks>       m_previousCallback;
+    CComPtr<IDebugOutputCallbacks>      m_previousCallback;
 
     CComPtr<IDebugClient5>              m_client;
+
+    bool                                m_passThrough;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

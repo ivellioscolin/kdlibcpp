@@ -548,10 +548,10 @@ bool isKernelDebugging()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-std::wstring debugCommand( const std::wstring &command )
+std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
 {
     HRESULT         hres;
-    OutputReader    outReader( g_dbgMgr->client );
+    OutputReader    outReader(g_dbgMgr->client, !suppressOutput);
 
     hres = g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
 

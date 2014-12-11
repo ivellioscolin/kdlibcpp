@@ -296,10 +296,14 @@ HRESULT STDMETHODCALLTYPE OutputReader::Output(
         __in ULONG Mask,
         __in PCSTR Text )
 {
-    if ( Mask == DEBUG_OUTPUT_NORMAL )
+    if (Mask == DEBUG_OUTPUT_NORMAL)
     {
-        m_readLine += _bstr_t( Text );
+        m_readLine += _bstr_t(Text);
+
+        if (m_passThrough && m_previousCallback)
+            return m_previousCallback->Output(Mask, Text);
     }
+
     return S_OK;
 }
 
