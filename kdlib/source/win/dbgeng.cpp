@@ -53,6 +53,7 @@ public:
         if ( FAILED( hres ) )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
 
+        g_dbgMgr->setQuietNotiification(true);
     }
 
     ~SwitchThreadContext() {
@@ -69,6 +70,8 @@ public:
             if ( m_savedRegCtx )
                 g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0] );
         }
+
+        g_dbgMgr->setQuietNotiification(false);
     }
 
 private:

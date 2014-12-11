@@ -19,6 +19,7 @@ DebugManager::DebugManager()
     m_previousExecutionStatus = DebugStatusNoDebuggee;
     m_previousCurrentThread = 0;
     m_remote = false;
+    m_quietNotification = false;
 
     CoInitialize(NULL);
 
@@ -108,10 +109,10 @@ HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint2 *bp )
         return DEBUG_STATUS_NO_CHANGE;
 
     result = ProcessMonitor::breakpointHit(
-        getCurrentProcessId(),
-        breakParams.Offset,
-        breakParams.BreakType == DEBUG_BREAKPOINT_DATA ? DataAccessBreakpoint : SoftwareBreakpoint
-        );
+            getCurrentProcessId(),
+            breakParams.Offset,
+            breakParams.BreakType == DEBUG_BREAKPOINT_DATA ? DataAccessBreakpoint : SoftwareBreakpoint
+            );
 
     return ConvertCallbackResult( result );
 }
@@ -154,7 +155,10 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
         ( DEBUG_ANY_ID != (ULONG)Argument))
     {
         ULONG  threadId = (ULONG)Argument;
-        ProcessMonitor::currentThreadChange(threadId);
+
+        if (!m_quietNotification)
+            ProcessMonitor::currentThreadChange(threadId);
+
         m_previousCurrentThread = threadId;
     }
 
@@ -168,7 +172,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
 
         ExecutionStatus  executionStatus = ConvertDbgEngineExecutionStatus( (ULONG)Argument );
 
-        ProcessMonitor::executionStatusChange(executionStatus);
+        if (!m_quietNotification)
+            ProcessMonitor::executionStatusChange(executionStatus);
 
         m_previousExecutionStatus = (ULONG)Argument;
     }
