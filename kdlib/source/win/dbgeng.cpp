@@ -49,11 +49,14 @@ public:
         hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0] );
         m_savedRegCtx = SUCCEEDED(hres);
 
+        g_dbgMgr->setQuietNotiification(true);
+
         hres = g_dbgMgr->system->SetCurrentThreadId( id );
         if ( FAILED( hres ) )
+        {
+            g_dbgMgr->setQuietNotiification(false);
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
-
-        g_dbgMgr->setQuietNotiification(true);
+        }
     }
 
     ~SwitchThreadContext() {

@@ -424,7 +424,7 @@ DebugCallbackResult ProcessMonitorImpl::breakpointHit( PROCESS_DEBUG_ID id, MEMO
         result = ret != DebugCallbackNoChange ? ret : result;
     }
 
-    return DebugCallbackNoChange;
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
