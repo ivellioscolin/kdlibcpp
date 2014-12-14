@@ -64,7 +64,6 @@
     <ClInclude Include="..\include\kdlib\kdlib.h" />
     <ClInclude Include="..\include\kdlib\memaccess.h" />
     <ClInclude Include="..\include\kdlib\module.h" />
-    <ClInclude Include="..\include\kdlib\scope.h" />
     <ClInclude Include="..\include\kdlib\stack.h" />
     <ClInclude Include="..\include\kdlib\symengine.h" />
     <ClInclude Include="..\include\kdlib\typedvar.h" />

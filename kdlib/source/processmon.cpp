@@ -71,6 +71,7 @@ public:
     DebugCallbackResult breakpointHit( PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, BreakpointType breakpointType);
     void currentThreadChange(THREAD_DEBUG_ID threadid);
     void executionStatusChange(ExecutionStatus status);
+    void changeLocalScope();
     DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
 
     ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id );
@@ -214,6 +215,13 @@ void ProcessMonitor::currentThreadChange(THREAD_DEBUG_ID id)
 void ProcessMonitor::executionStatusChange(ExecutionStatus status)
 {
     g_procmon->executionStatusChange(status);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::changeLocalScope()
+{
+    g_procmon->changeLocalScope();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -454,6 +462,21 @@ void ProcessMonitorImpl::executionStatusChange(ExecutionStatus status)
         (*it)->onExecutionStatusChange(status);
     }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::changeLocalScope()
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it = m_callbacks.begin();
+
+    for (; it != m_callbacks.end(); ++it)
+    {
+        (*it)->onChangeLocalScope();
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DebugCallbackResult  ProcessMonitorImpl::exceptionHit(const ExceptionInfo& excinfo)

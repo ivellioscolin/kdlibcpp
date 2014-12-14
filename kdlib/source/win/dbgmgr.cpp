@@ -181,6 +181,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
     return S_OK;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 HRESULT STDMETHODCALLTYPE DebugManager::Exception(
@@ -288,6 +289,21 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
     result = ProcessMonitor::processStop(procId, ProcessExit, ExitCode);
 
     return ConvertCallbackResult( result );
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::ChangeSymbolState(
+    __in ULONG Flags,
+    __in ULONG64 Argument
+    )
+{
+    if ( ( Flags & DEBUG_CSS_SCOPE ) != 0 )
+    {
+        ProcessMonitor::changeLocalScope();
+    }
+
+    return S_OK;
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -121,3 +121,20 @@ TEST_F(EventHandlerTest, ChangeCurrentThread)
 
     EXPECT_NO_THROW( terminateAllProcesses() );
 }
+
+TEST_F(EventHandlerTest, ScopeChange)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe breakhandlertest") );
+
+    targetGo();
+
+    EventHandlerMock    eventHandler;
+
+    EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onChangeLocalScope()).Times(AtLeast(2));
+
+    EXPECT_NO_THROW( debugCommand(L".frame 2") );
+    EXPECT_NO_THROW( debugCommand(L".frame 3") );
+
+    EXPECT_NO_THROW( terminateAllProcesses() );
+}

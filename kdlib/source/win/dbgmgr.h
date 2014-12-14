@@ -68,6 +68,7 @@ public:
         *Mask = 0;
         *Mask |= DEBUG_EVENT_BREAKPOINT;
         *Mask |= DEBUG_EVENT_CHANGE_ENGINE_STATE;
+        *Mask |= DEBUG_EVENT_CHANGE_SYMBOL_STATE;
         *Mask |= DEBUG_EVENT_EXCEPTION;
         *Mask |= DEBUG_EVENT_LOAD_MODULE;
         *Mask |= DEBUG_EVENT_UNLOAD_MODULE;
@@ -84,6 +85,7 @@ public:
     STDMETHOD(ChangeEngineState)(
         __in ULONG Flags,
         __in ULONG64 Argument );
+
 
     STDMETHOD(Exception)(
         __in PEXCEPTION_RECORD64 Exception,
@@ -121,7 +123,11 @@ public:
     STDMETHOD(ExitProcess)(
         __in ULONG ExitCode
         );
-    
+
+    STDMETHOD(ChangeSymbolState)(
+        __in ULONG Flags,
+        __in ULONG64 Argument
+        );
 };
 
 

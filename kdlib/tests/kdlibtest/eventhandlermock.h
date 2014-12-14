@@ -13,4 +13,5 @@ public:
     MOCK_METHOD2( onModuleLoad, kdlib::DebugCallbackResult ( kdlib::MEMOFFSET_64, const std::wstring&) );
     MOCK_METHOD2( onModuleUnload, kdlib::DebugCallbackResult ( kdlib::MEMOFFSET_64, const std::wstring&) );
     MOCK_METHOD1( onCurrentThreadChange, void(kdlib::THREAD_DEBUG_ID) );
+    MOCK_METHOD0( onChangeLocalScope, void(void) );
 };

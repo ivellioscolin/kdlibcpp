@@ -22,24 +22,24 @@ typedef boost::shared_ptr<StackFrame>  StackFramePtr;
 
 class StackFrame : public boost::enable_shared_from_this<StackFrame>, public boost::noncopyable {
 
-    friend StackFramePtr getStackFrame();
+    //friend StackFramePtr getStackFrame();
     friend StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
 
 public:
 
-    MEMOFFSET_64 getIP() {
+    MEMOFFSET_64 getIP() const {
          return m_ip;
     }
 
-    MEMOFFSET_64 getRET() {
+    MEMOFFSET_64 getRET() const {
         return m_ret;
     }
 
-    MEMOFFSET_64  getFP() {
+    MEMOFFSET_64  getFP() const {
         return m_fp;
     }
 
-    MEMOFFSET_64  getSP() {
+    MEMOFFSET_64  getSP() const {
         return m_sp;
     }
 
@@ -133,10 +133,13 @@ StackPtr getStack() {
     return StackPtr( new Stack() );
 }
 
-inline
-StackFramePtr getStackFrame() {
-    return getStack()->getFrame(0);
-}
+StackFramePtr getCurrentStackFrame();
+
+unsigned long getCurrentStackFrameNumber();
+
+void setCurrentStackFrame(StackFramePtr& stackFrame);
+
+void resetCurrentStackFrame();
 
 ///////////////////////////////////////////////////////////////////////////////
 

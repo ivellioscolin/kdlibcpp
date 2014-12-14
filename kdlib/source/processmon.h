@@ -25,6 +25,7 @@ public: // notification
     static DebugCallbackResult breakpointHit(PROCESS_DEBUG_ID id, MEMOFFSET_64 offset, BreakpointType breakpointType);
     static void currentThreadChange(THREAD_DEBUG_ID id);
     static void executionStatusChange(ExecutionStatus status);
+    static void changeLocalScope();
     static DebugCallbackResult exceptionHit(const ExceptionInfo& excinfo);
 
 public: // process manipulation

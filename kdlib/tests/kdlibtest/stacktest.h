@@ -46,7 +46,7 @@ TEST_F( StackTest, GetFunction )
 TEST_F( StackTest, TypedParam )
 {
     StackFramePtr  frame;
-    ASSERT_NO_THROW( frame = getStackFrame() );
+    ASSERT_NO_THROW( frame = getCurrentStackFrame() );
 
     EXPECT_EQ( 3, frame->getTypedParamCount() ); 
 
@@ -78,7 +78,7 @@ TEST_F( StackTest, TypedParam )
 TEST_F( StackTest, TypedParamByName )
 {
     StackFramePtr  frame;
-    ASSERT_NO_THROW( frame = getStackFrame() );
+    ASSERT_NO_THROW( frame = getCurrentStackFrame() );
 
     TypedVarPtr  param;
     ASSERT_NO_THROW( param = frame->getTypedParam(L"a") );
@@ -102,7 +102,7 @@ TEST_F( StackTest, TypedParamByName )
 TEST_F( StackTest, LocalVars )
 {
     StackFramePtr  frame;
-    ASSERT_NO_THROW( frame = getStackFrame() );
+    ASSERT_NO_THROW( frame = getCurrentStackFrame() );
 
     EXPECT_EQ( 1, frame->getLocalVarCount() );
     EXPECT_EQ( 10, *frame->getLocalVar(0) );
@@ -121,7 +121,7 @@ TEST_F( StackTest, LocalVars )
 TEST_F(StackTest, StaticVars)
 {
     StackFramePtr  frame;
-    ASSERT_NO_THROW( frame = getStackFrame() );
+    ASSERT_NO_THROW( frame = getCurrentStackFrame() );
 
     EXPECT_EQ( 2, frame->getStaticVarCount() );
     EXPECT_EQ( 1, *frame->getStaticVar(L"staticLong"));
@@ -129,3 +129,37 @@ TEST_F(StackTest, StaticVars)
     EXPECT_THROW(frame->getStaticVar(2), IndexException);
     EXPECT_THROW(frame->getStaticVar(L"Notexist"), SymbolException);
 }
+
+TEST_F(StackTest, ChangeCurrentFrame)
+{
+    StackFramePtr  frame1;
+
+    ASSERT_NO_THROW( frame1 = getStack()->getFrame(1) );
+    ASSERT_NO_THROW( setCurrentStackFrame(frame1) );
+
+    StackFramePtr  frame2;
+    ASSERT_NO_THROW( frame2 = getCurrentStackFrame() );
+    EXPECT_TRUE( frame1->getIP() == frame2->getIP() && 
+        frame1->getRET() == frame2->getRET() &&
+        frame1->getFP() == frame2->getFP() &&
+        frame1->getSP() == frame2->getSP() );
+
+    EXPECT_EQ( 1, getCurrentStackFrameNumber() );
+
+    EXPECT_NO_THROW( resetCurrentStackFrame() );
+
+    StackFramePtr  frame3;
+    ASSERT_NO_THROW( frame3 = getStack()->getFrame(0) );
+
+    StackFramePtr  frame4;
+    ASSERT_NO_THROW( frame4 = getCurrentStackFrame() );
+    EXPECT_TRUE( frame3->getIP() == frame4->getIP() && 
+        frame3->getRET() == frame4->getRET() &&
+        frame3->getFP() == frame4->getFP() &&
+        frame3->getSP() == frame4->getSP() );
+
+    EXPECT_EQ( 0, getCurrentStackFrameNumber() );
+}
+
+
+

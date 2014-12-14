@@ -111,9 +111,6 @@
     <ClInclude Include="..\include\kdlib\module.h">
       <Filter>kdlib/include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\kdlib\scope.h">
-      <Filter>kdlib/include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\kdlib\stack.h">
       <Filter>kdlib/include</Filter>
     </ClInclude>

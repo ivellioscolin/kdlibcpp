@@ -37,6 +37,9 @@ public:
     virtual void onCurrentThreadChange(THREAD_DEBUG_ID threadid)
     {}
 
+    virtual void onChangeLocalScope()
+    {}
+
     EventHandler() {
        registerEventsCallback(this);
     }

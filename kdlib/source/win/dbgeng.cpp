@@ -7,6 +7,8 @@
 #include <boost/smart_ptr/scoped_array.hpp>
 
 #include "kdlib/dbgengine.h"
+#include "kdlib/stack.h"
+
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
 
@@ -2150,6 +2152,75 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
         stackTrace[i].frameOffset = dbgFrames[i].FrameOffset;
         stackTrace[i].stackOffset = dbgFrames[i].StackOffset;
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+StackFramePtr getCurrentStackFrame()
+{
+    HRESULT  hres;
+    DEBUG_STACK_FRAME  stackFrame;
+
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, NULL, 0 );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
+
+    return getStackFrame(stackFrame.InstructionOffset, stackFrame.ReturnOffset, stackFrame.FrameOffset, stackFrame.StackOffset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long getCurrentStackFrameNumber()
+{
+    HRESULT  hres;
+    DEBUG_STACK_FRAME  stackFrame;
+
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, NULL, 0 );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
+
+    std::vector<FrameDesc>  stackTrace;
+    getStackTrace(stackTrace);
+
+    for ( size_t t = 0; t < stackTrace.size(); t++)
+    {
+        if ( stackTrace[t].instructionOffset == stackFrame.InstructionOffset &&
+            stackTrace[t].returnOffset == stackFrame.ReturnOffset &&
+            stackTrace[t].frameOffset == stackFrame.FrameOffset &&
+            stackTrace[t].stackOffset == stackFrame.StackOffset )
+                return t; 
+    }
+
+    return ~0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentStackFrame( StackFramePtr& stackFrame)
+{
+    HRESULT  hres;
+
+    DEBUG_STACK_FRAME  debugStackFrame = {};
+
+    debugStackFrame.InstructionOffset = stackFrame->getIP();
+    debugStackFrame.ReturnOffset = stackFrame->getRET();
+    debugStackFrame.FrameOffset = stackFrame->getFP();
+    debugStackFrame.StackOffset = stackFrame->getSP();
+
+    hres = g_dbgMgr->symbols->SetScope( 0, &debugStackFrame, NULL, 0);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::SetScope", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void resetCurrentStackFrame()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->symbols->ResetScope();
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::ResetScope", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
