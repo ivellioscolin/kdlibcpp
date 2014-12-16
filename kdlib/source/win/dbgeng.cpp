@@ -35,14 +35,22 @@ public:
             return;
         }
 
+        g_dbgMgr->setQuietNotiification(true);
+
         hres = g_dbgMgr->system->GetCurrentThreadId( &m_previousId );
         if ( FAILED( hres ) )
+        {
+            g_dbgMgr->setQuietNotiification(false);
             throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
+        }
 
         ULONG  registerNumber = 0;
         hres = g_dbgMgr->registers->GetNumberRegisters(&registerNumber);
         if ( FAILED( hres ) )
+        {
+            g_dbgMgr->setQuietNotiification(false);
             throw DbgEngException( L"IDebugRegister::GetNumberRegisters", hres ); 
+        }
 
         m_regValues.resize(registerNumber);
 
@@ -51,7 +59,11 @@ public:
         hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0] );
         m_savedRegCtx = SUCCEEDED(hres);
 
-        g_dbgMgr->setQuietNotiification(true);
+
+        m_savedLocalContext = false;
+
+        hres = g_dbgMgr->symbols->GetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext) );
+        m_savedLocalContext = SUCCEEDED(hres);
 
         hres = g_dbgMgr->system->SetCurrentThreadId( id );
         if ( FAILED( hres ) )
@@ -74,6 +86,9 @@ public:
         {
             if ( m_savedRegCtx )
                 g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0] );
+
+            if ( m_savedLocalContext )
+                g_dbgMgr->symbols->SetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext) );
         }
 
         g_dbgMgr->setQuietNotiification(false);
@@ -86,6 +101,10 @@ private:
     std::vector<DEBUG_VALUE>  m_regValues;
 
     bool  m_savedRegCtx;
+
+    CONTEXT_STORAGE  m_localContext;
+
+    bool m_savedLocalContext;
 };
 
 
@@ -2089,6 +2108,8 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
 
     if ( processorType == IMAGE_FILE_MACHINE_I386 )
     {
+        g_dbgMgr->setQuietNotiification(true);
+
         hres = 
             g_dbgMgr->control->GetStackTrace(
                 0,
@@ -2097,6 +2118,8 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
                 &dbgFrames[0],
                 filledFrames,
                 &filledFrames);
+
+        g_dbgMgr->setQuietNotiification(false);
 
         if (S_OK != hres)
             throw DbgEngException( L"IDebugControl::GetStackTrace", hres );
@@ -2115,6 +2138,8 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
 
             ReadWow64Context( wow64Context);
 
+            g_dbgMgr->setQuietNotiification(true);
+
             hres = 
                 g_dbgMgr->control->GetContextStackTrace( 
                     &wow64Context,
@@ -2125,6 +2150,9 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
                     filledFrames*sizeof(wow64Context),
                     sizeof(wow64Context),
                     &filledFrames );
+
+            g_dbgMgr->setQuietNotiification(false);
+
             if (S_OK != hres)
                 throw DbgEngException( L"IDebugControl::GetContextStackTrace", hres );
         }
@@ -2159,9 +2187,14 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
 StackFramePtr getCurrentStackFrame()
 {
     HRESULT  hres;
-    DEBUG_STACK_FRAME  stackFrame;
+    DEBUG_STACK_FRAME  stackFrame = {};
+
+    g_dbgMgr->setQuietNotiification(true);
 
     hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, NULL, 0 );
+
+    g_dbgMgr->setQuietNotiification(false);
+
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::GetScope", hres);
 
@@ -2173,9 +2206,14 @@ StackFramePtr getCurrentStackFrame()
 unsigned long getCurrentStackFrameNumber()
 {
     HRESULT  hres;
-    DEBUG_STACK_FRAME  stackFrame;
+    DEBUG_STACK_FRAME  stackFrame = {};
+
+    g_dbgMgr->setQuietNotiification(true);
 
     hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, NULL, 0 );
+
+    g_dbgMgr->setQuietNotiification(false);
+
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::GetScope", hres);
 

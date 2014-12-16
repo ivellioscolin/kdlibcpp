@@ -300,7 +300,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeSymbolState(
 {
     if ( ( Flags & DEBUG_CSS_SCOPE ) != 0 )
     {
-        ProcessMonitor::changeLocalScope();
+        if (!m_quietNotification)
+            ProcessMonitor::changeLocalScope();
     }
 
     return S_OK;
