@@ -575,16 +575,27 @@ bool isKernelDebugging()
 std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
 {
     HRESULT         hres;
-    OutputReader    outReader(g_dbgMgr->client, !suppressOutput);
 
-    hres = g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
+    if ( suppressOutput )
+    {
+        OutputReader    outReader;
+
+        CComQIPtr<IDebugControl5>  control = outReader.getClient();
+
+        hres = control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
+
+        if ( FAILED( hres ) )
+            throw  DbgEngException( L"IDebugControl::Execute", hres ); 
+
+        return outReader.Line();
+    }
+
+    hres = g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_ALL_CLIENTS, command.c_str(), 0 );
 
     if ( FAILED( hres ) )
         throw  DbgEngException( L"IDebugControl::Execute", hres ); 
 
-    waitForEvent();
-
-    return std::wstring( outReader.Line() ); 
+    return std::wstring();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1790,9 +1801,11 @@ void removeExtension(const std::wstring &extPath )
 std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  )
 {
     HRESULT  hres;
-    OutputReader    outReader( g_dbgMgr->client );
+    OutputReader    outReader;
 
-    hres = g_dbgMgr->control->CallExtensionWide( extHandle, command.c_str(), params.c_str() );
+    CComQIPtr<IDebugControl5>  control = outReader.getClient();
+
+    hres = control->CallExtensionWide( extHandle, command.c_str(), params.c_str() );
 
     if ( FAILED( hres ) )
         throw  DbgEngException( L"IDebugControl::CallExtension", hres ); 

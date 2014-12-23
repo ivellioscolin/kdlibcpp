@@ -31,7 +31,8 @@ void WindbgOut::write( const std::wstring& str )
             line += L'\n';
 
         g_dbgMgr->control->ControlledOutputWide(  
-           DEBUG_OUTCTL_AMBIENT_TEXT,
+          // DEBUG_OUTCTL_AMBIENT_TEXT,
+           DEBUG_OUTCTL_ALL_OTHER_CLIENTS,
            DEBUG_OUTPUT_NORMAL, 
            L"%ws",
            line.c_str()
@@ -42,7 +43,8 @@ void WindbgOut::write( const std::wstring& str )
 void WindbgOut::writedml( const std::wstring& str )
 {
     g_dbgMgr->control->ControlledOutputWide(  
-        DEBUG_OUTCTL_AMBIENT_DML,
+        //DEBUG_OUTCTL_AMBIENT_DML,
+        DEBUG_OUTCTL_ALL_OTHER_CLIENTS | DEBUG_OUTCTL_DML,
         DEBUG_OUTPUT_NORMAL, 
         L"%ws",
         str.c_str()
@@ -56,7 +58,8 @@ WindbgOut  windbgOut;
 
 void WindbgErr::write( const std::wstring& str )
 {
-    g_dbgMgr->control->OutputWide(  
+    g_dbgMgr->control->ControlledOutputWide(
+        DEBUG_OUTCTL_ALL_OTHER_CLIENTS,
         DEBUG_OUTPUT_ERROR, 
         L"%ws",
         str.c_str()
@@ -65,8 +68,9 @@ void WindbgErr::write( const std::wstring& str )
 
 void WindbgErr::writedml( const std::wstring& str )
 {
-    g_dbgMgr->control->OutputWide(  
-        DEBUG_OUTPUT_ERROR, 
+    g_dbgMgr->control->ControlledOutputWide(  
+        DEBUG_OUTCTL_ALL_OTHER_CLIENTS,
+        DEBUG_OUTPUT_ERROR | DEBUG_OUTCTL_DML,
         L"%ws",
         str.c_str()
         );

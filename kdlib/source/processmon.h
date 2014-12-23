@@ -27,6 +27,7 @@ public: // notification
     static void executionStatusChange(ExecutionStatus status);
     static void changeLocalScope();
     static DebugCallbackResult exceptionHit(const ExceptionInfo& excinfo);
+    static void debugOutput(const std::wstring text);
 
 public: // process manipulation
 

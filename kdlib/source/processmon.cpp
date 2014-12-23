@@ -73,6 +73,7 @@ public:
     void executionStatusChange(ExecutionStatus status);
     void changeLocalScope();
     DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
+    void debugOutput(const std::wstring text);
 
     ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id );
     void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id );
@@ -229,6 +230,13 @@ void ProcessMonitor::changeLocalScope()
 DebugCallbackResult ProcessMonitor::exceptionHit(const ExceptionInfo& excinfo)
 {
     return g_procmon->exceptionHit(excinfo);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::debugOutput(const std::wstring text)
+{
+    return g_procmon->debugOutput(text);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -493,6 +501,19 @@ DebugCallbackResult  ProcessMonitorImpl::exceptionHit(const ExceptionInfo& excin
     }
 
     return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::debugOutput(const std::wstring text)
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    {
+        (*it)->onDebugOutput(text);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DebugManager : public DebugBaseEventCallbacksWide
+class DebugManager : public DebugBaseEventCallbacksWide, public IDebugOutputCallbacksWide
 {
 
 public:
@@ -59,6 +59,28 @@ public:
 
     STDMETHOD_(ULONG, AddRef)() { return 1; }
     STDMETHOD_(ULONG, Release)() { return 1; }
+
+    STDMETHOD(QueryInterface)(
+        THIS_
+        _In_ REFIID InterfaceId,
+        _Out_ PVOID* Interface
+        )
+    {
+        *Interface = NULL;
+
+        if (IsEqualIID(InterfaceId, __uuidof(IUnknown)) ||
+            IsEqualIID(InterfaceId, __uuidof(IDebugEventCallbacksWide)) ||
+            IsEqualIID(InterfaceId, __uuidof(IDebugOutputCallbacksWide)))
+        {
+            *Interface = this;
+            AddRef();
+            return S_OK;
+        }
+        else
+        {
+            return E_NOINTERFACE;
+        }
+    }
 
     // IDebugEventCallbacks impls
     STDMETHOD(GetInterestMask)(
@@ -128,6 +150,11 @@ public:
         __in ULONG Flags,
         __in ULONG64 Argument
         );
+
+    STDMETHOD(Output)(
+        __in ULONG Mask,
+        __in PCWSTR Text
+        );
 };
 
 
@@ -173,31 +200,29 @@ class OutputReader : public IDebugOutputCallbacks, private boost::noncopyable {
 
 public:
 
-    explicit OutputReader( IDebugClient5 *client, bool passThrough = false ) 
+    explicit OutputReader() 
     {
-        HRESULT   hres;
+        HRESULT  hres = DebugCreate( __uuidof(IDebugClient5), (void **)&m_client );
+        if ( FAILED( hres ) )
+            throw DbgEngException(L"DebugCreate", hres);
 
-        m_client = client;
-        m_passThrough = passThrough;
-
-        m_client->GetOutputCallbacks( &m_previousCallback );
-        // for remote client this method does not impemented
-        //if ( FAILED( hres ) ) 
-        //    throw DbgEngException( L"IDebugClient::GetOutputCallbacksWide", hres );
-
-        hres = m_client->SetOutputCallbacks( this );
+        hres = m_client->SetOutputCallbacks(this );
         if ( FAILED( hres ) )
             throw DbgEngException( L"IDebugClient::SetOutputCallbacks", hres);
     }
 
     ~OutputReader() 
     {
-        m_client->SetOutputCallbacks( m_previousCallback );
+        m_client->SetOutputCallbacks(NULL);
     }
 
     const std::wstring&
     Line() const {
         return  m_readLine;
+    }
+
+    CComPtr<IDebugClient5>& getClient() {
+        return m_client;
     }
 
 private:
@@ -226,11 +251,7 @@ private:
 
     std::wstring                        m_readLine;
 
-    CComPtr<IDebugOutputCallbacks>      m_previousCallback;
-
     CComPtr<IDebugClient5>              m_client;
-
-    bool                                m_passThrough;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

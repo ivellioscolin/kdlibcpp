@@ -40,6 +40,9 @@ public:
     virtual void onChangeLocalScope()
     {}
 
+    virtual void onDebugOutput(const std::wstring& text)
+    {}
+
     EventHandler() {
        registerEventsCallback(this);
     }

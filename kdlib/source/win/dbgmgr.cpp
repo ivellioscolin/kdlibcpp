@@ -2,6 +2,8 @@
 
 #include <comutil.h>
 
+#include <kdlib/dbgio.h>
+
 #include "dbgmgr.h"
 #include "moduleimp.h"
 #include "processmon.h"
@@ -35,6 +37,10 @@ DebugManager::DebugManager()
     registers = CComQIPtr<IDebugRegisters2>(client);
 
     client->SetEventCallbacksWide( this );
+
+    client->SetOutputCallbacksWide(this);
+
+    client->SetOutputMask(DEBUG_OUTPUT_NORMAL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,7 +68,11 @@ DebugManager::DebugManager( const std::wstring& remoteOptions )
     advanced = CComQIPtr<IDebugAdvanced2>(client);
     registers = CComQIPtr<IDebugRegisters2>(client);
 
-    client->SetEventCallbacksWide( this );
+    client->SetEventCallbacksWide(this);
+
+    client->SetOutputCallbacksWide(this);
+
+    client->SetOutputMask(DEBUG_OUTPUT_NORMAL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -309,6 +319,19 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeSymbolState(
 
 ///////////////////////////////////////////////////////////////////
 
+HRESULT STDMETHODCALLTYPE DebugManager::Output(
+    __in ULONG Mask,
+    __in PCWSTR Text
+    )
+{
+    if ( ( Mask & ( DEBUG_OUTPUT_NORMAL | DEBUG_OUTPUT_ERROR | DEBUG_OUTPUT_WARNING ) ) != 0 )
+        ProcessMonitor::debugOutput(std::wstring(Text));
+
+    return S_OK;
+}
+
+///////////////////////////////////////////////////////////////////
+
 HRESULT STDMETHODCALLTYPE OutputReader::Output(
         __in ULONG Mask,
         __in PCSTR Text )
@@ -316,14 +339,13 @@ HRESULT STDMETHODCALLTYPE OutputReader::Output(
     if (Mask == DEBUG_OUTPUT_NORMAL)
     {
         m_readLine += _bstr_t(Text);
-
-        if (m_passThrough && m_previousCallback)
-            return m_previousCallback->Output(Mask, Text);
     }
 
     return S_OK;
 }
 
 ///////////////////////////////////////////////////////////////////
+
+
 
 } //kdlib namespace end
