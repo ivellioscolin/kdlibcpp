@@ -580,7 +580,7 @@ std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
     {
         OutputReader    outReader;
 
-        CComQIPtr<IDebugControl5>  control = outReader.getClient();
+        CComQIPtr<IDebugControl4>  control = outReader.getClient();
 
         hres = control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
 
@@ -1803,7 +1803,7 @@ std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, 
     HRESULT  hres;
     OutputReader    outReader;
 
-    CComQIPtr<IDebugControl5>  control = outReader.getClient();
+    CComQIPtr<IDebugControl4>  control = outReader.getClient();
 
     hres = control->CallExtensionWide( extHandle, command.c_str(), params.c_str() );
 
