@@ -2,6 +2,8 @@
 
 #include <boost/enable_shared_from_this.hpp>
 
+#include <kdlib/memaccess.h>
+
 #include "win/dbgmgr.h"
 
 #include "processmon.h"
@@ -31,6 +33,8 @@ public:
         return m_callback;
     }
 
+    virtual void remove();
+
 protected:
 
     BREAKPOINT_ID  m_id;
@@ -45,11 +49,15 @@ class SoftwareBreakpointImpl : public BaseBreakpointImpl
 
 public:
 
-    SoftwareBreakpointImpl(MEMOFFSET_64 offset, BreakpointCallback *callback =0) : BaseBreakpointImpl(offset,callback){}
+    explicit SoftwareBreakpointImpl(MEMOFFSET_64 offset) : BaseBreakpointImpl(offset, NULL){}
+
+    SoftwareBreakpointImpl(MEMOFFSET_64 offset, BreakpointCallback *callback) : BaseBreakpointImpl(offset,callback){}
+
+    SoftwareBreakpointImpl(MEMOFFSET_64 offset, BREAKPOINT_ID id) : BaseBreakpointImpl(offset) {
+        m_id = id;
+    }
 
     virtual void set();
-
-    virtual void remove();
 
     virtual BreakpointType getType() const {
         return SoftwareBreakpoint;
@@ -67,9 +75,21 @@ public:
         m_accessType(accessType)
         {}
 
-    virtual void set();
+    HardwareBreakpointImpl(MEMOFFSET_64 offset, size_t size, ACCESS_TYPE accessType) 
+        : BaseBreakpointImpl(offset, NULL),
+        m_size(size), 
+        m_accessType(accessType)
+        {}
 
-    virtual void remove();
+    HardwareBreakpointImpl(MEMOFFSET_64 offset, size_t size, ACCESS_TYPE accessType, BREAKPOINT_ID id) 
+        : BaseBreakpointImpl(offset, NULL),
+        m_size(size), 
+        m_accessType(accessType)
+        {
+            m_id = id;
+        }
+
+    virtual void set();
 
     virtual BreakpointType getType() const {
         return DataAccessBreakpoint;
@@ -80,6 +100,47 @@ private:
     size_t  m_size;
     ACCESS_TYPE  m_accessType;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+BreakpointPtr  getBreakpoint(IDebugBreakpoint* bp)
+{
+    HRESULT  hres;
+
+    ULONG  breakType;
+    ULONG  procType;
+    hres = bp->GetType(&breakType, &procType);
+    if ( FAILED(hres) )
+    {
+        throw DbgEngException(L"IDebugBreakpoint::GetType", hres); 
+    }
+
+    ULONG64  bpoffset = 0;
+    hres = bp->GetOffset(&bpoffset);
+    if ( FAILED(hres) )
+    {
+        throw DbgEngException(L"IDebugBreakpoint::GetOffset", hres); 
+    }
+    bpoffset = addr64(bpoffset);
+
+    ULONG bpid;
+    hres = bp->GetId(&bpid);
+
+    if ( breakType == DEBUG_BREAKPOINT_CODE )
+    {
+        return BreakpointPtr( new SoftwareBreakpointImpl(bpoffset, bpid) );
+    }
+
+    ULONG  dataSize;
+    ULONG  dataAccessType;
+    hres = bp->GetDataParameters(&dataSize, &dataAccessType);
+    if ( FAILED(hres) )
+    {
+        throw DbgEngException(L"IDebugBreakpoint::GetDataParameters", hres); 
+    }
+
+    return BreakpointPtr( new HardwareBreakpointImpl(bpoffset, dataSize, dataAccessType, bpid) );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -103,14 +164,46 @@ BreakpointPtr hardwareBreakPointSet(MEMOFFSET_64 offset, size_t size, ACCESS_TYP
 
 unsigned long getNumberBreakpoints()
 {
-    return ProcessMonitor::getNumberBreakpoints();
+    HRESULT  hres;
+    ULONG  numberBreakpoints = 0;
+
+    hres = g_dbgMgr->control->GetNumberBreakpoints(&numberBreakpoints);
+    if (FAILED(hres))
+    {
+        throw DbgEngException(L"IDebugControl::GetNumberBreakpoints", hres);
+    }
+
+    return numberBreakpoints;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 BreakpointPtr getBreakpointByIndex(unsigned long index)
 {
-    return ProcessMonitor::getBreakpointByIndex(index);
+    HRESULT  hres;
+
+    IDebugBreakpoint  *bp = NULL;
+    hres = g_dbgMgr->control->GetBreakpointByIndex(index, &bp);
+    if ( FAILED(hres) )
+        throw IndexException( index );
+
+    return getBreakpoint(bp);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void BaseBreakpointImpl::remove() 
+{
+    HRESULT  hres;
+
+    IDebugBreakpoint  *bp = NULL;
+    hres = g_dbgMgr->control->GetBreakpointById(m_id, &bp);
+    if (SUCCEEDED(hres))
+    {
+        ProcessMonitor::removeBreakpoint(getBreakpoint(bp));
+
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -151,53 +244,15 @@ void SoftwareBreakpointImpl::set()
         throw DbgEngException( L"IDebugBreakpoint::SetFlags", hres);
     }
 
-    BreakpointPtr  ptr = shared_from_this();
-    m_id = ProcessMonitor::insertBreakpoint(ptr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void SoftwareBreakpointImpl::remove()
-{
-    HRESULT  hres;
-    ULONG  bpNumber;
-
-    if ( ProcessMonitor::getBreakpointById(m_id) )
+    hres = bp->GetId(&m_id);
+    if ( FAILED(hres) )
     {
-        ProcessMonitor::removeBreakpoint(m_id);
-        m_id = BREAKPOINT_UNSET;
-
-        hres =  g_dbgMgr->control->GetNumberBreakpoints(&bpNumber);
-        if ( FAILED(hres) )
-            return;
-
-        for ( ULONG i = 0; i < bpNumber; ++i )
-        {
-            IDebugBreakpoint  *bp;
-            hres = g_dbgMgr->control->GetBreakpointByIndex(i, &bp );
-            if ( FAILED(hres) )
-                break;
-
-            MEMOFFSET_64  offset;
-            hres = bp->GetOffset(&offset);
-
-            if ( FAILED(hres) )
-                break;
-
-            if ( offset != m_offset )
-                continue;
-
-            ULONG breakType, procType;
-            hres = bp->GetType( &breakType, &procType );
-            if ( FAILED(hres) )
-                break;
-
-            if ( breakType != DEBUG_BREAKPOINT_CODE )
-                continue;
-
-            g_dbgMgr->control->RemoveBreakpoint(bp);
-        }
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException( L"IDebugBreakpoint::GetId", hres);
     }
+
+    BreakpointPtr  ptr = shared_from_this();
+    ProcessMonitor::registerBreakpoint(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -244,55 +299,29 @@ void HardwareBreakpointImpl::set()
         throw DbgEngException(L"IDebugBreakpoint::SetFlags", hres);
     }
 
-    BreakpointPtr  ptr = shared_from_this();
-    m_id = ProcessMonitor::insertBreakpoint(ptr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void HardwareBreakpointImpl::remove()
-{
-    HRESULT  hres;
-    ULONG  bpNumber;
-
-    if ( ProcessMonitor::getBreakpointById(m_id) )
+    hres = bp->GetId(&m_id);
+    if ( FAILED(hres) )
     {
-        ProcessMonitor::removeBreakpoint(m_id);
-        m_id = BREAKPOINT_UNSET;
-
-        hres =  g_dbgMgr->control->GetNumberBreakpoints(&bpNumber);
-        if ( FAILED(hres) )
-            return;
-
-        for ( ULONG i = 0; i < bpNumber; ++i )
-        {
-            IDebugBreakpoint  *bp;
-            hres = g_dbgMgr->control->GetBreakpointByIndex(i, &bp );
-            if ( FAILED(hres) )
-                break;
-
-            MEMOFFSET_64  offset;
-            hres = bp->GetOffset(&offset);
-
-            if ( FAILED(hres) )
-                break;
-
-            if ( offset != m_offset )
-                continue;
-
-            ULONG breakType, procType;
-            hres = bp->GetType( &breakType, &procType );
-            if ( FAILED(hres) )
-                break;
-
-            if ( breakType != DEBUG_BREAKPOINT_DATA )
-                continue;
-
-            g_dbgMgr->control->RemoveBreakpoint(bp);
-        }
+        g_dbgMgr->control->RemoveBreakpoint(bp);
+        throw DbgEngException( L"IDebugBreakpoint::GetId", hres);
     }
+
+    BreakpointPtr  ptr = shared_from_this();
+    ProcessMonitor::registerBreakpoint(ptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+DebugCallbackResult BreakpointCallbackHandler(IDebugBreakpoint2 *bp2)
+{
+    CComQIPtr<IDebugBreakpoint>  bp1 = bp2;
+    
+    BreakpointPtr  bpptr = getBreakpoint(bp1);
+
+    return ProcessMonitor::breakpointHit( getCurrentProcessId(), bpptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 } // namespace kdlib

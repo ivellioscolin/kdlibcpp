@@ -106,24 +106,12 @@ ULONG ConvertCallbackResult( DebugCallbackResult result )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+DebugCallbackResult BreakpointCallbackHandler(IDebugBreakpoint2 *bp);
+
 HRESULT STDMETHODCALLTYPE DebugManager::Breakpoint( IDebugBreakpoint2 *bp ) 
 {
-    DebugCallbackResult  result = DebugCallbackNoChange;
-
-    HRESULT hres;
-
-    DEBUG_BREAKPOINT_PARAMETERS  breakParams = {};
-
-    hres = bp->GetParameters(&breakParams);
-    if ( FAILED(hres) )
-        return DEBUG_STATUS_NO_CHANGE;
-
-    result = ProcessMonitor::breakpointHit(
-            getCurrentProcessId(),
-            breakParams.Offset,
-            breakParams.BreakType == DEBUG_BREAKPOINT_DATA ? DataAccessBreakpoint : SoftwareBreakpoint
-            );
-
+    DebugCallbackResult  result = BreakpointCallbackHandler(bp);
+   
     return ConvertCallbackResult( result );
 }
 

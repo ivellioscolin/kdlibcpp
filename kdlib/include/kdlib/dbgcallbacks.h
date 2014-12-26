@@ -19,9 +19,8 @@ struct DebugEventsCallback {
     virtual void onCurrentThreadChange(THREAD_DEBUG_ID threadid) = 0;
     virtual void onChangeLocalScope() = 0;
     virtual void onDebugOutput(const std::wstring& text) = 0;
-
-   // virtual void onSymbolsLoaded(MEMOFFSET_64 modBase) = 0;
-   // virtual void onSymbolsUnloaded(MEMOFFSET_64 modBase OPTIONAL) = 0;
+    //virtual void onBreakpointAdd( BREAKPOINT_ID bpId ) = 0;
+    //virtual void onBreakpointRemove( BREAKPOINT_ID bpId ) = 0;
 };
 
 void registerEventsCallback( DebugEventsCallback *callback );

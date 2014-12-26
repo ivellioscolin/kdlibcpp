@@ -71,16 +71,13 @@ TEST_F( BreakPointTest, EnumBreak )
 
     BreakpointPtr  bpIndex;
     ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(0) );
-    EXPECT_TRUE( bpIndex == bp1 || bpIndex == bp3 );
+    EXPECT_TRUE( bpIndex->getId() == bp1->getId() || bpIndex->getId() == bp3->getId() );
 
     ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(1) );
-    EXPECT_TRUE( bpIndex == bp1 || bpIndex == bp3 );
+    EXPECT_TRUE( bpIndex->getId() == bp1->getId() || bpIndex->getId() == bp3->getId() );
 
-    ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(2) );
-    EXPECT_TRUE( 0 == bpIndex );
-
-    ASSERT_NO_THROW( bpIndex = getBreakpointByIndex(-1) );
-    EXPECT_TRUE( 0 == bpIndex );
+    EXPECT_THROW( getBreakpointByIndex(2), IndexException );
+    EXPECT_THROW( getBreakpointByIndex(-1), IndexException );
 }
 
 class BreakpointMock 
