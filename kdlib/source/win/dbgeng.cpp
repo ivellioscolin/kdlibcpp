@@ -2265,6 +2265,17 @@ void setCurrentStackFrame( StackFramePtr& stackFrame)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void setCurrentStackFrameByIndex(unsigned long frameIndex)
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->symbols->SetScopeFrameByIndex(frameIndex);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::SetScopeFrameByIndex", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void resetCurrentStackFrame()
 {
     HRESULT  hres;

@@ -139,6 +139,8 @@ unsigned long getCurrentStackFrameNumber();
 
 void setCurrentStackFrame(StackFramePtr& stackFrame);
 
+void setCurrentStackFrameByIndex(unsigned long frameIndex);
+
 void resetCurrentStackFrame();
 
 ///////////////////////////////////////////////////////////////////////////////
