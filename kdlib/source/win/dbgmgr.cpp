@@ -176,6 +176,11 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
         m_previousExecutionStatus = (ULONG)Argument;
     }
 
+    if ((Flags & DEBUG_CES_BREAKPOINTS) != 0)
+    {
+        ProcessMonitor::breakpointsChange(getCurrentProcessId());
+    }
+
     return S_OK;
 }
 
@@ -299,7 +304,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeSymbolState(
     if ( ( Flags & DEBUG_CSS_SCOPE ) != 0 )
     {
         if (!m_quietNotification)
-            ProcessMonitor::changeLocalScope();
+            ProcessMonitor::localScopeChange();
     }
 
     return S_OK;

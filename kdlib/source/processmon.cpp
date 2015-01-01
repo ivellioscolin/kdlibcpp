@@ -62,7 +62,8 @@ public:
     DebugCallbackResult breakpointHit(PROCESS_DEBUG_ID id, BreakpointPtr& breakpoint);
     void currentThreadChange(THREAD_DEBUG_ID threadid);
     void executionStatusChange(ExecutionStatus status);
-    void changeLocalScope();
+    void localScopeChange();
+    void breakpointsChange(PROCESS_DEBUG_ID id);
     DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
     void debugOutput(const std::wstring text);
 
@@ -74,6 +75,8 @@ public:
 
     void registerBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
     void removeBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+
+    
 
 private:
 
@@ -229,9 +232,16 @@ void ProcessMonitor::executionStatusChange(ExecutionStatus status)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::changeLocalScope()
+void ProcessMonitor::localScopeChange()
 {
-    g_procmon->changeLocalScope();
+    g_procmon->localScopeChange();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::breakpointsChange(PROCESS_DEBUG_ID id)
+{
+    g_procmon->breakpointsChange(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -439,7 +449,7 @@ void ProcessMonitorImpl::executionStatusChange(ExecutionStatus status)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::changeLocalScope()
+void ProcessMonitorImpl::localScopeChange()
 {
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
@@ -448,6 +458,20 @@ void ProcessMonitorImpl::changeLocalScope()
     for (; it != m_callbacks.end(); ++it)
     {
         (*it)->onChangeLocalScope();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::breakpointsChange(PROCESS_DEBUG_ID id)
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it = m_callbacks.begin();
+
+    for (; it != m_callbacks.end(); ++it)
+    {
+        (*it)->onChangeBreakpoints();
     }
 }
 

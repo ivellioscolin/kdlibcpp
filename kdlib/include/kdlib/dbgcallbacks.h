@@ -18,9 +18,9 @@ struct DebugEventsCallback {
     virtual DebugCallbackResult onProcessExit( PROCESS_DEBUG_ID processid, ProcessExitReason  reason, unsigned long exitCode ) = 0;
     virtual void onCurrentThreadChange(THREAD_DEBUG_ID threadid) = 0;
     virtual void onChangeLocalScope() = 0;
+    virtual void onChangeBreakpoints() = 0;
     virtual void onDebugOutput(const std::wstring& text) = 0;
-    //virtual void onBreakpointAdd( BREAKPOINT_ID bpId ) = 0;
-    //virtual void onBreakpointRemove( BREAKPOINT_ID bpId ) = 0;
+
 };
 
 void registerEventsCallback( DebugEventsCallback *callback );

@@ -148,7 +148,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="packages.kdlibtest_vc120.config" />
+    <None Include="packages.kdlibtest_vc120.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\test\testvars.h" />

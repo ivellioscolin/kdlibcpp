@@ -25,7 +25,8 @@ public: // notification
     static DebugCallbackResult breakpointHit(PROCESS_DEBUG_ID id, BreakpointPtr& breakpoint);
     static void currentThreadChange(THREAD_DEBUG_ID id);
     static void executionStatusChange(ExecutionStatus status);
-    static void changeLocalScope();
+    static void breakpointsChange(PROCESS_DEBUG_ID id);
+    static void localScopeChange();
     static DebugCallbackResult exceptionHit(const ExceptionInfo& excinfo);
     static void debugOutput(const std::wstring text);
 

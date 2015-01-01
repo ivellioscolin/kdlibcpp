@@ -161,5 +161,17 @@ TEST_F(StackTest, ChangeCurrentFrame)
     EXPECT_EQ( 0, getCurrentStackFrameNumber() );
 }
 
+TEST_F(StackTest, ChangeScopeEvent)
+{
+    EventHandlerMock  eventHandler;
+
+    EXPECT_CALL(eventHandler, onChangeLocalScope()).Times(2);
+
+    StackFramePtr  frame1;
+    ASSERT_NO_THROW(frame1 = getStack()->getFrame(1));
+    ASSERT_NO_THROW(setCurrentStackFrame(frame1));
+
+    debugCommand(L".frame 2");
+}
 
 
