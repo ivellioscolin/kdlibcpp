@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "kdlib\dbgtypedef.h"
 
@@ -15,22 +16,21 @@ public:
     Disasm( MEMOFFSET_64 offset = 0);
 
     std::wstring  disassemble() {
-        std::wstring  s = m_disasm;
         m_currentOffset += m_length;
         doDisasm();
-        return s;
+        return m_disasm;
     }
 
     std::wstring  jump(MEMOFFSET_64 offset) {
         m_currentOffset = offset;
         doDisasm();
-        return disassemble();
+        return m_disasm;
     }
 
     std::wstring jumprel(MEMDISPLACEMENT delta) {
         m_currentOffset = getNearInstruction(delta);
         doDisasm();
-        return disassemble();
+        return m_disasm;
     }
 
     MEMOFFSET_64 getNearInstruction( MEMDISPLACEMENT delta );
@@ -38,15 +38,18 @@ public:
     std::wstring  reset() {
         m_currentOffset = m_beginOffset;
         doDisasm();
-        return disassemble();
-    }
-
-    std::wstring
-    assembly( const std::wstring &instr );
-
-    std::wstring  instruction() const {
         return m_disasm;
     }
+
+    std::wstring assembly( const std::wstring &instr );
+
+    std::wstring instruction() const {
+        return m_disasm;
+    }
+
+    std::wstring opmnemo() const; 
+
+    std::vector<unsigned char> opcode() const;
 
     MEMOFFSET_64 begin() const {
         return m_beginOffset;
@@ -72,8 +75,7 @@ private:
     MEMOFFSET_64    m_currentOffset;
     MEMOFFSET_64    m_ea;
     size_t          m_length;
-
-    std::wstring     m_disasm;
+    std::wstring    m_disasm;
 };
 
 /////////////////////////////////////////////////////////////////////////////////

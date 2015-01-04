@@ -1304,7 +1304,6 @@ MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id )
     return offset;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void registerEventsCallback( DebugEventsCallback *callback )
@@ -2171,6 +2170,8 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
         }
         else
         {
+            g_dbgMgr->setQuietNotiification(true);
+
             hres = 
                 g_dbgMgr->control->GetStackTrace(
                     0,
@@ -2179,6 +2180,8 @@ void getStackTrace(std::vector<FrameDesc> &stackTrace)
                     &dbgFrames[0],
                     filledFrames,
                     &filledFrames);
+
+            g_dbgMgr->setQuietNotiification(false);
 
             if (S_OK != hres)
                 throw DbgEngException( L"IDebugControl::GetStackTrace", hres );

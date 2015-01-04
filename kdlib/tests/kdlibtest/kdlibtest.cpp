@@ -14,6 +14,7 @@
 #include "breakhandler.h"
 #include "cputest.h"
 #include "stacktest.h"
+#include "disasmtest.h"
 
 class Environment : public ::testing::Environment {
 public:

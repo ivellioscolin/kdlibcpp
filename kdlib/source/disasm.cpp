@@ -1,9 +1,22 @@
 #include "stdafx.h"
 
+#include <boost/regex.hpp>
+
 #include "kdlib/disasm.h"
 #include "kdlib/disasmengine.h"
 #include "kdlib/dbgengine.h"
+#include "kdlib/exceptions.h"
 #include "kdlib/memaccess.h"
+
+/////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+static const boost::wregex opcodeRegex(L"^[0-9a-fA-F`]+\\s+[0-9a-fA-F]+\\s+(.*)$");
+
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 
 namespace kdlib {
 
@@ -55,4 +68,23 @@ MEMOFFSET_64 Disasm::getNearInstruction( MEMDISPLACEMENT delta ) {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-}; // end pykd namespace
+std::wstring Disasm::opmnemo() const
+{
+    boost::wsmatch    matchResult;
+
+    if (!boost::regex_match(m_disasm, matchResult, opcodeRegex))
+        throw DbgException("failed to parse instruction");
+
+    return std::wstring(matchResult[1].first, matchResult[1].second);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+std::vector<unsigned char> Disasm::opcode() const
+{
+    return loadBytes(m_currentOffset, m_length);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
+}; // end kdlib namespace

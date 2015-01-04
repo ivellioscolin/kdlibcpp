@@ -20,6 +20,5 @@ TEST_F( CPUContextTest, GetRegisters )
     MEMDISPLACEMENT  displ;
     EXPECT_EQ( L"breakOnRun", findSymbol( cpu->getIP(), displ ) );
     EXPECT_NE( 0, cpu->getSP() );
-    EXPECT_NE( 0, cpu->getFP() );
 }
 
