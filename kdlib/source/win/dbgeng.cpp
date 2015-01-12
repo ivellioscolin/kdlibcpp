@@ -108,6 +108,45 @@ private:
 };
 
 
+class ProcessAutoSwitch {
+
+public:
+
+    ProcessAutoSwitch(PROCESS_DEBUG_ID id)
+    {
+        HRESULT  hres;
+
+        if (id == -1 || id == getCurrentProcessId())
+        {
+            m_previousId = -1;
+            return;
+        }
+
+        hres = g_dbgMgr->system->GetCurrentProcessId(&m_previousId);
+        if (FAILED(hres))
+            throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessId", hres);
+
+        hres = g_dbgMgr->system->SetCurrentProcessId(id);
+        if (FAILED(hres))
+            throw DbgEngException(L"IDebugSystemObjects::SetCurrentProcessId", hres);
+    }
+
+    ~ProcessAutoSwitch()
+    {
+        if (m_previousId == -1)
+            return;
+        
+        g_dbgMgr->system->SetCurrentProcessId(m_previousId);
+    }
+
+
+private:
+
+    PROCESS_DEBUG_ID     m_previousId;
+};
+
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool initialize()
@@ -950,35 +989,12 @@ PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset )
 
 PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
 {
+    ProcessAutoSwitch  processSwitch(id);
+
     HRESULT  hres;
     ULONG  systemId;
 
-    if ( id == -1 )
-    {
-        hres = g_dbgMgr->system->GetCurrentProcessSystemId( &systemId );
-
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
-
-        return systemId;
-    }
-
-    ULONG        old_id;
-
-    hres = g_dbgMgr->system->GetCurrentProcessId( &old_id );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
-
-    if ( old_id != id )
-    {
-        hres = g_dbgMgr->system->SetCurrentProcessId( id );
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
-    }
-
     hres = g_dbgMgr->system->GetCurrentProcessSystemId( &systemId );
-
-    g_dbgMgr->system->SetCurrentProcessId( old_id );
 
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
@@ -990,40 +1006,38 @@ PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
 
 MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 {
+    ProcessAutoSwitch  processSwitch(id);
+
     HRESULT  hres;
     MEMOFFSET_64  offset;
 
-    if ( id == -1 )
-    {
-        hres = g_dbgMgr->system->GetCurrentProcessDataOffset( &offset );
-
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
-
-        return offset;
-    }
-
-    ULONG        old_id;
-
-    hres = g_dbgMgr->system->GetCurrentProcessId( &old_id );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
-
-    if ( old_id != id )
-    {
-        hres = g_dbgMgr->system->SetCurrentProcessId( id );
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
-    }
-
     hres = g_dbgMgr->system->GetCurrentProcessDataOffset( &offset );
-
-    g_dbgMgr->system->SetCurrentProcessId( old_id );
 
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
 
-    return offset;
+     return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring getProcessExecutableName(PROCESS_DEBUG_ID id)
+{
+    ProcessAutoSwitch  processSwitch(id);
+
+    const ULONG bufChars = (MAX_PATH * 2);
+
+    boost::scoped_array< WCHAR > exeName(new WCHAR[bufChars]);
+    memset(&exeName[0], 0, bufChars * sizeof(WCHAR));
+    
+    HRESULT  hres;
+    MEMOFFSET_64  offset;
+    ULONG tmp;
+    hres = g_dbgMgr->system->GetCurrentProcessExecutableNameWide(&exeName[0], bufChars, &tmp);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessExecutableNameWide", hres);
+
+    return std::wstring(&exeName[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1090,22 +1104,6 @@ void setCurrentProcess( MEMOFFSET_64  offset )
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-std::wstring getCurrentProcessExecutableName()
-{
-    const ULONG bufChars = (MAX_PATH * 2);
-
-    boost::scoped_array< WCHAR > exeName( new WCHAR[bufChars] );
-    memset(&exeName[0], 0, bufChars * sizeof(WCHAR));
-
-    ULONG tmp;
-    HRESULT hres = g_dbgMgr->system->GetCurrentProcessExecutableNameWide(&exeName[0], bufChars, &tmp);
-    if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessExecutableNameWide", hres );
-
-    return std::wstring( &exeName[0] );
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

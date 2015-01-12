@@ -97,8 +97,9 @@ PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset );
 PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid = -1 );
 PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index);
 
-PROCESS_ID  getProcessSystemId( PROCESS_DEBUG_ID id = -1);
-MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id  = -1);
+PROCESS_ID  getProcessSystemId(PROCESS_DEBUG_ID id = -1);
+MEMOFFSET_64 getProcessOffset(PROCESS_DEBUG_ID id  = -1);
+std::wstring getProcessExecutableName(PROCESS_DEBUG_ID id = -1);
 
 void setCurrentProcessById( PROCESS_DEBUG_ID id );
 void setCurrentProcessByOffset( MEMOFFSET_64 offset );
@@ -108,8 +109,6 @@ MEMOFFSET_64 getImplicitProcessOffset();
 
 MEMOFFSET_64 getCurrentProcess();
 void setCurrentProcess( MEMOFFSET_64  offset );
-
-std::wstring getCurrentProcessExecutableName();
 
 ExecutionStatus targetExecutionStatus();
 ExecutionStatus targetGo();
