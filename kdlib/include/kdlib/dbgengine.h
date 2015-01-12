@@ -94,7 +94,7 @@ void setCurrentThread(MEMOFFSET_64 offset);
 unsigned long getNumberProcesses();
 PROCESS_DEBUG_ID getCurrentProcessId();
 PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset );
-PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid = -1 );
+PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid );
 PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index);
 
 PROCESS_ID  getProcessSystemId(PROCESS_DEBUG_ID id = -1);
