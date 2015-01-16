@@ -79,14 +79,14 @@ void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displac
 
 THREAD_DEBUG_ID getCurrentThreadId();
 
-unsigned long getNumberThreads(PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+unsigned long getNumberThreads();
 
-THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
-THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
-THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset);
+THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid);
+THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index);
 
-THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = CURRENT_THREAD_ID, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
-MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = CURRENT_THREAD_ID, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = CURRENT_THREAD_ID);
+MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = CURRENT_THREAD_ID);
 
 void setCurrentThreadById(THREAD_DEBUG_ID id);
 void setCurrentThreadByOffset(MEMOFFSET_64 offset);

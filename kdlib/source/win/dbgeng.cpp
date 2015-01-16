@@ -1110,10 +1110,8 @@ MEMOFFSET_64 getImplicitProcessOffset()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long getNumberThreads(PROCESS_DEBUG_ID  processId)
+unsigned long getNumberThreads()
 {
-    ProcessAutoSwitch  autoProcess(processId);
-
     HRESULT     hres;
     ULONG       number;
 
@@ -1140,10 +1138,8 @@ THREAD_DEBUG_ID getCurrentThreadId()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset, PROCESS_DEBUG_ID processId)
+THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset)
 {
-    ProcessAutoSwitch  autoProcess(processId);
-
     HRESULT  hres;
     ULONG  id;
 
@@ -1156,10 +1152,8 @@ THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset, PROCESS_DEBUG_ID proces
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid, PROCESS_DEBUG_ID processId)
+THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid)
 {
-    ProcessAutoSwitch  autoProcess(processId);
-
     HRESULT  hres;
     ULONG  id;
 
@@ -1176,10 +1170,8 @@ THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid, PROCESS_DEBUG_ID processId)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index, PROCESS_DEBUG_ID processId)
+THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index)
 {
-    ProcessAutoSwitch autoProcess(processId);
-
     HRESULT  hres;
 
     if ( index >= getNumberThreads() )
@@ -1267,10 +1259,9 @@ void setCurrentThread(MEMOFFSET_64 offset)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id, PROCESS_DEBUG_ID  processId)
+THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id)
 {
     ThreadAutoSwitch  threadContext(id);
-    ProcessAutoSwitch  autoProcess(processId);
 
     HRESULT  hres;
     ULONG  systemId;
@@ -1285,10 +1276,9 @@ THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id, PROCESS_DEBUG_ID  processId)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id, PROCESS_DEBUG_ID  processId)
+MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id)
 {
     ThreadAutoSwitch  threadContext(id);
-    ProcessAutoSwitch  autoProcess(processId);
 
     HRESULT  hres;
     MEMOFFSET_64  offset;

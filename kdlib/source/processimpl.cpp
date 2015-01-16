@@ -21,6 +21,10 @@ public:
         m_processId = getCurrentProcessId();
     }
 
+    TargetProcessImpl(PROCESS_DEBUG_ID processId) :
+        m_processId(processId)
+    {}
+
     virtual ~TargetProcessImpl() 
     {}
 
@@ -84,7 +88,7 @@ TargetProcessPtr TargetProcess::getCurrent()
 
 TargetProcessPtr TargetProcess::getByIndex(unsigned long index)
 {
-    return boost::make_shared_noinit<TargetProcessImpl>();
+    return boost::make_shared<TargetProcessImpl>(getProcessIdByIndex(index));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,9 +148,8 @@ TargetThreadPtr TargetThread::getCurrent() {
 }
 
 TargetThreadPtr TargetThread::getByIndex(unsigned long index) {
-    return boost::make_shared_noinit<TargetThreadImpl>();
+    return TargetThreadPtr();
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

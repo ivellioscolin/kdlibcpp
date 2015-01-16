@@ -56,6 +56,9 @@
     <ClInclude Include="disasmtest.h">
       <Filter>testcases</Filter>
     </ClInclude>
+    <ClInclude Include="targettest.h">
+      <Filter>testcases</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.kdlibtest_vc120.config" />

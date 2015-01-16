@@ -29,6 +29,7 @@
     <ClCompile Include="disasm.cpp" />
     <ClCompile Include="memaccess.cpp" />
     <ClCompile Include="module.cpp" />
+    <ClCompile Include="processimpl.cpp" />
     <ClCompile Include="processmon.cpp" />
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="stdafx.cpp">
