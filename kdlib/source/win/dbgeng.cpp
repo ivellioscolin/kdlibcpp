@@ -1031,7 +1031,6 @@ std::wstring getProcessExecutableName(PROCESS_DEBUG_ID id)
     memset(&exeName[0], 0, bufChars * sizeof(WCHAR));
     
     HRESULT  hres;
-    MEMOFFSET_64  offset;
     ULONG tmp;
     hres = g_dbgMgr->system->GetCurrentProcessExecutableNameWide(&exeName[0], bufChars, &tmp);
     if (FAILED(hres))
