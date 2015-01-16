@@ -261,4 +261,3 @@ TEST_F(ProcessTest, GetNumberProcesses)
     EXPECT_THROW( terminateProcess(process_id), DbgException );
     ASSERT_EQ( 0, getNumberProcesses() );
 }
-

@@ -15,6 +15,7 @@
 #include "cputest.h"
 #include "stacktest.h"
 #include "disasmtest.h"
+#include "targettest.h"
 
 class Environment : public ::testing::Environment {
 public:
@@ -37,4 +38,3 @@ int _tmain(int argc, _TCHAR* argv[])
 
     return RUN_ALL_TESTS();
 }
-

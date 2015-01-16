@@ -71,6 +71,9 @@
     <ClCompile Include="dataaccessor.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="processimpl.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -169,6 +172,12 @@
       <Filter>kdlib/include</Filter>
     </ClInclude>
     <ClInclude Include="dataaccessorimpl.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\kdlib\process.h">
+      <Filter>kdlib/include</Filter>
+    </ClInclude>
+    <ClInclude Include="autoswitch.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

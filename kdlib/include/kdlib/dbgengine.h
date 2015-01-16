@@ -73,14 +73,20 @@ std::wstring getSourceFile( MEMOFFSET_64 offset = 0);
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset = 0 );
 
 // processes end threads
-unsigned long getNumberThreads();
-THREAD_DEBUG_ID getCurrentThreadId();
-THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset);
-THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid = -1);
-THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index);
 
-THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = -1);
-MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = -1);
+#define CURRENT_THREAD_ID  (-1)
+#define CURRENT_PROCESS_ID  (-1)
+
+THREAD_DEBUG_ID getCurrentThreadId();
+
+unsigned long getNumberThreads(PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+
+THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+
+THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id = CURRENT_THREAD_ID, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
+MEMOFFSET_64 getThreadOffset(THREAD_DEBUG_ID id = CURRENT_THREAD_ID, PROCESS_DEBUG_ID  processId = CURRENT_PROCESS_ID);
 
 void setCurrentThreadById(THREAD_DEBUG_ID id);
 void setCurrentThreadByOffset(MEMOFFSET_64 offset);
@@ -97,9 +103,9 @@ PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset );
 PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid );
 PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index);
 
-PROCESS_ID  getProcessSystemId(PROCESS_DEBUG_ID id = -1);
-MEMOFFSET_64 getProcessOffset(PROCESS_DEBUG_ID id  = -1);
-std::wstring getProcessExecutableName(PROCESS_DEBUG_ID id = -1);
+PROCESS_ID  getProcessSystemId(PROCESS_DEBUG_ID id = CURRENT_PROCESS_ID);
+MEMOFFSET_64 getProcessOffset(PROCESS_DEBUG_ID id  = CURRENT_PROCESS_ID);
+std::wstring getProcessExecutableName(PROCESS_DEBUG_ID id = CURRENT_PROCESS_ID);
 
 void setCurrentProcessById( PROCESS_DEBUG_ID id );
 void setCurrentProcessByOffset( MEMOFFSET_64 offset );

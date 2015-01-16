@@ -53,6 +53,9 @@
     <ClInclude Include="eventhandlermock.h">
       <Filter>testfixtures</Filter>
     </ClInclude>
+    <ClInclude Include="targettest.h">
+      <Filter>testcases</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

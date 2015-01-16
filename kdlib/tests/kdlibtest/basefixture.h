@@ -3,7 +3,10 @@
 #include <Windows.h>
 
 #include "gtest/gtest.h"
+
 #include "kdlib/dbgengine.h"
+#include "kdlib/exceptions.h"
+
 
 class BaseFixture : public ::testing::Test
 {
@@ -44,5 +47,12 @@ public:
         CloseHandle( processInfo.hThread );
 
         return processInfo.dwProcessId;
+    }
+
+    virtual void TearDown() {
+        try {
+            kdlib::terminateAllProcesses();
+        } catch(kdlib::DbgException&)
+        {}
     }
 };

@@ -12,6 +12,7 @@
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
 
+#include "autoswitch.h"
 #include "moduleimp.h"
 #include "processmon.h"
 #include "threadctx.h"
@@ -20,11 +21,11 @@ namespace  kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SwitchThreadContext {
+class ThreadAutoSwitch {
 
 public:
 
-    SwitchThreadContext( THREAD_DEBUG_ID id )
+    ThreadAutoSwitch( THREAD_DEBUG_ID id )
     {
 
         HRESULT      hres;
@@ -73,7 +74,7 @@ public:
         }
     }
 
-    ~SwitchThreadContext() {
+    ~ThreadAutoSwitch() {
 
         HRESULT      hres;
 
@@ -107,45 +108,34 @@ private:
     bool m_savedLocalContext;
 };
 
+///////////////////////////////////////////////////////////////////////////////
 
-class ProcessAutoSwitch {
+ProcessAutoSwitch::ProcessAutoSwitch(PROCESS_DEBUG_ID id)
+{
+    HRESULT  hres;
 
-public:
-
-    ProcessAutoSwitch(PROCESS_DEBUG_ID id)
+    if (id == -1 || id == getCurrentProcessId())
     {
-        HRESULT  hres;
-
-        if (id == -1 || id == getCurrentProcessId())
-        {
-            m_previousId = -1;
-            return;
-        }
-
-        hres = g_dbgMgr->system->GetCurrentProcessId(&m_previousId);
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessId", hres);
-
-        hres = g_dbgMgr->system->SetCurrentProcessId(id);
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::SetCurrentProcessId", hres);
+        m_previousId = -1;
+        return;
     }
 
-    ~ProcessAutoSwitch()
-    {
-        if (m_previousId == -1)
-            return;
+    hres = g_dbgMgr->system->GetCurrentProcessId(&m_previousId);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessId", hres);
+
+    hres = g_dbgMgr->system->SetCurrentProcessId(id);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects::SetCurrentProcessId", hres);
+}
+
+ProcessAutoSwitch::~ProcessAutoSwitch()
+{
+    if (m_previousId == -1)
+        return;
         
-        g_dbgMgr->system->SetCurrentProcessId(m_previousId);
-    }
-
-
-private:
-
-    PROCESS_DEBUG_ID     m_previousId;
-};
-
-
+    g_dbgMgr->system->SetCurrentProcessId(m_previousId);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1120,8 +1110,10 @@ MEMOFFSET_64 getImplicitProcessOffset()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long getNumberThreads()
+unsigned long getNumberThreads(PROCESS_DEBUG_ID  processId)
 {
+    ProcessAutoSwitch  autoProcess(processId);
+
     HRESULT     hres;
     ULONG       number;
 
@@ -1148,8 +1140,10 @@ THREAD_DEBUG_ID getCurrentThreadId()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_DEBUG_ID getThreadIdByOffset( MEMOFFSET_64 offset )
+THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset, PROCESS_DEBUG_ID processId)
 {
+    ProcessAutoSwitch  autoProcess(processId);
+
     HRESULT  hres;
     ULONG  id;
 
@@ -1162,8 +1156,10 @@ THREAD_DEBUG_ID getThreadIdByOffset( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid )
+THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid, PROCESS_DEBUG_ID processId)
 {
+    ProcessAutoSwitch  autoProcess(processId);
+
     HRESULT  hres;
     ULONG  id;
 
@@ -1180,8 +1176,10 @@ THREAD_DEBUG_ID getThreadIdBySystemId( THREAD_ID tid )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index)
+THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index, PROCESS_DEBUG_ID processId)
 {
+    ProcessAutoSwitch autoProcess(processId);
+
     HRESULT  hres;
 
     if ( index >= getNumberThreads() )
@@ -1269,9 +1267,10 @@ void setCurrentThread(MEMOFFSET_64 offset)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id )
+THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id, PROCESS_DEBUG_ID  processId)
 {
-    SwitchThreadContext  threadContext(id);
+    ThreadAutoSwitch  threadContext(id);
+    ProcessAutoSwitch  autoProcess(processId);
 
     HRESULT  hres;
     ULONG  systemId;
@@ -1286,9 +1285,10 @@ THREAD_ID getThreadSystemId( THREAD_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id )
+MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id, PROCESS_DEBUG_ID  processId)
 {
-    SwitchThreadContext  threadContext(id);
+    ThreadAutoSwitch  threadContext(id);
+    ProcessAutoSwitch  autoProcess(processId);
 
     HRESULT  hres;
     MEMOFFSET_64  offset;
