@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include <process.h>
 #include <windows.h>
 
 #include "test/testfunc.h"
@@ -18,6 +19,8 @@ int memTestRun();
 int stackTestRun();
 int loadUnloadModuleRun();
 int startChildProcess();
+void __cdecl sleepThread(void*);
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -50,6 +53,18 @@ int _tmain(int argc, _TCHAR* argv[])
     {
         Sleep( INFINITE );
         return 0;
+    }
+
+    if (testGroup == L"multithread")
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            _beginthread(sleepThread, 0, 0);
+        }
+
+        Sleep(INFINITE);
+        return 0;
+
     }
 
     if ( testGroup == L"childprocess" )
@@ -172,4 +187,9 @@ int startChildProcess()
     CloseHandle( processInfo.hThread );
 
     return 0;
+}
+
+void __cdecl sleepThread(void*)
+{
+    Sleep(INFINITE);
 }

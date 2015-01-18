@@ -37,10 +37,11 @@ public:
     virtual void setCurrent() = 0;
 
     virtual unsigned long getNumberThreads() = 0;
-    virtual TargetThreadPtr getThreadByIndex(unsigned long index)=0;
+    virtual TargetThreadPtr getThreadByIndex(unsigned long index) = 0;
+    virtual TargetThreadPtr getCurrentThread() = 0;
 
-    virtual unsigned long getModuleThreads() = 0;
-    virtual ModulePtr getModuleByIndex(unsigned long index)=0;
+    virtual unsigned long getNumberModules() = 0;
+    virtual ModulePtr getModuleByIndex(unsigned long index) = 0;
 
     virtual unsigned long getNumberBreakpoints() = 0;
     virtual BreakpointPtr getBreakpoint(unsigned long index) = 0;

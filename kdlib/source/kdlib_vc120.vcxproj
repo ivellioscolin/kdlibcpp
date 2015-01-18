@@ -29,7 +29,6 @@
     <ClCompile Include="disasm.cpp" />
     <ClCompile Include="memaccess.cpp" />
     <ClCompile Include="module.cpp" />
-    <ClCompile Include="processimpl.cpp" />
     <ClCompile Include="processmon.cpp" />
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -42,12 +41,14 @@
     <ClCompile Include="typeinfo.cpp" />
     <ClCompile Include="udtfiled.cpp" />
     <ClCompile Include="windbg\windbg.cpp" />
+    <ClCompile Include="win\autoswitch.cpp" />
     <ClCompile Include="win\breakpoint.cpp" />
     <ClCompile Include="win\cpucontext.cpp" />
     <ClCompile Include="win\dbgeng.cpp" />
     <ClCompile Include="win\dbgmem.cpp" />
     <ClCompile Include="win\dbgmgr.cpp" />
     <ClCompile Include="win\dbgmod.cpp" />
+    <ClCompile Include="win\processimpl.cpp" />
     <ClCompile Include="win\sympath.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +66,7 @@
     <ClInclude Include="..\include\kdlib\kdlib.h" />
     <ClInclude Include="..\include\kdlib\memaccess.h" />
     <ClInclude Include="..\include\kdlib\module.h" />
+    <ClInclude Include="..\include\kdlib\process.h" />
     <ClInclude Include="..\include\kdlib\scope.h" />
     <ClInclude Include="..\include\kdlib\stack.h" />
     <ClInclude Include="..\include\kdlib\symengine.h" />
@@ -82,6 +84,7 @@
     <ClInclude Include="typedvarimp.h" />
     <ClInclude Include="typeinfoimp.h" />
     <ClInclude Include="udtfield.h" />
+    <ClInclude Include="win\autoswitch.h" />
     <ClInclude Include="win\cpucontextimpl.h" />
     <ClInclude Include="win\dbgmgr.h" />
     <ClInclude Include="win\exceptions.h" />

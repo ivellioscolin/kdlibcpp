@@ -21,124 +21,6 @@ namespace  kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ThreadAutoSwitch {
-
-public:
-
-    ThreadAutoSwitch( THREAD_DEBUG_ID id )
-    {
-
-        HRESULT      hres;
-
-        if ( id == -1 || id == getCurrentThreadId() )
-        {
-            m_previousId = -1;
-            return;
-        }
-
-        g_dbgMgr->setQuietNotiification(true);
-
-        hres = g_dbgMgr->system->GetCurrentThreadId( &m_previousId );
-        if ( FAILED( hres ) )
-        {
-            g_dbgMgr->setQuietNotiification(false);
-            throw DbgEngException( L"IDebugSystemObjects::GetCurrentThreadId", hres ); 
-        }
-
-        ULONG  registerNumber = 0;
-        hres = g_dbgMgr->registers->GetNumberRegisters(&registerNumber);
-        if ( FAILED( hres ) )
-        {
-            g_dbgMgr->setQuietNotiification(false);
-            throw DbgEngException( L"IDebugRegister::GetNumberRegisters", hres ); 
-        }
-
-        m_regValues.resize(registerNumber);
-
-        m_savedRegCtx = false;
-
-        hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0] );
-        m_savedRegCtx = SUCCEEDED(hres);
-
-
-        m_savedLocalContext = false;
-
-        hres = g_dbgMgr->symbols->GetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext) );
-        m_savedLocalContext = SUCCEEDED(hres);
-
-        hres = g_dbgMgr->system->SetCurrentThreadId( id );
-        if ( FAILED( hres ) )
-        {
-            g_dbgMgr->setQuietNotiification(false);
-            throw DbgEngException( L"IDebugSystemObjects::SetCurrentThreadId", hres ); 
-        }
-    }
-
-    ~ThreadAutoSwitch() {
-
-        HRESULT      hres;
-
-        if ( m_previousId == -1 )
-            return;
-
-        hres = g_dbgMgr->system->SetCurrentThreadId( m_previousId );
-
-        if ( SUCCEEDED(hres) )
-        {
-            if ( m_savedRegCtx )
-                g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0] );
-
-            if ( m_savedLocalContext )
-                g_dbgMgr->symbols->SetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext) );
-        }
-
-        g_dbgMgr->setQuietNotiification(false);
-    }
-
-private:
-
-    THREAD_DEBUG_ID  m_previousId;
-
-    std::vector<DEBUG_VALUE>  m_regValues;
-
-    bool  m_savedRegCtx;
-
-    CONTEXT_STORAGE  m_localContext;
-
-    bool m_savedLocalContext;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-ProcessAutoSwitch::ProcessAutoSwitch(PROCESS_DEBUG_ID id)
-{
-    HRESULT  hres;
-
-    if (id == -1 || id == getCurrentProcessId())
-    {
-        m_previousId = -1;
-        return;
-    }
-
-    hres = g_dbgMgr->system->GetCurrentProcessId(&m_previousId);
-    if (FAILED(hres))
-        throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessId", hres);
-
-    hres = g_dbgMgr->system->SetCurrentProcessId(id);
-    if (FAILED(hres))
-        throw DbgEngException(L"IDebugSystemObjects::SetCurrentProcessId", hres);
-}
-
-ProcessAutoSwitch::~ProcessAutoSwitch()
-{
-    if (m_previousId == -1)
-        return;
-        
-    g_dbgMgr->system->SetCurrentProcessId(m_previousId);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 bool initialize()
 {
     if ( g_dbgMgr != 0  )
@@ -979,7 +861,10 @@ PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset )
 
 PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
 {
-    ProcessAutoSwitch  processSwitch(id);
+    ContextAutoRestore  contextRestore;
+
+    if (id != -1 && id != getCurrentProcessId())
+        setCurrentProcessById(id);
 
     HRESULT  hres;
     ULONG  systemId;
@@ -996,7 +881,10 @@ PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
 
 MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 {
-    ProcessAutoSwitch  processSwitch(id);
+    ContextAutoRestore  contextRestore;
+
+    if (id != -1 && id != getCurrentProcessId())
+        setCurrentProcessById(id);
 
     HRESULT  hres;
     MEMOFFSET_64  offset;
@@ -1013,7 +901,10 @@ MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 
 std::wstring getProcessExecutableName(PROCESS_DEBUG_ID id)
 {
-    ProcessAutoSwitch  processSwitch(id);
+    ContextAutoRestore  contextRestore;
+
+    if (id != -1 && id != getCurrentProcessId())
+        setCurrentProcessById(id);
 
     const ULONG bufChars = (MAX_PATH * 2);
 
@@ -1261,7 +1152,10 @@ void setCurrentThread(MEMOFFSET_64 offset)
 
 THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id)
 {
-    ThreadAutoSwitch  threadContext(id);
+    ContextAutoRestore  contextRestore;
+
+    if (id != -1 && id != getCurrentThreadId())
+        setCurrentThreadById(id);
 
     HRESULT  hres;
     ULONG  systemId;
@@ -1278,7 +1172,10 @@ THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id)
 
 MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id)
 {
-    ThreadAutoSwitch  threadContext(id);
+    ContextAutoRestore  contextRestore;
+
+    if (id != -1 && id != getCurrentThreadId())
+        setCurrentThreadById(id);
 
     HRESULT  hres;
     MEMOFFSET_64  offset;

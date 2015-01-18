@@ -38,4 +38,53 @@ TEST_F(TargetTest, getSystemId)
     EXPECT_NE( 0, TargetProcess::getByIndex(1)->getSystemId() );
 }
 
+TEST_F(TargetTest, getPebOffset)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+    EXPECT_NE(0, TargetProcess::getCurrent()->getPebOffset());
+    EXPECT_NE(0, TargetProcess::getByIndex(0)->getPebOffset());
+    EXPECT_NE(0, TargetProcess::getByIndex(1)->getPebOffset());
+}
+
+TEST_F(TargetTest, getNumberThreads)
+{
+    PROCESS_ID  procId = StartTargetappWithParam(L"multithread");
+    Sleep(100);
+    ASSERT_NO_THROW(attachProcess(procId));
+    EXPECT_EQ(6, TargetProcess::getCurrent()->getNumberThreads());
+}
+
+TEST_F(TargetTest, enumThreads)
+{
+    PROCESS_ID  procId = StartTargetappWithParam(L"multithread");
+    Sleep(100);
+    ASSERT_NO_THROW(attachProcess(procId));
+
+    TargetProcessPtr  process;
+    ASSERT_NO_THROW(process = TargetProcess::getCurrent());
+
+    unsigned long numberThreads = 0;
+    ASSERT_NO_THROW(numberThreads = process->getNumberThreads());
+
+    for (unsigned long i = 0; i < numberThreads; ++i)
+    {
+        TargetThreadPtr  thread;
+        ASSERT_NO_THROW(thread = process->getThreadByIndex(i));
+    }
+}
+
+TEST_F(TargetTest, currentThread)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    TargetProcessPtr  targetProcess;
+    ASSERT_NO_THROW(targetProcess = TargetProcess::getCurrent());
+
+    TargetThreadPtr  targetThread;
+    ASSERT_NO_THROW(targetThread = targetProcess->getCurrentThread());
+
+    EXPECT_NE(0, targetThread->getSystemId());
+    EXPECT_NE(0, targetThread->getTebOffset());
+}
 
