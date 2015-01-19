@@ -50,7 +50,7 @@ TEST_F(TargetTest, getPebOffset)
 TEST_F(TargetTest, getNumberThreads)
 {
     PROCESS_ID  procId = StartTargetappWithParam(L"multithread");
-    Sleep(100);
+    Sleep(1000);
     ASSERT_NO_THROW(attachProcess(procId));
     EXPECT_EQ(6, TargetProcess::getCurrent()->getNumberThreads());
 }

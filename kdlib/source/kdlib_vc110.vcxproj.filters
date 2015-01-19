@@ -71,8 +71,11 @@
     <ClCompile Include="dataaccessor.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="processimpl.cpp">
-      <Filter>common</Filter>
+    <ClCompile Include="win\autoswitch.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="win\processimpl.cpp">
+      <Filter>win</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,8 +180,8 @@
     <ClInclude Include="..\include\kdlib\process.h">
       <Filter>kdlib/include</Filter>
     </ClInclude>
-    <ClInclude Include="autoswitch.h">
-      <Filter>common</Filter>
+    <ClInclude Include="win\autoswitch.h">
+      <Filter>win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
