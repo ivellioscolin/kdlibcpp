@@ -235,7 +235,8 @@ protected:
     }
     
     virtual void setCurrent() {
-        NOT_IMPLEMENTED();
+        setCurrentProcessById(m_processId);
+        setCurrentThreadById(m_threadId);
     }
 
     virtual StackPtr getStack() {

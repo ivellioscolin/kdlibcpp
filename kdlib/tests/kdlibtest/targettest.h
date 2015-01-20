@@ -97,3 +97,27 @@ TEST_F(TargetTest, currentThread)
     EXPECT_NE(0, targetThread->getTebOffset());
 }
 
+TEST_F(TargetTest, setCurrentThread)
+{
+    PROCESS_ID  procId = StartTargetappWithParam(L"multithread");
+    Sleep(100);
+    ASSERT_NO_THROW(attachProcess(procId));
+
+    TargetProcessPtr  process;
+    ASSERT_NO_THROW(process = TargetProcess::getCurrent());
+
+    std::set<MEMOFFSET_64>  tebList;
+
+    unsigned long numberThreads = 0;
+    ASSERT_NO_THROW(numberThreads = process->getNumberThreads());
+
+    for (unsigned long i = 0; i < numberThreads; ++i)
+    {
+        TargetThreadPtr  thread;
+        ASSERT_NO_THROW(thread = process->getThreadByIndex(i));
+        ASSERT_NO_THROW(thread->setCurrent());
+        tebList.insert(process->getCurrentThread()->getTebOffset());
+    }
+
+    EXPECT_EQ(numberThreads, tebList.size());
+}
