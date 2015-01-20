@@ -26,6 +26,7 @@ public:
 
     static TargetProcessPtr  getCurrent();
     static TargetProcessPtr  getByIndex(unsigned long index);
+    static unsigned long getNumber();
 
 public:
 
@@ -55,6 +56,7 @@ public:
 
     static TargetThreadPtr getCurrent();
     static TargetThreadPtr getByIndex(unsigned long index);
+    static unsigned long getNumber();
 
 public:
 

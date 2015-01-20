@@ -147,6 +147,11 @@ TargetProcessPtr TargetProcess::getByIndex(unsigned long index)
     return boost::make_shared<TargetProcessImpl>(getProcessIdByIndex(index));
 }
 
+unsigned long TargetProcess::getNumber() 
+{
+    return getNumberProcesses();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class TargetThreadImpl : public TargetThread
@@ -154,9 +159,11 @@ class TargetThreadImpl : public TargetThread
 
 public:
 
-    TargetThreadImpl(THREAD_DEBUG_ID id) :
-        m_threadId(id)
-        {}
+    TargetThreadImpl(THREAD_DEBUG_ID id)
+    {
+        m_threadId = id;
+        m_processId = getCurrentProcessId();
+    }
 
     TargetThreadImpl() {
         m_threadId = getCurrentThreadId();
@@ -253,6 +260,11 @@ TargetThreadPtr TargetThread::getCurrent() {
 
 TargetThreadPtr TargetThread::getByIndex(unsigned long index) {
     return boost::make_shared<TargetThreadImpl>(getThreadIdByIndex(index));
+}
+
+unsigned long TargetThread::getNumber() 
+{
+    return getNumberThreads();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
