@@ -47,6 +47,15 @@ TEST_F(TargetTest, getPebOffset)
     EXPECT_NE(0, TargetProcess::getByIndex(1)->getPebOffset());
 }
 
+TEST_F(TargetTest, getExecutableName)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+    EXPECT_NE(L"", TargetProcess::getCurrent()->getExecutableName());
+    EXPECT_NE(L"", TargetProcess::getByIndex(0)->getExecutableName());
+    EXPECT_NE(L"", TargetProcess::getByIndex(1)->getExecutableName());
+}
+
 TEST_F(TargetTest, getNumberThreads)
 {
     PROCESS_ID  procId = StartTargetappWithParam(L"multithread");

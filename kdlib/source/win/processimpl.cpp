@@ -32,7 +32,24 @@ public:
 protected:
 
     virtual std::wstring getExecutableName() {
-        NOT_IMPLEMENTED();
+
+        ContextAutoRestore  contextRestore;
+
+        if (m_processId != getCurrentProcessId())
+            setCurrentProcessById(m_processId);
+
+        const ULONG bufChars = (MAX_PATH * 2);
+
+        boost::scoped_array< WCHAR > exeName(new WCHAR[bufChars]);
+        memset(&exeName[0], 0, bufChars * sizeof(WCHAR));
+
+        HRESULT  hres;
+        ULONG tmp;
+        hres = g_dbgMgr->system->GetCurrentProcessExecutableNameWide(&exeName[0], bufChars, &tmp);
+        if (FAILED(hres))
+            throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessExecutableNameWide", hres);
+
+        return std::wstring(&exeName[0]);
     }
 
     virtual PROCESS_ID getSystemId() 
