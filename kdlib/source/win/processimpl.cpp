@@ -3,6 +3,7 @@
 #include "kdlib/process.h"
 #include "kdlib/exceptions.h"
 #include "kdlib/dbgengine.h"
+#include "kdlib/breakpoint.h"
 
 #include "win/autoswitch.h"
 #include "win/dbgmgr.h"
@@ -141,12 +142,24 @@ protected:
         NOT_IMPLEMENTED();
     }
 
-    virtual unsigned long getNumberBreakpoints() {
-        NOT_IMPLEMENTED();
+    virtual unsigned long getNumberBreakpoints() 
+    {
+        ContextAutoRestore  contextRestore;
+
+        if (m_processId != getCurrentProcessId())
+            setCurrentProcessById(m_processId);
+
+        return getNumberBreakpoints();
     }
 
-    virtual BreakpointPtr getBreakpoint(unsigned long index) {
-        NOT_IMPLEMENTED();
+    virtual BreakpointPtr getBreakpoint(unsigned long index)
+    {
+        ContextAutoRestore  contextRestore;
+
+        if (m_processId != getCurrentProcessId())
+            setCurrentProcessById(m_processId);
+
+        return getBreakpointByIndex(index);
     }
 
 protected:
@@ -226,12 +239,13 @@ protected:
         return offset;
     }
 
-    virtual TargetProcessPtr getProcess() {
-        NOT_IMPLEMENTED();
+    virtual TargetProcessPtr getProcess()
+    {
+        return boost::make_shared<TargetProcessImpl>(m_processId);
     }
 
     virtual bool isCurrent() {
-        NOT_IMPLEMENTED();
+        return getCurrentProcessId() == m_processId && getCurrentThreadId() == m_threadId;
     }
     
     virtual void setCurrent() {

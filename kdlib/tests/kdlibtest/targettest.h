@@ -92,7 +92,8 @@ TEST_F(TargetTest, currentThread)
 
     TargetThreadPtr  targetThread;
     ASSERT_NO_THROW(targetThread = targetProcess->getCurrentThread());
-
+    
+    EXPECT_TRUE(targetThread->isCurrent());
     EXPECT_NE(0, targetThread->getSystemId());
     EXPECT_NE(0, targetThread->getTebOffset());
 }
@@ -116,8 +117,22 @@ TEST_F(TargetTest, setCurrentThread)
         TargetThreadPtr  thread;
         ASSERT_NO_THROW(thread = process->getThreadByIndex(i));
         ASSERT_NO_THROW(thread->setCurrent());
+        EXPECT_TRUE(thread->isCurrent());
         tebList.insert(process->getCurrentThread()->getTebOffset());
     }
 
     EXPECT_EQ(numberThreads, tebList.size());
+}
+
+TEST_F(TargetTest, threadGetProcess)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    TargetProcessPtr  targetProcess;
+    ASSERT_NO_THROW(targetProcess = TargetProcess::getCurrent());
+
+    TargetThreadPtr  targetThread;
+    ASSERT_NO_THROW(targetThread = targetProcess->getCurrentThread());
+
+    EXPECT_EQ(targetProcess->getSystemId(), targetThread->getProcess()->getSystemId());
 }
