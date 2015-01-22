@@ -149,7 +149,7 @@ protected:
         if (m_processId != getCurrentProcessId())
             setCurrentProcessById(m_processId);
 
-        return getNumberBreakpoints();
+        return kdlib::getNumberBreakpoints();
     }
 
     virtual BreakpointPtr getBreakpoint(unsigned long index)
@@ -159,7 +159,7 @@ protected:
         if (m_processId != getCurrentProcessId())
             setCurrentProcessById(m_processId);
 
-        return getBreakpointByIndex(index);
+        return kdlib::getBreakpointByIndex(index);
     }
 
 protected:
