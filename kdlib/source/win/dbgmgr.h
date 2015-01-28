@@ -96,6 +96,8 @@ public:
         *Mask |= DEBUG_EVENT_UNLOAD_MODULE;
         *Mask |= DEBUG_EVENT_CREATE_PROCESS;
         *Mask |= DEBUG_EVENT_EXIT_PROCESS;
+        *Mask |= DEBUG_EVENT_CREATE_THREAD;
+        *Mask |= DEBUG_EVENT_EXIT_THREAD;
 
         return S_OK;
     }
@@ -144,6 +146,16 @@ public:
 
     STDMETHOD(ExitProcess)(
         __in ULONG ExitCode
+        );
+
+    STDMETHOD(CreateThread)(
+        ULONG64  handle,
+        ULONG64  dataOffset,
+        ULONG64  startOffset
+        );
+
+    STDMETHOD(ExitThread)(
+        ULONG ExitCode
         );
 
     STDMETHOD(ChangeSymbolState)(

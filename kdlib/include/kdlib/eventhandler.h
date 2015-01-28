@@ -30,7 +30,18 @@ public:
         return DebugCallbackNoChange;
     }
 
+    virtual DebugCallbackResult onProcessStart(PROCESS_DEBUG_ID processid) {
+        return DebugCallbackNoChange;
+    }
+
     virtual DebugCallbackResult onProcessExit( PROCESS_DEBUG_ID processid, ProcessExitReason  reason, unsigned long exitCode ) {
+        return DebugCallbackNoChange;
+    }
+
+    virtual DebugCallbackResult onThreadStart() {
+        return DebugCallbackNoChange;
+    }
+    virtual DebugCallbackResult onThreadStop() {
         return DebugCallbackNoChange;
     }
 

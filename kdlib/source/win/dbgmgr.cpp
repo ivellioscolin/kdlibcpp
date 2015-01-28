@@ -296,6 +296,34 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
 
 ///////////////////////////////////////////////////////////////////
 
+HRESULT STDMETHODCALLTYPE DebugManager::CreateThread(
+    ULONG64  handle,
+    ULONG64  dataOffset,
+    ULONG64  startOffset
+    )
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    result = ProcessMonitor::createThread();
+
+    return ConvertCallbackResult(result);
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::ExitThread(
+    ULONG ExitCode
+    )
+{
+    DebugCallbackResult  result = DebugCallbackNoChange;
+
+    result = ProcessMonitor::stopThread();
+
+    return ConvertCallbackResult(result);
+}
+
+///////////////////////////////////////////////////////////////////
+
 HRESULT STDMETHODCALLTYPE DebugManager::ChangeSymbolState(
     __in ULONG Flags,
     __in ULONG64 Argument
