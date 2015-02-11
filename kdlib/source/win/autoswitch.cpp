@@ -11,6 +11,8 @@ ContextAutoRestore::ContextAutoRestore()
 {
     HRESULT      hres;
 
+    memset(&m_localContext, 0, sizeof(m_localContext));
+
     g_dbgMgr->setQuietNotiification(true);
 
     hres = g_dbgMgr->system->GetCurrentThreadId(&m_currentThread);
@@ -47,7 +49,7 @@ ContextAutoRestore::ContextAutoRestore()
 
     m_savedLocalContext = true;
 
-    hres = g_dbgMgr->symbols->GetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext));
+    hres = g_dbgMgr->symbols->GetScope(0ULL, &m_currentFrame, &m_localContext, sizeof(m_localContext));
     if (FAILED(hres))
     {
         m_savedLocalContext = false;
@@ -67,7 +69,7 @@ ContextAutoRestore::~ContextAutoRestore()
         g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0]);
 
     if (m_savedLocalContext)
-        g_dbgMgr->symbols->SetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext));
+        g_dbgMgr->symbols->SetScope(0ULL, &m_currentFrame, &m_localContext, sizeof(m_localContext));
 
     g_dbgMgr->setQuietNotiification(false);
 }

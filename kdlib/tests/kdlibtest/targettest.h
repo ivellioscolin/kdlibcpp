@@ -4,6 +4,7 @@
 #include "basefixture.h"
 
 #include "kdlib/process.h"
+#include "kdlib/stack.h"
 
 using namespace kdlib;
 
@@ -136,3 +137,22 @@ TEST_F(TargetTest, threadGetProcess)
 
     EXPECT_EQ(targetProcess->getSystemId(), targetThread->getProcess()->getSystemId());
 }
+
+
+TEST_F(TargetTest, restoreContext)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    Sleep(100);
+
+    ASSERT_NO_THROW(setCurrentStackFrameByIndex(2));
+
+    unsigned int processNumber = TargetProcess::getNumber();
+
+    for (unsigned int i = 0; i < processNumber; ++i)
+        TargetProcess::getByIndex(i)->getExecutableName();
+
+    EXPECT_EQ(2, getCurrentStackFrameNumber());
+}
+

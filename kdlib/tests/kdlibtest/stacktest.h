@@ -148,17 +148,21 @@ TEST_F(StackTest, ChangeCurrentFrame)
 
     EXPECT_NO_THROW( resetCurrentStackFrame() );
 
-    StackFramePtr  frame3;
-    ASSERT_NO_THROW( frame3 = getStack()->getFrame(0) );
+    ASSERT_NO_THROW( frame1 = getStack()->getFrame(0) );
 
-    StackFramePtr  frame4;
-    ASSERT_NO_THROW( frame4 = getCurrentStackFrame() );
-    EXPECT_TRUE( frame3->getIP() == frame4->getIP() && 
-        frame3->getRET() == frame4->getRET() &&
-        frame3->getFP() == frame4->getFP() &&
-        frame3->getSP() == frame4->getSP() );
+    ASSERT_NO_THROW( frame2 = getCurrentStackFrame() );
+    EXPECT_TRUE( frame1->getIP() == frame2->getIP() && 
+        frame1->getRET() == frame2->getRET() &&
+        frame1->getFP() == frame2->getFP() &&
+        frame1->getSP() == frame2->getSP() );
 
     EXPECT_EQ( 0, getCurrentStackFrameNumber() );
+
+    ASSERT_NO_THROW(setCurrentStackFrameByIndex(2));
+    EXPECT_EQ(2, getCurrentStackFrameNumber());
+
+    ASSERT_NO_THROW(debugCommand(L".frame 3"));
+    EXPECT_EQ(3, getCurrentStackFrameNumber());
 }
 
 TEST_F(StackTest, ChangeScopeEvent)

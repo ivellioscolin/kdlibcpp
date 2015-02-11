@@ -27,14 +27,7 @@ protected:
     std::vector<DEBUG_VALUE>  m_regValues;
     bool m_savedLocalContext;
     CONTEXT_STORAGE  m_localContext;
-
-
-
-    //    bool  m_savedRegCtx;
-    //
-    //    CONTEXT_STORAGE  m_localContext;
-    //
-    //    bool m_savedLocalContext;
+    DEBUG_STACK_FRAME  m_currentFrame;
 };
 
 
