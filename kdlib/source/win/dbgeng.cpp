@@ -183,7 +183,7 @@ PROCESS_DEBUG_ID startProcess( const std::wstring  &processName,  bool debugChil
         NULL, 
         NULL,
         FALSE, 
-        DETACHED_PROCESS | CREATE_SUSPENDED,
+        /* DETACHED_PROCESS |*/ CREATE_SUSPENDED | CREATE_NEW_CONSOLE,
         NULL,
         NULL,
         &startupInfo,
@@ -633,10 +633,8 @@ ExecutionStatus targetStepIn()
 
 ExecutionStatus targetStepOut()
 {
-    Disasm   disasm;
-
     g_dbgMgr->setQuietNotiification(true);
-    while (disasm.opmnemo() != L"ret")
+    while (Disasm().opmnemo() != L"ret")
         targetChangeStatus(DEBUG_STATUS_STEP_OVER);
     g_dbgMgr->setQuietNotiification(false);
 
