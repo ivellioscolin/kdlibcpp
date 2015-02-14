@@ -120,6 +120,7 @@ ExecutionStatus targetExecutionStatus();
 ExecutionStatus targetGo();
 ExecutionStatus targetStep();
 ExecutionStatus targetStepIn();
+ExecutionStatus tragetStepOut();
 void targetBreak();
 
 // events

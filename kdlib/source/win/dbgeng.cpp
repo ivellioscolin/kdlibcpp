@@ -8,6 +8,7 @@
 
 #include "kdlib/dbgengine.h"
 #include "kdlib/stack.h"
+#include "kdlib/disasm.h"
 
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
@@ -15,7 +16,8 @@
 #include "autoswitch.h"
 #include "moduleimp.h"
 #include "processmon.h"
-#include "threadctx.h"
+//#include "threadctx.h"
+
 
 namespace  kdlib {
 
@@ -612,12 +614,10 @@ ExecutionStatus targetChangeStatus( ULONG status )
     return waitForEvent();
 }
 
-
 ExecutionStatus targetGo()
 {
     return targetChangeStatus( DEBUG_STATUS_GO );
 }
-
 
 ExecutionStatus targetStep()
 {
@@ -627,6 +627,20 @@ ExecutionStatus targetStep()
 ExecutionStatus targetStepIn()
 {
     return targetChangeStatus( DEBUG_STATUS_STEP_INTO );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ExecutionStatus targetStepOut()
+{
+    Disasm   disasm;
+
+    g_dbgMgr->setQuietNotiification(true);
+    while (disasm.opmnemo() != L"ret")
+        targetChangeStatus(DEBUG_STATUS_STEP_OVER);
+    g_dbgMgr->setQuietNotiification(false);
+
+    return targetChangeStatus(DEBUG_STATUS_STEP_INTO);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
