@@ -643,6 +643,48 @@ ExecutionStatus targetStepOut()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ExecutionStatus sourceStepOver()
+{
+    ULONG  codeLevel;
+
+    HRESULT  hres;
+
+    hres = g_dbgMgr->control->GetCodeLevel(&codeLevel);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetCodeLevel", hres);
+
+    g_dbgMgr->control->SetCodeLevel(DEBUG_LEVEL_SOURCE);
+
+    ExecutionStatus exstatus = targetChangeStatus(DEBUG_STATUS_STEP_OVER);
+
+    g_dbgMgr->control->SetCodeLevel(codeLevel);
+
+    return exstatus;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ExecutionStatus sourceStepIn()
+{
+    ULONG  codeLevel;
+
+    HRESULT  hres;
+
+    hres = g_dbgMgr->control->GetCodeLevel(&codeLevel);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetCodeLevel", hres);
+
+    g_dbgMgr->control->SetCodeLevel(DEBUG_LEVEL_SOURCE);
+
+    ExecutionStatus exstatus = targetChangeStatus(DEBUG_STATUS_STEP_INTO);
+
+    g_dbgMgr->control->SetCodeLevel(codeLevel);
+
+    return exstatus;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void targetBreak()
 {
     HRESULT  hres;

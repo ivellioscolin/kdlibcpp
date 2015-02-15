@@ -123,6 +123,9 @@ ExecutionStatus targetStepIn();
 ExecutionStatus targetStepOut();
 void targetBreak();
 
+ExecutionStatus sourceStepIn();
+ExecutionStatus sourceStepOver();
+
 // events
 EventType getLastEventType();
 PROCESS_DEBUG_ID getLastEventProcessId();
