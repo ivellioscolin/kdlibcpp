@@ -11,8 +11,8 @@ ContextAutoRestore::ContextAutoRestore()
 {
     HRESULT      hres;
 
-    m_localContext = {};
-    m_currentFrame = {};
+    memset( &m_localContext, 0, sizeof(m_localContext) );
+    memset( &m_currentFrame, 0, sizeof(m_currentFrame) );
 
     g_dbgMgr->setQuietNotiification(true);
 
