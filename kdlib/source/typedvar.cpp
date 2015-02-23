@@ -370,8 +370,8 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
     {
         MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
 
-        if ( staticOffset == 0 )
-           NOT_IMPLEMENTED();
+        //if ( staticOffset == 0 )
+        //   NOT_IMPLEMENTED();
 
         return  loadTypedVar( fieldType, staticOffset );
     }
@@ -396,8 +396,8 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
     {
         MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(index);
 
-        if ( staticOffset == 0 )
-           NOT_IMPLEMENTED();
+        //if ( staticOffset == 0 )
+        //   NOT_IMPLEMENTED();
 
         return  loadTypedVar( fieldType, staticOffset );
     }
