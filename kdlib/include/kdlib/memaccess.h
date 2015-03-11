@@ -14,6 +14,7 @@ MEMOFFSET_64 addr64( MEMOFFSET_64 offset );
 void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr = false, unsigned long *readed = 0 );
 bool readMemoryUnsafe( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr = false, unsigned long *readed = 0 );
 bool isVaValid( MEMOFFSET_64 addr );
+bool isVaRegionValid(MEMOFFSET_64 addr, size_t length);
 bool compareMemory( MEMOFFSET_64 addr1, MEMOFFSET_64 addr2, size_t length, bool phyAddr = false );
 MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const std::vector<char>& pattern );
 MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOffset, unsigned long long &regionLength );

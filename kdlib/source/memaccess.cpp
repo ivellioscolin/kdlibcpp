@@ -109,6 +109,9 @@ template<typename T>
 std::vector<T>
 loadArray( MEMOFFSET_64 offset, unsigned long number, bool phyAddr )
 {
+    if (!phyAddr && !isVaRegionValid(offset, number*sizeof(T)))
+        throw MemoryException(offset);
+
     std::vector<T>   buffer(number);
 
     if (number)
@@ -191,9 +194,12 @@ std::vector<double> loadDoubles( MEMOFFSET_64 offset, unsigned long number, bool
 
 std::string loadChars( MEMOFFSET_64 offset, unsigned long number, bool phyAddr )
 {
-    std::vector<char>   buffer(number);
+    unsigned long  bufferSize = (unsigned long)(sizeof(std::vector<char>::value_type)*number);
 
-    unsigned long  bufferSize = (unsigned long)( sizeof(std::vector<char>::value_type)*buffer.size() );
+    if (!phyAddr && !isVaRegionValid(offset, bufferSize))
+        throw MemoryException(offset);
+
+    std::vector<char>   buffer(number);
     
     if (number)
         readMemory( offset, &buffer[0], bufferSize, phyAddr );
@@ -205,10 +211,13 @@ std::string loadChars( MEMOFFSET_64 offset, unsigned long number, bool phyAddr )
 
 std::wstring loadWChars( MEMOFFSET_64 offset, unsigned long number, bool phyAddr )
 {
+    unsigned long   bufferSize = (unsigned long)(sizeof(std::vector<wchar_t>::value_type)*number);
+
+    if (!phyAddr && !isVaRegionValid(offset, bufferSize))
+        throw MemoryException(offset);
+
     std::vector<wchar_t>   buffer(number);
 
-    unsigned long   bufferSize = (unsigned long )( sizeof(std::vector<wchar_t>::value_type)*buffer.size() );
-    
     if (number)
         readMemory( offset, &buffer[0], bufferSize, phyAddr );
 
@@ -237,6 +246,9 @@ std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long number, s
     offset = addr64( offset );
 
     psize = psize == 0 ? ptrSize() : psize;
+
+    if (!isVaRegionValid(offset, psize*number))
+        throw MemoryException(offset);
 
     std::vector<MEMOFFSET_64>   ptrs(number);
 

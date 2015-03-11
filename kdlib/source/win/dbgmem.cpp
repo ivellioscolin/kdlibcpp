@@ -122,6 +122,22 @@ bool isVaValid( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool isVaRegionValid(MEMOFFSET_64 addr, size_t length)
+{
+    HRESULT  hres;
+    ULONG64  validBase = 0;
+    ULONG  validSize = 0;
+
+    if (length > 0xFFFFFFFF)
+        return false;
+
+    hres = g_dbgMgr->dataspace->GetValidRegionVirtual(addr, length, &validBase, &validSize);
+
+    return hres == S_OK && validBase == addr && validSize == length;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string loadCStr( MEMOFFSET_64 offset )
 {
    const size_t    maxLength = 0x10000;

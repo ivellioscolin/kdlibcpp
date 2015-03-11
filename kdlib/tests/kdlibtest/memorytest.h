@@ -132,4 +132,22 @@ TEST_F( MemoryTest, testBigCStr )
     EXPECT_EQ( wcslen(bigWStr), loadWStr( m_targetModule->getSymbolVa(L"bigWStr") ).length() );
 }
 
+TEST_F(MemoryTest, InvalidBigRegion)
+{
+    MEMOFFSET_64  offset = m_targetModule->getSymbolVa(L"bigValue");
+
+    EXPECT_THROW(loadBytes(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadWords(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadDWords(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadQWords(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadSignBytes(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadSignWords(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadSignDWords(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadSignQWords(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadFloats(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadDoubles(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadChars(offset, 0xF0000000), MemoryException);
+    EXPECT_THROW(loadWChars(offset, 0xF0000000), MemoryException);
+}
+
 
