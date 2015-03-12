@@ -39,22 +39,14 @@ ContextAutoRestore::ContextAutoRestore()
     }
 
     m_regValues.resize(registerNumber);
-
-    m_savedRegCtx = true;
-
     hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0]);
-    if (FAILED(hres))
-    {
-        m_savedRegCtx = false;
-    }
+    m_savedRegCtx = (S_OK == hres);
 
-    m_savedLocalContext = true;
+    hres = g_dbgMgr->symbols->GetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext));   
+    m_savedLocalContext = (S_OK == hres);
 
     hres = g_dbgMgr->symbols->GetScope(0ULL, &m_currentFrame, NULL, 0);   
-    if (FAILED(hres))
-    {
-        m_savedLocalContext = false;
-    }
+    m_savedCurrentFrame = (S_OK == hres);
 }
 
 
@@ -70,7 +62,10 @@ ContextAutoRestore::~ContextAutoRestore()
         g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0]);
 
     if (m_savedLocalContext)
-        g_dbgMgr->symbols->SetScope(0ULL, &m_currentFrame, NULL, 0); 
+        g_dbgMgr->symbols->SetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext));
+
+    if (m_savedCurrentFrame)
+        g_dbgMgr->symbols->SetScope(0ULL, &m_currentFrame, NULL, 0);
 
     g_dbgMgr->setQuietNotiification(false);
 }
