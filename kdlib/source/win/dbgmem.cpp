@@ -232,25 +232,31 @@ MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const
 
 MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOffset, unsigned long long &regionLength )
 {
+
+    HRESULT  hres;
+
     beginOffset = addr64(beginOffset);
 
-    HRESULT  hres =  g_dbgMgr->dataspace->GetNextDifferentlyValidOffsetVirtual( beginOffset, &regionOffset );
+    do {
 
-    if ( FAILED(hres) )
-        throw DbgException( "findMemoryRegion: failed to find next region" );
+        MEMORY_BASIC_INFORMATION64  meminfo = {};
 
-    regionOffset =  addr64(regionOffset);
+        hres = g_dbgMgr->dataspace->QueryVirtual(beginOffset, &meminfo);
 
-    MEMORY_BASIC_INFORMATION64  meminfo = {};
+        if (FAILED(hres))
+            throw MemoryException(regionOffset);
 
-    hres = g_dbgMgr->dataspace->QueryVirtual( regionOffset, &meminfo );
+        if (meminfo.State == MEM_COMMIT)
+        {
+            regionOffset = addr64(meminfo.BaseAddress);
+            regionLength = meminfo.RegionSize;
 
-    if ( FAILED(hres) )
-       throw MemoryException( regionOffset );
+            return regionOffset;
+        }
 
-    regionLength = meminfo.RegionSize;
+        beginOffset = meminfo.BaseAddress + meminfo.RegionSize;
 
-    return regionOffset;
+    } while (TRUE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
