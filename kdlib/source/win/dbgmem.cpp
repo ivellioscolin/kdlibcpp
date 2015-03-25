@@ -235,6 +235,9 @@ MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOff
 
     HRESULT  hres;
 
+    if (isKernelDebugging())
+        throw DbgException("findMemoryRegion does not work in the kernel mode");
+
     beginOffset = addr64(beginOffset);
 
     do {
