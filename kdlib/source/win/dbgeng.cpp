@@ -770,17 +770,24 @@ ULONG getCurrentTime()
 void getSystemInfo( SystemInfo &systemInfo )
 {
     HRESULT  hres;
+    ULONG platformId;
 
-    ULONG platformId, servicePackNumber;
+    hres = g_dbgMgr->control->GetSystemVersionValues(
+        &platformId,
+        &systemInfo.majorVersion, 
+        &systemInfo.minorVersion,
+        NULL,
+        NULL);
 
-    systemInfo.buildNumber = 0;
-    systemInfo.majorVersion = 0;
-    systemInfo.minorVersion = 0;
+    if ( FAILED( hres ) )
+         throw DbgEngException( L"IDebugControl::GetSystemVersionValues", hres );
+
+    ULONG  majorBuild, servicePackNumber;
 
     hres = g_dbgMgr->control->GetSystemVersion(
         &platformId,
-        &systemInfo.majorVersion,
-        &systemInfo.minorVersion,
+        &majorBuild,
+        &systemInfo.buildNumber,
         NULL,
         0,
         NULL,
@@ -788,9 +795,6 @@ void getSystemInfo( SystemInfo &systemInfo )
         NULL,
         0,
         NULL );
-
-    if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugControl::GetSystemVersion", hres );
 
     ULONG strSize = 0;
 
@@ -806,7 +810,6 @@ void getSystemInfo( SystemInfo &systemInfo )
          throw DbgEngException( L"IDebugControl::GetSystemVersion", hres );
 
     systemInfo.buildDescription = std::wstring( &buffer[0] );
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
