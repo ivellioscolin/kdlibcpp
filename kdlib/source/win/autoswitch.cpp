@@ -19,28 +19,33 @@ ContextAutoRestore::ContextAutoRestore()
     hres = g_dbgMgr->system->GetCurrentThreadId(&m_currentThread);
     if (FAILED(hres))
     {
-        g_dbgMgr->setQuietNotiification(false);
-        throw DbgEngException(L"IDebugSystemObjects::GetCurrentThreadId", hres);
+        m_currentThread = -1;
     }
 
     hres = g_dbgMgr->system->GetCurrentProcessId(&m_currentProcess);
     if (FAILED(hres))
     {
-        g_dbgMgr->setQuietNotiification(false);
-        throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessId", hres);
+        m_currentProcess = -1;
+    }
+
+    hres = g_dbgMgr->system->GetCurrentSystemId(&m_currentSystem);
+    if (FAILED(hres))
+    {
+        m_currentSystem = -1;
     }
 
     ULONG  registerNumber = 0;
     hres = g_dbgMgr->registers->GetNumberRegisters(&registerNumber);
     if (FAILED(hres))
     {
-        g_dbgMgr->setQuietNotiification(false);
-        throw DbgEngException(L"IDebugRegister::GetNumberRegisters", hres);
+        m_savedRegCtx = false;
     }
-
-    m_regValues.resize(registerNumber);
-    hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0]);
-    m_savedRegCtx = (S_OK == hres);
+    else
+    {
+        m_regValues.resize(registerNumber);
+        hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0]);
+        m_savedRegCtx = (S_OK == hres);
+    }
 
     hres = g_dbgMgr->symbols->GetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext));   
     m_savedLocalContext = (S_OK == hres);
@@ -54,9 +59,14 @@ ContextAutoRestore::ContextAutoRestore()
 
 ContextAutoRestore::~ContextAutoRestore()
 {
-    g_dbgMgr->system->SetCurrentProcessId(m_currentProcess);
+    if (m_currentSystem != -1)
+        g_dbgMgr->system->SetCurrentSystemId(m_currentSystem);
 
-    g_dbgMgr->system->SetCurrentThreadId(m_currentThread);
+    if (m_currentProcess != -1)
+        g_dbgMgr->system->SetCurrentProcessId(m_currentProcess);
+
+    if (m_currentThread != -1)
+        g_dbgMgr->system->SetCurrentThreadId(m_currentThread);
 
     if (m_savedRegCtx)
         g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0]);

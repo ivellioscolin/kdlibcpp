@@ -11,6 +11,83 @@
 namespace kdlib
 {
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TargetSystemImpl : public TargetSystem
+{
+public:
+
+    TargetSystemImpl()
+    {
+       m_systemId = getCurrentSystemId();
+    }
+
+    TargetSystemImpl(SYSTEM_DEBUG_ID systemId):
+        m_systemId(systemId)
+        {}
+
+    virtual std::wstring getDescription() {
+
+        ContextAutoRestore  contextRestore;
+
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        return getSystemDesc();
+    }
+
+    virtual unsigned long getNumberProcesses() {
+
+        ContextAutoRestore  contextRestore;
+
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        return TargetProcess::getNumber();
+    }
+
+    virtual TargetProcessPtr getProcessByIndex(unsigned long index) {
+
+        ContextAutoRestore  contextRestore;
+
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        return TargetProcess::getByIndex(index);
+    }
+
+    virtual TargetProcessPtr getCurrentProcess() {
+
+        ContextAutoRestore  contextRestore;
+
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        return TargetProcess::getCurrent();
+    }
+
+private:
+
+    SYSTEM_DEBUG_ID   m_systemId;
+};
+
+
+unsigned long  TargetSystem::getNumber()
+{
+    return getNumberSystems();
+}
+
+TargetSystemPtr TargetSystem::getCurrent()
+{
+    return boost::make_shared<TargetSystemImpl>();
+}
+
+TargetSystemPtr TargetSystem::getByIndex(unsigned long index)
+{
+    return boost::make_shared<TargetSystemImpl>(getSystemIdByIndex(index));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class TargetProcessImpl : public TargetProcess

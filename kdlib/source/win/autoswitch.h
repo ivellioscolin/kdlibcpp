@@ -23,6 +23,7 @@ protected:
 
     THREAD_DEBUG_ID    m_currentThread;
     PROCESS_DEBUG_ID   m_currentProcess;
+    SYSTEM_DEBUG_ID    m_currentSystem;
 
     bool  m_savedRegCtx;
     std::vector<DEBUG_VALUE>  m_regValues;

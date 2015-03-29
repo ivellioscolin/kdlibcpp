@@ -156,3 +156,29 @@ TEST_F(TargetTest, restoreContext)
     EXPECT_EQ(2, getCurrentStackFrameNumber());
 }
 
+TEST_F(TargetTest, TwoSystem)
+{
+    PROCESS_DEBUG_ID   id;
+
+    ASSERT_NO_THROW(id = startProcess(L"targetapp.exe  processtest"));
+    ASSERT_NO_THROW(writeDump(L"targetapp0.dmp", false));
+    ASSERT_NO_THROW(terminateProcess(id));
+
+    ASSERT_NO_THROW(id = startProcess(L"targetapp.exe  processtest"));
+    ASSERT_NO_THROW(writeDump(L"targetapp1.dmp", false));
+    ASSERT_NO_THROW(terminateProcess(id));
+
+    ASSERT_NO_THROW(loadDump(L"targetapp0.dmp"));
+    ASSERT_NO_THROW(loadDump(L"targetapp1.dmp"));
+
+    EXPECT_LE(2UL, TargetSystem::getNumber());
+
+    for (unsigned long i = 0; i < TargetSystem::getNumber(); ++i)
+    {
+        TargetSystemPtr  targetSystem;
+        EXPECT_NO_THROW(targetSystem = TargetSystem::getByIndex(i));
+
+        std::wstring  targetSystemDesc;
+        EXPECT_NO_THROW(targetSystemDesc = targetSystem->getDescription());
+    }
+}

@@ -12,11 +12,34 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class TargetSystem;
+typedef boost::shared_ptr<TargetSystem>  TargetSystemPtr;
+
 class TargetProcess;
 typedef boost::shared_ptr<TargetProcess>  TargetProcessPtr;
 
 class TargetThread;
 typedef boost::shared_ptr<TargetThread>  TargetThreadPtr;
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TargetSystem
+{
+public: 
+
+    static TargetSystemPtr  getCurrent();
+    static TargetSystemPtr  getByIndex(unsigned long index);
+    static unsigned long getNumber();
+
+public:
+
+    virtual std::wstring  getDescription() = 0;
+    
+    virtual unsigned long getNumberProcesses() = 0;
+    virtual TargetProcessPtr getProcessByIndex(unsigned long index) = 0;
+    virtual TargetProcessPtr getCurrentProcess() = 0;
+
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

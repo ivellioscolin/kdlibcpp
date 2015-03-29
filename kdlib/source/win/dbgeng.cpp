@@ -835,6 +835,96 @@ void getSystemCrashInfo( SystemCrashInfo &crashInfo )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+unsigned long  getNumberSystems()
+{
+    HRESULT  hres;
+    ULONG  number;
+
+    hres = g_dbgMgr->system->GetNumberSystems(&number);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects::GetNumberSystems", hres );
+
+    return number;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SYSTEM_DEBUG_ID getSystemIdByIndex(unsigned long index)
+{
+    HRESULT  hres;
+    ULONG systemId;
+
+    hres = g_dbgMgr->system->GetSystemIdsByIndex(index, 1, &systemId);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects2::GetSystemIdsByIndex", hres);
+
+    return SYSTEM_DEBUG_ID(systemId);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SYSTEM_DEBUG_ID getCurrentSystemId()
+{
+    HRESULT      hres;
+    ULONG        id;
+
+    hres = g_dbgMgr->system->GetCurrentSystemId(&id);
+    if (FAILED(hres))
+    {
+        ULONG   firstId;
+
+        hres = g_dbgMgr->system->GetSystemIdsByIndex(0, 1, &firstId);
+        if (FAILED(hres))
+            throw DbgEngException(L"IDebugSystemObjects2::GetSystemIdsByIndex", hres);
+
+        hres = g_dbgMgr->system->SetCurrentSystemId(firstId);
+        if (FAILED(hres))
+            throw DbgEngException(L"IDebugSystemObjects2::SetCurrentSystemId", hres);
+
+        hres = g_dbgMgr->system->GetCurrentSystemId(&id);
+        if (FAILED(hres))
+            throw DbgEngException(L"IDebugSystemObjects::GetCurrentSystemId", hres);
+    }
+
+    return  SYSTEM_DEBUG_ID(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring getSystemDesc(SYSTEM_DEBUG_ID id)
+{
+    ContextAutoRestore  contextRestore;
+
+    if (id != CURRENT_SYSTEM_ID && id != getCurrentSystemId())
+        setCurrentSystemById(id);
+
+    const ULONG bufChars = (MAX_PATH * 2);
+
+    boost::scoped_array< WCHAR > desc(new WCHAR[bufChars]);
+    memset(&desc[0], 0, bufChars * sizeof(WCHAR));
+
+    HRESULT  hres;
+    ULONG tmp;
+    hres = g_dbgMgr->system->GetCurrentSystemServerNameWide(&desc[0], bufChars, &tmp);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects2::GetCurrentSystemServerNameWide", hres);
+
+    return std::wstring(&desc[0]);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentSystemById(SYSTEM_DEBUG_ID id)
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->system->SetCurrentSystemId(id);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObject2::SetCurrentSystemId", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 unsigned long getNumberProcesses()
 {
     //HRESULT  hres;
