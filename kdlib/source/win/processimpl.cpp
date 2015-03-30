@@ -37,6 +37,37 @@ public:
         return getSystemDesc();
     }
 
+
+    virtual bool isDumpAnalyzing() {
+
+        ContextAutoRestore  contextRestore;
+
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        return isDumpAnalyzing();
+    }
+
+    virtual bool isKernelDebugging() {
+
+        ContextAutoRestore  contextRestore;
+
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        return isKernelDebugging();
+    }
+
+    virtual bool is64bitSystem() {
+        
+        ContextAutoRestore  contextRestore;
+
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        return is64bitSystem();
+    }
+
     virtual unsigned long getNumberProcesses() {
 
         ContextAutoRestore  contextRestore;
