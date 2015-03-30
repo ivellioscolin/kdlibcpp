@@ -30,40 +30,47 @@ public:
     virtual std::wstring getDescription() {
 
         ContextAutoRestore  contextRestore;
+        {
 
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
 
-        return getSystemDesc();
+            return  getSystemDesc();
+        }
     }
 
 
     virtual bool isDumpAnalyzing() {
 
         ContextAutoRestore  contextRestore;
+        {
 
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
 
-        return isDumpAnalyzing();
+            return isDumpAnalyzing();
+       }
     }
 
     virtual bool isKernelDebugging() {
 
         ContextAutoRestore  contextRestore;
+        {
 
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
 
-        return isKernelDebugging();
+            return isKernelDebugging();
+        }
     }
 
     virtual bool is64bitSystem() {
         
         ContextAutoRestore  contextRestore;
-
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
+        {
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
+        }
 
         return is64bitSystem();
     }
@@ -79,31 +86,37 @@ public:
     virtual unsigned long getNumberProcesses() {
 
         ContextAutoRestore  contextRestore;
+        {
 
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
 
-        return TargetProcess::getNumber();
+            return TargetProcess::getNumber();
+        }
     }
 
     virtual TargetProcessPtr getProcessByIndex(unsigned long index) {
 
         ContextAutoRestore  contextRestore;
+        {
 
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
 
-        return TargetProcess::getByIndex(index);
+            return TargetProcess::getByIndex(index);
+        }
     }
 
     virtual TargetProcessPtr getCurrentProcess() {
 
         ContextAutoRestore  contextRestore;
+        {
 
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
 
-        return TargetProcess::getCurrent();
+            return TargetProcess::getCurrent();
+        }
     }
 
 private:
@@ -154,55 +167,59 @@ protected:
     virtual std::wstring getExecutableName() {
 
         ContextAutoRestore  contextRestore;
+        {
 
-        switchContext();
+            switchContext();
 
-        const ULONG bufChars = (MAX_PATH * 2);
+            const ULONG bufChars = (MAX_PATH * 2);
 
-        boost::scoped_array< WCHAR > exeName(new WCHAR[bufChars]);
-        memset(&exeName[0], 0, bufChars * sizeof(WCHAR));
+            boost::scoped_array< WCHAR > exeName(new WCHAR[bufChars]);
+            memset(&exeName[0], 0, bufChars * sizeof(WCHAR));
 
-        HRESULT  hres;
-        ULONG tmp;
-        hres = g_dbgMgr->system->GetCurrentProcessExecutableNameWide(&exeName[0], bufChars, &tmp);
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessExecutableNameWide", hres);
+            HRESULT  hres;
+            ULONG tmp;
+            hres = g_dbgMgr->system->GetCurrentProcessExecutableNameWide(&exeName[0], bufChars, &tmp);
+            if (FAILED(hres))
+                throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessExecutableNameWide", hres);
 
-        return std::wstring(&exeName[0]);
+            return std::wstring(&exeName[0]);
+        }
     }
 
     virtual PROCESS_ID getSystemId() 
     {
         ContextAutoRestore  contextRestore;
+        {
+            switchContext();
 
-        switchContext();
+            HRESULT  hres;
+            ULONG  systemId;
 
-        HRESULT  hres;
-        ULONG  systemId;
+            hres = g_dbgMgr->system->GetCurrentProcessSystemId(&systemId);
 
-        hres = g_dbgMgr->system->GetCurrentProcessSystemId(&systemId);
+            if (FAILED(hres))
+                throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessSystemId", hres);
 
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessSystemId", hres);
-
-        return systemId;
+            return systemId;
+        }
     }
 
     virtual MEMOFFSET_64 getPebOffset() 
     {
         ContextAutoRestore  contextRestore;
+        {
+            switchContext();
 
-        switchContext();
+            HRESULT  hres;
+            MEMOFFSET_64  offset;
 
-        HRESULT  hres;
-        MEMOFFSET_64  offset;
+            hres = g_dbgMgr->system->GetCurrentProcessDataOffset(&offset);
 
-        hres = g_dbgMgr->system->GetCurrentProcessDataOffset(&offset);
+            if (FAILED(hres))
+                throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessSystemId", hres);
 
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::GetCurrentProcessSystemId", hres);
-
-        return offset;
+            return offset;
+        }
     }
 
     virtual bool isCurrent() {
@@ -216,35 +233,38 @@ protected:
     virtual unsigned long getNumberThreads()
     {
         ContextAutoRestore  contextRestore;
+        {
+            switchContext();
 
-        switchContext();
+            HRESULT     hres;
+            ULONG       number;
 
-        HRESULT     hres;
-        ULONG       number;
+            hres = g_dbgMgr->system->GetNumberThreads(&number);
+            if (FAILED(hres))
+                throw DbgEngException(L"IDebugSystemObjects::GetNumberThreads", hres);
 
-        hres = g_dbgMgr->system->GetNumberThreads(&number);
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::GetNumberThreads", hres);
-
-        return number;
+            return number;
+        }
     }
 
     virtual TargetThreadPtr getThreadByIndex(unsigned long index)
     {
         ContextAutoRestore  contextRestore;
+        {
+            switchContext();
 
-        switchContext();
-
-        return TargetThread::getByIndex(index);
+            return TargetThread::getByIndex(index);
+        }
     }
 
     virtual TargetThreadPtr getCurrentThread()
     {
         ContextAutoRestore   contextRestore;
+        {
+            switchContext();
 
-        switchContext();
-
-        return TargetThread::getCurrent();
+            return TargetThread::getCurrent();
+        }
     }
 
     virtual unsigned long getNumberModules() {
@@ -258,19 +278,19 @@ protected:
     virtual unsigned long getNumberBreakpoints() 
     {
         ContextAutoRestore  contextRestore;
-
-        switchContext();
-
-        return kdlib::getNumberBreakpoints();
+        {
+            switchContext();
+            return kdlib::getNumberBreakpoints();
+        }
     }
 
     virtual BreakpointPtr getBreakpoint(unsigned long index)
     {
         ContextAutoRestore  contextRestore;
-
-        switchContext();
-
-        return kdlib::getBreakpointByIndex(index);
+        {
+            switchContext();
+            return kdlib::getBreakpointByIndex(index);
+        }
     }
 
 protected:
@@ -331,35 +351,37 @@ protected:
     virtual THREAD_ID getSystemId() 
     {
         ContextAutoRestore  contextRestore;
+        {
+            switchContext();
 
-        switchContext();
+            HRESULT  hres;
+            ULONG  systemId;
 
-        HRESULT  hres;
-        ULONG  systemId;
+            hres = g_dbgMgr->system->GetCurrentThreadSystemId(&systemId);
 
-        hres = g_dbgMgr->system->GetCurrentThreadSystemId(&systemId);
+            if (FAILED(hres))
+                throw DbgEngException(L"IDebugSystemObjects::GetCurrentThreadSystemId", hres);
 
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::GetCurrentThreadSystemId", hres);
-
-        return systemId;
+            return systemId;
+        }
     }
 
     virtual MEMOFFSET_64 getTebOffset() 
     {
         ContextAutoRestore  contextRestore;
+        {
+            switchContext();
 
-        switchContext();
+            HRESULT  hres;
+            MEMOFFSET_64  offset;
 
-        HRESULT  hres;
-        MEMOFFSET_64  offset;
+            hres = g_dbgMgr->system->GetCurrentThreadDataOffset(&offset);
 
-        hres = g_dbgMgr->system->GetCurrentThreadDataOffset(&offset);
+            if (FAILED(hres))
+                throw DbgEngException(L"IDebugSystemObjects::GetCurrentThreadSystemId", hres);
 
-        if (FAILED(hres))
-            throw DbgEngException(L"IDebugSystemObjects::GetCurrentThreadSystemId", hres);
-
-        return offset;
+            return offset;
+        }
     }
 
     virtual TargetProcessPtr getProcess()
