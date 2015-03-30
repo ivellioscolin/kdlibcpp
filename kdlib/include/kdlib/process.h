@@ -37,6 +37,9 @@ public:
     virtual bool isDumpAnalyzing() = 0;
     virtual bool isKernelDebugging() = 0;
     virtual bool is64bitSystem() = 0;
+
+    virtual bool isCurrent() = 0;
+    virtual void setCurrent() = 0;
     
     virtual unsigned long getNumberProcesses() = 0;
     virtual TargetProcessPtr getProcessByIndex(unsigned long index) = 0;

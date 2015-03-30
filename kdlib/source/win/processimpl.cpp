@@ -68,6 +68,14 @@ public:
         return is64bitSystem();
     }
 
+    virtual bool isCurrent() {
+        return getCurrentSystemId() == m_systemId;
+    }
+
+    virtual void setCurrent() {
+        NOT_IMPLEMENTED();
+    }
+
     virtual unsigned long getNumberProcesses() {
 
         ContextAutoRestore  contextRestore;
@@ -129,11 +137,14 @@ public:
     TargetProcessImpl() 
     {
         m_processId = getCurrentProcessId();
+        m_systemId = getCurrentSystemId();
     }
 
-    TargetProcessImpl(PROCESS_DEBUG_ID processId) :
-        m_processId(processId)
-    {}
+    TargetProcessImpl(PROCESS_DEBUG_ID processId) 
+    {
+        m_processId = processId;
+        m_systemId = getCurrentSystemId();
+    }
 
     virtual ~TargetProcessImpl() 
     {}
@@ -144,8 +155,7 @@ protected:
 
         ContextAutoRestore  contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         const ULONG bufChars = (MAX_PATH * 2);
 
@@ -165,8 +175,7 @@ protected:
     {
         ContextAutoRestore  contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         HRESULT  hres;
         ULONG  systemId;
@@ -183,8 +192,7 @@ protected:
     {
         ContextAutoRestore  contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         HRESULT  hres;
         MEMOFFSET_64  offset;
@@ -198,7 +206,7 @@ protected:
     }
 
     virtual bool isCurrent() {
-        NOT_IMPLEMENTED();
+        return getCurrentSystemId() == m_systemId && getCurrentProcessId() == m_processId;
     }
 
     virtual void setCurrent() {
@@ -209,8 +217,7 @@ protected:
     {
         ContextAutoRestore  contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         HRESULT     hres;
         ULONG       number;
@@ -226,8 +233,7 @@ protected:
     {
         ContextAutoRestore  contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         return TargetThread::getByIndex(index);
     }
@@ -236,8 +242,7 @@ protected:
     {
         ContextAutoRestore   contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         return TargetThread::getCurrent();
     }
@@ -254,8 +259,7 @@ protected:
     {
         ContextAutoRestore  contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         return kdlib::getNumberBreakpoints();
     }
@@ -264,15 +268,24 @@ protected:
     {
         ContextAutoRestore  contextRestore;
 
-        if (m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
+        switchContext();
 
         return kdlib::getBreakpointByIndex(index);
     }
 
 protected:
 
+    void switchContext()
+    {
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
+        if (m_processId != getCurrentProcessId())
+            setCurrentProcessById(m_processId);
+    }
+
     PROCESS_DEBUG_ID  m_processId;
+    SYSTEM_DEBUG_ID  m_systemId;
 };
 
 TargetProcessPtr TargetProcess::getCurrent()
@@ -301,11 +314,13 @@ public:
     {
         m_threadId = id;
         m_processId = getCurrentProcessId();
+        m_systemId = getCurrentSystemId();
     }
 
     TargetThreadImpl() {
         m_threadId = getCurrentThreadId();
         m_processId = getCurrentProcessId();
+        m_systemId = getCurrentSystemId();
     }
 
     virtual ~TargetThreadImpl() {
@@ -353,10 +368,11 @@ protected:
     }
 
     virtual bool isCurrent() {
-        return getCurrentProcessId() == m_processId && getCurrentThreadId() == m_threadId;
+        return getCurrentSystemId() == m_systemId && getCurrentProcessId() == m_processId && getCurrentThreadId() == m_threadId;
     }
     
     virtual void setCurrent() {
+        setCurrentSystemById(m_systemId);
         setCurrentProcessById(m_processId);
         setCurrentThreadById(m_threadId);
     }
@@ -381,6 +397,9 @@ protected:
 
     void switchContext()
     {
+        if (m_systemId != getCurrentSystemId())
+            setCurrentSystemById(m_systemId);
+
         if (m_processId != getCurrentProcessId())
             setCurrentProcessById(m_processId);
 
@@ -391,6 +410,7 @@ protected:
 
     THREAD_DEBUG_ID  m_threadId;
     PROCESS_DEBUG_ID  m_processId;
+    SYSTEM_DEBUG_ID  m_systemId;
 };
 
 
