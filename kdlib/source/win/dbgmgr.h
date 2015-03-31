@@ -44,10 +44,12 @@ public:
         return m_remote;
     }
 
-    void setQuietNotiification(bool quiet) {
+    bool setQuietNotiification(bool quiet) {
+        bool previous = m_quietNotification;
         m_quietNotification = quiet;
+        return previous;
     }
-
+    
 private:
 
     ULONG                       m_previousExecutionStatus;

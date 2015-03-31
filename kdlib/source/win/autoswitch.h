@@ -21,6 +21,8 @@ public:
 
 protected:
 
+    bool  m_quietState;
+
     THREAD_DEBUG_ID    m_currentThread;
     PROCESS_DEBUG_ID   m_currentProcess;
     SYSTEM_DEBUG_ID    m_currentSystem;

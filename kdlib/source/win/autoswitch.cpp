@@ -14,7 +14,7 @@ ContextAutoRestore::ContextAutoRestore()
     memset( &m_localContext, 0, sizeof(m_localContext) );
     memset( &m_currentFrame, 0, sizeof(m_currentFrame) );
 
-    g_dbgMgr->setQuietNotiification(true);
+    m_quietState = g_dbgMgr->setQuietNotiification(true);
 
     hres = g_dbgMgr->system->GetCurrentThreadId(&m_currentThread);
     if (FAILED(hres))
@@ -77,7 +77,7 @@ ContextAutoRestore::~ContextAutoRestore()
     if (m_savedCurrentFrame)
         g_dbgMgr->symbols->SetScope(0ULL, &m_currentFrame, NULL, 0);
 
-    g_dbgMgr->setQuietNotiification(false);
+    g_dbgMgr->setQuietNotiification(m_quietState);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
