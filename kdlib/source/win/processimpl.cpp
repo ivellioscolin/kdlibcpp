@@ -35,7 +35,7 @@ public:
             if (m_systemId != getCurrentSystemId())
                 setCurrentSystemById(m_systemId);
 
-            return  getSystemDesc();
+            return  kdlib::getSystemDesc();
         }
     }
 
@@ -48,7 +48,7 @@ public:
             if (m_systemId != getCurrentSystemId())
                 setCurrentSystemById(m_systemId);
 
-            return isDumpAnalyzing();
+            return kdlib::isDumpAnalyzing();
        }
     }
 
@@ -60,7 +60,7 @@ public:
             if (m_systemId != getCurrentSystemId())
                 setCurrentSystemById(m_systemId);
 
-            return isKernelDebugging();
+            return kdlib::isKernelDebugging();
         }
     }
 
@@ -72,7 +72,7 @@ public:
                 setCurrentSystemById(m_systemId);
         }
 
-        return is64bitSystem();
+        return kdlib::is64bitSystem();
     }
 
     virtual bool isCurrent() {
