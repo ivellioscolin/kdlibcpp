@@ -782,7 +782,7 @@ void getSystemInfo( SystemInfo &systemInfo )
     if ( FAILED( hres ) )
          throw DbgEngException( L"IDebugControl::GetSystemVersionValues", hres );
 
-    ULONG  majorBuild, servicePackNumber;
+    ULONG  majorBuild;
 
     hres = g_dbgMgr->control->GetSystemVersion(
         &platformId,
@@ -791,7 +791,7 @@ void getSystemInfo( SystemInfo &systemInfo )
         NULL,
         0,
         NULL,
-        &servicePackNumber,
+        &systemInfo.servicePackNumber,
         NULL,
         0,
         NULL );
@@ -2267,7 +2267,7 @@ unsigned long getCurrentStackFrameNumber()
     std::vector<FrameDesc>  stackTrace;
     getStackTrace(stackTrace);
 
-    for ( size_t t = 0; t < stackTrace.size(); t++)
+    for ( unsigned long t = 0; t < stackTrace.size(); t++)
     {
         if ( stackTrace[t].instructionOffset == stackFrame.InstructionOffset &&
             stackTrace[t].returnOffset == stackFrame.ReturnOffset &&

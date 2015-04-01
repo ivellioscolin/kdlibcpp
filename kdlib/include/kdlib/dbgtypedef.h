@@ -81,6 +81,7 @@ enum EventType {
 struct SystemInfo {
     unsigned long  majorVersion;
     unsigned long  minorVersion;
+    unsigned long  servicePackNumber;
     unsigned long  buildNumber;
     std::wstring  buildDescription;
 };
