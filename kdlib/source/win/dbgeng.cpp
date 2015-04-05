@@ -927,16 +927,14 @@ void setCurrentSystemById(SYSTEM_DEBUG_ID id)
 
 unsigned long getNumberProcesses()
 {
-    //HRESULT  hres;
-    //ULONG  number;
+    HRESULT  hres;
+    ULONG  number;
 
-    //hres = g_dbgMgr->system->GetNumberProcesses( &number );
-    //if ( FAILED( hres ) )
-    //    throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
+    hres = g_dbgMgr->system->GetNumberProcesses( &number );
+    if ( FAILED( hres ) )
+        throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
 
-    //return number;
-
-    return ProcessMonitor::getNumberProcesses();
+    return number;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -987,7 +985,7 @@ PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index)
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugSystemObjects::GetProcessIdsByIndex failed", hres );
 
-    return THREAD_DEBUG_ID(processId);
+    return PROCESS_DEBUG_ID(processId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
