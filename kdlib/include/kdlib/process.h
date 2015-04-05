@@ -27,13 +27,16 @@ class TargetSystem
 {
 public: 
 
-    static TargetSystemPtr  getCurrent();
-    static TargetSystemPtr  getByIndex(unsigned long index);
+    static TargetSystemPtr getCurrent();
+    static TargetSystemPtr getByIndex(unsigned long index);
+    static TargetSystemPtr getById(SYSTEM_DEBUG_ID id);
     static unsigned long getNumber();
 
 public:
 
     virtual std::wstring  getDescription() = 0;
+    virtual SYSTEM_DEBUG_ID getId() = 0;
+
     virtual bool isDumpAnalyzing() = 0;
     virtual bool isKernelDebugging() = 0;
     virtual bool is64bitSystem() = 0;
@@ -55,6 +58,7 @@ public:
 
     static TargetProcessPtr  getCurrent();
     static TargetProcessPtr  getByIndex(unsigned long index);
+    static TargetProcessPtr  getById(PROCESS_DEBUG_ID id);
     static unsigned long getNumber();
 
 public:
@@ -62,6 +66,7 @@ public:
     virtual std::wstring getExecutableName() = 0;
     virtual PROCESS_ID getSystemId() = 0;
     virtual MEMOFFSET_64 getPebOffset() = 0;
+    virtual PROCESS_DEBUG_ID getId() = 0;
 
     virtual bool isCurrent() = 0;
     virtual void setCurrent() = 0;
@@ -85,10 +90,12 @@ public:
 
     static TargetThreadPtr getCurrent();
     static TargetThreadPtr getByIndex(unsigned long index);
+    static TargetThreadPtr getById(THREAD_DEBUG_ID id);
     static unsigned long getNumber();
 
 public:
-
+    
+    virtual THREAD_DEBUG_ID getId() = 0;
     virtual THREAD_ID getSystemId() = 0;
     virtual MEMOFFSET_64 getTebOffset() = 0;
     virtual TargetProcessPtr getProcess() = 0;

@@ -39,6 +39,9 @@ public:
         }
     }
 
+    virtual SYSTEM_DEBUG_ID getId() {
+        return m_systemId;
+    }
 
     virtual bool isDumpAnalyzing() {
 
@@ -140,6 +143,11 @@ TargetSystemPtr TargetSystem::getByIndex(unsigned long index)
     return boost::make_shared<TargetSystemImpl>(getSystemIdByIndex(index));
 }
 
+TargetSystemPtr TargetSystem::getById(SYSTEM_DEBUG_ID id)
+{
+    return boost::make_shared<TargetSystemImpl>(id);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class TargetProcessImpl : public TargetProcess
@@ -164,6 +172,10 @@ public:
 
 protected:
 
+    virtual PROCESS_DEBUG_ID getId() {
+        return m_processId;
+    }
+    
     virtual std::wstring getExecutableName() {
 
         ContextAutoRestore  contextRestore;
@@ -318,6 +330,11 @@ TargetProcessPtr TargetProcess::getByIndex(unsigned long index)
     return boost::make_shared<TargetProcessImpl>(getProcessIdByIndex(index));
 }
 
+TargetProcessPtr TargetProcess::getById(PROCESS_DEBUG_ID id)
+{
+    return boost::make_shared<TargetProcessImpl>(id);
+}
+
 unsigned long TargetProcess::getNumber() 
 {
     return getNumberProcesses();
@@ -347,6 +364,11 @@ public:
     }
 
 protected:
+
+    virtual SYSTEM_DEBUG_ID getId()
+    {
+        return m_threadId;
+    }
 
     virtual THREAD_ID getSystemId() 
     {
@@ -442,6 +464,11 @@ TargetThreadPtr TargetThread::getCurrent() {
 
 TargetThreadPtr TargetThread::getByIndex(unsigned long index) {
     return boost::make_shared<TargetThreadImpl>(getThreadIdByIndex(index));
+}
+
+TargetThreadPtr TargetThread::getById(THREAD_DEBUG_ID id)
+{
+    return boost::make_shared<TargetThreadImpl>(id);
 }
 
 unsigned long TargetThread::getNumber() 
