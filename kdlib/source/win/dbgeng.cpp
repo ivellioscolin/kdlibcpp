@@ -842,7 +842,7 @@ unsigned long  getNumberSystems()
 
     hres = g_dbgMgr->system->GetNumberSystems(&number);
     if (FAILED(hres))
-        throw DbgEngException(L"IDebugSystemObjects::GetNumberSystems", hres );
+        return 0UL;
 
     return number;
 }
@@ -931,8 +931,8 @@ unsigned long getNumberProcesses()
     ULONG  number;
 
     hres = g_dbgMgr->system->GetNumberProcesses( &number );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetNumberProcesses", hres );
+    if (FAILED(hres))
+        return 0UL;
 
     return number;
 }
@@ -1153,8 +1153,8 @@ unsigned long getNumberThreads()
 
     hres = g_dbgMgr->system->GetNumberThreads( &number );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetNumberThreads", hres ); 
-        
+        return 0UL;
+
     return number;
 }
 
