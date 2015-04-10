@@ -148,7 +148,24 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
     __in ULONG64 Argument )
 {
 
-    if ( ((Flags & DEBUG_CES_CURRENT_THREAD) != 0) &&
+    if (((Flags & DEBUG_CES_EXECUTION_STATUS) != 0) &&
+        ((Argument & DEBUG_STATUS_INSIDE_WAIT) == 0) &&
+        (ULONG)Argument != m_previousExecutionStatus)
+    {
+        if (m_previousExecutionStatus == DEBUG_STATUS_NO_DEBUGGEE &&
+            (ULONG)Argument != DEBUG_STATUS_GO)
+            return S_OK;
+
+        ExecutionStatus  executionStatus = ConvertDbgEngineExecutionStatus((ULONG)Argument);
+
+        if (!m_quietNotification)
+            ProcessMonitor::executionStatusChange(executionStatus);
+
+        m_previousExecutionStatus = (ULONG)Argument;
+    }
+
+    if (m_previousExecutionStatus == DEBUG_STATUS_BREAK &&
+        ((Flags & DEBUG_CES_CURRENT_THREAD) != 0) &&
         (m_previousCurrentThread != (ULONG)Argument) &&
         ( DEBUG_ANY_ID != (ULONG)Argument))
     {
@@ -158,22 +175,6 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
             ProcessMonitor::currentThreadChange(threadId);
 
         m_previousCurrentThread = threadId;
-    }
-
-    if ( ( ( Flags & DEBUG_CES_EXECUTION_STATUS ) != 0 ) &&
-         ( ( Argument & DEBUG_STATUS_INSIDE_WAIT ) == 0 ) &&
-         (ULONG)Argument != m_previousExecutionStatus )
-    {
-        if ( m_previousExecutionStatus == DEBUG_STATUS_NO_DEBUGGEE &&
-             (ULONG)Argument != DEBUG_STATUS_GO )
-                return S_OK;
-
-        ExecutionStatus  executionStatus = ConvertDbgEngineExecutionStatus( (ULONG)Argument );
-
-        if (!m_quietNotification)
-            ProcessMonitor::executionStatusChange(executionStatus);
-
-        m_previousExecutionStatus = (ULONG)Argument;
     }
 
     if ((Flags & DEBUG_CES_BREAKPOINTS) != 0)
