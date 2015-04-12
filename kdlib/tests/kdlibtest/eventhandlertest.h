@@ -104,15 +104,17 @@ TEST_F(EventHandlerTest, ChangeCurrentThread)
 {
     ASSERT_NO_THROW(startProcess(L"targetapp.exe  processtest"));
 
+    kdlib::THREAD_DEBUG_ID  id = getThreadIdByIndex(0);
+    kdlib::setCurrentThreadById(id);
+    unsigned long  threadNumber = kdlib::getNumberThreads();
+
     EventHandlerMock    eventHandler;
     DefaultValue<kdlib::DebugCallbackResult>::Set(DebugCallbackNoChange);
 
-    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(2);
+    EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(threadNumber-1);
     EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
 
-    unsigned long  threadNumber = kdlib::getNumberThreads();
-
-    for (unsigned int i = 0; i < threadNumber; ++i)
+    for (unsigned int i = 1; i < threadNumber; ++i)
     {
         kdlib::THREAD_DEBUG_ID  id = getThreadIdByIndex(i);
         kdlib::setCurrentThreadById(id);
