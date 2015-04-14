@@ -266,6 +266,9 @@ extern listEntry  g_listHead;
 
 extern listEntry deadlockEntry;
 
+extern std::string  g_stdString;
+extern std::wstring  g_stdWString;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 

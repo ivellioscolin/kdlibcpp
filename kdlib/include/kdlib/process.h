@@ -46,6 +46,7 @@ public:
     
     virtual unsigned long getNumberProcesses() = 0;
     virtual TargetProcessPtr getProcessByIndex(unsigned long index) = 0;
+    virtual TargetProcessPtr getProcessById(PROCESS_DEBUG_ID id) = 0;
     virtual TargetProcessPtr getCurrentProcess() = 0;
 
 };
@@ -73,6 +74,7 @@ public:
 
     virtual unsigned long getNumberThreads() = 0;
     virtual TargetThreadPtr getThreadByIndex(unsigned long index) = 0;
+    virtual TargetThreadPtr getThreadById(THREAD_DEBUG_ID id) = 0;
     virtual TargetThreadPtr getCurrentThread() = 0;
 
     virtual unsigned long getNumberModules() = 0;

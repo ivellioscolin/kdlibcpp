@@ -110,6 +110,16 @@ public:
         }
     }
 
+    virtual TargetProcessPtr getProcessById(PROCESS_DEBUG_ID id) {
+        ContextAutoRestore  contextRestore;
+        {
+            if (m_systemId != getCurrentSystemId())
+                setCurrentSystemById(m_systemId);
+
+            return TargetProcess::getById(id);
+        }
+    }
+
     virtual TargetProcessPtr getCurrentProcess() {
 
         ContextAutoRestore  contextRestore;
@@ -266,6 +276,16 @@ protected:
             switchContext();
 
             return TargetThread::getByIndex(index);
+        }
+    }
+
+    virtual TargetThreadPtr getThreadById(THREAD_DEBUG_ID id)
+    {
+        ContextAutoRestore  contextRestore;
+        {
+            switchContext();
+
+            return TargetThread::getById(id);
         }
     }
 

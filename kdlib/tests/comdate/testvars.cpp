@@ -149,3 +149,6 @@ listEntry deadlockEntry = { &deadlockEntry, &deadlockEntry };
 
 volatile ATL::CAtlException g_atlException(E_UNEXPECTED);
 
+std::string  g_stdString("testString");
+std::wstring  g_stdWString(L"testWcharString");
+
