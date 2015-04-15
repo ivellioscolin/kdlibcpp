@@ -18,11 +18,11 @@
 
 #include "diacallback.h"
 
-
 #include <initguid.h>
-DEFINE_GUID( MSDIA11_CLASSGUID, 0x761d3bcd, 0x1304, 0x41d5, 0x94, 0xe8, 0xea, 0xc5, 0x4e, 0x4a, 0xc1, 0x72);
+DEFINE_GUID(MSDIA11_CLASSGUID, 0x761d3bcd, 0x1304, 0x41d5, 0x94, 0xe8, 0xea, 0xc5, 0x4e, 0x4a, 0xc1, 0x72);
 
-//+		str1	L"761d3bcd-1304-41d5-94e8-eac54e4ac172"	std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> >
+DEFINE_GUID(MSDIA12_CLASSGUID, 0x3bfcea48, 0x620f, 0x4b6b, 0x81, 0xf7, 0xb9, 0xaf, 0x75, 0x45, 0x4c, 0x7d);
+
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -55,8 +55,12 @@ static SymbolSessionPtr createSession(
         if ( S_OK == hres )
             break;
 
+        hres = dataSource.CoCreateInstance(MSDIA12_CLASSGUID, NULL, CLSCTX_INPROC_SERVER);
+        if (S_OK == hres)
+            break;
+
         hres = dataSource.CoCreateInstance(MSDIA11_CLASSGUID, NULL, CLSCTX_INPROC_SERVER);
-        if ( S_OK == hres )
+        if (S_OK == hres)
             break;
 
         HMODULE  hModule = NULL;
@@ -76,11 +80,19 @@ static SymbolSessionPtr createSession(
         std::wstring  fileName(&fileNameBuffer[0], fileNameSize);
 
         size_t pos = fileName.find_last_of(L'\\');
-        
+
+        fileName.replace(pos, fileName.length() - pos, L"\\msdia120.dll");
+
+        hres = NoRegCoCreate(fileName.c_str(), MSDIA12_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        if (S_OK == hres)
+            break;
+
+        pos = fileName.find_last_of(L'\\');
+
         fileName.replace(pos, fileName.length() - pos, L"\\msdia110.dll");
 
-        hres = NoRegCoCreate( fileName.c_str(), MSDIA11_CLASSGUID,  __uuidof(IDiaDataSource), (void**)&dataSource);
-        if ( S_OK == hres )
+        hres = NoRegCoCreate(fileName.c_str(), MSDIA11_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        if (S_OK == hres)
             break;
 
         throw DiaException(L"Call ::CoCreateInstance", hres);
