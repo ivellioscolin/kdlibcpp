@@ -357,7 +357,7 @@ std::wstring TypedVarBase::printValue() const
     } catch(MemoryException& )
     {}
 
-    return L"Ivalid memory";
+    return L"Invalid memory";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
