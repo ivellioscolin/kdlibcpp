@@ -79,6 +79,10 @@ DebugManager::DebugManager( const std::wstring& remoteOptions )
 
 DebugManager::~DebugManager()
 {
+    client->SetEventCallbacks(NULL);
+
+    client->SetOutputCallbacks(NULL);
+
     CoUninitialize();
 }
 
@@ -147,39 +151,44 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
     __in ULONG Flags,
     __in ULONG64 Argument )
 {
+    try {
 
-    if (((Flags & DEBUG_CES_EXECUTION_STATUS) != 0) &&
-        ((Argument & DEBUG_STATUS_INSIDE_WAIT) == 0) &&
-        (ULONG)Argument != m_previousExecutionStatus)
-    {
-        if (m_previousExecutionStatus == DEBUG_STATUS_NO_DEBUGGEE &&
-            (ULONG)Argument != DEBUG_STATUS_GO)
-            return S_OK;
+        if (((Flags & DEBUG_CES_EXECUTION_STATUS) != 0) &&
+            ((Argument & DEBUG_STATUS_INSIDE_WAIT) == 0) &&
+            (ULONG)Argument != m_previousExecutionStatus)
+        {
+            if (m_previousExecutionStatus == DEBUG_STATUS_NO_DEBUGGEE &&
+                (ULONG)Argument != DEBUG_STATUS_GO)
+                return S_OK;
 
-        ExecutionStatus  executionStatus = ConvertDbgEngineExecutionStatus((ULONG)Argument);
+            ExecutionStatus  executionStatus = ConvertDbgEngineExecutionStatus((ULONG)Argument);
 
-        if (!m_quietNotification)
-            ProcessMonitor::executionStatusChange(executionStatus);
+            if (!m_quietNotification)
+                ProcessMonitor::executionStatusChange(executionStatus);
 
-        m_previousExecutionStatus = (ULONG)Argument;
+            m_previousExecutionStatus = (ULONG)Argument;
+        }
+
+        if (m_previousExecutionStatus == DEBUG_STATUS_BREAK &&
+            ((Flags & DEBUG_CES_CURRENT_THREAD) != 0) &&
+            (m_previousCurrentThread != (ULONG)Argument) &&
+            (DEBUG_ANY_ID != (ULONG)Argument))
+        {
+            ULONG  threadId = (ULONG)Argument;
+
+            if (!m_quietNotification)
+                ProcessMonitor::currentThreadChange(threadId);
+
+            m_previousCurrentThread = threadId;
+        }
+
+        if ((Flags & DEBUG_CES_BREAKPOINTS) != 0)
+        {
+            ProcessMonitor::breakpointsChange(getCurrentProcessId());
+        }
     }
-
-    if (m_previousExecutionStatus == DEBUG_STATUS_BREAK &&
-        ((Flags & DEBUG_CES_CURRENT_THREAD) != 0) &&
-        (m_previousCurrentThread != (ULONG)Argument) &&
-        ( DEBUG_ANY_ID != (ULONG)Argument))
+    catch (kdlib::DbgException&)
     {
-        ULONG  threadId = (ULONG)Argument;
-
-        if (!m_quietNotification)
-            ProcessMonitor::currentThreadChange(threadId);
-
-        m_previousCurrentThread = threadId;
-    }
-
-    if ((Flags & DEBUG_CES_BREAKPOINTS) != 0)
-    {
-        ProcessMonitor::breakpointsChange(getCurrentProcessId());
     }
 
     return S_OK;
@@ -192,24 +201,31 @@ HRESULT STDMETHODCALLTYPE DebugManager::Exception(
     __in PEXCEPTION_RECORD64 Exception,
     __in ULONG FirstChance )
 {
+
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    ExceptionInfo   excinfo = {};
+    try {
 
-    excinfo.firstChance = FirstChance != 0;
+        ExceptionInfo   excinfo = {};
 
-    excinfo.exceptionCode = Exception->ExceptionCode;
-    excinfo.exceptionFlags = Exception->ExceptionFlags;
-    excinfo.exceptionRecord = Exception->ExceptionRecord;
-    excinfo.exceptionAddress = Exception->ExceptionAddress;
-    excinfo.parameterCount = Exception->NumberParameters;
+        excinfo.firstChance = FirstChance != 0;
 
-    for (ULONG i = 0; i < Exception->NumberParameters; ++i)
-        excinfo.parameters[i] = Exception->ExceptionInformation[i];
+        excinfo.exceptionCode = Exception->ExceptionCode;
+        excinfo.exceptionFlags = Exception->ExceptionFlags;
+        excinfo.exceptionRecord = Exception->ExceptionRecord;
+        excinfo.exceptionAddress = Exception->ExceptionAddress;
+        excinfo.parameterCount = Exception->NumberParameters;
 
-    result = ProcessMonitor::exceptionHit(excinfo);
+        for (ULONG i = 0; i < Exception->NumberParameters; ++i)
+            excinfo.parameters[i] = Exception->ExceptionInformation[i];
 
-    return ConvertCallbackResult( result );
+        result = ProcessMonitor::exceptionHit(excinfo);
+    }
+    catch (kdlib::DbgException&)
+    {
+    }
+
+    return ConvertCallbackResult(result);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -226,11 +242,16 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    std::wstring  moduleName = ModuleName ? std::wstring(ModuleName) : std::wstring();
+    try {
 
-    result = ProcessMonitor::moduleLoad( getCurrentProcessId(), BaseOffset, moduleName);
+        std::wstring  moduleName = ModuleName ? std::wstring(ModuleName) : std::wstring();
 
-    return ConvertCallbackResult( result );
+        result = ProcessMonitor::moduleLoad( getCurrentProcessId(), BaseOffset, moduleName);
+    }
+    catch (kdlib::DbgException&)
+    {}
+
+    return ConvertCallbackResult(result);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -242,15 +263,19 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    std::wstring  moduleName;
     try {
+
+        std::wstring  moduleName;
+
         moduleName = getModuleName(BaseOffset);
-    } catch( DbgException& )
+
+        result = ProcessMonitor::moduleUnload(getCurrentProcessId(), BaseOffset, moduleName);
+
+    }
+    catch (kdlib::DbgException&)
     {}
 
-    result =  ProcessMonitor::moduleUnload(getCurrentProcessId(), BaseOffset, moduleName);
-         
-    return ConvertCallbackResult( result );
+    return ConvertCallbackResult(result);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -271,11 +296,18 @@ HRESULT STDMETHODCALLTYPE DebugManager::CreateProcess(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    PROCESS_DEBUG_ID  processId = getCurrentProcessId();
+    try {
 
-    result = ProcessMonitor::processStart( processId );
+        PROCESS_DEBUG_ID  processId = getCurrentProcessId();
 
-    ProcessMonitor::moduleLoad(processId, BaseOffset, std::wstring(ModuleName));
+        result = ProcessMonitor::processStart( processId );
+
+        ProcessMonitor::moduleLoad(processId, BaseOffset, std::wstring(ModuleName));
+
+    }
+    catch (kdlib::DbgException&)
+    {
+    }
 
     return ConvertCallbackResult( result );
 }
@@ -288,9 +320,16 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitProcess(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    PROCESS_DEBUG_ID  procId = getCurrentProcessId();
+    try {
 
-    result = ProcessMonitor::processStop(procId, ProcessExit, ExitCode);
+        PROCESS_DEBUG_ID  procId = getCurrentProcessId();
+
+        result = ProcessMonitor::processStop(procId, ProcessExit, ExitCode);
+
+    }
+    catch (kdlib::DbgException&)
+    {
+    }
 
     return ConvertCallbackResult( result );
 }
@@ -305,7 +344,14 @@ HRESULT STDMETHODCALLTYPE DebugManager::CreateThread(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    result = ProcessMonitor::createThread();
+    try {
+
+        result = ProcessMonitor::createThread();
+
+    }
+    catch (kdlib::DbgException&)
+    {
+    }
 
     return ConvertCallbackResult(result);
 }
@@ -318,7 +364,13 @@ HRESULT STDMETHODCALLTYPE DebugManager::ExitThread(
 {
     DebugCallbackResult  result = DebugCallbackNoChange;
 
-    result = ProcessMonitor::stopThread();
+    try {
+
+        result = ProcessMonitor::stopThread();
+    }
+    catch (kdlib::DbgException&)
+    {
+    }
 
     return ConvertCallbackResult(result);
 }
@@ -330,10 +382,17 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeSymbolState(
     __in ULONG64 Argument
     )
 {
-    if ( ( Flags & DEBUG_CSS_SCOPE ) != 0 )
+    try {
+
+        if ( ( Flags & DEBUG_CSS_SCOPE ) != 0 )
+        {
+            if (!m_quietNotification)
+                ProcessMonitor::localScopeChange();
+        }
+
+    }
+    catch (kdlib::DbgException&)
     {
-        if (!m_quietNotification)
-            ProcessMonitor::localScopeChange();
     }
 
     return S_OK;
@@ -346,8 +405,15 @@ HRESULT STDMETHODCALLTYPE DebugManager::Output(
     __in PCWSTR Text
     )
 {
-    if ( ( Mask & ( DEBUG_OUTPUT_NORMAL | DEBUG_OUTPUT_ERROR | DEBUG_OUTPUT_WARNING ) ) != 0 )
-        ProcessMonitor::debugOutput(std::wstring(Text));
+    try {
+
+        if ( ( Mask & ( DEBUG_OUTPUT_NORMAL | DEBUG_OUTPUT_ERROR | DEBUG_OUTPUT_WARNING ) ) != 0 )
+            ProcessMonitor::debugOutput(std::wstring(Text));
+
+    }
+    catch (kdlib::DbgException&)
+    {
+    }
 
     return S_OK;
 }
