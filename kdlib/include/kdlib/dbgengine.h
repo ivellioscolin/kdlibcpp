@@ -169,8 +169,17 @@ EXTENSION_ID getExtension(const std::wstring &extPath );
 std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  );
 
 // synthetic symbols
-kdlib::SyntheticSymbol addSyntheticSymbol( kdlib::MEMOFFSET_64 offset, unsigned long size, const std::wstring &name );
-void removeSyntheticSymbol(const kdlib::SyntheticSymbol& syntheticSymbol);
+void getNearSyntheticSymbols( MEMOFFSET_64 offset, std::vector< SyntheticSymbol > &syntheticSymbols );
+void getSyntheticSymbols( const std::wstring &name, std::vector< SyntheticSymbol > &syntheticSymbols );
+void getSyntheticSymbolInformation(
+    const SyntheticSymbol& syntheticSymbol,
+    std::wstring *name = nullptr,
+    MEMOFFSET_64 *offset = nullptr,
+    unsigned long *size = nullptr
+);
+
+SyntheticSymbol addSyntheticSymbol( MEMOFFSET_64 offset, unsigned long size, const std::wstring &name );
+void removeSyntheticSymbol(const SyntheticSymbol& syntheticSymbol);
 
 ///////////////////////////////////////////////////////////////////////////////
 

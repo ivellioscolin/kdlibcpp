@@ -129,9 +129,15 @@ protected:
 
     SymbolSessionPtr& getSymSession();
 
+    bool inRange(MEMOFFSET_64 offset) const {
+        return (offset >= m_base) && (offset < (m_base + m_size));
+    }
+
     virtual NumVariant getValue() const {
         return NumVariant( m_base );
     }
+
+    void findSymSessionSymbol(MEMOFFSET_64 offset, std::wstring &name, MEMDISPLACEMENT &displacement);
 
     std::wstring  m_name;
     std::wstring  m_imageName;

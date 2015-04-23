@@ -2319,30 +2319,126 @@ void resetCurrentStackFrame()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void getNearSyntheticSymbols( MEMOFFSET_64 offset, std::vector< SyntheticSymbol > &syntheticSymbols )
+{
+    HRESULT hres;
+
+    unsigned long count;
+    hres = g_dbgMgr->symbols->GetNearNameByOffsetWide(offset, 0, nullptr, 0, &count, nullptr);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetNearNameByOffsetWide", hres);
+
+    std::vector< wchar_t > buffer(count + 1, L'\0');
+    hres = g_dbgMgr->symbols->GetNearNameByOffsetWide(offset, 0, &buffer[0], count + 1, nullptr, nullptr);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetNearNameByOffsetWide", hres);
+
+    return getSyntheticSymbols(&buffer[0], syntheticSymbols);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void getSyntheticSymbols( const std::wstring &name, std::vector< SyntheticSymbol > &syntheticSymbols )
+{
+    HRESULT hres;
+
+    unsigned long count;
+    hres = g_dbgMgr->symbols->GetSymbolEntriesByNameWide(name.c_str(), 0, nullptr, 0, &count);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetSymbolEntriesByNameWide", hres);
+
+    syntheticSymbols.clear();
+    if (!count)
+        return;
+
+    std::vector< DEBUG_MODULE_AND_ID > moduleAndIds(count);
+    hres = g_dbgMgr->symbols->GetSymbolEntriesByNameWide(name.c_str(), 0, &moduleAndIds[0], count, nullptr);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetSymbolEntriesByNameWide", hres);
+
+
+    syntheticSymbols.reserve(moduleAndIds.size());
+    for (auto &moduleAndId : moduleAndIds)
+    {
+        DEBUG_SYMBOL_ENTRY symbolEntry;
+        HRESULT hres = g_dbgMgr->symbols->GetSymbolEntryInformation(&moduleAndId, &symbolEntry);
+        if ( FAILED(hres) )
+            throw DbgEngException(L"IDebugSymbols::GetSymbolEntryInformation", hres);
+
+        if (symbolEntry.Tag != SymTagCustom)
+            continue;
+
+        SyntheticSymbol syntheticSymbol = { moduleAndId.ModuleBase, moduleAndId.Id };
+        syntheticSymbols.push_back( std::move(syntheticSymbol) );
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void getSyntheticSymbolInformation(
+    const SyntheticSymbol& syntheticSymbol,
+    std::wstring *name,
+    MEMOFFSET_64 *offset,
+    unsigned long *size
+)
+{
+    HRESULT hres;
+
+    DEBUG_MODULE_AND_ID moduleAndId = { syntheticSymbol.moduleBase, syntheticSymbol.symbolId };
+
+    DEBUG_SYMBOL_ENTRY symbolEntry;
+    hres = g_dbgMgr->symbols->GetSymbolEntryInformation(&moduleAndId, &symbolEntry);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetSymbolEntryInformation", hres);
+
+    if (name)
+    {
+        std::vector<wchar_t> buffer(symbolEntry.NameSize + 1, L'\0');
+        hres = 
+            g_dbgMgr->symbols->GetSymbolEntryStringWide(
+                &moduleAndId,
+                0,
+                &buffer[0],
+                symbolEntry.NameSize + 1,
+                nullptr);
+        if ( FAILED(hres) )
+            throw DbgEngException(L"IDebugSymbols::GetSymbolEntryStringWide", hres);
+        *name = &buffer[0];
+    }
+
+    if (offset)
+        *offset = symbolEntry.Offset;
+
+    if (size)
+        *size = symbolEntry.Size;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 kdlib::SyntheticSymbol addSyntheticSymbol( kdlib::MEMOFFSET_64 offset, unsigned long size, const std::wstring &name )
 {
-    DEBUG_MODULE_AND_ID id;
+    DEBUG_MODULE_AND_ID moduleAndId;
     HRESULT hres = 
         g_dbgMgr->symbols->AddSyntheticSymbolWide(
             offset,
             size,
             name.c_str(),
             DEBUG_ADDSYNTHSYM_DEFAULT,
-            &id);
+            &moduleAndId);
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::AddSyntheticSymbolWide", hres);
 
-    SyntheticSymbol syntheticSymbol = { id.ModuleBase, id.Id };
-    return syntheticSymbol;
+    SyntheticSymbol syntheticSymbol = { moduleAndId.ModuleBase, moduleAndId.Id };
+    return std::move(syntheticSymbol);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void removeSyntheticSymbol(const kdlib::SyntheticSymbol& syntheticSymbol)
 {
-    DEBUG_MODULE_AND_ID id = { syntheticSymbol.moduleBase, syntheticSymbol.symbolId };
+    DEBUG_MODULE_AND_ID moduleAndId = { syntheticSymbol.moduleBase, syntheticSymbol.symbolId };
 
-    HRESULT hres = g_dbgMgr->symbols->RemoveSyntheticSymbol(&id);
+    HRESULT hres = g_dbgMgr->symbols->RemoveSyntheticSymbol(&moduleAndId);
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::RemoveSyntheticSymbol", hres);
 }

@@ -90,8 +90,38 @@ MEMOFFSET_64 ModuleImp::getSymbolVa( const std::wstring& symbolName )
 
 MEMOFFSET_32 ModuleImp::getSymbolRva( const std::wstring& symbolName )
 {
-    SymbolPtr  sym = getSymbolScope()->getChildByName( symbolName );
-    return sym->getRva();
+    try
+    {
+        return getSymbolScope()->getChildByName(symbolName)->getRva();
+    }
+    catch(const SymbolException &)
+    {
+    }
+
+    std::vector< SyntheticSymbol > ids;
+    try
+    {
+        getSyntheticSymbols(getName() + L"!" + symbolName, ids);
+    }
+    catch(const DbgException &)
+    {
+    }
+    for (const auto &id : ids)
+    {
+        try
+        {
+            MEMOFFSET_64 offset;
+            getSyntheticSymbolInformation(id, nullptr, &offset);
+
+            if (inRange(offset))
+                return static_cast<MEMOFFSET_32>(offset - m_base);
+        }
+        catch(const DbgException &)
+        {
+        }
+    }
+
+    throw SymbolException( symbolName + L"symbol is not found");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,20 +295,71 @@ SymbolOffsetList ModuleImp::enumSymbols( const std::wstring  &mask )
 
 std::wstring ModuleImp::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
 {
-    displacement = 0;
-    std::wstring name;
+    if ( !inRange(offset) )
+        throw SymbolException(L"offset dont has to module");
 
-    while ( name.empty() )
+    struct
     {
-        SymbolPtr  sym = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base ), SymTagNull, &displacement );
-        name = sym->getName();
-        if ( !name.empty() )
-            break;
+        std::wstring name;
+        MEMDISPLACEMENT displacement;
+    } symSessionSymbol;
+    findSymSessionSymbol(offset, symSessionSymbol.name, symSessionSymbol.displacement);
 
-        offset = offset - displacement - 1;
+    std::vector< SyntheticSymbol > ids;
+    try
+    {
+        getNearSyntheticSymbols(offset, ids);
+    }
+    catch(const DbgException &)
+    {
     }
 
-    return name;
+    if (!ids.empty())
+    {
+        for (const auto &id : ids)
+        {
+            struct
+            {
+                std::wstring name;
+                MEMOFFSET_64 offset;
+                unsigned long size;
+            } dbgEngineSymbol;
+            try
+            {
+                getSyntheticSymbolInformation(
+                    id,
+                    &dbgEngineSymbol.name,
+                    &dbgEngineSymbol.offset,
+                    &dbgEngineSymbol.size);
+            }
+            catch(const DbgException &)
+            {
+            }
+
+            if ( !dbgEngineSymbol.name.empty() && 
+                 inRange(dbgEngineSymbol.offset) && 
+                 inRange(dbgEngineSymbol.offset + dbgEngineSymbol.size) )
+            {
+                // select "best" symbol (minimal displacement)
+                displacement = (MEMDISPLACEMENT)((long long)offset - (long long)dbgEngineSymbol.offset);
+                if ( !symSessionSymbol.name.empty() && 
+                    (abs(symSessionSymbol.displacement) <= abs(displacement)) )
+                {
+                    displacement = symSessionSymbol.displacement;
+                    return symSessionSymbol.name;
+                }
+                return dbgEngineSymbol.name;
+            }
+        }
+    }
+
+    if ( !symSessionSymbol.name.empty() )
+    {
+        displacement = symSessionSymbol.displacement;
+        return symSessionSymbol.name;
+    }
+
+    throw SymbolException(L"symbol not found");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,7 +368,7 @@ TypedVarPtr ModuleImp::getTypedVarByAddr( MEMOFFSET_64 offset )
 {
     offset = addr64(offset);
 
-    if ( offset < m_base || offset >= m_base + m_size )
+    if ( !inRange(offset) )
         throw SymbolException(L"offset dont has to module");
 
     SymbolPtr symVar = getSymSession()->findByRva( (MEMOFFSET_32)(offset - m_base ) );
@@ -384,7 +465,7 @@ void ModuleImp::getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsi
 {
     offset = addr64(offset);
 
-    if ( offset < m_base || offset >= m_base + m_size )
+    if ( !inRange(offset) )
         throw SymbolException(L"offset dont has to module");
 
     getSymSession()->getSourceLine( offset, fileName, lineno, displacement );
@@ -402,6 +483,29 @@ std::string ModuleImp::getVersionInfo( const std::string &value )
 void ModuleImp::getFixedFileInfo( FixedFileInfo &fixedFileInfo )
 {
     return getModuleFixedFileInfo( m_base, fixedFileInfo );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ModuleImp::findSymSessionSymbol(MEMOFFSET_64 offset, std::wstring &name, MEMDISPLACEMENT &displacement)
+{
+    displacement = 0;
+    try
+    {
+        while ( name.empty() )
+        {
+            SymbolPtr sym = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base), SymTagNull, &displacement );
+            name = sym->getName();
+            if ( !name.empty() )
+                break;
+
+            offset = offset - displacement - 1;
+        }
+    }
+    catch (const DbgException &)
+    {
+        name.clear();
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
