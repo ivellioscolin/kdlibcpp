@@ -418,7 +418,7 @@ private:
         FunctionMap::FunctionAddress addr;            
 
          if( !m_exportMap.findByName( name, addr ) )
-             throw SymbolException( name + L"symbol is not found");
+             throw SymbolException( name + L" symbol is not found");
 
         return SymbolPtr( new ExportSymbol( name, addr ) );
 

@@ -121,7 +121,7 @@ MEMOFFSET_32 ModuleImp::getSymbolRva( const std::wstring& symbolName )
         }
     }
 
-    throw SymbolException( symbolName + L"symbol is not found");
+    throw SymbolException( symbolName + L" symbol is not found");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
