@@ -168,6 +168,10 @@ void removeExtension( const std::wstring &extPath );
 EXTENSION_ID getExtension(const std::wstring &extPath );
 std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  );
 
+// synthetic symbols
+kdlib::SyntheticSymbol addSyntheticSymbol( kdlib::MEMOFFSET_64 offset, unsigned long size, const std::wstring &name );
+void removeSyntheticSymbol(const kdlib::SyntheticSymbol& syntheticSymbol);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

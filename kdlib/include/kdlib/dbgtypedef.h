@@ -20,6 +20,7 @@ typedef unsigned long           BITOFFSET;
 typedef unsigned long           ACCESS_TYPE;
 typedef unsigned long long      EXTENSION_ID;
 typedef unsigned long           RELREG_ID;
+typedef unsigned long long      SYMBOL_ID;
 
 enum DebugCallbackResult {
     DebugCallbackProceed = 0,
@@ -149,10 +150,15 @@ enum ProcessExitReason {
 };
 
 struct FrameDesc {
-    MEMOFFSET_64            instructionOffset;;
+    MEMOFFSET_64            instructionOffset;
     MEMOFFSET_64            returnOffset;
     MEMOFFSET_64            frameOffset;
     MEMOFFSET_64            stackOffset; 
+};
+
+struct SyntheticSymbol {
+    MEMOFFSET_64    moduleBase;
+    SYMBOL_ID       symbolId;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

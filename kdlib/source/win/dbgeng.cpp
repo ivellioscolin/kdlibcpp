@@ -2319,6 +2319,36 @@ void resetCurrentStackFrame()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+kdlib::SyntheticSymbol addSyntheticSymbol( kdlib::MEMOFFSET_64 offset, unsigned long size, const std::wstring &name )
+{
+    DEBUG_MODULE_AND_ID id;
+    HRESULT hres = 
+        g_dbgMgr->symbols->AddSyntheticSymbolWide(
+            offset,
+            size,
+            name.c_str(),
+            DEBUG_ADDSYNTHSYM_DEFAULT,
+            &id);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::AddSyntheticSymbolWide", hres);
+
+    SyntheticSymbol syntheticSymbol = { id.ModuleBase, id.Id };
+    return syntheticSymbol;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void removeSyntheticSymbol(const kdlib::SyntheticSymbol& syntheticSymbol)
+{
+    DEBUG_MODULE_AND_ID id = { syntheticSymbol.moduleBase, syntheticSymbol.symbolId };
+
+    HRESULT hres = g_dbgMgr->symbols->RemoveSyntheticSymbol(&id);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::RemoveSyntheticSymbol", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end 
 
 
