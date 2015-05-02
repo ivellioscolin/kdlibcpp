@@ -218,6 +218,7 @@ class TypeInfoFields : public TypeInfoImp
 {
 
 protected:
+    std::wstring print();
 
     virtual TypeInfoPtr getElement( const std::wstring &name );
 
@@ -287,7 +288,6 @@ public:
         {}
 
 protected:
-
     virtual std::wstring str();
 
     virtual size_t getSize() {

@@ -60,6 +60,10 @@ public:
         CustomBase( name, align )
         {}
 
+    virtual std::wstring str() {
+        return std::wstring(L"struct: ") + TypeInfoFields::print();
+    }
+
 private:
 
     virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
@@ -74,6 +78,10 @@ public:
     CustomUnion( const std::wstring &name, size_t align = 0 ) :
         CustomBase( name, align )
         {}
+
+    virtual std::wstring str() {
+        return std::wstring(L"union: ") + TypeInfoFields::print();
+    }
 
 private:
 
