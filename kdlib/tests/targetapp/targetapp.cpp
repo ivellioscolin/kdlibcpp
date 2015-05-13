@@ -57,14 +57,20 @@ int _tmain(int argc, _TCHAR* argv[])
 
     if (testGroup == L"multithread")
     {
+        LONG  startThreadCount = 0;
         for (int i = 0; i < 4; ++i)
         {
-            _beginthread(sleepThread, 0, 0);
+            _beginthread(sleepThread, 0, &startThreadCount);
         }
+        
+        while (startThreadCount < 4)
+            Sleep(100);
+
+        __debugbreak();
 
         Sleep(INFINITE);
-        return 0;
 
+        return 0;
     }
 
     if ( testGroup == L"childprocess" )
@@ -189,7 +195,9 @@ int startChildProcess()
     return 0;
 }
 
-void __cdecl sleepThread(void*)
+void __cdecl sleepThread(void* param)
 {
+    InterlockedIncrement((LONG*)param);
+
     Sleep(INFINITE);
 }

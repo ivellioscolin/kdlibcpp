@@ -59,17 +59,17 @@ TEST_F(TargetTest, getExecutableName)
 
 TEST_F(TargetTest, getNumberThreads)
 {
-    PROCESS_ID  procId = StartTargetappWithParam(L"multithread");
-    Sleep(1000);
-    ASSERT_NO_THROW(attachProcess(procId));
-    EXPECT_EQ(6, TargetProcess::getCurrent()->getNumberThreads());
+    PROCESS_DEBUG_ID  id;
+    ASSERT_NO_THROW(id = startProcess(L"targetapp.exe multithread")); 
+    ASSERT_NO_THROW(targetGo());
+    EXPECT_EQ(5, TargetProcess::getCurrent()->getNumberThreads());
 }
 
 TEST_F(TargetTest, enumThreads)
 {
-    PROCESS_ID  procId = StartTargetappWithParam(L"multithread");
-    Sleep(100);
-    ASSERT_NO_THROW(attachProcess(procId));
+    PROCESS_DEBUG_ID  procId;
+    ASSERT_NO_THROW(procId = startProcess(L"targetapp.exe multithread"));
+    ASSERT_NO_THROW(targetGo());
 
     TargetProcessPtr  process;
     ASSERT_NO_THROW(process = TargetProcess::getCurrent());
@@ -82,6 +82,27 @@ TEST_F(TargetTest, enumThreads)
         TargetThreadPtr  thread;
         ASSERT_NO_THROW(thread = process->getThreadByIndex(i));
     }
+}
+
+TEST_F(TargetTest, EnumModules)
+{
+    PROCESS_DEBUG_ID  procId;
+    ASSERT_NO_THROW(procId = startProcess(L"targetapp.exe multithread"));
+    ASSERT_NO_THROW(targetGo());
+
+    TargetProcessPtr  process;
+    ASSERT_NO_THROW(process = TargetProcess::getCurrent());
+
+    unsigned long numberModules = 0;
+    ASSERT_NO_THROW(numberModules = process->getNumberModules());
+    ASSERT_LT(0, numberModules);
+
+    for (unsigned long i = 0; i < numberModules; ++i)
+    {
+        ModulePtr  module;
+        ASSERT_NO_THROW(module = process->getModuleByIndex(i));
+    }
+
 }
 
 TEST_F(TargetTest, currentThread)
@@ -101,9 +122,9 @@ TEST_F(TargetTest, currentThread)
 
 TEST_F(TargetTest, setCurrentThread)
 {
-    PROCESS_ID  procId = StartTargetappWithParam(L"multithread");
-    Sleep(100);
-    ASSERT_NO_THROW(attachProcess(procId));
+    PROCESS_DEBUG_ID  procId;
+    ASSERT_NO_THROW(procId = startProcess(L"targetapp.exe multithread"));
+    ASSERT_NO_THROW(targetGo());
 
     TargetProcessPtr  process;
     ASSERT_NO_THROW(process = TargetProcess::getCurrent());
@@ -144,7 +165,7 @@ TEST_F(TargetTest, restoreContext)
     ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
     ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
 
-    Sleep(100);
+    ASSERT_NO_THROW(targetGo());
 
     ASSERT_NO_THROW(setCurrentStackFrameByIndex(2));
 
@@ -182,3 +203,5 @@ TEST_F(TargetTest, TwoSystem)
         EXPECT_NO_THROW(targetSystemDesc = targetSystem->getDescription());
     }
 }
+
+

@@ -294,17 +294,26 @@ protected:
         ContextAutoRestore   contextRestore;
         {
             switchContext();
-
             return TargetThread::getCurrent();
         }
     }
 
-    virtual unsigned long getNumberModules() {
-        NOT_IMPLEMENTED();
+    virtual unsigned long getNumberModules()
+    {
+        ContextAutoRestore   contextRestore;
+        {
+            switchContext();
+            return kdlib::getNumberModules();
+        }
     }
 
-    virtual ModulePtr getModuleByIndex(unsigned long index) {
-        NOT_IMPLEMENTED();
+    virtual ModulePtr getModuleByIndex(unsigned long index)
+    {
+        ContextAutoRestore   contextRestore;
+        {
+            switchContext();
+            return kdlib::loadModule(kdlib::getModuleOffsetByIndex(index));
+        }
     }
 
     virtual unsigned long getNumberBreakpoints() 

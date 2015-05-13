@@ -99,6 +99,23 @@ std::vector<MEMOFFSET_64> getModuleBasesList()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+MEMOFFSET_64 getModuleOffsetByIndex(unsigned long index)
+{
+    HRESULT  hres;
+
+    if (index >= getNumberModules())
+        throw IndexException(index);
+
+    ULONG64  base = 0;
+    hres = g_dbgMgr->symbols->GetModuleByIndex(index, &base);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbol::GetModuleByIndex", hres);
+
+    return MEMOFFSET_64(base);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 //MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 //{
 //    HRESULT     hres;

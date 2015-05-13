@@ -49,6 +49,7 @@ void getSystemCrashInfo( SystemCrashInfo &crashInfo );
 
 //manage target modules
 unsigned long getNumberModules();
+MEMOFFSET_64 getModuleOffsetByIndex(unsigned long index);
 std::vector<MEMOFFSET_64> getModuleBasesList();
 MEMOFFSET_64 findModuleBase( const std::wstring &moduleName );
 MEMOFFSET_64 findModuleBase( MEMOFFSET_64 offset );
