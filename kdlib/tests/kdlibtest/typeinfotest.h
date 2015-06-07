@@ -100,6 +100,16 @@ TEST_F( TypeInfoTest, BaseTypeArray )
     EXPECT_THROW( loadType( L"Int2B[-1]" ), TypeException );
 }
 
+TEST_F( TypeInfoTest, ComplexTypeArray )
+{
+    EXPECT_EQ( L"structTest[2]", loadType( L"structTest[2]")->getName() );
+    EXPECT_TRUE( loadType( L"structTest[2]")->isArray() );
+    EXPECT_EQ( loadType( L"structTest")->getSize()*2*3, loadType( L"structTest[2][3]")->getSize());
+
+    EXPECT_THROW( loadType( L"structTest[2][-1]"), TypeException );
+}
+
+
 TEST_F( TypeInfoTest, BaseTypePointer )
 {
     EXPECT_EQ( L"UInt1B*", loadType( L"UInt1B*" )->getName() );
