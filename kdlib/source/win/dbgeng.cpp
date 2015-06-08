@@ -12,6 +12,7 @@
 
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
+#include "win/utils.h"
 
 #include "autoswitch.h"
 #include "moduleimp.h"
@@ -2411,6 +2412,83 @@ void getSyntheticSymbolInformation(
 
     if (size)
         *size = symbolEntry.Size;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+std::wstring loadSourceFileFromSrcSrv(MEMOFFSET_64 offset, const std::wstring& fileName)
+{
+    HRESULT  hres;
+
+    ULONG  tokenSize;
+
+    hres =
+        g_dbgMgr->advanced->GetSourceFileInformationWide(
+            DEBUG_SRCFILE_SYMBOL_TOKEN,
+            const_cast<wchar_t*>(fileName.c_str()),
+            offset,
+            0,
+            NULL,
+            0,
+            &tokenSize);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugAdvanced3::GetSourceFileInformationWide", hres);
+
+    std::vector<char>  tokenBuffer(tokenSize);
+
+    hres =
+        g_dbgMgr->advanced->GetSourceFileInformationWide(
+            DEBUG_SRCFILE_SYMBOL_TOKEN,
+            const_cast<wchar_t*>(fileName.c_str()),
+            offset,
+            0,
+            &tokenBuffer[0],
+            tokenSize,
+            NULL);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugAdvanced3::GetSourceFileInformationWide", hres);
+
+    ULONG  foundElement;
+    ULONG foundFileSize;
+
+    hres =
+        g_dbgMgr->advanced->FindSourceFileAndTokenWide(
+        0,
+        offset,
+        const_cast<wchar_t*>(fileName.c_str()),
+        DEBUG_FIND_SOURCE_BEST_MATCH,
+        &tokenBuffer[0],
+        tokenSize,
+        &foundElement,
+        NULL,
+        0,
+        &foundFileSize);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugAdvanced3::FindSourceFileAndTokenWide", hres);
+
+    std::vector<wchar_t>  foundFileBuffer(foundFileSize);
+
+    hres =
+        g_dbgMgr->advanced->FindSourceFileAndTokenWide(
+        0,
+        offset,
+        const_cast<wchar_t*>(fileName.c_str()),
+        DEBUG_FIND_SOURCE_BEST_MATCH,
+        &tokenBuffer[0],
+        tokenSize,
+        &foundElement,
+        &foundFileBuffer[0],
+        foundFileSize,
+        &foundFileSize);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugAdvanced3::FindSourceFileAndTokenWide", hres);
+
+    return std::wstring(&foundFileBuffer[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

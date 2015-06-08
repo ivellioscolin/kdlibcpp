@@ -70,7 +70,12 @@ std::wstring getSymbolPath();
 void setSymbolPath(const std::wstring &symPath);
 void appendSymbolPath(const std::wstring &symPath);
 
+std::wstring getSrcPath();
+void setSrcPath(const std::wstring &srcPath);
+void appendSrcPath(const std::wstring &srcPath);
+
 std::wstring getSourceFile( MEMOFFSET_64 offset = 0);
+std::wstring getSourceFileFromSrcSrv( MEMOFFSET_64 offset = 0);
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset = 0 );
 
 // processes end threads
@@ -181,6 +186,8 @@ void getSyntheticSymbolInformation(
 
 SyntheticSymbol addSyntheticSymbol( MEMOFFSET_64 offset, unsigned long size, const std::wstring &name );
 void removeSyntheticSymbol(const SyntheticSymbol& syntheticSymbol);
+
+std::wstring loadSourceFileFromSrcSrv(MEMOFFSET_64 offset, const std::wstring& fileName);
 
 ///////////////////////////////////////////////////////////////////////////////
 

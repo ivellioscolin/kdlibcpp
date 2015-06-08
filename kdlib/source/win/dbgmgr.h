@@ -35,7 +35,7 @@ public:
      CComPtr<IDebugSystemObjects4>  system;
      CComPtr<IDebugDataSpaces4>     dataspace;
      CComPtr<IDebugSymbols3>        symbols;
-     CComPtr<IDebugAdvanced2>       advanced;
+     CComPtr<IDebugAdvanced3>       advanced;
      CComPtr<IDebugRegisters2>      registers;
 
 public:

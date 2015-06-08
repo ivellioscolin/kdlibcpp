@@ -461,6 +461,24 @@ std::wstring ModuleImp::getSourceFile( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring  ModuleImp::getSourceFileFromSrcSrv(MEMOFFSET_64 offset)
+{
+    std::wstring  fileName;
+    std::wstring  loadedFileName;
+    unsigned long  lineno;
+    long  displacement;
+
+    offset = addr64(offset);
+
+    getSourceLine(offset, fileName, lineno, displacement);
+
+    loadedFileName = loadSourceFileFromSrcSrv(m_base, fileName);
+
+    return loadedFileName;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void ModuleImp::getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement )
 {
     offset = addr64(offset);
@@ -551,6 +569,18 @@ std::wstring getSourceFile( MEMOFFSET_64 offset )
     ModulePtr module = loadModule( offset );
     
     return module->getSourceFile( offset );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring getSourceFileFromSrcSrv(MEMOFFSET_64 offset)
+{
+    if ( offset == 0 )
+        offset = getInstructionOffset();
+
+    ModulePtr module = loadModule(offset);
+
+    return module->getSourceFileFromSrcSrv(offset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

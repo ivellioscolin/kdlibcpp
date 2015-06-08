@@ -53,6 +53,50 @@ void appendSymbolPath(const std::wstring &symPath)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+std::wstring getSrcPath()
+{
+    ULONG retSrcPathChars = 0;
+    g_dbgMgr->symbols->GetSourcePath(NULL, 0, &retSrcPathChars);
+    if (!retSrcPathChars)
+        return std::wstring();
+
+    const ULONG srcPathChars = retSrcPathChars + 1;
+    boost::scoped_array<wchar_t> srcPath(new wchar_t[srcPathChars]);
+    RtlZeroMemory(srcPath.get(), sizeof(wchar_t) * srcPathChars);
+   
+    HRESULT hres =
+        g_dbgMgr->symbols->GetSourcePathWide(srcPath.get(), srcPathChars, &retSrcPathChars);
+    
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugSymbols::GetSourcePathWide", hres);
+
+    return std::wstring(srcPath.get());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void setSrcPath(const std::wstring &srcPath)
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->symbols->SetSourcePathWide(srcPath.c_str());
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::SetSourcePathWide", hres);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void appendSrcPath(const std::wstring &srcPath)
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->symbols->AppendSourcePathWide(srcPath.c_str());
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::AppendSourcePathWide", hres);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 }   // namespace kdlib
 
 ////////////////////////////////////////////////////////////////////////////////

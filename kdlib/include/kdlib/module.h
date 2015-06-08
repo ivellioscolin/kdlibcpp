@@ -94,6 +94,8 @@ public:
 
     virtual std::wstring getSourceFile( MEMOFFSET_64 offset ) = 0;
 
+    virtual std::wstring  getSourceFileFromSrcSrv(MEMOFFSET_64 offset) = 0;
+
     virtual void getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement ) = 0;
 
     virtual std::string getVersionInfo( const std::string &value ) = 0;
