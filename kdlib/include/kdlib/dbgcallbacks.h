@@ -23,6 +23,8 @@ struct DebugEventsCallback {
     virtual void onChangeLocalScope() = 0;
     virtual void onChangeBreakpoints() = 0;
     virtual void onDebugOutput(const std::wstring& text) = 0;
+    virtual void onStartInput() = 0;
+    virtual void onStopInput() = 0;
 
 };
 

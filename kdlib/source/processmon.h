@@ -31,6 +31,8 @@ public: // notification
     static void localScopeChange();
     static DebugCallbackResult exceptionHit(const ExceptionInfo& excinfo);
     static void debugOutput(const std::wstring text);
+    static void startInput();
+    static void stopInput();
 
 public: // process manipulation
 

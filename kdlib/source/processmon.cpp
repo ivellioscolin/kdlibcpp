@@ -69,6 +69,8 @@ public:
     void breakpointsChange(PROCESS_DEBUG_ID id);
     DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
     void debugOutput(const std::wstring text);
+    void startInput();
+    void stopInput();
 
     ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id );
     void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id );
@@ -270,7 +272,21 @@ DebugCallbackResult ProcessMonitor::exceptionHit(const ExceptionInfo& excinfo)
 
 void ProcessMonitor::debugOutput(const std::wstring text)
 {
-    return g_procmon->debugOutput(text);
+    g_procmon->debugOutput(text);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::startInput()
+{
+    g_procmon->startInput();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::stopInput()
+{
+    g_procmon->stopInput();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -567,6 +583,32 @@ void ProcessMonitorImpl::debugOutput(const std::wstring text)
     for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         (*it)->onDebugOutput(text);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::startInput()
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    {
+        (*it)->onStartInput();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::stopInput()
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it;
+    for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    {
+        (*it)->onStopInput();
     }
 }
 

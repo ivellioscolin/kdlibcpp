@@ -499,7 +499,9 @@ std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
         hres = control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
 
         if ( FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::Execute", hres ); 
+            throw  DbgEngException( L"IDebugControl::ExecuteWide", hres ); 
+
+        waitForEvent();
 
         return outReader.Line();
     }
@@ -507,7 +509,9 @@ std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
     hres = g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_ALL_CLIENTS, command.c_str(), 0 );
 
     if ( FAILED( hres ) )
-        throw  DbgEngException( L"IDebugControl::Execute", hres ); 
+        throw  DbgEngException( L"IDebugControl::ExecuteWide", hres ); 
+
+    waitForEvent();
 
     return std::wstring();
 }
@@ -2519,6 +2523,13 @@ void removeSyntheticSymbol(const kdlib::SyntheticSymbol& syntheticSymbol)
     HRESULT hres = g_dbgMgr->symbols->RemoveSyntheticSymbol(&moduleAndId);
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::RemoveSyntheticSymbol", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void dinput(const std::wstring &str)
+{
+    g_dbgMgr->control->ReturnInputWide(str.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

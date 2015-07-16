@@ -37,8 +37,8 @@ DebugManager::DebugManager()
     registers = CComQIPtr<IDebugRegisters2>(client);
 
     client->SetEventCallbacksWide( this );
-
     client->SetOutputCallbacksWide(this);
+    client->SetInputCallbacks(this);
 
     client->SetOutputMask(DEBUG_OUTPUT_NORMAL);
 }
@@ -415,6 +415,25 @@ HRESULT STDMETHODCALLTYPE DebugManager::Output(
     {
     }
 
+    return S_OK;
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::StartInput(
+    __in ULONG BufferSize
+    )
+{
+    ProcessMonitor::startInput();
+    return S_OK;
+}
+
+///////////////////////////////////////////////////////////////////
+
+HRESULT STDMETHODCALLTYPE DebugManager::EndInput(
+    )
+{
+    ProcessMonitor::stopInput();
     return S_OK;
 }
 

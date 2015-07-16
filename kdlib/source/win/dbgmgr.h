@@ -18,7 +18,7 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DebugManager : public DebugBaseEventCallbacksWide, public IDebugOutputCallbacksWide
+class DebugManager : public DebugBaseEventCallbacksWide, public IDebugOutputCallbacksWide, public IDebugInputCallbacks
 {
 
 public:
@@ -72,7 +72,8 @@ public:
 
         if (IsEqualIID(InterfaceId, __uuidof(IUnknown)) ||
             IsEqualIID(InterfaceId, __uuidof(IDebugEventCallbacksWide)) ||
-            IsEqualIID(InterfaceId, __uuidof(IDebugOutputCallbacksWide)))
+            IsEqualIID(InterfaceId, __uuidof(IDebugOutputCallbacksWide)) ||
+            IsEqualIID(InterfaceId, __uuidof(IDebugInputCallbacks)) )
         {
             *Interface = this;
             AddRef();
@@ -169,6 +170,14 @@ public:
         __in ULONG Mask,
         __in PCWSTR Text
         );
+
+    STDMETHOD(StartInput)(
+        __in ULONG BufferSize
+        );
+
+    STDMETHOD(EndInput)(
+        );
+
 };
 
 

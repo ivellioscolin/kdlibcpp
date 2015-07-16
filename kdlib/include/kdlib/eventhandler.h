@@ -57,6 +57,13 @@ public:
     virtual void onDebugOutput(const std::wstring& text)
     {}
 
+    virtual void onStartInput()
+    {}
+
+    virtual void onStopInput()
+    {}
+
+
     EventHandler() {
        registerEventsCallback(this);
     }
