@@ -91,6 +91,16 @@ protected:
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
+    virtual VarStorage getElementStorage(const std::wstring& fieldName)
+    {
+        throw TypeException(m_typeInfo->getName(), L" not implemented for this type");
+    }
+
+    virtual VarStorage getElementStorage(size_t index)
+    {
+        throw TypeException(m_typeInfo->getName(), L" not implemented for this type");
+    }
+
     virtual size_t getElementCount()
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
@@ -104,6 +114,16 @@ protected:
     virtual size_t getElementIndex( const std::wstring&  elementName )
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
+    }
+
+    virtual unsigned long getElementReg(const std::wstring& fieldName)
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual unsigned long getElementReg(size_t index)
+    {
+        NOT_IMPLEMENTED();
     }
 
 protected:
@@ -320,15 +340,26 @@ public:
  
     virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& paramName );
 
+    virtual unsigned long getElementReg(const std::wstring& fieldName);
+
+    virtual unsigned long getElementReg(size_t index);
+
     virtual size_t getElementIndex(const std::wstring& paramName );
 
     virtual std::wstring getElementName( size_t index );
+
+    virtual VarStorage getElementStorage(const std::wstring& fieldName);
+
+    virtual VarStorage getElementStorage(size_t index);
 
     virtual size_t getSize() const {
         return m_symbol->getSize();
     }
 
 protected:
+
+    SymbolPtr getChildSymbol(size_t index);
+
     MEMOFFSET_64 getDebugXImpl(SymTags symTag) const;
 
     SymbolPtr  m_symbol;

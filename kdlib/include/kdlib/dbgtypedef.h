@@ -161,6 +161,11 @@ struct SyntheticSymbol {
     SYMBOL_ID       symbolId;
 };
 
+enum VarStorage {
+    MemoryVar,
+    RegisterVar
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

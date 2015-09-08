@@ -105,7 +105,8 @@ public:
 
     ULONG getDataKind();
 
-    //ULONG getRegisterId();
+    ULONG getRegisterId();
+
     virtual ULONG getRegRealativeId() override;
 
     virtual SymbolPtr getObjectPointerType() override;

@@ -72,11 +72,20 @@ TypedVarPtr StackFrame::getFunction()
 
 unsigned long StackFrame::getTypedParamCount()
 {
-    ModulePtr mod = loadModule(m_ip);
+    try {
 
-    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
+        ModulePtr mod = loadModule(m_ip);
 
-    return static_cast<unsigned long>(func->getElementCount());
+        TypedVarPtr func = mod->getFunctionByAddr(m_ip);
+
+        return static_cast<unsigned long>(func->getElementCount());
+
+    }
+    catch (DbgException&)
+    {
+    }
+
+    return 0UL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,13 +96,27 @@ TypedVarPtr StackFrame::getTypedParam( unsigned long index )
 
     TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
-    MEMOFFSET_REL relOffset = func->getElementOffset(index);
+    VarStorage  storage = func->getElementStorage(index);
 
-    RELREG_ID regRel = func->getElementOffsetRelativeReg(index);
+    if (storage == MemoryVar)
+    {
+        MEMOFFSET_REL relOffset = func->getElementOffset(index);
 
-    MEMOFFSET_64  offset = getOffset( regRel, relOffset );
+        RELREG_ID regRel = func->getElementOffsetRelativeReg(index);
 
-    return loadTypedVar( func->getType()->getElement(index), offset );
+        MEMOFFSET_64  offset = getOffset(regRel, relOffset);
+
+        return loadTypedVar(func->getType()->getElement(index), offset);
+    }
+
+    if (storage == RegisterVar)
+    {
+        unsigned long  regId = func->getElementReg(index);
+
+        return loadTypedVar(func->getType()->getElement(index), getRegisterAccessor(regId));
+    }
+
+    throw DbgException("unknown variable storage");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,7 +153,15 @@ TypedVarPtr StackFrame::getTypedParam( const std::wstring& paramName )
 
 unsigned long StackFrame::getLocalVarCount()
 {
-    return static_cast<unsigned long>(getLocalVars().size());
+    try
+    {
+        return static_cast<unsigned long>(getLocalVars().size());
+    }
+    catch (DbgException&)
+    {
+    }
+
+    return 0UL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

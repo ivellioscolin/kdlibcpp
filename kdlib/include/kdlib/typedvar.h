@@ -73,10 +73,14 @@ public:
     virtual std::wstring getName() const = 0;
     virtual TypedVarPtr getElement( const std::wstring& fieldName ) = 0;
     virtual TypedVarPtr getElement( size_t index ) = 0;
+    virtual VarStorage getElementStorage(const std::wstring& fieldName) = 0;
+    virtual VarStorage getElementStorage(size_t index ) = 0;
     virtual MEMOFFSET_REL getElementOffset(const std::wstring& fieldName ) = 0;
     virtual MEMOFFSET_REL getElementOffset(size_t index ) = 0;
     virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) = 0;
     virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) = 0;
+    virtual unsigned long getElementReg(const std::wstring& fieldName) = 0;
+    virtual unsigned long getElementReg(size_t index) = 0;
     virtual size_t getElementCount() = 0;
     virtual std::wstring getElementName( size_t index ) = 0;
     virtual size_t getElementIndex(const std::wstring&  elementName) = 0;

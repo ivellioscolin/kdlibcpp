@@ -94,11 +94,23 @@ int breakpointTestRun()
     return 0;
 }
 
+class stackTestClass
+{
+public:
+
+    void stackMethod(double a, int b)
+    {
+        __debugbreak();
+    }
+};
+
 
 std::string __fastcall stackTestRun2( int&a, double b, const char* c )
 {
     int  localInt = 10;
-    __debugbreak();
+
+    stackTestClass   stackClass;
+    stackClass.stackMethod(b, localInt);
     
     if ( localInt/5 > 0 )
         return std::string("Hello!");

@@ -83,7 +83,6 @@ TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, DataAccessorPtr &dataSourc
 
 TypedVarPtr loadTypedVar( SymbolPtr &symbol )
 {
-
     if ( SymTagFunction == symbol->getSymTag() )
     {
         return TypedVarPtr( new SymbolFunction( symbol ) );
@@ -144,6 +143,16 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
         throw DbgException( "type info is null");
 
     return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadTypedVar(const TypeInfoPtr &varType, DataAccessorPtr& dataSource)
+{
+    if (!varType)
+        throw DbgException("type info is null");
+
+    return getTypedVar(varType, dataSource);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -671,8 +680,6 @@ std::wstring TypedVarFunction::str()
     return m_typeInfo->getName();
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 SymbolFunction::SymbolFunction( SymbolPtr& symbol ) :
@@ -683,30 +690,36 @@ SymbolFunction::SymbolFunction( SymbolPtr& symbol ) :
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_REL SymbolFunction::getElementOffset( size_t index )
+SymbolPtr SymbolFunction::getChildSymbol(size_t index)
 {
-    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
-    if ( paramLst.size() < index )
-        throw IndexException( index );
+    SymbolPtrList  paramLst = m_symbol->findChildren(SymTagData);
+    if (paramLst.size() < index)
+        throw IndexException(index);
 
-    SymbolPtr paramSym;
     SymbolPtrList::iterator itVar = paramLst.begin();
-    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
+    for (size_t i = 0; itVar != paramLst.end(); ++itVar)
     {
-        if ( (*itVar)->getDataKind() == DataIsParam  )
+        unsigned long  dataKind = (*itVar)->getDataKind();
+
+        if (dataKind == DataIsParam || dataKind == DataIsObjectPtr)
         {
-            if ( i == index )
+            if (i == index)
             {
-                paramSym = *itVar;
-                break;
+                return *itVar;
             }
 
             i++;
         }
     }
 
-    if ( !paramSym )
-        throw IndexException( index );
+    throw IndexException(index);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL SymbolFunction::getElementOffset( size_t index )
+{
+    SymbolPtr  paramSym = getChildSymbol(index);
 
     return paramSym->getOffset();
 }
@@ -715,30 +728,29 @@ MEMOFFSET_REL SymbolFunction::getElementOffset( size_t index )
 
 RELREG_ID SymbolFunction::getElementOffsetRelativeReg(size_t index )
 {
-    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
-    if ( paramLst.size() < index )
-        throw IndexException( index );
-
-    SymbolPtr paramSym;
-    SymbolPtrList::iterator itVar = paramLst.begin();
-    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
-    {
-        if ( (*itVar)->getDataKind() == DataIsParam  )
-        {
-            if ( i == index )
-            {
-                paramSym = *itVar;
-                break;
-            }
-
-            i++;
-        }
-    }
-
-    if ( !paramSym )
-        throw IndexException( index );
+    SymbolPtr  paramSym = getChildSymbol(index);
 
     return paramSym->getRegRealativeId();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+VarStorage SymbolFunction::getElementStorage(const std::wstring& fieldName)
+{
+    SymbolPtr  paramSym = m_symbol->getChildByName(fieldName);
+    if (paramSym->getLocType() == LocIsEnregistered)
+        return RegisterVar;
+    return MemoryVar;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+VarStorage SymbolFunction::getElementStorage(size_t index)
+{
+    SymbolPtr  paramSym = getChildSymbol(index);
+    if (paramSym->getLocType() == LocIsEnregistered)
+        return RegisterVar;
+    return MemoryVar;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -784,24 +796,8 @@ size_t SymbolFunction::getElementIndex(const std::wstring& paramName )
 
 std::wstring SymbolFunction::getElementName( size_t index )
 {
-    SymbolPtrList  paramLst = m_symbol->findChildren( SymTagData );
-    if ( paramLst.size() < index )
-        throw IndexException( index );
-
-    SymbolPtr paramSym;
-    SymbolPtrList::iterator itVar = paramLst.begin();
-    for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
-    {
-        if ( (*itVar)->getDataKind() == DataIsParam  )
-        {
-            if ( i == index )
-                return  (*itVar)->getName();
-
-            i++;
-        }
-    }
-
-    throw IndexException( index );
+    SymbolPtr  paramSym = getChildSymbol(index);
+    return  paramSym->getName();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -817,6 +813,23 @@ MEMOFFSET_64 SymbolFunction::getDebugXImpl(SymTags symTag) const
         return (*resLst.begin())->getVa();
     }
     throw DbgException("unexpected count of child symbols");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long SymbolFunction::getElementReg(const std::wstring& fieldName)
+{
+    SymbolPtr  paramSym = m_symbol->getChildByName(fieldName);
+
+    return paramSym->getRegRealativeId();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long SymbolFunction::getElementReg(size_t index)
+{
+    SymbolPtr  paramSym = getChildSymbol(index);
+    return paramSym->getRegisterId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
