@@ -781,7 +781,9 @@ size_t SymbolFunction::getElementIndex(const std::wstring& paramName )
 
     for ( size_t i = 0; itVar != paramLst.end(); ++itVar )
     {
-        if ( (*itVar)->getDataKind() == DataIsParam  )
+        unsigned long  dataKind = (*itVar)->getDataKind();
+
+        if (dataKind == DataIsParam || dataKind == DataIsObjectPtr)
         {
             if (  (*itVar)->getName() == paramName )
                 return i;

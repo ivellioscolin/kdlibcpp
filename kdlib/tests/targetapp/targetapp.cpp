@@ -98,10 +98,18 @@ class stackTestClass
 {
 public:
 
+    stackTestClass()
+    {
+        m_param = 1234;
+    }
+
+
     void stackMethod(double a, int b)
     {
         __debugbreak();
     }
+
+    long  m_param;
 };
 
 

@@ -132,21 +132,33 @@ std::wstring  StackFrame::getTypedParamName( unsigned long index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrame::getTypedParam( const std::wstring& paramName )
+TypedVarPtr StackFrame::getTypedParam( const std::wstring& paramName)
 {
     ModulePtr mod = loadModule(m_ip);
 
     TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
-    MEMOFFSET_REL relOffset = func->getElementOffset(paramName);
+    VarStorage  storage = func->getElementStorage(paramName);
 
-    RELREG_ID regRel = func->getElementOffsetRelativeReg(paramName);
+    if (storage == MemoryVar)
+    {
+        MEMOFFSET_REL relOffset = func->getElementOffset(paramName);
 
-    MEMOFFSET_64  offset = getOffset( regRel, relOffset );
+        RELREG_ID regRel = func->getElementOffsetRelativeReg(paramName);
 
-    size_t  paramIndex = func->getElementIndex( paramName );
+        MEMOFFSET_64  offset = getOffset(regRel, relOffset);
 
-    return loadTypedVar( func->getType()->getElement(paramIndex), offset );
+        return loadTypedVar(func->getType()->getElement(func->getElementIndex(paramName)), offset);
+    }
+
+    if (storage == RegisterVar)
+    {
+        unsigned long  regId = func->getElementReg(paramName);
+
+        return loadTypedVar(func->getType()->getElement(func->getElementIndex(paramName)), getRegisterAccessor(regId));
+    }
+
+    throw DbgException("unknown variable storage");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,10 +183,10 @@ TypedVarPtr StackFrame::getLocalVar( unsigned long index )
     SymbolPtrList  vars = getLocalVars();
 
     SymbolPtrList::iterator it = vars.begin();
-    std::advance( it, index );
-
-    if ( it == vars.end() )
+    if (index >= vars.size())
         throw IndexException(index);
+
+    std::advance( it, index );
 
     SymbolPtr  sym = *it;
 

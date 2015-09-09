@@ -36,9 +36,13 @@ TEST_F( StackTest, GetFunction )
 
     ASSERT_NO_THROW( frame =  getStack()->getFrame(0) );
     ASSERT_NO_THROW( function = frame->getFunction() );
-    EXPECT_EQ( std::wstring(L"stackTestRun2"), findSymbol( function->getAddress() ) );
+    EXPECT_EQ( std::wstring(L"stackTestClass::stackMethod"), findSymbol( function->getAddress() ) );
 
     ASSERT_NO_THROW( frame =  getStack()->getFrame(1) );
+    ASSERT_NO_THROW( function = frame->getFunction() );
+    EXPECT_EQ( std::wstring(L"stackTestRun2"), findSymbol( function->getAddress() ) );
+
+    ASSERT_NO_THROW( frame =  getStack()->getFrame(2) );
     ASSERT_NO_THROW( function = frame->getFunction() );
     EXPECT_EQ( std::wstring(L"stackTestRun1"), findSymbol( function->getAddress() ) );
 }
@@ -52,25 +56,16 @@ TEST_F( StackTest, TypedParam )
 
     TypedVarPtr  param;
     ASSERT_NO_THROW( param = frame->getTypedParam(0) );
-    EXPECT_EQ( 10, param->deref()->getValue() );
+    EXPECT_EQ(1234, param->deref()->getElement(L"m_param")->getValue());
 
     ASSERT_NO_THROW( param = frame->getTypedParam(1) );
     EXPECT_FLOAT_EQ( 0.8f, param->getValue().asFloat() );
 
-    ASSERT_NO_THROW( param = frame->getTypedParam(2) );
-    EXPECT_EQ( "Bye", loadCStr( param->getValue().asULongLong() ) );
+    ASSERT_NO_THROW(param = frame->getTypedParam(2));
+    EXPECT_EQ(10, param->getValue() );
 
-    ASSERT_NO_THROW( frame = getStack()->getFrame(1) );
-
-    EXPECT_EQ( 3, frame->getTypedParamCount() ); 
-
-    ASSERT_NO_THROW( param = frame->getTypedParam(0) );
-    EXPECT_EQ( 10, param->getValue() );
-
-    ASSERT_NO_THROW( param = frame->getTypedParam(1) );
-    EXPECT_FLOAT_EQ( 0.8f, param->deref()->getValue().asFloat() );
-
-    EXPECT_THROW( frame->getTypedParam(3), IndexException );
+    EXPECT_THROW(frame->getTypedParam(3), IndexException);
+    EXPECT_THROW(frame->getTypedParam(-1), IndexException);
 
     EXPECT_EQ( 0, getStack()->getFrame(5)->getTypedParamCount() );
 }
@@ -81,52 +76,47 @@ TEST_F( StackTest, TypedParamByName )
     ASSERT_NO_THROW( frame = getCurrentStackFrame() );
 
     TypedVarPtr  param;
-    ASSERT_NO_THROW( param = frame->getTypedParam(L"a") );
-    EXPECT_EQ( 10, param->deref()->getValue() );
+    ASSERT_NO_THROW( param = frame->getTypedParam(L"this") );
+    EXPECT_EQ(1234, param->deref()->getElement(L"m_param")->getValue());
 
-    ASSERT_NO_THROW( param = frame->getTypedParam(L"b") );
+    ASSERT_NO_THROW( param = frame->getTypedParam(L"a") );
     EXPECT_FLOAT_EQ( 0.8f, param->getValue().asFloat() );
 
-    ASSERT_NO_THROW( param = frame->getTypedParam(L"c") );
-    EXPECT_EQ( "Bye", loadCStr( param->getValue().asULongLong() ) );
-
-    ASSERT_NO_THROW( frame = getStack()->getFrame(1) );
-
-    ASSERT_NO_THROW( param = frame->getTypedParam(L"a") );
-    EXPECT_EQ( 10, param->getValue() );
-    
+    ASSERT_NO_THROW( param = frame->getTypedParam(L"b") );
+    EXPECT_EQ(10, param->getValue());
+   
     EXPECT_THROW( frame->getTypedParam(L""), DbgException );
     EXPECT_THROW( frame->getTypedParam(L"notexist"), SymbolException );
+    EXPECT_THROW(frame->getTypedParam(L"THIS"), SymbolException);
 }
 
 TEST_F( StackTest, LocalVars )
 {
     StackFramePtr  frame;
-    ASSERT_NO_THROW( frame = getCurrentStackFrame() );
 
-    EXPECT_EQ( 1, frame->getLocalVarCount() );
-    EXPECT_EQ( 10, *frame->getLocalVar(0) );
-    EXPECT_EQ( 10, *frame->getLocalVar(L"localInt") );
-
-    EXPECT_THROW(frame->getLocalVar(1), IndexException);
-    EXPECT_THROW(frame->getLocalVar(L"Notexist"), SymbolException);
-
-    ASSERT_NO_THROW( frame = getStack()->getFrame(1) );
+    ASSERT_NO_THROW( frame = getStack()->getFrame(2) );
     EXPECT_EQ( 3, frame->getLocalVarCount() );
-    EXPECT_NO_THROW(frame->getLocalVar(L"localDouble"));
-    EXPECT_NO_THROW(frame->getLocalVar(L"localFloat"));
+
+    EXPECT_FLOAT_EQ(0.0f, frame->getLocalVar(0)->getValue().asFloat());
+    EXPECT_FLOAT_EQ(0.8f, frame->getLocalVar(L"localFloat")->getValue().asFloat());
     EXPECT_NO_THROW(frame->getLocalVar(L"localChars"));
+
+    EXPECT_THROW(frame->getLocalVar(-1), IndexException);
+    EXPECT_THROW(frame->getLocalVar(3), IndexException);
+    EXPECT_THROW(frame->getLocalVar(L"Notexist"), SymbolException);
 }
 
 TEST_F(StackTest, StaticVars)
 {
     StackFramePtr  frame;
-    ASSERT_NO_THROW( frame = getCurrentStackFrame() );
+    ASSERT_NO_THROW(frame = getStack()->getFrame(2));
 
     EXPECT_EQ( 2, frame->getStaticVarCount() );
     EXPECT_EQ( 1, *frame->getStaticVar(L"staticLong"));
-    EXPECT_NO_THROW(frame->getStaticVar(1));
+    EXPECT_EQ(1, *frame->getStaticVar(0));
+
     EXPECT_THROW(frame->getStaticVar(2), IndexException);
+    EXPECT_THROW(frame->getStaticVar(-1), IndexException);
     EXPECT_THROW(frame->getStaticVar(L"Notexist"), SymbolException);
 }
 
