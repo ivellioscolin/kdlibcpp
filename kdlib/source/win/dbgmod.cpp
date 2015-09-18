@@ -1,12 +1,12 @@
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 
 #include "kdlib/dbgengine.h"
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
+
+#include "autoswitch.h"
 
 #include <vector>
 #include <iomanip>
@@ -234,6 +234,8 @@ std::wstring getModuleSymbolFileName( MEMOFFSET_64 baseOffset )
 
     if (!*moduleInfo.LoadedPdbName)
     {
+        ContextAutoRestore  contextRestore;
+
         std::wstringstream sstr;
         sstr << L"/f \"" << moduleInfo.ImageName << L"\"";
 
