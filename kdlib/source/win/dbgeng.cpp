@@ -1310,7 +1310,7 @@ void setCurrentThread(MEMOFFSET_64 offset)
 
 THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id)
 {
-    bool current = id != -1 && id != getCurrentThreadId();
+    bool current = id != -1 || id != getCurrentThreadId();
 
     ContextAutoRestoreIf  contextRestore(current);
 
@@ -1332,7 +1332,7 @@ THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id)
 
 MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id)
 {
-    bool current = id != -1 && id != getCurrentThreadId();
+    bool current = id != -1 || id != getCurrentThreadId();
 
     ContextAutoRestoreIf  contextRestore(current);
 
