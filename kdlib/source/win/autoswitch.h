@@ -11,15 +11,17 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ContextAutoRestore {
+class ContextAutoRestoreIf {
 
 public:
 
-    ContextAutoRestore();
+    ContextAutoRestoreIf(bool skipContextRestore = false);
 
-    virtual ~ContextAutoRestore();
+    virtual ~ContextAutoRestoreIf();
 
 protected:
+
+    bool  m_skipRestore;
 
     bool  m_quietState;
 
@@ -34,9 +36,18 @@ protected:
     CONTEXT_STORAGE  m_localContext;
 
     bool m_savedCurrentFrame;
+    MEMOFFSET_64  m_instructionOffset;
     DEBUG_STACK_FRAME  m_currentFrame;
 };
 
+
+class  ContextAutoRestore : public ContextAutoRestoreIf
+{
+public:
+
+    ContextAutoRestore() : ContextAutoRestoreIf(false)
+    {}
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

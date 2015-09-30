@@ -7,9 +7,13 @@ namespace kdlib
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ContextAutoRestore::ContextAutoRestore()
+ContextAutoRestoreIf::ContextAutoRestoreIf(bool skipContextRestore)
 {
     HRESULT      hres;
+
+    m_skipRestore = skipContextRestore;
+    if (m_skipRestore)
+        return;
 
     memset( &m_localContext, 0, sizeof(m_localContext) );
     memset( &m_currentFrame, 0, sizeof(m_currentFrame) );
@@ -34,31 +38,30 @@ ContextAutoRestore::ContextAutoRestore()
         m_currentSystem = -1;
     }
 
-    ULONG  registerNumber = 0;
-    hres = g_dbgMgr->registers->GetNumberRegisters(&registerNumber);
-    if (FAILED(hres))
+    m_savedRegCtx = false;
+    m_savedLocalContext = false;
+    m_savedCurrentFrame = false;
+
+    DEBUG_VALUE  regVal;
+    hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, 1, NULL, 0, &regVal);
+    if (S_OK == hres)
     {
-        m_savedRegCtx = false;
-    }
-    else
-    {
-        m_regValues.resize(registerNumber);
-        hres = g_dbgMgr->registers->GetValues2(DEBUG_REGSRC_EXPLICIT, registerNumber, NULL, 0, &m_regValues[0]);
-        m_savedRegCtx = (S_OK == hres);
+        hres = g_dbgMgr->symbols->GetScope(&m_instructionOffset, NULL, &m_localContext, sizeof(m_localContext));
+        m_savedLocalContext = (S_OK == hres);
     }
 
-    hres = g_dbgMgr->symbols->GetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext));   
-    m_savedLocalContext = (S_OK == hres);
-
-    hres = g_dbgMgr->symbols->GetScope(0ULL, &m_currentFrame, NULL, 0);   
+    hres = g_dbgMgr->symbols->GetScope(&m_instructionOffset, &m_currentFrame, NULL, 0);
     m_savedCurrentFrame = (S_OK == hres);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ContextAutoRestore::~ContextAutoRestore()
+ContextAutoRestoreIf::~ContextAutoRestoreIf()
 {
+    if (m_skipRestore)
+        return;
+
     if (m_currentSystem != -1)
         g_dbgMgr->system->SetCurrentSystemId(m_currentSystem);
 
@@ -72,10 +75,10 @@ ContextAutoRestore::~ContextAutoRestore()
         g_dbgMgr->registers->SetValues2(DEBUG_REGSRC_EXPLICIT, static_cast<ULONG>(m_regValues.size()), NULL, 0, &m_regValues[0]);
 
     if (m_savedLocalContext)
-        g_dbgMgr->symbols->SetScope(0ULL, NULL, &m_localContext, sizeof(m_localContext));
+        g_dbgMgr->symbols->SetScope(m_instructionOffset, NULL, &m_localContext, sizeof(m_localContext));
 
     if (m_savedCurrentFrame)
-        g_dbgMgr->symbols->SetScope(0ULL, &m_currentFrame, NULL, 0);
+        g_dbgMgr->symbols->SetScope(m_instructionOffset, &m_currentFrame, NULL, 0);
 
     g_dbgMgr->setQuietNotiification(m_quietState);
 }

@@ -898,9 +898,11 @@ SYSTEM_DEBUG_ID getCurrentSystemId()
 
 std::wstring getSystemDesc(SYSTEM_DEBUG_ID id)
 {
-    ContextAutoRestore  contextRestore;
+    bool current = id != CURRENT_SYSTEM_ID || id != getCurrentSystemId();
 
-    if (id != CURRENT_SYSTEM_ID && id != getCurrentSystemId())
+    ContextAutoRestoreIf  contextRestore(current);
+
+    if (!current)
         setCurrentSystemById(id);
 
     const ULONG bufChars = (MAX_PATH * 2);
@@ -1011,9 +1013,11 @@ PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset )
 
 PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
 {
-    ContextAutoRestore  contextRestore;
+    bool current = id != -1 || id != getCurrentProcessId();
 
-    if (id != -1 && id != getCurrentProcessId())
+    ContextAutoRestoreIf  contextRestore(current);
+
+    if (!current)
         setCurrentProcessById(id);
 
     HRESULT  hres;
@@ -1031,9 +1035,11 @@ PROCESS_ID getProcessSystemId( PROCESS_DEBUG_ID id )
 
 MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 {
-    ContextAutoRestore  contextRestore;
+    bool current = id != -1 || id != getCurrentProcessId();
 
-    if (id != -1 && id != getCurrentProcessId())
+    ContextAutoRestoreIf  contextRestore(current);
+
+    if (!current)
         setCurrentProcessById(id);
 
     HRESULT  hres;
@@ -1051,9 +1057,11 @@ MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
 
 std::wstring getProcessExecutableName(PROCESS_DEBUG_ID id)
 {
-    ContextAutoRestore  contextRestore;
+    bool current = id != -1 || id != getCurrentProcessId();
 
-    if (id != -1 && id != getCurrentProcessId())
+    ContextAutoRestoreIf  contextRestore(current);
+
+    if (!current)
         setCurrentProcessById(id);
 
     const ULONG bufChars = (MAX_PATH * 2);
@@ -1302,9 +1310,11 @@ void setCurrentThread(MEMOFFSET_64 offset)
 
 THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id)
 {
-    ContextAutoRestore  contextRestore;
+    bool current = id != -1 && id != getCurrentThreadId();
 
-    if (id != -1 && id != getCurrentThreadId())
+    ContextAutoRestoreIf  contextRestore(current);
+
+    if (!current)
         setCurrentThreadById(id);
 
     HRESULT  hres;
@@ -1322,9 +1332,11 @@ THREAD_ID getThreadSystemId(THREAD_DEBUG_ID id)
 
 MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id)
 {
-    ContextAutoRestore  contextRestore;
+    bool current = id != -1 && id != getCurrentThreadId();
 
-    if (id != -1 && id != getCurrentThreadId())
+    ContextAutoRestoreIf  contextRestore(current);
+
+    if (!current)
         setCurrentThreadById(id);
 
     HRESULT  hres;
