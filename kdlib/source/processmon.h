@@ -4,6 +4,7 @@
 #include "kdlib/module.h"
 #include "kdlib/breakpoint.h"
 #include "kdlib/dbgcallbacks.h"
+#include "kdlib/typeinfo.h"
 
 namespace kdlib {
 
@@ -52,6 +53,11 @@ public: //breakpoint callbacks
 public: //callbacks
     static void registerEventsCallback(DebugEventsCallback *callback);
     static void removeEventsCallback(DebugEventsCallback *callback);
+
+public: // 
+
+    static TypeInfoPtr getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id = -1);
+    static void insertTypeInfo( const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id = -1);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

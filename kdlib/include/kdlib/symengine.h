@@ -234,6 +234,8 @@ void setSymSrvDir(const std::wstring &symSrvDirectory);
 
 SymbolSessionPtr loadSymbolFromExports(MEMOFFSET_64 loadBase); 
 
+SymbolSessionPtr loadNoSymbolSession();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }; // end kdlib namespace

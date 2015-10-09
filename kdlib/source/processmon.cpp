@@ -25,6 +25,9 @@ public:
     void insertModule( ModulePtr& module);
     void removeModule(MEMOFFSET_64  offset );
 
+    TypeInfoPtr getTypeInfo(const std::wstring& name);
+    void insertTypeInfo(const TypeInfoPtr& typeInfo);
+
     void insertBreakpoint(BreakpointPtr& breakpoint);
     void removeBreakpoint(BreakpointPtr& breakpoint);
 
@@ -35,10 +38,14 @@ private:
     typedef std::map<MEMOFFSET_64, ModulePtr> ModuleMap;
     ModuleMap  m_moduleMap;
     boost::recursive_mutex  m_moduleLock;
+
+    typedef std::map<std::wstring, TypeInfoPtr>  TypeInfoMap;
+    TypeInfoMap  m_typeInfoMap;
+    boost::recursive_mutex  m_typeInfoLock;
     
-     typedef std::map<BREAKPOINT_ID, BreakpointPtr>  BreakpointIdMap;
-     BreakpointIdMap  m_breakpointMap;
-     boost::recursive_mutex  m_breakpointLock;
+    typedef std::map<BREAKPOINT_ID, BreakpointPtr>  BreakpointIdMap;
+    BreakpointIdMap  m_breakpointMap;
+    boost::recursive_mutex  m_breakpointLock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,6 +81,9 @@ public:
 
     ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id );
     void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id );
+
+    TypeInfoPtr getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id = -1);
+    void insertTypeInfo(const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id = -1);
 
     void registerEventsCallback(DebugEventsCallback *callback);
     void removeEventsCallback(DebugEventsCallback *callback);
@@ -309,6 +319,25 @@ void ProcessMonitor::insertModule( ModulePtr& module, PROCESS_DEBUG_ID id )
     return g_procmon->insertModule(module, id);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr ProcessMonitor::getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id)
+{
+    if (id == -1)
+        id = getCurrentProcessId();
+
+    return g_procmon->getTypeInfo(name, id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::insertTypeInfo(const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id)
+{
+    if (id == -1)
+        id = getCurrentProcessId();
+
+    return g_procmon->insertTypeInfo(typeInfo, id);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -411,7 +440,7 @@ void ProcessMonitorImpl::processAllStop()
 unsigned int ProcessMonitorImpl::getNumberProcesses()
 {
     boost::recursive_mutex::scoped_lock l(m_lock);
-    return m_processMap.size();
+    return static_cast<unsigned int>(m_processMap.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -623,6 +652,26 @@ void ProcessMonitorImpl::insertModule( ModulePtr& module, PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr ProcessMonitorImpl::getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id)
+{
+    ProcessInfoPtr  processInfo = getProcess(id);
+    if ( processInfo )
+        return processInfo->getTypeInfo(name);
+
+    return TypeInfoPtr();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::insertTypeInfo(const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id)
+{
+    ProcessInfoPtr  processInfo = getProcess(id);
+    if (processInfo)
+        return processInfo->insertTypeInfo(typeInfo);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 ProcessInfoPtr ProcessMonitorImpl::getProcess( PROCESS_DEBUG_ID id )
 {
     boost::recursive_mutex::scoped_lock l(m_lock);
@@ -715,6 +764,29 @@ void ProcessInfo::removeModule(MEMOFFSET_64  offset )
 {
     boost::recursive_mutex::scoped_lock l(m_moduleLock);
     m_moduleMap.erase(offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr ProcessInfo::getTypeInfo(const std::wstring& name)
+{
+    boost::recursive_mutex::scoped_lock l(m_typeInfoLock);
+
+    TypeInfoMap::iterator  it = m_typeInfoMap.find(name);
+
+    if (it != m_typeInfoMap.end())
+        return it->second;
+
+    return TypeInfoPtr();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessInfo::insertTypeInfo(const TypeInfoPtr& typeInfo)
+{
+    boost::recursive_mutex::scoped_lock l(m_typeInfoLock);
+
+    m_typeInfoMap.insert(std::make_pair(typeInfo->getName(), typeInfo));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -194,9 +194,10 @@ class ExportSymbol : public ExportSymbolBase
 {
 public:
 
-    ExportSymbol( const std::wstring &name, ULONG rva ) :
-      m_name( name ),
-      m_rva( rva )
+    ExportSymbol(const std::wstring &name, ULONG rva, MachineTypes machineType) :
+      m_name(name),
+      m_rva(rva),
+      m_machineType(machineType)
       {}
 
 
@@ -212,8 +213,15 @@ private:
         return m_rva;
     }
 
+    virtual MachineTypes getMachineType()
+    {
+        return m_machineType;
+    }
+
+
     std::wstring  m_name;
     ULONG  m_rva;
+    MachineTypes m_machineType;
 
 };
 
@@ -359,7 +367,18 @@ public:
         if ( displacement )
             *displacement = offset;
 
-        return SymbolPtr( new ExportSymbol( name, address ) );
+        return SymbolPtr(new ExportSymbol(name, address, getMachineType()));
+    }
+
+    virtual MachineTypes getMachineType()
+    {
+        switch (m_machineType)
+        {
+        case IMAGE_FILE_MACHINE_I386: return machine_I386;
+        case IMAGE_FILE_MACHINE_AMD64: return machine_AMD64;
+        }
+
+        throw SymbolException(L"Unkonw machine type");
     }
 
 private:
@@ -420,12 +439,12 @@ private:
 
     virtual SymbolPtr getChildByName(const std::wstring &name )
     {
-        FunctionMap::FunctionAddress addr;            
+        FunctionMap::FunctionAddress addr;
 
          if( !m_exportMap.findByName( name, addr ) )
              throw SymbolException( name + L" symbol is not found");
 
-        return SymbolPtr( new ExportSymbol( name, addr ) );
+        return SymbolPtr( new ExportSymbol( name, addr, getMachineType() ) );
 
     }
 

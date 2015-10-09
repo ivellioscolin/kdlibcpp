@@ -11,6 +11,7 @@
 #include "kdlib/typeinfo.h"
 
 #include "typeinfoimp.h"
+#include "processmon.h"
 
 namespace {
 
@@ -191,17 +192,12 @@ TypeInfoPtr loadType( const std::wstring &typeName )
 
     splitSymName( typeName, moduleName, symName );
 
-    ModulePtr  module;
-
     if ( moduleName.empty() )
     {
-        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
-        module = loadModule( moduleOffset );
+        return TypeInfo::getTypeInfoFromCache(symName);
     }
-    else
-    {
-        module = loadModule( moduleName );
-    }
+
+    ModulePtr  module = loadModule(moduleName);
 
     SymbolPtr  symbolScope = module->getSymbolScope();
 
@@ -501,6 +497,27 @@ TypeInfoPtr TypeInfo::getRecursiveComplexType( const std::wstring &typeName, Typ
         return getRecursiveComplexType( typeName, lowestType, bracketExpr, ptrSize );
 
     return lowestType;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfo::getTypeInfoFromCache(const std::wstring &typeName)
+{
+    TypeInfoPtr  cachedType = ProcessMonitor::getTypeInfo(typeName);
+    if (cachedType)
+        return cachedType;
+
+    MEMOFFSET_64 moduleOffset = findModuleBySymbol(typeName);
+
+    ModulePtr module = loadModule(moduleOffset);
+
+    SymbolPtr  symbolScope = module->getSymbolScope();
+
+    TypeInfoPtr  typeInfo = loadType(symbolScope, typeName);
+
+    ProcessMonitor::insertTypeInfo(typeInfo);
+
+    return typeInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

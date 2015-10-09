@@ -177,7 +177,9 @@ SymbolSessionPtr& ModuleImp::getSymSession()
     catch(const DbgException&)
     {}
 
-    throw SymbolException( L"failed to load symbol file" );
+    m_symSession = loadNoSymbolSession();
+
+    return m_symSession;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

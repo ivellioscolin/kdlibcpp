@@ -298,4 +298,205 @@ void setSymSrvDir(const std::wstring &symSrvDir)
 
 //////////////////////////////////////////////////////////////////////////////////
 
+class NoSymbolScope : public Symbol
+{
+public:
+
+    virtual SymbolPtrList findChildren(ULONG symTag, const std::wstring &name = L"", bool caseSensitive = FALSE)
+    {
+        throw SymbolException(L"symbol not found");
+    }
+
+    virtual ULONG getBaseType()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getBitPosition()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getChildByIndex(ULONG _index)
+    {
+        throw SymbolException(L"symbol not found");
+    }
+
+    virtual SymbolPtr getChildByName(const std::wstring &_name)
+    {
+        throw SymbolException(L"symbol not found");
+    }
+
+    virtual size_t getChildCount()
+    {
+        return 0;
+    }
+
+    virtual size_t getChildCount(ULONG symTag)
+    {
+        return 0;
+    }
+
+    virtual size_t getCount()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getDataKind()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getIndexType()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getLocType()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual MachineTypes getMachineType()
+    {
+        return MachineTypes::machine_I386;
+    }
+
+    virtual std::wstring getName()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual LONG getOffset()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getRva()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual size_t getSize()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymTags getSymTag()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getType()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getUdtKind()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONGLONG getVa()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void getValue(NumVariant &vtValue)
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getVirtualBaseDispIndex()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual int getVirtualBasePointerOffset()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getVirtualBaseDispSize()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isBasicType()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isConstant()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isIndirectVirtualBaseClass()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isVirtualBaseClass()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual unsigned long getRegisterId()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getRegRealativeId()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getObjectPointerType()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual ULONG getCallingConvention()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getClassParent()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+};
+
+class NoSymbolSession : public SymbolSession {
+
+public:
+
+
+    virtual SymbolPtr getSymbolScope() {
+        return SymbolPtr(new NoSymbolScope());
+    }
+
+    virtual SymbolPtr findByRva(MEMOFFSET_32 rva, unsigned long symTag = SymTagNull, long* displacement = NULL) {
+        throw SymbolException(L"Symbol not found");
+    }
+
+    virtual void getSourceLine(MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineNo, long &displacement) {
+        throw SymbolException(L"Source file not found");
+    }
+
+    virtual std::wstring getSymbolFileName() {
+        return L"no symbols";
+    }
+
+};
+
+SymbolSessionPtr loadNoSymbolSession()
+{
+    return SymbolSessionPtr(new NoSymbolSession());
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
 }   // namespace kdlib
