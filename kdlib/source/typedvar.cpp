@@ -349,7 +349,15 @@ std::wstring TypedVarBase::str()
     std::wstringstream  sstr;
 
     sstr << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
-    sstr << " Value: " <<  L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+    sstr << " Value: ";
+    try
+    {
+        sstr << L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+    }
+    catch (const MemoryException &)
+    {
+        sstr << L"????";
+    }
 
     return sstr.str();
 }
@@ -567,7 +575,8 @@ std::wstring TypedVarPointer::printValue() const
          sstr << L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
          return sstr.str();
 
-    } catch(MemoryException&)
+    }
+    catch(MemoryException&)
     {}
 
     return L"Invalid memory";
