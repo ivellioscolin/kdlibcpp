@@ -328,8 +328,7 @@ public:
 
     virtual NumVariant getValue() const 
     {
-        NOT_IMPLEMENTED();
-        //return NumVariant(getAddress());
+        return NumVariant(getAddress());
     }
 
     virtual size_t getElementCount()
@@ -338,7 +337,8 @@ public:
     }
 
     virtual  TypedVarPtr getElement(size_t index);
- 
+
+    virtual std::wstring str(); 
 };
 
 ///////////////////////////////////////////////////////////////////////////////

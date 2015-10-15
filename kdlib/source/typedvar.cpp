@@ -860,4 +860,25 @@ TypedVarPtr TypedVarVtbl::getElement(size_t index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypedVarVtbl::str()
+{
+    std::wstringstream   sstr;
+
+    sstr << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress() << std::endl;
+
+    TypeInfoPtr  elementType = loadType(L"Void*");
+    size_t  elementSize = elementType->getSize();
+    MEMOFFSET_64  beginOffset = m_varData->getAddress();
+
+    for (size_t i = 0; i < m_typeInfo->getElementCount(); ++i)
+    {
+        MEMOFFSET_64  val = ptrPtr(beginOffset + elementSize*i, elementSize);
+        sstr << "   [" << std::dec << i << "] 0x" << std::hex << val << " (" << findSymbol(val) << ')' << std::endl;
+    }
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // end kdlib namesapce
