@@ -1182,9 +1182,16 @@ TypeInfoPtr TypeInfoBitField::getClassParent()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoVtbl::getClassParent()
+size_t TypeInfoVtbl::getElementCount()
 {
-    return loadType(m_symbol->getClassParent());
+    return m_symbol->getCount();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoVtbl::getSize()
+{
+    return ((m_symbol->getMachineType() == machine_AMD64) ? 8 : 4) * getElementCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

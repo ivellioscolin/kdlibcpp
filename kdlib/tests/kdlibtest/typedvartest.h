@@ -279,3 +279,13 @@ TEST_F( TypedVarTest, FunctionDebugRange )
     ASSERT_LE( ULONG_PTR(funcptr->getDebugEnd()), ULONG_PTR(funcptr->getAddress()) + funcptr->getSize() );
 }
 
+
+TEST_F(TypedVarTest, getVTBL)
+{
+    TypedVarPtr  vtbl;
+    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2));
+    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod3"));
+    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(4));
+    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod1"));
+    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(1)).find(L"virtMethod2"));
+}

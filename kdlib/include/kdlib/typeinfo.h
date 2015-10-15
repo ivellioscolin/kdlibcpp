@@ -57,6 +57,7 @@ public:
     virtual bool isEnum() = 0;
     virtual bool isBitField() = 0;
     virtual bool isFunction() = 0;
+    virtual bool isVtbl() = 0;
 
     virtual BITOFFSET getBitOffset() = 0;
     virtual BITOFFSET getBitWidth() = 0;

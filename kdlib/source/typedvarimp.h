@@ -305,7 +305,6 @@ public:
         TypedVarImp( typeInfo, dataSource, name )
     {}
 
-
     virtual NumVariant getValue() const {
         return NumVariant( getAddress() );
     }
@@ -315,6 +314,31 @@ public:
     }
 
     virtual std::wstring str();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypedVarVtbl : public TypedVarImp
+{
+public:
+
+    TypedVarVtbl(const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"") :
+        TypedVarImp(typeInfo, dataSource, name)
+    {}
+
+    virtual NumVariant getValue() const 
+    {
+        NOT_IMPLEMENTED();
+        //return NumVariant(getAddress());
+    }
+
+    virtual size_t getElementCount()
+    {
+        return m_typeInfo->getElementCount();
+    }
+
+    virtual  TypedVarPtr getElement(size_t index);
+ 
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -76,6 +76,9 @@ TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, DataAccessorPtr &dataSourc
     if ( typeInfo->isFunction() )
         return TypedVarPtr( new TypedVarFunction( typeInfo, dataSource, name ) );
 
+    if (typeInfo->isVtbl() )
+        return TypedVarPtr( new TypedVarVtbl( typeInfo, dataSource, name ) );
+
     NOT_IMPLEMENTED();
 }
 
@@ -841,6 +844,18 @@ unsigned long SymbolFunction::getElementReg(size_t index)
 {
     SymbolPtr  paramSym = getChildSymbol(index);
     return paramSym->getRegisterId();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr TypedVarVtbl::getElement(size_t index)
+{
+    if (index >= m_typeInfo->getElementCount())
+        throw IndexException(index);
+
+    TypeInfoPtr     elementType = loadType(L"Void*");
+
+    return loadTypedVar(elementType, m_varData->getAddress() + elementType->getSize()*index);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

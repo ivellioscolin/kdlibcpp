@@ -305,7 +305,7 @@ TEST_F( TypeInfoTest, SizeOf )
     EXPECT_EQ( sizeof(structTest), getSymbolSize(L"targetapp!structTest") );
 }
 
-TEST_F( TypeInfoTest, VTBL )
+TEST_F(TypeInfoTest, EnumVirtualField)
 {
     TypeInfoPtr typeInfo;
     ASSERT_NO_THROW( typeInfo = loadType( L"g_virtChild" ) );
@@ -315,11 +315,21 @@ TEST_F( TypeInfoTest, VTBL )
         EXPECT_NO_THROW( typeInfo->getElement(i) );
 }
 
+TEST_F(TypeInfoTest, VTBL)
+{
+    TypeInfoPtr vtblInfo;
+    ASSERT_NO_THROW(vtblInfo = loadType(L"g_virtChild")->getElement(2)->deref());
+    EXPECT_TRUE(vtblInfo->isVtbl());
+    EXPECT_EQ(1, vtblInfo->getElementCount());
+    ASSERT_NO_THROW(vtblInfo = loadType(L"g_virtChild")->getElement(4)->deref());
+    EXPECT_TRUE(vtblInfo->isVtbl());
+    EXPECT_EQ(2, vtblInfo->getElementCount());
+}
+
 TEST_F( TypeInfoTest, VirtualMember )
 {
     TypeInfoPtr typeInfo;
     ASSERT_NO_THROW( typeInfo = loadType( L"g_virtChild" ) );
-
     EXPECT_TRUE( typeInfo->isVirtualMember(L"m_baseField") );
 }
 

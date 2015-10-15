@@ -86,6 +86,10 @@ protected:
         return false;
     }
 
+    virtual bool isVtbl() {
+        return false;
+    }
+
     virtual bool isConstant() {
         return m_constant;
     }
@@ -510,8 +514,8 @@ private:
 class TypeInfoVtbl: public TypeInfoImp
 {
 public:
-    TypeInfoVtbl( SymbolPtr &symbol ) : m_symbol( symbol ) {}
 
+    TypeInfoVtbl( SymbolPtr &symbol ) : m_symbol( symbol ) {}
 
     virtual std::wstring str() {
         return getName();
@@ -521,11 +525,17 @@ public:
         return L"VTable";
     }
 
-    virtual TypeInfoPtr getClassParent();
-
     virtual size_t getAlignReq() {
         return getPtrSizeBySymbol( m_symbol );
     }
+
+    virtual bool isVtbl() {
+        return true;
+    }
+
+    virtual size_t getElementCount();
+
+    virtual size_t getSize();
 
 protected:
     SymbolPtr   m_symbol;
