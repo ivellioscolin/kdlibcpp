@@ -122,6 +122,9 @@ protected:
     void getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement );
 
     std::string getVersionInfo( const std::string &value );
+
+    void getFileVersion(unsigned long& majorVersion, unsigned long& minorVerion, unsigned long& revision, unsigned long& build);
+
     void getFixedFileInfo( FixedFileInfo &fixedFileInfo );
 
 protected:

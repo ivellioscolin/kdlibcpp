@@ -507,6 +507,20 @@ void ModuleImp::getFixedFileInfo( FixedFileInfo &fixedFileInfo )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void ModuleImp::getFileVersion(unsigned long& majorVersion, unsigned long& minorVerion, unsigned long& revision, unsigned long& build)
+{
+    FixedFileInfo  fileInfo = {};
+
+    getModuleFixedFileInfo( m_base, fileInfo);
+
+    majorVersion = (fileInfo.FileVersionMS >> 16) & 0xFFFF;
+    minorVerion = (fileInfo.FileVersionMS) & 0xFFFF;
+    revision = (fileInfo.FileVersionLS >> 16) & 0xFFFF;
+    build = (fileInfo.FileVersionLS) & 0xFFFF;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void ModuleImp::findSymSessionSymbol(MEMOFFSET_64 offset, std::wstring &name, MEMDISPLACEMENT &displacement)
 {
     displacement = 0;

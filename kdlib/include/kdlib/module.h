@@ -100,6 +100,8 @@ public:
 
     virtual std::string getVersionInfo( const std::string &value ) = 0;
 
+    virtual void getFileVersion(unsigned long& majorVersion, unsigned long& minorVerion, unsigned long& revision, unsigned long& build) = 0;
+
     virtual void getFixedFileInfo( FixedFileInfo &fixedFileInfo ) = 0;
 };
 
