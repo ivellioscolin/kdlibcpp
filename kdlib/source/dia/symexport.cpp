@@ -9,11 +9,51 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/tag.hpp>
 
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/regex.hpp>
+
 #include "kdlib/symengine.h"
 #include "kdlib/exceptions.h"
 #include "kdlib/memaccess.h"
 
 namespace bmi = boost::multi_index;
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+    
+    void escapeRegex(std::wstring &regex)
+    {
+        boost::replace_all(regex, L"\\", L"\\\\");
+        boost::replace_all(regex, L"^", L"\\^");
+        boost::replace_all(regex, L".", L"\\.");
+        boost::replace_all(regex, L"$", L"\\$");
+        boost::replace_all(regex, L"|", L"\\|");
+        boost::replace_all(regex, L"(", L"\\(");
+        boost::replace_all(regex, L")", L"\\)");
+        boost::replace_all(regex, L"[", L"\\[");
+        boost::replace_all(regex, L"]", L"\\]");
+        boost::replace_all(regex, L"*", L"\\*");
+        boost::replace_all(regex, L"+", L"\\+");
+        boost::replace_all(regex, L"?", L"\\?");
+        boost::replace_all(regex, L"/", L"\\/");
+    }
+
+    bool fnmatch(const std::wstring&  str, const std::wstring& match)
+    {
+        std::wstring  reStr = match;
+        escapeRegex(reStr);
+
+        boost::replace_all(reStr, L"\\?", L".");
+        boost::replace_all(reStr, L"\\*", L".*");
+
+        boost::wregex pattern(reStr, boost::regex::normal);
+
+        return boost::regex_match(str, pattern);
+    }
+}
+
 
 namespace kdlib {
 
@@ -194,9 +234,10 @@ class ExportSymbol : public ExportSymbolBase
 {
 public:
 
-    ExportSymbol(const std::wstring &name, ULONG rva, MachineTypes machineType) :
+    ExportSymbol(const std::wstring &name, ULONG rva, ULONGLONG moduleBase, MachineTypes machineType) :
       m_name(name),
       m_rva(rva),
+      m_moduleBase(moduleBase),
       m_machineType(machineType)
       {}
 
@@ -213,6 +254,11 @@ private:
         return m_rva;
     }
 
+    virtual ULONGLONG getVa()
+    {
+        return m_moduleBase + m_rva;
+    }
+
     virtual MachineTypes getMachineType()
     {
         return m_machineType;
@@ -221,6 +267,7 @@ private:
 
     std::wstring  m_name;
     ULONG  m_rva;
+    ULONGLONG  m_moduleBase;
     MachineTypes m_machineType;
 
 };
@@ -257,7 +304,7 @@ public:
             return false;
         
         address = (*it).Address;
-        return true;        
+        return true;
     }
 
     bool findByAddress(const FunctionAddress address, FunctionName& name, FunctionAddress& funcAddress, FunctionOffset& offset ) const
@@ -281,7 +328,26 @@ public:
             offset = static_cast<FunctionOffset>(address - (*it).Address);
             funcAddress = (*it).Address;
         }
-        return true;        
+        return true;
+    }
+
+    size_t size() const
+    {
+        return m_storage.size();
+    }
+
+    bool findByIndex(const size_t index, FunctionName& name, FunctionAddress& funcAddress) const
+    {
+        if (index >= size())
+            return false;
+
+        NameIndex::const_iterator it = GetNameIndex().begin();
+        std::advance(it, index);
+
+        name = (*it).Name;
+        funcAddress = (*it).Address;
+
+        return true;
     }
 
 private:
@@ -367,7 +433,7 @@ public:
         if ( displacement )
             *displacement = offset;
 
-        return SymbolPtr(new ExportSymbol(name, address, getMachineType()));
+        return SymbolPtr(new ExportSymbol(name, address, m_moduleBase, getMachineType()));
     }
 
     virtual MachineTypes getMachineType()
@@ -381,6 +447,36 @@ public:
         throw SymbolException(L"Unkonw machine type");
     }
 
+    virtual SymbolPtr getChildByName(const std::wstring &name)
+    {
+        FunctionMap::FunctionAddress addr;
+
+        if (!m_exportMap.findByName(name, addr))
+            throw SymbolException(name + L" symbol is not found");
+
+        return SymbolPtr(new ExportSymbol(name, addr, m_moduleBase, getMachineType()));
+    }
+
+    virtual SymbolPtrList findChildren(ULONG symTag, const std::wstring &mask = L"", bool caseSensitive = FALSE)
+    {
+        SymbolPtrList  symLst;
+
+        if (symTag == SymTagPublicSymbol)
+        {
+            for (size_t i = 0; i < m_exportMap.size(); ++i)
+            {
+                std::wstring funcName;
+                ULONG address;
+                m_exportMap.findByIndex(i, funcName, address);
+
+                if (mask.empty() || mask == L"*" || fnmatch(funcName, mask) )
+                    symLst.push_back(SymbolPtr(new ExportSymbol(funcName, address, m_moduleBase, getMachineType())));
+            }
+        }
+
+        return symLst;
+    }
+
 private:
 
     ExportSymbolDir( ULONGLONG moduleBase )
@@ -391,6 +487,8 @@ private:
         readMemory( ntHeaderOffset, &ntHeaders, sizeof(ntHeaders) );
 
         m_machineType = ntHeaders.FileHeader.Machine;
+
+        m_moduleBase = moduleBase;
 
         if ( m_machineType == IMAGE_FILE_MACHINE_I386 )
         {
@@ -437,20 +535,11 @@ private:
         }
     }
 
-    virtual SymbolPtr getChildByName(const std::wstring &name )
-    {
-        FunctionMap::FunctionAddress addr;
-
-         if( !m_exportMap.findByName( name, addr ) )
-             throw SymbolException( name + L" symbol is not found");
-
-        return SymbolPtr( new ExportSymbol( name, addr, getMachineType() ) );
-
-    }
-
     FunctionMap m_exportMap;
 
     ULONG  m_machineType;
+
+    ULONGLONG  m_moduleBase;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
