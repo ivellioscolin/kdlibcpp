@@ -49,7 +49,11 @@ public:
         m_quietNotification = quiet;
         return previous;
     }
-    
+
+    void registerEventsCallback(DebugEventsCallback *callback);
+
+    void removeEventsCallback(DebugEventsCallback *callback);
+
 private:
 
     ULONG                       m_previousExecutionStatus;

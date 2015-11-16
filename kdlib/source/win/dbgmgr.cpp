@@ -86,6 +86,19 @@ DebugManager::~DebugManager()
     CoUninitialize();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void DebugManager::registerEventsCallback(DebugEventsCallback *callback)
+{
+    ProcessMonitor::registerEventsCallback(callback);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void DebugManager::removeEventsCallback(DebugEventsCallback *callback)
+{
+    ProcessMonitor::removeEventsCallback(callback);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -300,7 +313,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::CreateProcess(
 
         PROCESS_DEBUG_ID  processId = getCurrentProcessId();
 
-        result = ProcessMonitor::processStart( processId );
+        result = ProcessMonitor::processStart(processId);
 
         ProcessMonitor::moduleLoad(processId, BaseOffset, std::wstring(ModuleName));
 
