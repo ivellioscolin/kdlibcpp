@@ -1354,14 +1354,14 @@ MEMOFFSET_64 getThreadOffset( THREAD_DEBUG_ID id)
 
 void registerEventsCallback( DebugEventsCallback *callback )
 {
-    ProcessMonitor::registerEventsCallback(callback);
+    g_dbgMgr->registerEventsCallback(callback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void removeEventsCallback( DebugEventsCallback *callback )
 {
-    ProcessMonitor::removeEventsCallback(callback);
+    g_dbgMgr->removeEventsCallback(callback);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
