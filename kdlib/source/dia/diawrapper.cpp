@@ -2,7 +2,9 @@
 #include "stdafx.h"
 
 #include <comutil.h>
+
 #include <dbghelp.h>
+#pragma comment(lib, "dbghelp.lib")
 
 #include <boost/regex.hpp>
 
@@ -205,23 +207,15 @@ SymbolPtrList  DiaSymbol::findChildren(
     DiaEnumSymbolsPtr symbols;
     HRESULT hres;
 
-    if ( name.empty() )
-    {
-        hres = m_symbol->findChildren(
-            static_cast<enum ::SymTagEnum>(symTag),
-                NULL,
-                (caseSensitive ? nsCaseSensitive : nsCaseInsensitive) | nsfUndecoratedName | nsfRegularExpression,
-                &symbols);
+    const std::wstring decoratedMask = name.empty() ? 
+        std::wstring() : std::wstring(L"*") + name.c_str() + L"*";
 
-    }
-    else
-    {
-        hres = m_symbol->findChildren(
+    hres = 
+        m_symbol->findChildren(
             static_cast<enum ::SymTagEnum>(symTag),
-                name.c_str(),
-                (caseSensitive ? nsCaseSensitive : nsCaseInsensitive) | nsfUndecoratedName | nsfRegularExpression,
-                &symbols);
-    }
+            decoratedMask.empty() ? NULL : decoratedMask.c_str(),
+            (caseSensitive ? nsCaseSensitive : nsCaseInsensitive) | nsfUndecoratedName | nsfRegularExpression,
+            &symbols);
 
     if (S_OK != hres)
         throw DiaException(L"Call IDiaSymbol::findChildren", hres);
@@ -232,8 +226,14 @@ SymbolPtrList  DiaSymbol::findChildren(
     ULONG celt;
     while ( SUCCEEDED(symbols->Next(1, &child, &celt)) && (celt == 1) )
     {
-        childList.push_back( SymbolPtr( new DiaSymbol(child, m_machineType) ) );
+        SymbolPtr symbol( new DiaSymbol(child, m_machineType) );
         child = NULL;
+
+        if ( name.empty() || 
+             ::SymMatchStringW(symbol->getName().c_str(), name.c_str(), caseSensitive) )
+        {
+            childList.push_back( symbol );
+        }
     }
 
     return childList;
