@@ -31,7 +31,7 @@ public: // notification
     static void breakpointsChange(PROCESS_DEBUG_ID id);
     static void localScopeChange();
     static DebugCallbackResult exceptionHit(const ExceptionInfo& excinfo);
-    static void debugOutput(const std::wstring text);
+    static void debugOutput(const std::wstring& text);
     static void startInput();
     static void stopInput();
 

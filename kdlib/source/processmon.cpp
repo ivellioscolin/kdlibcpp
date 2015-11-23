@@ -75,7 +75,7 @@ public:
     void localScopeChange();
     void breakpointsChange(PROCESS_DEBUG_ID id);
     DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
-    void debugOutput(const std::wstring text);
+    void debugOutput(const std::wstring& text);
     void startInput();
     void stopInput();
 
@@ -280,7 +280,7 @@ DebugCallbackResult ProcessMonitor::exceptionHit(const ExceptionInfo& excinfo)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::debugOutput(const std::wstring text)
+void ProcessMonitor::debugOutput(const std::wstring& text)
 {
     g_procmon->debugOutput(text);
 }
@@ -604,7 +604,7 @@ DebugCallbackResult  ProcessMonitorImpl::exceptionHit(const ExceptionInfo& excin
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::debugOutput(const std::wstring text)
+void ProcessMonitorImpl::debugOutput(const std::wstring& text)
 {
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
