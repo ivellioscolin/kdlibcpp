@@ -24,3 +24,5 @@ extern void ( *CdeclFuncPtr)( int a, float b);
 extern void (FuncTestClass::*MethodPtr)();
 extern void (__cdecl*CdeclStaticMethodPtr)();
 
+extern FuncTestClass FuncReturnClass();
+

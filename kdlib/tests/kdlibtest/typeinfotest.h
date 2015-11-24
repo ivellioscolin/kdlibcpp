@@ -425,6 +425,9 @@ TEST_F( TypeInfoTest, FunctionName )
     ASSERT_NO_THROW( ti = loadTypedVar(L"MethodPtr")->getType()->deref() );
     EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::)()") );
 
+    ASSERT_NO_THROW(ti = loadTypedVar(L"FuncReturnClass")->getType());
+    EXPECT_EQ( 0, ti->getName().compare(L"FuncReturnClass(__cdecl)()") );
+
     ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfCdeclFuncPtr")->getType()->getElement(0)->deref() );
     EXPECT_EQ( 0, ti->getName().compare(L"Void(__cdecl)(Int4B, Float)") );
 

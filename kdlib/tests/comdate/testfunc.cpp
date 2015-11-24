@@ -60,6 +60,12 @@ void (*ArrayOfCdeclFuncPtr[])(int, float) = { &CdeclFunc, &CdeclFunc, &CdeclFunc
 void (FuncTestClass::*ArrayOfMethodPtr[])() = { &FuncTestClass::method, &FuncTestClass::method };
 
 
+
+FuncTestClass FuncReturnClass()
+{
+    return FuncTestClass();
+}
+
 extern "C" 
 {
 
