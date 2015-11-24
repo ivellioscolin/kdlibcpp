@@ -1142,7 +1142,7 @@ CallingConventionType TypeInfoFunction::getCallingConvention()
 
 TypeInfoPtr TypeInfoFunction::getReturnType()
 {
-    return TypeInfo::getBaseTypeInfo( m_symbol->getType() );
+    return loadType(m_symbol->getType());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

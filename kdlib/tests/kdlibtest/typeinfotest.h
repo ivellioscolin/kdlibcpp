@@ -420,19 +420,19 @@ TEST_F( TypeInfoTest, FunctionName )
     TypeInfoPtr ti;
 
     ASSERT_NO_THROW( ti = loadTypedVar(L"CdeclFuncPtr")->getType()->deref() );
-    EXPECT_EQ( 0, ti->getName().compare(L"Void(__cdecl)(Int4B, Float)") );
+    EXPECT_EQ(L"Void(__cdecl)(Int4B, Float)", ti->getName());
 
     ASSERT_NO_THROW( ti = loadTypedVar(L"MethodPtr")->getType()->deref() );
-    EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::)()") );
+    EXPECT_EQ(L"Void(__thiscall FuncTestClass::)()", ti->getName() );
 
     ASSERT_NO_THROW(ti = loadTypedVar(L"FuncReturnClass")->getType());
-    EXPECT_EQ( 0, ti->getName().compare(L"FuncReturnClass(__cdecl)()") );
+    EXPECT_EQ(L"FuncTestClass(__cdecl)()", ti->getName());
 
     ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfCdeclFuncPtr")->getType()->getElement(0)->deref() );
-    EXPECT_EQ( 0, ti->getName().compare(L"Void(__cdecl)(Int4B, Float)") );
+    EXPECT_EQ(L"Void(__cdecl)(Int4B, Float)", ti->getName());
 
     ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfMethodPtr")->getType()->getElement(0)->deref() );
-    EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::)()") );
+    EXPECT_EQ(L"Void(__thiscall FuncTestClass::)()", ti->getName());
 }
 
 TEST_F( TypeInfoTest, FunctionPtrName )
