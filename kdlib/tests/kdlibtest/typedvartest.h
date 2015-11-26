@@ -127,7 +127,7 @@ TEST_F( TypedVarTest, GetElementByIndex )
     EXPECT_EQ( g_structTest.m_field1, *loadTypedVar(L"g_structTest")->getElement(1) );
     EXPECT_THROW( loadTypedVar(L"g_structTest")->getElement(10), IndexException );
     EXPECT_EQ( g_testArray[0].m_field1, *loadTypedVar(L"g_testArray")->getElement(0)->getElement(1) );
-    EXPECT_THROW( loadTypedVar(L"g_testArray")->getElement( ARRAYSIZE(g_testArray) ), IndexException  );
+    EXPECT_NO_THROW( loadTypedVar(L"g_testArray")->getElement( ARRAYSIZE(g_testArray) + 10 ) ); 
 }
 
 TEST_F( TypedVarTest, GetElementName )

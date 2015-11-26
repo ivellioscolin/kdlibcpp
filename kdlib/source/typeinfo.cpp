@@ -595,9 +595,6 @@ std::wstring TypeInfoReference::getName()
 
 TypeInfoPtr TypeInfoArray::getElement( size_t index )
 {
-    if ( index >= m_count )
-        throw IndexException( index );
-
     return m_derefType;
 }
 

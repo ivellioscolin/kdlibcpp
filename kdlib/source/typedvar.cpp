@@ -589,8 +589,8 @@ std::wstring TypedVarPointer::printValue() const
 
 TypedVarPtr TypedVarArray::getElement( size_t index )
 {
-    if ( index >= m_typeInfo->getElementCount() )
-        throw IndexException( index );
+    //if ( index >= m_typeInfo->getElementCount() )
+    //    throw IndexException( index );
 
     TypeInfoPtr     elementType = m_typeInfo->getElement(0);
 

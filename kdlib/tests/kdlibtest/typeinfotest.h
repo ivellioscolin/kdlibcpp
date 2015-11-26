@@ -169,6 +169,9 @@ TEST_F( TypeInfoTest, Array )
 
     EXPECT_EQ( TEST_ARRAY_SIZE, array1->getElementCount() );
     EXPECT_EQ( 4, array2->getElementCount() );
+
+    EXPECT_EQ(loadType(L"UInt8B")->getSize(), array1->getElement(0)->getSize());
+    EXPECT_EQ(loadType(L"UInt8B")->getSize(), array1->getElement(TEST_ARRAY_SIZE)->getSize());
 }
 
 TEST_F( TypeInfoTest, CppRef )
