@@ -260,3 +260,43 @@ TEST_F(ProcessTest, ProcessInfo)
 //    ASSERT_EQ( 0, getNumberProcesses() );
 //}
 //
+
+
+class LiveProcessTest : public BaseFixture
+{
+};
+
+TEST_F(LiveProcessTest, getNumberLiveProcesses)
+{
+    EXPECT_LT(0, getNumberLiveProcesses());
+}
+
+TEST_F(LiveProcessTest, getLiveProcessesList)
+{
+    std::vector<LiveProcessInfo>  processInfoLst;
+    ASSERT_NO_THROW( getLiveProcessesList(processInfoLst) );
+
+    EXPECT_LT(0, processInfoLst.size());
+}
+
+TEST_F(LiveProcessTest, getLiveProcessName)
+{
+    ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
+
+    std::vector<LiveProcessInfo>  processInfoLst;
+    ASSERT_NO_THROW( getLiveProcessesList(processInfoLst) );
+
+    EXPECT_TRUE( processInfoLst.end() != std::find_if(processInfoLst.begin(), processInfoLst.end(), [](LiveProcessInfo& info){return info.name == L"targetapp.exe";} ) );
+}
+
+
+TEST_F(LiveProcessTest, getLiveProcessName)
+{
+    ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
+
+    std::vector<LiveProcessInfo>  processInfoLst;
+    ASSERT_NO_THROW( getLiveProcessesList(processInfoLst) );
+
+    EXPECT_TRUE( processInfoLst.end() != std::find_if(processInfoLst.begin(), processInfoLst.end(), [](LiveProcessInfo& info){return info.name == L"targetapp.exe";} ) );
+}
+

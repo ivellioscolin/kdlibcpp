@@ -62,7 +62,7 @@ TEST_F(TargetTest, getNumberThreads)
     PROCESS_DEBUG_ID  id;
     ASSERT_NO_THROW(id = startProcess(L"targetapp.exe multithread")); 
     ASSERT_NO_THROW(targetGo());
-    EXPECT_EQ(5, TargetProcess::getCurrent()->getNumberThreads());
+    EXPECT_LT(5, TargetProcess::getCurrent()->getNumberThreads());
 }
 
 TEST_F(TargetTest, enumThreads)

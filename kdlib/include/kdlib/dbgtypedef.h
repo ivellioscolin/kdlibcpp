@@ -166,6 +166,14 @@ enum VarStorage {
     RegisterVar
 };
 
+
+struct LiveProcessInfo {
+    PROCESS_ID  pid;
+    std::wstring  name;
+    std::wstring  user;
+    std::wstring  commandLine;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

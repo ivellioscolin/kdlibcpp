@@ -189,6 +189,10 @@ void removeSyntheticSymbol(const SyntheticSymbol& syntheticSymbol);
 
 std::wstring loadSourceFileFromSrcSrv(MEMOFFSET_64 offset, const std::wstring& fileName);
 
+// aux function
+unsigned long getNumberLiveProcesses();
+void getLiveProcessesList(std::vector<LiveProcessInfo> &processInfo);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

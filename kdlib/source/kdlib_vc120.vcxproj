@@ -68,6 +68,7 @@
     <ClCompile Include="win\dbgmem.cpp" />
     <ClCompile Include="win\dbgmgr.cpp" />
     <ClCompile Include="win\dbgmod.cpp" />
+    <ClCompile Include="win\liveprocess.cpp" />
     <ClCompile Include="win\processimpl.cpp" />
     <ClCompile Include="win\sympath.cpp" />
   </ItemGroup>
