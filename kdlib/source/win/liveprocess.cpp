@@ -44,7 +44,7 @@ std::wstring getLiveProcessUser(DWORD processID)
         
     do {
 
-       hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID );
+       hProcess = OpenProcess( PROCESS_QUERY_INFORMATION, FALSE, processID );
        if ( !hProcess )
            break;
 
