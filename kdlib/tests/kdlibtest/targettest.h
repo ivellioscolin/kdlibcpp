@@ -62,7 +62,7 @@ TEST_F(TargetTest, getNumberThreads)
     PROCESS_DEBUG_ID  id;
     ASSERT_NO_THROW(id = startProcess(L"targetapp.exe multithread")); 
     ASSERT_NO_THROW(targetGo());
-    EXPECT_LT(5, TargetProcess::getCurrent()->getNumberThreads());
+    EXPECT_LE(5, TargetProcess::getCurrent()->getNumberThreads());
 }
 
 TEST_F(TargetTest, enumThreads)
@@ -95,7 +95,7 @@ TEST_F(TargetTest, EnumModules)
 
     unsigned long numberModules = 0;
     ASSERT_NO_THROW(numberModules = process->getNumberModules());
-    ASSERT_LT(0, numberModules);
+    ASSERT_LT(0UL, numberModules);
 
     for (unsigned long i = 0; i < numberModules; ++i)
     {
