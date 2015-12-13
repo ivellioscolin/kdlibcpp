@@ -3,35 +3,12 @@
 
 #include <Windows.h>
 #include <Psapi.h>
+#include <TlHelp32.h>
 
 #include "kdlib/dbgengine.h"
 #include "kdlib/exceptions.h"
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////////////
-
-std::wstring getLiveProcessName(DWORD processID)
-{
-    std::wstring  processName = L"<unknown>";
-
-    HANDLE hProcess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID );
-
-    if (NULL != hProcess )
-    {
-        std::vector<wchar_t>  nameBuffer(0x1000);
-        size_t  nameLength = GetModuleBaseNameW(hProcess, NULL, &nameBuffer[0], nameBuffer.size());
-
-        if ( nameLength > 0 )
-        {
-            processName = std::wstring( &nameBuffer[0], nameLength );
-        }
-
-        CloseHandle( hProcess );
-    }
-
-    return processName;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -113,31 +90,28 @@ unsigned long getNumberLiveProcesses()
 
 void getLiveProcessesList(std::vector<LiveProcessInfo> &processInfo)
 {
-    DWORD  bytesNeeded;
-    DWORD  processNumber;
-    std::vector<DWORD>  processIds(0x1000);
 
-    if ( !EnumProcesses( &processIds[0], processIds.size(), &bytesNeeded ) )
-    {
-        processIds.resize(bytesNeeded/sizeof(DWORD)*2);
+    HANDLE snapshotHandle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshotHandle ==  INVALID_HANDLE_VALUE)
+        throw DbgException("Failed to get processes snapshot");
 
-        if ( !EnumProcesses( &processIds[0], processIds.size(), &bytesNeeded ))
-        {
-            throw DbgException("failed to enum process");
-        }
-    }
+    PROCESSENTRY32W  processEntry;
+    processEntry.dwSize = sizeof( PROCESSENTRY32 );
 
-    processNumber = bytesNeeded / sizeof(DWORD);
+    bool  getProcessRes = Process32FirstW(snapshotHandle, &processEntry);
 
-    for ( size_t i = 0; i < processNumber; ++i)
+    while( getProcessRes )
     {
         LiveProcessInfo  pinfo;
 
-        pinfo.pid = processIds[i];
-        pinfo.name = getLiveProcessName(pinfo.pid);
+        pinfo.pid =processEntry.th32ProcessID;
+        pinfo.parentPid = processEntry.th32ParentProcessID;
+        pinfo.name = std::wstring( processEntry.szExeFile);
         pinfo.user = getLiveProcessUser(pinfo.pid);
 
         processInfo.push_back(pinfo);
+
+        getProcessRes = Process32NextW(snapshotHandle, &processEntry);
     }
 }
 

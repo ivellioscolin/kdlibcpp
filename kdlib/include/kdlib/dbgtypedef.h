@@ -169,6 +169,7 @@ enum VarStorage {
 
 struct LiveProcessInfo {
     PROCESS_ID  pid;
+    PROCESS_ID  parentPid;
     std::wstring  name;
     std::wstring  user;
     std::wstring  commandLine;
