@@ -26,7 +26,7 @@ void detachAllProcesses();
 void terminateAllProcesses();
 
 PROCESS_DEBUG_ID loadDump( const std::wstring &fileName );
-void closeDump( PROCESS_DEBUG_ID processId );
+void closeDump( PROCESS_DEBUG_ID processId = -1);
 void writeDump( const std::wstring &fileNamem, bool smallDump );
 
 bool isLocalKernelDebuggerEnabled();
