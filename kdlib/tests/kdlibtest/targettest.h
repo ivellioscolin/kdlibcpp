@@ -159,6 +159,15 @@ TEST_F(TargetTest, threadGetProcess)
     EXPECT_EQ(targetProcess->getSystemId(), targetThread->getProcess()->getSystemId());
 }
 
+TEST_F(TargetTest, threadGetStack)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    TargetThreadPtr  targetThread;
+    ASSERT_NO_THROW(targetThread = TargetProcess::getCurrent()->getCurrentThread());
+    EXPECT_NO_THROW(targetThread->getStack());
+}
+
 
 TEST_F(TargetTest, restoreContext)
 {

@@ -437,7 +437,14 @@ protected:
     }
 
     virtual StackPtr getStack() {
-        NOT_IMPLEMENTED();
+        if (isCurrent())
+            return kdlib::getStack();
+
+        ContextAutoRestore  contextRestore;
+
+        switchContext();
+
+        return kdlib::getStack();
     }
 
     virtual unsigned long getNumberRegisters() {
