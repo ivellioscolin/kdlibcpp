@@ -116,8 +116,8 @@ TEST_F( MemoryTest, LoadChars )
     std::string  _helloStr(helloStr);
     std::wstring  _helloWStr(helloWStr);
 
-    EXPECT_EQ( _helloStr, loadChars( m_targetModule->getSymbolVa(L"helloStr"), _helloStr.size() ) );
-    EXPECT_EQ( _helloWStr, loadWChars( m_targetModule->getSymbolVa(L"helloWStr"), _helloWStr.size() ) );
+    EXPECT_EQ( _helloStr, loadChars( m_targetModule->getSymbolVa(L"helloStr"), static_cast<unsigned long>(_helloStr.size()) ) );
+    EXPECT_EQ( _helloWStr, loadWChars( m_targetModule->getSymbolVa(L"helloWStr"), static_cast<unsigned long>(_helloWStr.size()) ) );
 }
 
 TEST_F( MemoryTest, loadCStr )

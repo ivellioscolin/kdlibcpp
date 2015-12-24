@@ -459,3 +459,19 @@ TEST_F( TypeInfoTest, FunctionArrName )
     ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfMethodPtr")->getType() );
     EXPECT_EQ( 0, ti->getName().compare(L"Void(__thiscall FuncTestClass::*[2])()") );
 }
+
+TEST_F(TypeInfoTest, ArrayOverflow)
+{
+    TypeInfoPtr  intType = loadType(L"Int2B");
+
+    EXPECT_NO_THROW(intType->arrayOf(SIZE_MAX / intType->getSize()));
+    EXPECT_EQ(SIZE_MAX / intType->getSize(), intType->arrayOf(SIZE_MAX / intType->getSize())->getElementCount());
+    EXPECT_EQ(SIZE_MAX / intType->getSize() * intType->getSize(), intType->arrayOf(SIZE_MAX / intType->getSize())->getSize());
+    EXPECT_NO_THROW(intType->arrayOf(0));
+    EXPECT_EQ(0, intType->arrayOf(0)->getSize());
+
+    EXPECT_THROW(intType->arrayOf(SIZE_MAX / intType->getSize()), TypeException);
+    EXPECT_THROW(intType->arrayOf(SIZE_MAX), TypeException);
+    EXPECT_THROW(intType->arrayOf(-1), TypeException);
+
+}

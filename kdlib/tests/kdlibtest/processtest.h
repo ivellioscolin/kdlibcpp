@@ -268,7 +268,7 @@ class LiveProcessTest : public BaseFixture
 
 TEST_F(LiveProcessTest, getNumberLiveProcesses)
 {
-    EXPECT_LT(0, getNumberLiveProcesses());
+    EXPECT_LT(0UL, getNumberLiveProcesses());
 }
 
 TEST_F(LiveProcessTest, getLiveProcessesList)
@@ -276,7 +276,7 @@ TEST_F(LiveProcessTest, getLiveProcessesList)
     std::vector<LiveProcessInfo>  processInfoLst;
     ASSERT_NO_THROW( getLiveProcessesList(processInfoLst) );
 
-    EXPECT_LT(0, processInfoLst.size());
+    EXPECT_LT(0UL, processInfoLst.size());
 }
 
 TEST_F(LiveProcessTest, getLiveProcessName)
