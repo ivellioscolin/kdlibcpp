@@ -459,6 +459,40 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual MEMOFFSET_64 getInstructionOffset()
+    {
+    
+        if (isCurrent())
+            return kdlib::getInstructionOffset();
+            
+        ContextAutoRestore  contextRestore;
+        switchContext();
+
+        return kdlib::getInstructionOffset();
+    }
+
+    virtual MEMOFFSET_64 getStackOffset()
+    {
+        if (isCurrent())
+            return kdlib::getStackOffset();
+            
+        ContextAutoRestore  contextRestore;
+        switchContext();
+
+        return kdlib::getStackOffset();
+    }
+   
+    virtual MEMOFFSET_64 getFrameOffset()
+    {
+        if (isCurrent())
+            return kdlib::getFrameOffset();
+            
+        ContextAutoRestore  contextRestore;
+        switchContext();
+
+        return kdlib::getFrameOffset();
+    }
+
 protected:
 
     void switchContext()

@@ -107,6 +107,10 @@ public:
 
     virtual StackPtr getStack() = 0;
 
+    virtual MEMOFFSET_64 getInstructionOffset() = 0;
+    virtual MEMOFFSET_64 getStackOffset() = 0;
+    virtual MEMOFFSET_64 getFrameOffset() = 0;
+
     virtual unsigned long getNumberRegisters() = 0;
     virtual NumVariant getRegisterByName(const std::wstring& regName) = 0;
     virtual NumVariant getRegisterByIndex(unsigned long regIndex) = 0;

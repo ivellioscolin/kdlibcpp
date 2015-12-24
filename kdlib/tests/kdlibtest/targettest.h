@@ -213,4 +213,17 @@ TEST_F(TargetTest, TwoSystem)
     }
 }
 
+TEST_F(TargetTest, IpFrameStackOffset)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
 
+    TargetProcessPtr  targetProcess;
+    ASSERT_NO_THROW(targetProcess = TargetProcess::getCurrent());
+
+    TargetThreadPtr  targetThread;
+    ASSERT_NO_THROW(targetThread = targetProcess->getCurrentThread());
+
+    EXPECT_EQ(kdlib::getInstructionOffset(), targetThread->getInstructionOffset());
+    EXPECT_EQ(kdlib::getFrameOffset(), targetThread->getFrameOffset());
+    EXPECT_EQ(kdlib::getStackOffset(), targetThread->getStackOffset());
+}
