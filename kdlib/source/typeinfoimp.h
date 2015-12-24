@@ -664,11 +664,16 @@ class TypeInfoArray : public TypeInfoReference
 
 public:
 
-    TypeInfoArray( const TypeInfoPtr &derefType, size_t count ) :
-        m_derefType( derefType ),
-        m_count( count ),
-        m_ptrSize( derefType->getPtrSize() )
-        {}
+    TypeInfoArray( const TypeInfoPtr &derefType, size_t count ) 
+    {
+        size_t maxCount = SIZE_MAX / derefType->getSize();
+        if (count > maxCount)
+            throw TypeException(L"Failed to create too long array");
+
+        m_derefType = derefType;
+        m_count = count;
+        m_ptrSize = derefType->getPtrSize();
+    }
 
     TypeInfoArray( SymbolPtr& symbol )
     {

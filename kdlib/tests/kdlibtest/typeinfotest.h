@@ -470,7 +470,7 @@ TEST_F(TypeInfoTest, ArrayOverflow)
     EXPECT_NO_THROW(intType->arrayOf(0));
     EXPECT_EQ(0, intType->arrayOf(0)->getSize());
 
-    EXPECT_THROW(intType->arrayOf(SIZE_MAX / intType->getSize()), TypeException);
+    EXPECT_THROW(intType->arrayOf(SIZE_MAX / intType->getSize() + 1), TypeException);
     EXPECT_THROW(intType->arrayOf(SIZE_MAX), TypeException);
     EXPECT_THROW(intType->arrayOf(-1), TypeException);
 
