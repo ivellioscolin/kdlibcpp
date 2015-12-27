@@ -199,6 +199,12 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeEngineState(
         {
             ProcessMonitor::breakpointsChange(getCurrentProcessId());
         }
+
+        if ((Flags & DEBUG_CES_EFFECTIVE_PROCESSOR) != 0)
+        {
+            if (!m_quietNotification)
+                ProcessMonitor::localScopeChange();
+        }
     }
     catch (kdlib::DbgException&)
     {
