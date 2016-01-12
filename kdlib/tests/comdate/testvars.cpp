@@ -152,3 +152,5 @@ volatile ATL::CAtlException g_atlException(E_UNEXPECTED);
 std::string  g_stdString("testString");
 std::wstring  g_stdWString(L"testWcharString");
 
+void VariadicFunc(int, ...);
+volatile decltype(&VariadicFunc) g_variadicFuncPtr = &VariadicFunc;

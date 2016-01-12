@@ -83,3 +83,7 @@ void __fastcall PureCFastcallFunc( int a, float b )
 }
 
 }
+
+void VariadicFunc(int, ...)
+{
+}
