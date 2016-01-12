@@ -311,7 +311,7 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex baseMatch(L"^(Char)|(WChar)|(Int1B)|(UInt1B)|(Int2B)|(UInt2B)|(Int4B)|(UInt4B)|(Int8B)|(UInt8B)|(Long)|(ULong)|(Float)|(Bool)|(Double)|(Void)|(Hresult)$" );
+static const boost::wregex baseMatch(L"^(Char)|(WChar)|(Int1B)|(UInt1B)|(Int2B)|(UInt2B)|(Int4B)|(UInt4B)|(Int8B)|(UInt8B)|(Long)|(ULong)|(Float)|(Bool)|(Double)|(Void)|(Hresult)|(NoType)$" );
 
 bool TypeInfo::isBaseType( const std::wstring &typeName )
 {
@@ -396,7 +396,10 @@ TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrS
 
         if ( baseMatchResult[17].matched )
             return TypeInfoPtr( new TypeInfoBaseWrapper<unsigned long>(L"Hresult", ptrSize) );
-   }
+
+        if ( baseMatchResult[18].matched )
+            return TypeInfoPtr( new TypeInfoNoType() );
+    }
 
     NOT_IMPLEMENTED();
 
@@ -1109,7 +1112,18 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
             bIsFirstArg = false;
         else
             sstr << L", ";
-        sstr << loadType( *itArg )->getName();
+
+        TypeInfoPtr argType = loadType( *itArg );
+        if (argType->isNoType())
+        {
+            // Variadic function
+            sstr << "...";
+            assert((itArg + 1) == m_args.end());
+        }
+        else
+        {
+            sstr << loadType( *itArg )->getName();
+        }
     }
 
     sstr << L")";

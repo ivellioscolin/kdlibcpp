@@ -90,6 +90,10 @@ protected:
         return false;
     }
 
+    virtual bool isNoType() {
+        return false;
+    }
+
     virtual bool isConstant() {
         return m_constant;
     }
@@ -184,6 +188,10 @@ protected:
 
     virtual TypeInfoPtr getClassParent() {
         throw TypeException( getName(), L"has no class parent" ); 
+    }
+
+    virtual size_t getAlignReq() {
+        throw TypeException( getName(), L"has no alignment-requirement" );
     }
 
 public:
@@ -453,7 +461,7 @@ protected:
         return true;
     }
 
-    size_t getPtrSize() {
+    virtual size_t getPtrSize() {
         return m_ptrSize;
     }
 
@@ -465,7 +473,6 @@ protected:
 
     std::wstring  m_name;
     size_t  m_ptrSize;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -493,20 +500,38 @@ protected:
     }
 
     virtual size_t getSize() {
-        throw TypeException( L"Void", L"This type has no size" );
+        throw TypeException( getName(), L"This type has no size" );
     }
 
-    size_t getPtrSize() {
+    virtual size_t getPtrSize() {
         return m_ptrSize;
-    }
-
-    virtual size_t getAlignReq() {
-        throw TypeException( L"Void", L"This type has no alignment-requirement" );
     }
 
 private:
 
     size_t  m_ptrSize;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoNoType : public TypeInfoImp 
+{
+protected:
+    virtual std::wstring str() {
+        return getName();
+    }
+
+    virtual std::wstring getName() {
+        return L"NoType";
+    }
+
+    virtual bool isNoType() {
+        return true;
+    }
+
+    virtual size_t getPtrSize() {
+        throw TypeException( getName(), L"Don't exist pointers to this type" );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -645,7 +670,7 @@ protected:
         return m_ptrSize;
     }
 
-    size_t getPtrSize() {
+    virtual size_t getPtrSize() {
         return m_ptrSize;
     }
 
@@ -712,7 +737,7 @@ protected:
         return m_derefType->getSize() * m_count;
     }
 
-    size_t getPtrSize() {
+    virtual size_t getPtrSize() {
         return m_ptrSize;
     }
 
