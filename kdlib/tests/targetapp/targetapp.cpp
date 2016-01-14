@@ -113,7 +113,11 @@ public:
 };
 
 
-std::string __fastcall stackTestRun2( int&a, double b, const char* c )
+#ifdef _DEBUG
+#pragma optimize( "g", on )
+#endif
+
+std::string __fastcall stackTestRun2( int a, double b, const char* c )
 {
     int  localInt = 10;
 
@@ -126,14 +130,18 @@ std::string __fastcall stackTestRun2( int&a, double b, const char* c )
         return std::string("Buy!");
 }
 
+#ifdef _DEBUG
+#pragma optimize( "", off )
+#endif
+
 float stackTestRun1( int a, const float& b, const std::string& c )
 {
     static long staticLong = 1;
-    double localDouble = 0.0;
+    volatile double localDouble = 0.0;
 
     try {
 
-        float localFloat = b;
+        volatile float localFloat = b;
 
         if ( staticLong == 1 )
         {

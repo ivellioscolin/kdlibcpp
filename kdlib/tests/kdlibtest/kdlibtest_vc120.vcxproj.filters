@@ -7,6 +7,9 @@
     <ClCompile Include="..\comdate\testvars.cpp">
       <Filter>testcases\testdata</Filter>
     </ClCompile>
+    <ClCompile Include="..\comdate\testfunc.cpp">
+      <Filter>testcases\testdata</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

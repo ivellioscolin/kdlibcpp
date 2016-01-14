@@ -177,6 +177,7 @@
     <ClInclude Include="varianttest.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\comdate\testfunc.cpp" />
     <ClCompile Include="..\comdate\testvars.cpp" />
     <ClCompile Include="gmock\gmock-gtest-all.cc">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

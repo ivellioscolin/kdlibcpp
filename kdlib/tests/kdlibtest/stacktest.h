@@ -70,6 +70,20 @@ TEST_F( StackTest, TypedParam )
     EXPECT_EQ( 0, getStack()->getFrame(5)->getTypedParamCount() );
 }
 
+TEST_F(StackTest, FastcallParam)
+{
+    StackFramePtr  frame;
+    ASSERT_NO_THROW(frame = getStack()->getFrame(1) );
+
+    TypedVarPtr  param;
+
+    ASSERT_NO_THROW(param = frame->getTypedParam(L"a"));
+    EXPECT_EQ(10, param->getValue());
+
+    ASSERT_NO_THROW(param = frame->getTypedParam(L"b"));
+    EXPECT_FLOAT_EQ(0.8f, param->getValue().asFloat());
+}
+
 TEST_F( StackTest, TypedParamByName )
 {
     StackFramePtr  frame;
