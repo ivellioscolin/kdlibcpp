@@ -295,6 +295,39 @@ SymbolOffsetList ModuleImp::enumSymbols( const std::wstring  &mask )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeNameList ModuleImp::enumTypes(const std::wstring& mask)
+{
+	TypeNameList  lst;
+
+	SymbolPtrList  symlst = getSymbolScope()->findChildren(SymTagUDT, mask);
+
+	for (SymbolPtrList::iterator it = symlst.begin(); it != symlst.end(); ++it)
+	{
+		lst.push_back((*it)->getName());
+	}
+
+	symlst = getSymbolScope()->findChildren(SymTagEnum, mask);
+
+	for (SymbolPtrList::iterator it = symlst.begin(); it != symlst.end(); ++it)
+	{
+		lst.push_back((*it)->getName());
+	}
+
+    symlst = getSymbolScope()->findChildren(SymTagFunctionType, mask);
+
+	for (SymbolPtrList::iterator it = symlst.begin(); it != symlst.end(); ++it)
+	{
+		lst.push_back((*it)->getName());
+	}
+
+	lst.sort();
+	lst.unique();
+
+	return lst;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring ModuleImp::findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
 {
     if ( !inRange(offset) )

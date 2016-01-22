@@ -113,6 +113,8 @@ protected:
 
     SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" );
 
+	TypeNameList enumTypes(const std::wstring& mask = L"*");
+
     std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 
     std::wstring getSourceFile( MEMOFFSET_64 offset );

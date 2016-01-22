@@ -27,6 +27,8 @@ void splitSymName( const std::wstring &fullName, std::wstring &moduleName, std::
 
 typedef std::pair< std::wstring, MEMOFFSET_64 > SymbolOffset;
 typedef std::list< SymbolOffset > SymbolOffsetList;
+typedef std::list< std::wstring > TypeNameList;
+
 
 class Module : private boost::noncopyable, public NumBehavior {
     
@@ -89,6 +91,8 @@ public:
     virtual TypedVarList loadTypedVarArray( MEMOFFSET_64 addr, const std::wstring &typeName, size_t count ) = 0;
 
     virtual SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" ) = 0;
+
+	virtual TypeNameList enumTypes(const std::wstring  &mask = L"*") = 0;
 
     virtual std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement ) = 0;
 
