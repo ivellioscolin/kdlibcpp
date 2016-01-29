@@ -169,6 +169,7 @@ class Symbol {
 public:
 
     virtual SymbolPtrList findChildren( unsigned long symTag, const std::wstring &name = L"", bool caseSensitive = false ) = 0;
+    virtual SymbolPtrList findChildrenByRVA(unsigned long symTag, unsigned long rva) = 0;
     virtual unsigned long getBaseType() = 0;
     virtual BITOFFSET getBitPosition() = 0;
     virtual SymbolPtr getChildByIndex(unsigned long  index ) = 0;

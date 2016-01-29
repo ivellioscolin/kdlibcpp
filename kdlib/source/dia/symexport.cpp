@@ -67,6 +67,11 @@ class ExportSymbolBase : public Symbol
         NOT_IMPLEMENTED();
     }
 
+    virtual SymbolPtrList findChildrenByRVA(unsigned long symTag, unsigned long rva)
+    {
+        NOT_IMPLEMENTED();
+    }
+
     virtual ULONG getBaseType()
     {
         NOT_IMPLEMENTED();

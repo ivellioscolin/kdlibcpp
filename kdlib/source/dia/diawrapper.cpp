@@ -241,6 +241,37 @@ SymbolPtrList  DiaSymbol::findChildren(
 
 //////////////////////////////////////////////////////////////////////////////////
 
+SymbolPtrList DiaSymbol::findChildrenByRVA(unsigned long symTag, unsigned long rva)
+{
+    DiaEnumSymbolsPtr symbols;
+    HRESULT hres;
+
+    hres = m_symbol->findChildrenExByRVA(
+        static_cast<enum ::SymTagEnum>(symTag),
+        NULL,
+        nsCaseSensitive | nsfUndecoratedName,
+        rva,
+        &symbols);
+
+    if (S_OK != hres)
+        throw DiaException(L"Call IDiaSymbol::findChildrenExByRVA", hres);
+
+    SymbolPtrList childList;
+    DiaSymbolPtr child;
+    ULONG celt;
+    while (SUCCEEDED(symbols->Next(1, &child, &celt)) && (celt == 1))
+    {
+        SymbolPtr symbol(new DiaSymbol(child, m_machineType));
+        child = NULL;
+
+        childList.push_back(symbol);
+    }
+
+    return childList;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
 ULONG DiaSymbol::getBaseType()
 {
     return callSymbol(get_baseType);

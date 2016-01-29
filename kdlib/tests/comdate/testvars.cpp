@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include <atlexcept.h>
+#include <list>
 
 #include "test/testvars.h"
 
@@ -151,6 +152,20 @@ volatile ATL::CAtlException g_atlException(E_UNEXPECTED);
 
 std::string  g_stdString("testString");
 std::wstring  g_stdWString(L"testWcharString");
+
+std::list<int> StdListCreator()
+{
+    std::list<int>  l;
+    l.push_back(1);
+    l.push_back(2);
+    l.push_back(3); 
+    return l;
+}
+
+std::list<int>  g_stdList = StdListCreator();
+
+
+
 
 void VariadicFunc(int, ...);
 volatile decltype(&VariadicFunc) g_variadicFuncPtr = &VariadicFunc;

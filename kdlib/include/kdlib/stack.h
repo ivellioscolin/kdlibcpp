@@ -85,6 +85,8 @@ protected:
 
      SymbolPtrList  getLocalVars();
 
+     SymbolPtrList getParams();
+
      SymbolPtrList  getBlockLocalVars(SymbolPtr&  sym);
 
      MEMOFFSET_64 getOffset( unsigned long regRel, MEMOFFSET_REL relOffset );

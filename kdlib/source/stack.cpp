@@ -92,28 +92,37 @@ unsigned long StackFrame::getTypedParamCount()
 
 TypedVarPtr StackFrame::getTypedParam( unsigned long index )
 {
-    ModulePtr mod = loadModule(m_ip);
+    SymbolPtrList  vars = getParams();
 
-    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
+    SymbolPtrList::iterator it = vars.begin();
+    if (index >= vars.size())
+        throw IndexException(index);
 
-    VarStorage  storage = func->getElementStorage(index);
+    std::advance(it, index);
 
-    if (storage == MemoryVar)
+    SymbolPtr  sym = *it;
+
+    unsigned long  location = sym->getLocType();
+
+    if (location == LocIsEnregistered)
     {
-        MEMOFFSET_REL relOffset = func->getElementOffset(index);
+        unsigned long  regId = sym->getRegisterId();
 
-        RELREG_ID regRel = func->getElementOffsetRelativeReg(index);
+        return loadTypedVar(loadType(sym), getRegisterAccessor(regId));
+    }
+    else if (location == LocIsRegRel)
+    {
+        MEMOFFSET_REL relOffset = sym->getOffset();
+
+        RELREG_ID regRel = sym->getRegRealativeId();
 
         MEMOFFSET_64  offset = getOffset(regRel, relOffset);
 
-        return loadTypedVar(func->getType()->getElement(index), offset);
+        return loadTypedVar(loadType(sym), offset);
     }
-
-    if (storage == RegisterVar)
+    else if (location == LocIsNull)
     {
-        unsigned long  regId = func->getElementReg(index);
-
-        return loadTypedVar(func->getType()->getElement(index), getRegisterAccessor(regId));
+        return loadTypedVar(loadType(sym), 0);
     }
 
     throw DbgException("unknown variable storage");
@@ -123,42 +132,58 @@ TypedVarPtr StackFrame::getTypedParam( unsigned long index )
 
 std::wstring  StackFrame::getTypedParamName( unsigned long index )
 {
-    ModulePtr mod = loadModule(m_ip);
+    SymbolPtrList  vars = getParams();
 
-    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
+    SymbolPtrList::iterator it = vars.begin();
+    std::advance(it, index);
 
-    return func->getElementName(index);
+    if (it == vars.end())
+        throw IndexException(index);
+
+    return (*it)->getName();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedVarPtr StackFrame::getTypedParam( const std::wstring& paramName)
 {
-    ModulePtr mod = loadModule(m_ip);
+    SymbolPtrList  vars = getParams();
 
-    TypedVarPtr func = mod->getFunctionByAddr(m_ip);
-
-    VarStorage  storage = func->getElementStorage(paramName);
-
-    if (storage == MemoryVar)
+    SymbolPtrList::iterator it = vars.begin();
+    for (; it != vars.end(); ++it)
     {
-        MEMOFFSET_REL relOffset = func->getElementOffset(paramName);
+        if ((*it)->getName() == paramName)
+        {
+            SymbolPtr  sym = *it;
 
-        RELREG_ID regRel = func->getElementOffsetRelativeReg(paramName);
+            unsigned long  location = sym->getLocType();
 
-        MEMOFFSET_64  offset = getOffset(regRel, relOffset);
+            if (location == LocIsEnregistered)
+            {
+                unsigned long  regId = sym->getRegisterId();
 
-        return loadTypedVar(func->getType()->getElement(func->getElementIndex(paramName)), offset);
+                return loadTypedVar(loadType(sym), getRegisterAccessor(regId));
+            }
+            else if (location == LocIsRegRel)
+            {
+                MEMOFFSET_REL relOffset = sym->getOffset();
+
+                RELREG_ID regRel = sym->getRegRealativeId();
+
+                MEMOFFSET_64  offset = getOffset(regRel, relOffset);
+
+                return loadTypedVar(loadType(sym), offset);
+            }
+            else if (location == LocIsNull)
+            {
+                return loadTypedVar(loadType(sym), 0);
+            }
+
+            throw DbgException("unknown variable storage");
+        }
     }
 
-    if (storage == RegisterVar)
-    {
-        unsigned long  regId = func->getElementReg(paramName);
-
-        return loadTypedVar(func->getType()->getElement(func->getElementIndex(paramName)), getRegisterAccessor(regId));
-    }
-
-    throw DbgException("unknown variable storage");
+    throw SymbolException(L"symbol not found");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -190,13 +215,30 @@ TypedVarPtr StackFrame::getLocalVar( unsigned long index )
 
     SymbolPtr  sym = *it;
 
-    MEMOFFSET_REL relOffset = sym->getOffset();
+    unsigned long  location = sym->getLocType();
 
-    RELREG_ID regRel = sym->getRegRealativeId();
+    if (location  == LocIsEnregistered)
+    {
+        unsigned long  regId = sym->getRegisterId();
 
-    MEMOFFSET_64  offset = getOffset( regRel, relOffset );
+        return loadTypedVar(loadType(sym), getRegisterAccessor(regId));
+    }
+    else if (location == LocIsRegRel)
+    {
+        MEMOFFSET_REL relOffset = sym->getOffset();
 
-    return loadTypedVar( loadType(sym), offset);
+        RELREG_ID regRel = sym->getRegRealativeId();
+
+        MEMOFFSET_64  offset = getOffset(regRel, relOffset);
+
+        return loadTypedVar(loadType(sym), offset);
+    }
+    else if (location == LocIsNull)
+    {
+        return loadTypedVar(loadType(sym), 0);
+    }
+
+    throw DbgException("unknown variable storage");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -227,13 +269,30 @@ TypedVarPtr StackFrame::getLocalVar( const std::wstring& paramName )
         {
             SymbolPtr  sym = *it;
 
-            MEMOFFSET_REL relOffset = sym->getOffset();
+            unsigned long  location = sym->getLocType();
 
-            RELREG_ID regRel = sym->getRegRealativeId();
+            if (location == LocIsEnregistered)
+            {
+                unsigned long  regId = sym->getRegisterId();
 
-            MEMOFFSET_64  offset = getOffset( regRel, relOffset );
+                return loadTypedVar(loadType(sym), getRegisterAccessor(regId));
+            }
+            else if (location == LocIsRegRel)
+            {
+                MEMOFFSET_REL relOffset = sym->getOffset();
 
-            return loadTypedVar( loadType(sym), offset);
+                RELREG_ID regRel = sym->getRegRealativeId();
+
+                MEMOFFSET_64  offset = getOffset(regRel, relOffset);
+
+                return loadTypedVar(loadType(sym), offset);
+            }
+            else if (location == LocIsNull)
+            {
+                return loadTypedVar(loadType(sym), 0);
+            }
+
+            throw DbgException("unknown variable storage");
         }
     }
 
@@ -257,7 +316,7 @@ SymbolPtrList  StackFrame::getLocalVars()
         return lst;
 
     // find var in current scope
-    SymbolPtrList symList = symFunc->findChildren(SymTagData);
+    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
 
     SymbolPtrList::iterator it;
     for ( it = symList.begin(); it != symList.end(); it++ )
@@ -275,6 +334,32 @@ SymbolPtrList  StackFrame::getLocalVars()
         SymbolPtrList  innerVars = getBlockLocalVars(*itScope);
  
         lst.insert( lst.end(), innerVars.begin(), innerVars.end() );
+    }
+
+    return lst;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolPtrList StackFrame::getParams()
+{
+    ModulePtr mod = loadModule(m_ip);
+
+    MEMDISPLACEMENT displacemnt;
+    SymbolPtr symFunc = mod->getSymbolByVa(m_ip, SymTagFunction, &displacemnt);
+
+    SymbolPtrList  lst;
+
+    // find var in current scope
+    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
+
+    SymbolPtrList::iterator it;
+    for (it = symList.begin(); it != symList.end(); it++)
+    {
+        unsigned long dataKind = (*it)->getDataKind();
+
+        if ( dataKind == DataIsParam || dataKind == DataIsObjectPtr )
+            lst.push_back(*it);
     }
 
     return lst;

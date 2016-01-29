@@ -69,6 +69,8 @@ public:
         bool caseSensitive = FALSE
     );
 
+    SymbolPtrList findChildrenByRVA(unsigned long symTag, unsigned long rva);
+
     size_t getSize();
 
     std::wstring getName();

@@ -307,6 +307,11 @@ public:
         throw SymbolException(L"symbol not found");
     }
 
+    virtual SymbolPtrList findChildrenByRVA(unsigned long symTag, unsigned long rva)
+    {
+        NOT_IMPLEMENTED();
+    }
+
     virtual ULONG getBaseType()
     {
         NOT_IMPLEMENTED();
