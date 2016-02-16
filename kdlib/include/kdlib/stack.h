@@ -7,6 +7,7 @@
 #include <kdlib/dbgengine.h>
 #include <kdlib/typedvar.h>
 #include <kdlib/exceptions.h>
+#include <kdlib/dataaccessor.h>
 
 namespace kdlib {
 
@@ -20,129 +21,51 @@ typedef boost::shared_ptr<StackFrame>  StackFramePtr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StackFrame : public boost::enable_shared_from_this<StackFrame>, public boost::noncopyable {
-
-    //friend StackFramePtr getStackFrame();
-    friend StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp );
-
+class StackFrame
+{
 public:
 
-    MEMOFFSET_64 getIP() const {
-         return m_ip;
-    }
+    virtual MEMOFFSET_64  getIP() const = 0;
+    virtual MEMOFFSET_64  getRET() const = 0;
+    virtual MEMOFFSET_64  getFP() const = 0;
+    virtual MEMOFFSET_64  getSP() const = 0;
+    virtual DataAccessorPtr getRegisterAccessor(unsigned long regId) = 0;
+    virtual TypedVarPtr getFunction() = 0;
+    virtual unsigned long getTypedParamCount() = 0;
+    virtual TypedVarPtr getTypedParam(unsigned long index) = 0;
+    virtual std::wstring  getTypedParamName(unsigned long index) = 0;
+    virtual TypedVarPtr getTypedParam(const std::wstring& paramName) = 0;
+    virtual unsigned long getLocalVarCount() = 0;
+    virtual TypedVarPtr getLocalVar(unsigned long index) = 0;
+    virtual TypedVarPtr getLocalVar(const std::wstring& paramName) = 0;
+    virtual std::wstring  getLocalVarName(unsigned long index) = 0;
+    virtual unsigned long getStaticVarCount() = 0;
+    virtual TypedVarPtr getStaticVar(unsigned long index) = 0;
+    virtual TypedVarPtr getStaticVar(const std::wstring& paramName) = 0;
+    virtual std::wstring  getStaticVarName(unsigned long index) = 0;
 
-    MEMOFFSET_64 getRET() const {
-        return m_ret;
-    }
 
-    MEMOFFSET_64  getFP() const {
-        return m_fp;
-    }
-
-    MEMOFFSET_64  getSP() const {
-        return m_sp;
-    }
-
-    TypedVarPtr getFunction();
-
-    unsigned long getTypedParamCount();
-
-    TypedVarPtr getTypedParam( unsigned long index );
-
-    std::wstring  getTypedParamName( unsigned long index );
-
-    TypedVarPtr getTypedParam( const std::wstring& paramName );
-
-    unsigned long getLocalVarCount();
-
-    TypedVarPtr getLocalVar( unsigned long index );
-
-    TypedVarPtr getLocalVar( const std::wstring& paramName );
-
-    std::wstring  getLocalVarName( unsigned long index );
-
-    unsigned long getStaticVarCount() {
-        NOT_IMPLEMENTED();
-    }
-
-    TypedVarPtr getStaticVar( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
-
-    TypedVarPtr getStaticVar( const std::wstring& paramName ) {
-        NOT_IMPLEMENTED();
-    }
-
-    std::wstring  getStaticVarName( unsigned long index ) {
-        NOT_IMPLEMENTED();
-    }
-
-protected:
-
-    StackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp ) :
-        m_ip(ip), m_ret(ret), m_fp(fp), m_sp(sp)
-        {}
-
-     SymbolPtrList  getLocalVars();
-
-     SymbolPtrList getParams();
-
-     SymbolPtrList  getBlockLocalVars(SymbolPtr&  sym);
-
-     MEMOFFSET_64 getOffset( unsigned long regRel, MEMOFFSET_REL relOffset );
-
-     MEMOFFSET_64  m_ip;
-     MEMOFFSET_64  m_ret;
-     MEMOFFSET_64  m_fp;
-     MEMOFFSET_64  m_sp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Stack {
-
-    friend StackPtr getStack();
-
+class Stack
+{
 public:
 
-    unsigned long getFrameCount() {
-        return static_cast<unsigned long>( m_stackTrace.size() );
-    }
-
-    StackFramePtr getFrame( unsigned long frameNumber ) 
-    {
-        return getStackFrame( 
-                m_stackTrace[frameNumber].instructionOffset,
-                m_stackTrace[frameNumber].returnOffset,
-                m_stackTrace[frameNumber].frameOffset,
-                m_stackTrace[frameNumber].stackOffset );
-    }
-
-protected:
-
-    Stack() 
-    {
-       getStackTrace(m_stackTrace);
-    }
-
-    std::vector<FrameDesc>  m_stackTrace;
+    virtual unsigned long getFrameCount() = 0;
+    virtual StackFramePtr getFrame(unsigned long frameNumber) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline
-StackPtr getStack() {
-    return StackPtr( new Stack() );
-}
-
+StackPtr getStack();
+StackFramePtr getStackFrame(MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp);
 StackFramePtr getCurrentStackFrame();
 
 unsigned long getCurrentStackFrameNumber();
-
 void setCurrentStackFrame(StackFramePtr& stackFrame);
-
 void setCurrentStackFrameByIndex(unsigned long frameIndex);
-
 void resetCurrentStackFrame();
 
 ///////////////////////////////////////////////////////////////////////////////

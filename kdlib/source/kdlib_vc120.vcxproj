@@ -88,7 +88,6 @@
     <ClInclude Include="..\include\kdlib\memaccess.h" />
     <ClInclude Include="..\include\kdlib\module.h" />
     <ClInclude Include="..\include\kdlib\process.h" />
-    <ClInclude Include="..\include\kdlib\scope.h" />
     <ClInclude Include="..\include\kdlib\stack.h" />
     <ClInclude Include="..\include\kdlib\symengine.h" />
     <ClInclude Include="..\include\kdlib\typedvar.h" />
@@ -100,6 +99,7 @@
     <ClInclude Include="dia\diawrapper.h" />
     <ClInclude Include="moduleimp.h" />
     <ClInclude Include="processmon.h" />
+    <ClInclude Include="stackimpl.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="typedvarimp.h" />
