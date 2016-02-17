@@ -1,14 +1,13 @@
 #include "stdafx.h"
 
+#include "kdlib\stack.h"
 #include "kdlib\module.h"
 
-#include "stackimpl.h"
-
-namespace {
-
-using namespace kdlib;
+namespace kdlib {
 
 typedef std::pair<MEMOFFSET_64, MEMOFFSET_64>   DebugRange;
+
+namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -20,14 +19,14 @@ DebugRange getFuncDebugRange(SymbolPtr& sym)
     try
     {
         lstFuncDebugStart = sym->findChildren(SymTagFuncDebugStart);
-        if (lstFuncDebugStart.empty())
+        if ( lstFuncDebugStart.empty() )
             return std::make_pair(0, 0);
 
         lstFuncDebugEnd = sym->findChildren(SymTagFuncDebugEnd);
-        if (lstFuncDebugEnd.empty())
+        if ( lstFuncDebugEnd.empty() )
             return std::make_pair(0, 0);
 
-        return std::make_pair((*lstFuncDebugStart.begin())->getVa(), (*lstFuncDebugEnd.begin())->getVa());
+        return std::make_pair( (*lstFuncDebugStart.begin())->getVa(), (*lstFuncDebugEnd.begin())->getVa());
     }
     catch (const SymbolException&)
     {
@@ -44,7 +43,7 @@ DebugRange getBlockRange(SymbolPtr& sym)
     return std::make_pair(blockBegin, blockEnd);
 }
 
-bool inDebugRange(const DebugRange& range, MEMOFFSET_64 offset)
+bool inDebugRange( const DebugRange& range, MEMOFFSET_64 offset)
 {
     return range.first <= offset && range.second >= offset;
 }
@@ -53,45 +52,31 @@ bool inDebugRange(const DebugRange& range, MEMOFFSET_64 offset)
 
 }
 
-namespace kdlib {
-
-///////////////////////////////////////////////////////////////////////////////
-
-StackPtr getStack()
-{
-    return getStackFromContext(loadCPUContext());
-}
-
-StackPtr getStackFromContext(CPUContextPtr &ctx)
-{
-    return ctx->getStack();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
 {
-    return StackFramePtr(new StackFrameSimple(ip, ret, fp, sp));
+    return StackFramePtr( new StackFrame(ip,ret,fp,sp) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrameImpl::getFunction()
+TypedVarPtr StackFrame::getFunction()
 {
-    ModulePtr mod = loadModule(getIP());
+    ModulePtr mod = loadModule(m_ip);
 
-    return mod->getFunctionByAddr(getIP());
+    return mod->getFunctionByAddr(m_ip);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long StackFrameImpl::getTypedParamCount()
+unsigned long StackFrame::getTypedParamCount()
 {
     try {
 
-        ModulePtr mod = loadModule(getIP());
+        ModulePtr mod = loadModule(m_ip);
 
-        TypedVarPtr func = mod->getFunctionByAddr(getIP());
+        TypedVarPtr func = mod->getFunctionByAddr(m_ip);
 
         return static_cast<unsigned long>(func->getElementCount());
 
@@ -105,7 +90,7 @@ unsigned long StackFrameImpl::getTypedParamCount()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrameImpl::getTypedParam(unsigned long index)
+TypedVarPtr StackFrame::getTypedParam( unsigned long index )
 {
     SymbolPtrList  vars = getParams();
 
@@ -145,7 +130,7 @@ TypedVarPtr StackFrameImpl::getTypedParam(unsigned long index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring  StackFrameImpl::getTypedParamName(unsigned long index)
+std::wstring  StackFrame::getTypedParamName( unsigned long index )
 {
     SymbolPtrList  vars = getParams();
 
@@ -160,7 +145,7 @@ std::wstring  StackFrameImpl::getTypedParamName(unsigned long index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
+TypedVarPtr StackFrame::getTypedParam( const std::wstring& paramName)
 {
     SymbolPtrList  vars = getParams();
 
@@ -203,7 +188,7 @@ TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long StackFrameImpl::getLocalVarCount()
+unsigned long StackFrame::getLocalVarCount()
 {
     try
     {
@@ -218,7 +203,7 @@ unsigned long StackFrameImpl::getLocalVarCount()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrameImpl::getLocalVar(unsigned long index)
+TypedVarPtr StackFrame::getLocalVar( unsigned long index )
 {
     SymbolPtrList  vars = getLocalVars();
 
@@ -258,7 +243,7 @@ TypedVarPtr StackFrameImpl::getLocalVar(unsigned long index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring  StackFrameImpl::getLocalVarName(unsigned long index)
+std::wstring  StackFrame::getLocalVarName( unsigned long index )
 {
     SymbolPtrList  vars = getLocalVars();
 
@@ -273,7 +258,7 @@ std::wstring  StackFrameImpl::getLocalVarName(unsigned long index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
+TypedVarPtr StackFrame::getLocalVar( const std::wstring& paramName )
 {
     SymbolPtrList  vars = getLocalVars();
 
@@ -316,24 +301,22 @@ TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtrList  StackFrameImpl::getLocalVars()
+SymbolPtrList  StackFrame::getLocalVars()
 {
-    MEMOFFSET_64  frameIP = getIP();
-
-    ModulePtr mod = loadModule(frameIP);
+    ModulePtr mod  = loadModule(m_ip);
 
     MEMDISPLACEMENT displacemnt;
-    SymbolPtr symFunc = mod->getSymbolByVa(frameIP, SymTagFunction, &displacemnt);
+    SymbolPtr symFunc = mod->getSymbolByVa( m_ip, SymTagFunction, &displacemnt );
 
     SymbolPtrList  lst;
 
     DebugRange  debugRange = getFuncDebugRange(symFunc);
 
-    if (!inDebugRange(debugRange, frameIP))
+    if ( !inDebugRange(debugRange, m_ip) )
         return lst;
 
     // find var in current scope
-    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(frameIP - mod->getBase()));
+    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
 
     SymbolPtrList::iterator it;
     for ( it = symList.begin(); it != symList.end(); it++ )
@@ -358,19 +341,17 @@ SymbolPtrList  StackFrameImpl::getLocalVars()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtrList StackFrameImpl::getParams()
+SymbolPtrList StackFrame::getParams()
 {
-    MEMOFFSET_64  frameIP = getIP();
-
-    ModulePtr mod = loadModule(frameIP);
+    ModulePtr mod = loadModule(m_ip);
 
     MEMDISPLACEMENT displacemnt;
-    SymbolPtr symFunc = mod->getSymbolByVa(frameIP, SymTagFunction, &displacemnt);
+    SymbolPtr symFunc = mod->getSymbolByVa(m_ip, SymTagFunction, &displacemnt);
 
     SymbolPtrList  lst;
 
     // find var in current scope
-    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(frameIP - mod->getBase()));
+    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
 
     SymbolPtrList::iterator it;
     for (it = symList.begin(); it != symList.end(); it++)
@@ -386,15 +367,13 @@ SymbolPtrList StackFrameImpl::getParams()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolPtrList  StackFrameImpl::getBlockLocalVars(SymbolPtr& sym)
+SymbolPtrList  StackFrame::getBlockLocalVars(SymbolPtr& sym)
 {
-    MEMOFFSET_64  frameIP = getIP();
-
     SymbolPtrList  lst;
 
     DebugRange  debugRange = getBlockRange(sym);
 
-    if (!inDebugRange(debugRange, frameIP))
+    if ( !inDebugRange(debugRange, m_ip) )
         return lst;
 
     // find var in current scope
@@ -424,18 +403,18 @@ SymbolPtrList  StackFrameImpl::getBlockLocalVars(SymbolPtr& sym)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_64 StackFrameImpl::getOffset(unsigned long regRel, MEMOFFSET_REL relOffset)
+MEMOFFSET_64 StackFrame::getOffset( unsigned long regRel, MEMOFFSET_REL relOffset )
 {
     switch( regRel )
     {
     case rriInstructionPointer:
-        return (MEMOFFSET_64)( getIP() + relOffset );
+        return (MEMOFFSET_64)( m_ip + relOffset );
 
     case rriStackFrame:
-        return (MEMOFFSET_64)( getFP() + relOffset);
+        return (MEMOFFSET_64)( m_fp + relOffset );
 
     case rriStackPointer:
-        return (MEMOFFSET_64)( getSP() + relOffset);
+        return (MEMOFFSET_64)( m_sp + relOffset );
     }
 
     throw DbgException( "unknown relative offset" );

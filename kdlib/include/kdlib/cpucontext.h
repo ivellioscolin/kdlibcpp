@@ -5,7 +5,6 @@
 
 #include "kdlib/dbgtypedef.h"
 #include "kdlib/variant.h"
-#include "kdlib/stack.h"
 
 namespace kdlib {
 
@@ -29,21 +28,18 @@ public:
     virtual NumVariant getRegisterByIndex( unsigned long index ) = 0;
     virtual std::wstring getRegisterName( unsigned long index ) = 0;
     virtual unsigned long getRegisterNumber() = 0;
-    virtual DataAccessorPtr getRegisterAccessor(unsigned long regId) = 0;
 
     virtual MEMOFFSET_64 getIP() = 0;
     virtual MEMOFFSET_64 getSP() = 0;
     virtual MEMOFFSET_64 getFP() = 0;
 
-    virtual StackPtr getStack() = 0;
+    virtual unsigned long long loadMSR( unsigned long msrIndex ) = 0;
+    virtual void setMSR( unsigned long msrIndex, unsigned long long value ) = 0;
 };
 
 inline CPUContextPtr loadCPUContext() {
     return CPUContext::loadCPUCurrentContext();
 }
-
-StackPtr getStackFromContext(CPUContextPtr &ctx);
-StackFramePtr getStackFrameFromContext(CPUContextPtr &ctx);
 
 ///////////////////////////////////////////////////////////////////////////////
 
