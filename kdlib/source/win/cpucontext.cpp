@@ -3,8 +3,10 @@
 #include "kdlib/dbgengine.h"
 #include "kdlib/exceptions.h"
 
+#include "stackimpl.h"
 #include "cpucontextimpl.h"
 #include "dbgmgr.h"
+
 
 namespace kdlib {
 
@@ -86,7 +88,7 @@ NumVariant getRegisterByIndex(unsigned long index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CPUContextPtr CPUContext::loadCPUCurrentContext()
+CPUContextPtr loadCPUContext()
 {
     return CPUContextPtr( new CPUContextImpl() );
 }
@@ -163,6 +165,441 @@ std::wstring CPUContextImpl::getRegisterName( unsigned long index )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+StackPtr getStackAmd64()
+{
+    HRESULT  hres;
+
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
+    std::vector<CONTEXT_X64>  contexts(filledFrames);
+
+    g_dbgMgr->setQuietNotiification(true);
+
+    hres = 
+        g_dbgMgr->control->GetContextStackTrace(
+            NULL,
+            0,
+            &frames[0],
+            filledFrames,
+            &contexts[0],
+            filledFrames*sizeof(CONTEXT_X64),
+            sizeof(CONTEXT_X64),
+            &filledFrames 
+            );
+
+    g_dbgMgr->setQuietNotiification(false);
+
+    if (S_OK != hres)
+        throw DbgEngException( L"IDebugControl::GetStackTrace", hres );
+
+
+    std::vector<StackFramePtr>  stackFrames;
+
+    for (ULONG i = 0; i < filledFrames; ++i)
+    {
+        stackFrames.push_back(StackFramePtr(new StackFrameImpl(
+            i,
+            frames[i].InstructionOffset,
+            frames[i].ReturnOffset,
+            frames[i].FrameOffset,
+            frames[i].StackOffset,
+            CPUContextPtr(new CPUContextAmd64(contexts[i])))));
+    }
+
+    return StackPtr(new StackImpl(stackFrames));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ReadWow64Context(WOW64_CONTEXT& wow64Context)
+{
+    // 
+    //  *** undoc ***
+    // !wow64exts.r
+    // http://www.woodmann.com/forum/archive/index.php/t-11162.html
+    // http://www.nynaeve.net/Code/GetThreadWow64Context.cpp
+    // 
+
+    HRESULT     hres;
+
+    ULONG64 teb64Address;
+
+    ULONG debugClass, debugQualifier;
+    hres = g_dbgMgr->control->GetDebuggeeType(&debugClass, &debugQualifier);
+
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetDebuggeeType", hres);
+
+    if (debugClass == DEBUG_CLASS_KERNEL)
+    {
+        DEBUG_VALUE  debugValue = {};
+        ULONG        remainderIndex = 0;
+
+        hres =
+            g_dbgMgr->control->EvaluateWide(
+            L"@@C++(#FIELD_OFFSET(nt!_KTHREAD, Teb))",
+            DEBUG_VALUE_INT64,
+            &debugValue,
+            &remainderIndex);
+        if (FAILED(hres))
+            throw  DbgEngException(L"IDebugControl::Evaluate", hres);
+
+        ULONG64 tebOffset = debugValue.I64;
+
+        hres = g_dbgMgr->system->GetImplicitThreadDataOffset(&teb64Address);
+        if (S_OK != hres)
+            throw DbgEngException(L"IDebugSystemObjects::GetImplicitThreadDataOffset", hres);
+
+        ULONG readedBytes;
+
+        hres =
+            g_dbgMgr->dataspace->ReadVirtual(
+            teb64Address + tebOffset,
+            &teb64Address,
+            sizeof(teb64Address),
+            &readedBytes);
+        if (FAILED(hres))
+            throw MemoryException(teb64Address + tebOffset);
+    }
+    else
+    {
+        hres = g_dbgMgr->system->GetImplicitThreadDataOffset(&teb64Address);
+        if (S_OK != hres)
+            throw DbgEngException(L"IDebugSystemObjects::GetImplicitThreadDataOffset", hres);
+    }
+
+    // ? @@C++(#FIELD_OFFSET(nt!_TEB64, TlsSlots))
+    // hardcoded in !wow64exts.r (6.2.8250.0)
+    static const ULONG teb64ToTlsOffset = 0x01480;
+    static const ULONG WOW64_TLS_CPURESERVED = 1;
+    ULONG64 cpuAreaAddress;
+    ULONG readedBytes;
+
+    hres = g_dbgMgr->dataspace->ReadVirtual(
+        teb64Address + teb64ToTlsOffset + (sizeof(ULONG64) * WOW64_TLS_CPURESERVED),
+        &cpuAreaAddress,
+        sizeof(cpuAreaAddress),
+        &readedBytes);
+
+    if (S_OK != hres)
+        throw MemoryException(teb64Address + teb64ToTlsOffset + (sizeof(ULONG64) * WOW64_TLS_CPURESERVED));
+
+    // CPU Area is:
+    // +00 unknown ULONG
+    // +04 WOW64_CONTEXT struct
+    static const ULONG cpuAreaToWow64ContextOffset = sizeof(ULONG);
+
+    hres =
+        g_dbgMgr->dataspace->ReadVirtual(
+        cpuAreaAddress + cpuAreaToWow64ContextOffset,
+        &wow64Context,
+        sizeof(wow64Context),
+        &readedBytes);
+
+    if (S_OK != hres)
+        throw MemoryException(cpuAreaAddress + cpuAreaToWow64ContextOffset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+StackPtr getStackWow64()
+{
+    HRESULT  hres;
+
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
+    std::vector<WOW64_CONTEXT>  contexts(filledFrames);
+
+    WOW64_CONTEXT  wow64Context;
+    ReadWow64Context( wow64Context);
+
+    g_dbgMgr->setQuietNotiification(true);
+
+    hres =
+        g_dbgMgr->control->GetContextStackTrace(
+        &wow64Context,
+        sizeof(WOW64_CONTEXT),
+        &frames[0],
+        filledFrames,
+        &contexts[0],
+        filledFrames*sizeof(WOW64_CONTEXT),
+        sizeof(WOW64_CONTEXT),
+        &filledFrames
+        );
+
+    g_dbgMgr->setQuietNotiification(false);
+
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetStackTrace", hres);
+
+
+    std::vector<StackFramePtr>  stackFrames;
+
+    for (ULONG i = 0; i < filledFrames; ++i)
+    {
+        stackFrames.push_back(StackFramePtr(new StackFrameImpl(
+            i,
+            frames[i].InstructionOffset,
+            frames[i].ReturnOffset,
+            frames[i].FrameOffset,
+            frames[i].StackOffset,
+            CPUContextPtr(new CPUContextWOW64(contexts[i])))));
+    }
+
+    return StackPtr(new StackImpl(stackFrames));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+StackPtr getStackX86()
+{
+    HRESULT  hres;
+
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
+    std::vector<CONTEXT_X86>  contexts(filledFrames);
+
+    g_dbgMgr->setQuietNotiification(true);
+
+    hres =
+        g_dbgMgr->control->GetContextStackTrace(
+        NULL,
+        0,
+        &frames[0],
+        filledFrames,
+        &contexts[0],
+        filledFrames*sizeof(CONTEXT_X86),
+        sizeof(CONTEXT_X86),
+        &filledFrames
+        );
+
+    g_dbgMgr->setQuietNotiification(false);
+
+    if (S_OK != hres)
+        throw DbgEngException(L"IDebugControl::GetStackTrace", hres);
+
+
+    std::vector<StackFramePtr>  stackFrames;
+
+    for (ULONG i = 0; i < filledFrames; ++i)
+    {
+        stackFrames.push_back(StackFramePtr(new StackFrameImpl(
+            i,
+            frames[i].InstructionOffset,
+            frames[i].ReturnOffset,
+            frames[i].FrameOffset,
+            frames[i].StackOffset,
+            CPUContextPtr(new CPUContextI386(contexts[i])))));
+    }
+
+    return StackPtr(new StackImpl(stackFrames));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+StackPtr getStack()
+{
+    HRESULT  hres;
+    
+    ULONG  cpuType;
+    hres = g_dbgMgr->control->GetActualProcessorType((PULONG)&cpuType);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetActualProcessorType", hres);
+
+    ULONG  cpuMode;
+    hres = g_dbgMgr->control->GetEffectiveProcessorType((PULONG)&cpuMode);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetEffectiveProcessorType", hres);
+
+    if (cpuType == IMAGE_FILE_MACHINE_AMD64 && cpuMode == IMAGE_FILE_MACHINE_AMD64)
+        return getStackAmd64();
+
+    if (cpuType == IMAGE_FILE_MACHINE_AMD64 && cpuMode == IMAGE_FILE_MACHINE_I386)
+        return getStackWow64();
+
+    if (cpuType == IMAGE_FILE_MACHINE_I386)
+        return getStackX86(); 
+    
+    throw DbgException("Unknown CPU type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+StackFramePtr getStackFrameAmd64()
+{
+    HRESULT  hres;
+    DEBUG_STACK_FRAME  stackFrame = {};
+    CONTEXT_X64  stackContext;
+    
+    g_dbgMgr->setQuietNotiification(true);
+    
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, &stackContext, sizeof(CONTEXT_X64));
+    
+    g_dbgMgr->setQuietNotiification(false);
+    
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
+    
+    return StackFramePtr(new StackFrameImpl(
+        stackFrame.FrameNumber,
+        stackFrame.InstructionOffset,
+        stackFrame.ReturnOffset,
+        stackFrame.FrameOffset,
+        stackFrame.StackOffset,
+        CPUContextPtr(new CPUContextAmd64(stackContext))));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+StackFramePtr getStackFrameWow64()
+{
+    HRESULT  hres;
+    DEBUG_STACK_FRAME  stackFrame = {};
+    WOW64_CONTEXT  stackContext;
+
+    g_dbgMgr->setQuietNotiification(true);
+
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, &stackContext, sizeof(WOW64_CONTEXT));
+
+    g_dbgMgr->setQuietNotiification(false);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
+
+    return StackFramePtr(new StackFrameImpl(
+        stackFrame.FrameNumber,
+        stackFrame.InstructionOffset,
+        stackFrame.ReturnOffset,
+        stackFrame.FrameOffset,
+        stackFrame.StackOffset,
+        CPUContextPtr(new CPUContextWOW64(stackContext))));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+StackFramePtr getStackFrameX86()
+{
+    HRESULT  hres;
+    DEBUG_STACK_FRAME  stackFrame = {};
+    CONTEXT_X86  stackContext;
+
+    g_dbgMgr->setQuietNotiification(true);
+
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, &stackContext, sizeof(CONTEXT_X86));
+
+    g_dbgMgr->setQuietNotiification(false);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
+
+    return StackFramePtr(new StackFrameImpl(
+        stackFrame.FrameNumber,
+        stackFrame.InstructionOffset,
+        stackFrame.ReturnOffset,
+        stackFrame.FrameOffset,
+        stackFrame.StackOffset,
+        CPUContextPtr(new CPUContextI386(stackContext))));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+StackFramePtr getCurrentStackFrame()
+{
+    HRESULT  hres;
+
+    ULONG  cpuType;
+    hres = g_dbgMgr->control->GetActualProcessorType((PULONG)&cpuType);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetActualProcessorType", hres);
+
+    ULONG  cpuMode;
+    hres = g_dbgMgr->control->GetEffectiveProcessorType((PULONG)&cpuMode);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetEffectiveProcessorType", hres);
+
+    if (cpuType == IMAGE_FILE_MACHINE_AMD64 && cpuMode == IMAGE_FILE_MACHINE_AMD64)
+        return getStackFrameAmd64();
+
+    if (cpuType == IMAGE_FILE_MACHINE_AMD64 && cpuMode == IMAGE_FILE_MACHINE_I386)
+        return getStackFrameWow64();
+
+    if (cpuType == IMAGE_FILE_MACHINE_I386)
+        return getStackFrameX86();
+
+    throw DbgException("Unknown CPU type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+unsigned long getCurrentStackFrameNumber()
+{
+    HRESULT  hres;
+
+    ULONG  frameIndex;
+    hres = g_dbgMgr->symbols->GetCurrentScopeFrameIndex(&frameIndex);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::GetCurrentScopeFrameIndex", hres);
+
+    return frameIndex;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentStackFrame(StackFramePtr& stackFrame)
+{
+    HRESULT  hres;
+    
+    DEBUG_STACK_FRAME  debugStackFrame = {};
+    
+    debugStackFrame.InstructionOffset = stackFrame->getIP();
+    debugStackFrame.ReturnOffset = stackFrame->getRET();
+    debugStackFrame.FrameOffset = stackFrame->getFP();
+    debugStackFrame.StackOffset = stackFrame->getSP();
+    debugStackFrame.FrameNumber = stackFrame->getNumber();
+    
+    hres = g_dbgMgr->symbols->SetScope(0, &debugStackFrame, NULL, 0);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::SetScope", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCurrentStackFrameByIndex(unsigned long frameIndex)
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->symbols->SetScopeFrameByIndex(frameIndex);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::SetScopeFrameByIndex", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void resetCurrentStackFrame()
+{
+    HRESULT  hres;
+    
+    hres = g_dbgMgr->symbols->ResetScope();
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::ResetScope", hres);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
 
 
 

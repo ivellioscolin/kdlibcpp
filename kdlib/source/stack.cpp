@@ -1,7 +1,8 @@
 #include "stdafx.h"
 
-#include "kdlib\stack.h"
 #include "kdlib\module.h"
+
+#include "stackimpl.h"
 
 namespace kdlib {
 
@@ -52,25 +53,25 @@ bool inDebugRange( const DebugRange& range, MEMOFFSET_64 offset)
 
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+//
+//StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
+//{
+//    return StackFramePtr( new StackFrame(ip,ret,fp,sp) );
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////
+//
+//TypedVarPtr StackFrame::getFunction()
+//{
+//    ModulePtr mod = loadModule(m_ip);
+//
+//    return mod->getFunctionByAddr(m_ip);
+//}
+//
 ///////////////////////////////////////////////////////////////////////////////
 
-StackFramePtr getStackFrame( MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
-{
-    return StackFramePtr( new StackFrame(ip,ret,fp,sp) );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypedVarPtr StackFrame::getFunction()
-{
-    ModulePtr mod = loadModule(m_ip);
-
-    return mod->getFunctionByAddr(m_ip);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-unsigned long StackFrame::getTypedParamCount()
+unsigned long StackFrameImpl::getTypedParamCount()
 {
     try {
 
@@ -88,9 +89,9 @@ unsigned long StackFrame::getTypedParamCount()
     return 0UL;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrame::getTypedParam( unsigned long index )
+TypedVarPtr StackFrameImpl::getTypedParam(unsigned long index)
 {
     SymbolPtrList  vars = getParams();
 
@@ -128,9 +129,9 @@ TypedVarPtr StackFrame::getTypedParam( unsigned long index )
     throw DbgException("unknown variable storage");
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-std::wstring  StackFrame::getTypedParamName( unsigned long index )
+std::wstring  StackFrameImpl::getTypedParamName(unsigned long index)
 {
     SymbolPtrList  vars = getParams();
 
@@ -143,9 +144,9 @@ std::wstring  StackFrame::getTypedParamName( unsigned long index )
     return (*it)->getName();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrame::getTypedParam( const std::wstring& paramName)
+TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
 {
     SymbolPtrList  vars = getParams();
 
@@ -186,9 +187,9 @@ TypedVarPtr StackFrame::getTypedParam( const std::wstring& paramName)
     throw SymbolException(L"symbol not found");
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-unsigned long StackFrame::getLocalVarCount()
+unsigned long StackFrameImpl::getLocalVarCount()
 {
     try
     {
@@ -201,9 +202,9 @@ unsigned long StackFrame::getLocalVarCount()
     return 0UL;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrame::getLocalVar( unsigned long index )
+TypedVarPtr StackFrameImpl::getLocalVar(unsigned long index)
 {
     SymbolPtrList  vars = getLocalVars();
 
@@ -241,9 +242,9 @@ TypedVarPtr StackFrame::getLocalVar( unsigned long index )
     throw DbgException("unknown variable storage");
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-std::wstring  StackFrame::getLocalVarName( unsigned long index )
+std::wstring  StackFrameImpl::getLocalVarName(unsigned long index)
 {
     SymbolPtrList  vars = getLocalVars();
 
@@ -256,9 +257,9 @@ std::wstring  StackFrame::getLocalVarName( unsigned long index )
     return (*it)->getName();
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr StackFrame::getLocalVar( const std::wstring& paramName )
+TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
 {
     SymbolPtrList  vars = getLocalVars();
 
@@ -299,9 +300,9 @@ TypedVarPtr StackFrame::getLocalVar( const std::wstring& paramName )
     throw SymbolException(L"symbol not found");
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-SymbolPtrList  StackFrame::getLocalVars()
+SymbolPtrList  StackFrameImpl::getLocalVars()
 {
     ModulePtr mod  = loadModule(m_ip);
 
@@ -315,7 +316,7 @@ SymbolPtrList  StackFrame::getLocalVars()
     if ( !inDebugRange(debugRange, m_ip) )
         return lst;
 
-    // find var in current scope
+    //find var in current scope
     SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
 
     SymbolPtrList::iterator it;
@@ -325,7 +326,7 @@ SymbolPtrList  StackFrame::getLocalVars()
             lst.push_back( *it );
     }
 
-   // find inners scopes
+    //find inners scopes
     SymbolPtrList scopeList = symFunc->findChildren(SymTagBlock);
     SymbolPtrList::iterator itScope = scopeList.begin();
 
@@ -339,9 +340,9 @@ SymbolPtrList  StackFrame::getLocalVars()
     return lst;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-SymbolPtrList StackFrame::getParams()
+SymbolPtrList StackFrameImpl::getParams()
 {
     ModulePtr mod = loadModule(m_ip);
 
@@ -365,9 +366,9 @@ SymbolPtrList StackFrame::getParams()
     return lst;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-SymbolPtrList  StackFrame::getBlockLocalVars(SymbolPtr& sym)
+SymbolPtrList  StackFrameImpl::getBlockLocalVars(SymbolPtr& sym)
 {
     SymbolPtrList  lst;
 
@@ -386,7 +387,7 @@ SymbolPtrList  StackFrame::getBlockLocalVars(SymbolPtr& sym)
             lst.push_back( *it );
     }
 
-   // find inners scopes
+    // find inners scopes
     SymbolPtrList scopeList = sym->findChildren(SymTagBlock);
     SymbolPtrList::iterator itScope = scopeList.begin();
 
@@ -401,9 +402,9 @@ SymbolPtrList  StackFrame::getBlockLocalVars(SymbolPtr& sym)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-MEMOFFSET_64 StackFrame::getOffset( unsigned long regRel, MEMOFFSET_REL relOffset )
+MEMOFFSET_64 StackFrameImpl::getOffset(unsigned long regRel, MEMOFFSET_REL relOffset)
 {
     switch( regRel )
     {
@@ -420,6 +421,7 @@ MEMOFFSET_64 StackFrame::getOffset( unsigned long regRel, MEMOFFSET_REL relOffse
     throw DbgException( "unknown relative offset" );
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
 
 }; // kdlib namespace end

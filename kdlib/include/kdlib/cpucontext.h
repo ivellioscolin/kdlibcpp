@@ -13,12 +13,8 @@ namespace kdlib {
 class CPUContext;
 typedef boost::shared_ptr<CPUContext>  CPUContextPtr;
 
-class  CPUContext : private boost::noncopyable {
-
-public:
-
-    static CPUContextPtr loadCPUCurrentContext();
-
+class  CPUContext 
+{
 public:
 
     virtual CPUType getCPUType() = 0;
@@ -37,9 +33,7 @@ public:
     virtual void setMSR( unsigned long msrIndex, unsigned long long value ) = 0;
 };
 
-inline CPUContextPtr loadCPUContext() {
-    return CPUContext::loadCPUCurrentContext();
-}
+CPUContextPtr loadCPUContext();
 
 ///////////////////////////////////////////////////////////////////////////////
 
