@@ -341,9 +341,9 @@ private:
     template <typename T>
     T getValue() const
     {
-        T  v;
-        getRegisterValue(m_regId, &v, sizeof(v));
-        return v;
+        char  buffer[16];
+        getRegisterValue(m_regId, buffer, sizeof(buffer));
+        return *reinterpret_cast<T*>(buffer);
     }
 
     virtual unsigned char readByte(size_t pos) const
