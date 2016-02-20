@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <cvconst.h>
+
 #include "kdlib/dbgengine.h"
 #include "kdlib/exceptions.h"
 
@@ -432,24 +434,51 @@ StackFramePtr getStackFrameAmd64()
 {
     HRESULT  hres;
     DEBUG_STACK_FRAME  stackFrame = {};
-    CONTEXT_X64  stackContext;
+    ULONG  frameNumber;
+
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
+    std::vector<CONTEXT_X64>  contexts(filledFrames);
     
     g_dbgMgr->setQuietNotiification(true);
-    
-    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, &stackContext, sizeof(CONTEXT_X64));
-    
-    g_dbgMgr->setQuietNotiification(false);
-    
-    if ( FAILED(hres) )
+
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, NULL, 0);
+
+    frameNumber = stackFrame.FrameNumber;
+
+    if (FAILED(hres))
+    {
+        g_dbgMgr->setQuietNotiification(false);
         throw DbgEngException(L"IDebugSymbols::GetScope", hres);
-    
+    }
+
+    hres =
+        g_dbgMgr->control->GetContextStackTrace(
+        NULL,
+        0,
+        &frames[0],
+        filledFrames,
+        &contexts[0],
+        filledFrames*sizeof(CONTEXT_X64),
+        sizeof(CONTEXT_X64),
+        &filledFrames
+        );
+
+    if (FAILED(hres))
+    {
+        g_dbgMgr->setQuietNotiification(false);
+        throw DbgEngException(L"IDebugControl4::GetContextStackTrace", hres);
+    }
+
+    g_dbgMgr->setQuietNotiification(false);
+
     return StackFramePtr(new StackFrameImpl(
-        stackFrame.FrameNumber,
-        stackFrame.InstructionOffset,
-        stackFrame.ReturnOffset,
-        stackFrame.FrameOffset,
-        stackFrame.StackOffset,
-        CPUContextPtr(new CPUContextAmd64(stackContext))));
+        frameNumber,
+        frames[frameNumber].InstructionOffset,
+        frames[frameNumber].ReturnOffset,
+        frames[frameNumber].FrameOffset,
+        frames[frameNumber].StackOffset,
+        CPUContextPtr(new CPUContextAmd64(contexts[frameNumber]))));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -458,24 +487,54 @@ StackFramePtr getStackFrameWow64()
 {
     HRESULT  hres;
     DEBUG_STACK_FRAME  stackFrame = {};
-    WOW64_CONTEXT  stackContext;
+    ULONG  frameNumber;
+
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
+    std::vector<WOW64_CONTEXT>  contexts(filledFrames);
+
+    WOW64_CONTEXT  wow64Context;
+    ReadWow64Context(wow64Context);
 
     g_dbgMgr->setQuietNotiification(true);
 
-    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, &stackContext, sizeof(WOW64_CONTEXT));
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, NULL, 0);
+
+    frameNumber = stackFrame.FrameNumber;
+
+    if (FAILED(hres))
+    {
+        g_dbgMgr->setQuietNotiification(false);
+        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
+    }
+
+    hres =
+        g_dbgMgr->control->GetContextStackTrace(
+        NULL,
+        0,
+        &frames[0],
+        filledFrames,
+        &contexts[0],
+        filledFrames*sizeof(WOW64_CONTEXT),
+        sizeof(WOW64_CONTEXT),
+        &filledFrames
+        );
+
+    if (FAILED(hres))
+    {
+        g_dbgMgr->setQuietNotiification(false);
+        throw DbgEngException(L"IDebugControl4::GetContextStackTrace", hres);
+    }
 
     g_dbgMgr->setQuietNotiification(false);
 
-    if (FAILED(hres))
-        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
-
     return StackFramePtr(new StackFrameImpl(
-        stackFrame.FrameNumber,
-        stackFrame.InstructionOffset,
-        stackFrame.ReturnOffset,
-        stackFrame.FrameOffset,
-        stackFrame.StackOffset,
-        CPUContextPtr(new CPUContextWOW64(stackContext))));
+        frameNumber,
+        frames[frameNumber].InstructionOffset,
+        frames[frameNumber].ReturnOffset,
+        frames[frameNumber].FrameOffset,
+        frames[frameNumber].StackOffset,
+        CPUContextPtr(new CPUContextWOW64(contexts[frameNumber]))));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -484,24 +543,51 @@ StackFramePtr getStackFrameX86()
 {
     HRESULT  hres;
     DEBUG_STACK_FRAME  stackFrame = {};
-    CONTEXT_X86  stackContext;
+    ULONG  frameNumber;
 
+    ULONG   filledFrames = 1024;
+    std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
+    std::vector<CONTEXT_X86>  contexts(filledFrames);
+    
     g_dbgMgr->setQuietNotiification(true);
 
-    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, &stackContext, sizeof(CONTEXT_X86));
+    hres = g_dbgMgr->symbols->GetScope(NULL, &stackFrame, NULL, 0);
+
+    frameNumber = stackFrame.FrameNumber;
+
+    if (FAILED(hres))
+    {
+        g_dbgMgr->setQuietNotiification(false);
+        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
+    }
+
+    hres =
+        g_dbgMgr->control->GetContextStackTrace(
+        NULL,
+        0,
+        &frames[0],
+        filledFrames,
+        &contexts[0],
+        filledFrames*sizeof(CONTEXT_X86),
+        sizeof(CONTEXT_X86),
+        &filledFrames
+        );
+
+    if (FAILED(hres))
+    {
+        g_dbgMgr->setQuietNotiification(false);
+        throw DbgEngException(L"IDebugControl4::GetContextStackTrace", hres);
+    }
 
     g_dbgMgr->setQuietNotiification(false);
 
-    if (FAILED(hres))
-        throw DbgEngException(L"IDebugSymbols::GetScope", hres);
-
     return StackFramePtr(new StackFrameImpl(
-        stackFrame.FrameNumber,
-        stackFrame.InstructionOffset,
-        stackFrame.ReturnOffset,
-        stackFrame.FrameOffset,
-        stackFrame.StackOffset,
-        CPUContextPtr(new CPUContextI386(stackContext))));
+        frameNumber,
+        frames[frameNumber].InstructionOffset,
+        frames[frameNumber].ReturnOffset,
+        frames[frameNumber].FrameOffset,
+        frames[frameNumber].StackOffset,
+        CPUContextPtr(new CPUContextI386(contexts[frameNumber]))));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -591,286 +677,284 @@ void resetCurrentStackFrame()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+NumVariant CPUContextI386::getRegisterByIndex(unsigned long index)
+{
+    switch (index)
+    {
+    case CV_REG_AL:
+        return NumVariant(static_cast<unsigned char>(m_context.Eax & 0xFF));
+    case CV_REG_CL:
+        return NumVariant(static_cast<unsigned char>(m_context.Ecx & 0xFF));
+    case CV_REG_DL:
+        return NumVariant(static_cast<unsigned char>(m_context.Edx & 0xFF));
+    case CV_REG_BL:
+        return NumVariant(static_cast<unsigned char>(m_context.Ebx & 0xFF));
+    case CV_REG_AH:
+        return NumVariant(static_cast<unsigned char>((m_context.Eax & 0xFF00) >> 8));
+    case CV_REG_CH:
+        return NumVariant(static_cast<unsigned char>((m_context.Ecx & 0xFF00) >> 8));
+    case CV_REG_DH:
+        return NumVariant(static_cast<unsigned char>((m_context.Edx & 0xFF00) >> 8));
+    case CV_REG_BH:
+       return NumVariant(static_cast<unsigned char>((m_context.Ebx & 0xFF00) >> 8));
+    case CV_REG_AX:
+        return NumVariant(static_cast<unsigned short>(m_context.Eax & 0xFFFF));
+    case CV_REG_CX:
+        return NumVariant(static_cast<unsigned short>(m_context.Ecx & 0xFFFF));
+    case CV_REG_DX:
+        return NumVariant(static_cast<unsigned short>(m_context.Edx & 0xFFFF));
+    case CV_REG_BX:
+        return NumVariant(static_cast<unsigned short>(m_context.Ebx & 0xFFFF));
+    case CV_REG_SP:
+        return NumVariant(static_cast<unsigned short>(m_context.Esp & 0xFFFF));
+    case CV_REG_BP:
+        return NumVariant(static_cast<unsigned short>(m_context.Ebp & 0xFFFF));
+    case CV_REG_SI:
+        return NumVariant(static_cast<unsigned short>(m_context.Esi & 0xFFFF));
+    case CV_REG_DI:
+        return NumVariant(static_cast<unsigned short>(m_context.Edi & 0xFFFF));
+    case CV_REG_EAX:
+        return NumVariant(m_context.Eax);
+    case CV_REG_ECX:
+        return NumVariant(m_context.Ecx);
+    case CV_REG_EDX:
+        return NumVariant(m_context.Edx);
+    case CV_REG_EBX:
+        return NumVariant(m_context.Ebx);
+    case CV_REG_ESP:
+        return NumVariant(m_context.Esp);
+    case CV_REG_EBP:
+        return NumVariant(m_context.Ebp);
+    case CV_REG_ESI:
+        return NumVariant(m_context.Esi);
+    case CV_REG_EDI:
+       return NumVariant(m_context.Edi);
+    case CV_REG_ES:
+       return NumVariant(m_context.SegEs);
+    case CV_REG_CS:
+       return NumVariant(m_context.SegCs);
+    case CV_REG_SS:
+       return NumVariant(m_context.SegSs);
+    case CV_REG_DS:
+       return NumVariant(m_context.SegDs);
+    case CV_REG_FS:
+        return NumVariant(m_context.SegFs);
+    case CV_REG_GS:
+        return NumVariant(m_context.SegGs);
+    case CV_REG_IP:
+        return NumVariant(static_cast<unsigned short>(m_context.Eip & 0xFFFF));
+    case CV_REG_FLAGS:
+        return NumVariant(static_cast<unsigned short>(m_context.EFlags & 0xFFFF));
+    case CV_REG_EIP:
+        return NumVariant(m_context.Eip);
+    case CV_REG_EFLAGS:
+        return NumVariant(m_context.EFlags);
+    }
 
+    std::stringstream sstr;
+    sstr << "I386 context: unsupported register index " << std::dec << index;
+    throw DbgException(sstr.str());
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//CPUContextPtr CPUContext::loadCPUCurrentContext()
-//{
-//    return CPUContextPtr( new CPUContextImpl() );
-//}
-//
-/////////////////////////////////////////////////////////////////////////////////
-
-//CPUContextPtr CPUContext::loadCPUContextByIndex( unsigned long index )
-//{
-//    THREAD_DEBUG_ID  threadId = getThreadIdByIndex(index);
-//
-//    SwitchThreadContext  threadContext( threadId );
-//
-//    return CPUContextPtr( new CPUContextImpl() );
-//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//CPUContextPtr CPUContext::loadCPUContextImplicit( MEMOFFSET_64 offset)
-//{
-//    SwitchThreadContext  threadContext(-1);
-//
-//    setImplicitThread(offset);
-//
-//    return CPUContextPtr( new CPUContextImpl() );
-//}
+NumVariant CPUContextWOW64::getRegisterByIndex(unsigned long index)
+{
+    switch (index)
+    {
+    case CV_REG_AL:
+        return NumVariant(static_cast<unsigned char>(m_context.Eax & 0xFF));
+    case CV_REG_CL:
+        return NumVariant(static_cast<unsigned char>(m_context.Ecx & 0xFF));
+    case CV_REG_DL:
+        return NumVariant(static_cast<unsigned char>(m_context.Edx & 0xFF));
+    case CV_REG_BL:
+        return NumVariant(static_cast<unsigned char>(m_context.Ebx & 0xFF));
+    case CV_REG_AH:
+        return NumVariant(static_cast<unsigned char>((m_context.Eax & 0xFF00) >> 8));
+    case CV_REG_CH:
+        return NumVariant(static_cast<unsigned char>((m_context.Ecx & 0xFF00) >> 8));
+    case CV_REG_DH:
+        return NumVariant(static_cast<unsigned char>((m_context.Edx & 0xFF00) >> 8));
+    case CV_REG_BH:
+        return NumVariant(static_cast<unsigned char>((m_context.Ebx & 0xFF00) >> 8));
+    case CV_REG_AX:
+        return NumVariant(static_cast<unsigned short>(m_context.Eax & 0xFFFF));
+    case CV_REG_CX:
+        return NumVariant(static_cast<unsigned short>(m_context.Ecx & 0xFFFF));
+    case CV_REG_DX:
+        return NumVariant(static_cast<unsigned short>(m_context.Edx & 0xFFFF));
+    case CV_REG_BX:
+        return NumVariant(static_cast<unsigned short>(m_context.Ebx & 0xFFFF));
+    case CV_REG_SP:
+        return NumVariant(static_cast<unsigned short>(m_context.Esp & 0xFFFF));
+    case CV_REG_BP:
+        return NumVariant(static_cast<unsigned short>(m_context.Ebp & 0xFFFF));
+    case CV_REG_SI:
+        return NumVariant(static_cast<unsigned short>(m_context.Esi & 0xFFFF));
+    case CV_REG_DI:
+        return NumVariant(static_cast<unsigned short>(m_context.Edi & 0xFFFF));
+    case CV_REG_EAX:
+        return NumVariant(m_context.Eax);
+    case CV_REG_ECX:
+        return NumVariant(m_context.Ecx);
+    case CV_REG_EDX:
+        return NumVariant(m_context.Edx);
+    case CV_REG_EBX:
+        return NumVariant(m_context.Ebx);
+    case CV_REG_ESP:
+        return NumVariant(m_context.Esp);
+    case CV_REG_EBP:
+        return NumVariant(m_context.Ebp);
+    case CV_REG_ESI:
+        return NumVariant(m_context.Esi);
+    case CV_REG_EDI:
+        return NumVariant(m_context.Edi);
+    case CV_REG_ES:
+        return NumVariant(m_context.SegEs);
+    case CV_REG_CS:
+        return NumVariant(m_context.SegCs);
+    case CV_REG_SS:
+        return NumVariant(m_context.SegSs);
+    case CV_REG_DS:
+        return NumVariant(m_context.SegDs);
+    case CV_REG_FS:
+        return NumVariant(m_context.SegFs);
+    case CV_REG_GS:
+        return NumVariant(m_context.SegGs);
+    case CV_REG_IP:
+        return NumVariant(static_cast<unsigned short>(m_context.Eip & 0xFFFF));
+    case CV_REG_FLAGS:
+        return NumVariant(static_cast<unsigned short>(m_context.EFlags & 0xFFFF));
+    case CV_REG_EIP:
+        return NumVariant(m_context.Eip);
+    case CV_REG_EFLAGS:
+        return NumVariant(m_context.EFlags);
+    }
+
+    std::stringstream sstr;
+    sstr << "WOW64 context: unsupported register index " << std::dec << index;
+    throw DbgException(sstr.str());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//CPUContextImpl::CPUContextImpl()
-//{
-//    //HRESULT  hres;
-//
-//    //hres = g_dbgMgr->control->GetActualProcessorType( &m_processorType );
-//    //if ( FAILED( hres ) )
-//    //    throw DbgEngException( L"IDebugControl::GetActualProcessorType", hres );
-//
-//
-//    //hres = g_dbgMgr->control->GetEffectiveProcessorType( &m_processorMode );
-//    //if ( FAILED( hres ) )
-//    //    throw DbgEngException( L"IdebugControl::GetEffectiveProcessorType", hres );
-//
-//
-//
-//
-//
-//    //if ( m_processorType == IMAGE_FILE_MACHINE_I386 )
-//    //{
-//    //    hres = g_dbgMgr->advanced->GetThreadContext( &m_ctx_x86, sizeof(m_ctx_x86) );
-//    //    if ( FAILED( hres ) )
-//    //        throw DbgEngException( L"IDebugAdvanced::GetThreadContext", hres );
-//
-//    //}
-//    //else
-//    //if ( m_processorType == IMAGE_FILE_MACHINE_AMD64 )
-//    //{
-//    //    ULONG  effproc;
-//
-//    //    hres = g_dbgMgr->control->GetEffectiveProcessorType( &effproc );
-//    //    if ( FAILED( hres ) )
-//    //        throw DbgEngException( L"IDebugControl::GetEffectiveProcessorType", hres );
-//
-//    //    if ( effproc == IMAGE_FILE_MACHINE_I386 )
-//    //    {
-//    //        m_wow64 = true;
-//
-//    //        ReadWow64Context();
-//    //    }
-//    //    else
-//    //    {
-//    //        hres = g_dbgMgr->advanced->GetThreadContext( &m_ctx_amd64, sizeof(m_ctx_amd64) );
-//    //        if ( FAILED( hres ) )    
-//    //            throw DbgEngException( L"IDebugAdvanced::GetThreadContext", hres );
-//    //    }
-//    //}
-//    //else
-//    //{
-//    //    throw DbgException( "unknown processor type");
-//    //}
-//}
+NumVariant CPUContextAmd64::getRegisterByIndex(unsigned long index)
+{
 
-///////////////////////////////////////////////////////////////////////////////
+    switch (index)
+    {
 
-//void CPUContextImpl::ReadWow64Context()
-//{
-//    // 
-//    //  *** undoc ***
-//    // !wow64exts.r
-//    // http://www.woodmann.com/forum/archive/index.php/t-11162.html
-//    // http://www.nynaeve.net/Code/GetThreadWow64Context.cpp
-//    // 
-//
-//    HRESULT     hres;
-//    ULONG       debugClass, debugQualifier;
-//    
-//    hres = g_dbgMgr->control->GetDebuggeeType( &debugClass, &debugQualifier );
-//    
-//    if ( FAILED( hres ) )
-//        throw DbgEngException( L"IDebugControl::GetDebuggeeType", hres );   
-//         
-//    ULONG64 teb64Address;
-//
-//    if ( debugClass == DEBUG_CLASS_KERNEL )
-//    {
-//        DEBUG_VALUE  debugValue = {};
-//        ULONG        remainderIndex = 0;
-//
-//        hres = g_dbgMgr->control->EvaluateWide( 
-//            L"@@C++(#FIELD_OFFSET(nt!_KTHREAD, Teb))",
-//            DEBUG_VALUE_INT64,
-//            &debugValue,
-//            &remainderIndex );
-//            
-//        if ( FAILED( hres ) )
-//            throw  DbgEngException( L"IDebugControl::Evaluate", hres );
-//            
-//        ULONG64 tebOffset = debugValue.I64;
-//
-//        hres = g_dbgMgr->system->GetImplicitThreadDataOffset(&teb64Address);
-//        if (FAILED(hres) )
-//            throw DbgEngException( L"IDebugSystemObjects::GetImplicitThreadDataOffset", hres);
-//
-//        ULONG readedBytes;
-//
-//        hres = g_dbgMgr->dataspace->ReadVirtual( 
-//            teb64Address + tebOffset,
-//            &teb64Address,
-//            sizeof(teb64Address),
-//            &readedBytes);
-//
-//            if (FAILED(hres) )
-//            throw MemoryException(teb64Address + tebOffset);
-//    }
-//    else
-//    {
-//        hres = g_dbgMgr->system->GetImplicitThreadDataOffset(&teb64Address);
-//        if (S_OK != hres)
-//            throw DbgEngException( L"IDebugSystemObjects::GetImplicitThreadDataOffset", hres);
-//    }
-//
-//    // ? @@C++(#FIELD_OFFSET(nt!_TEB64, TlsSlots))
-//    // hardcoded in !wow64exts.r (6.2.8250.0)
-//    static const ULONG teb64ToTlsOffset = 0x01480;
-//    static const ULONG WOW64_TLS_CPURESERVED = 1;
-//    ULONG64 cpuAreaAddress;
-//    ULONG readedBytes;
-//
-//    hres = g_dbgMgr->dataspace->ReadVirtual( 
-//            teb64Address + teb64ToTlsOffset + (sizeof(ULONG64) * WOW64_TLS_CPURESERVED),
-//            &cpuAreaAddress,
-//            sizeof(cpuAreaAddress),
-//            &readedBytes);
-//
-//    if (FAILED(hres) )
-//        throw MemoryException(teb64Address + teb64ToTlsOffset + (sizeof(ULONG64) * WOW64_TLS_CPURESERVED));
-//
-//    // CPU Area is:
-//    // +00 unknown ULONG
-//    // +04 WOW64_CONTEXT struct
-//    static const ULONG cpuAreaToWow64ContextOffset = sizeof(ULONG);
-//
-//    hres = g_dbgMgr->dataspace->ReadVirtual(
-//            cpuAreaAddress + cpuAreaToWow64ContextOffset,
-//            &m_ctx_wow64,
-//            sizeof(m_ctx_wow64),
-//            &readedBytes);
-//
-//    if (FAILED(hres) )
-//        throw MemoryException(cpuAreaAddress + cpuAreaToWow64ContextOffset);
-//}
+    case CV_AMD64_AL:
+        return NumVariant(static_cast<unsigned char>(m_context.Rax & 0xFF));
+    case CV_AMD64_CL:
+        return NumVariant(static_cast<unsigned char>(m_context.Rcx & 0xFF));
+    case CV_AMD64_DL:
+        return NumVariant(static_cast<unsigned char>(m_context.Rdx & 0xFF));
+    case CV_AMD64_BL:
+        return NumVariant(static_cast<unsigned char>(m_context.Rbx & 0xFF));
+    case CV_AMD64_AH:
+        return NumVariant(static_cast<unsigned char>((m_context.Rax & 0xFF00) >> 8));
+    case CV_AMD64_CH:
+        return NumVariant(static_cast<unsigned char>((m_context.Rcx & 0xFF00) >> 8));
+    case CV_AMD64_DH:
+        return NumVariant(static_cast<unsigned char>((m_context.Rdx & 0xFF00) >> 8));
+    case CV_AMD64_BH:
+        return NumVariant(static_cast<unsigned char>((m_context.Rbx & 0xFF00) >> 8));
+    case CV_AMD64_AX:
+        return NumVariant(static_cast<unsigned short>(m_context.Rax & 0xFFFF));
+    case CV_AMD64_CX:
+        return NumVariant(static_cast<unsigned short>(m_context.Rcx & 0xFFFF));
+    case CV_AMD64_DX:
+        return NumVariant(static_cast<unsigned short>(m_context.Rdx & 0xFFFF));
+    case CV_AMD64_BX:
+        return NumVariant(static_cast<unsigned short>(m_context.Rbx & 0xFFFF));
+    case CV_AMD64_SP:
+        return NumVariant(static_cast<unsigned short>(m_context.Rsp & 0xFFFF));
+    case CV_AMD64_BP:
+        return NumVariant(static_cast<unsigned short>(m_context.Rbp & 0xFFFF));
+    case CV_AMD64_SI:
+        return NumVariant(static_cast<unsigned short>(m_context.Rsi & 0xFFFF));
+    case CV_AMD64_DI:
+        return NumVariant(static_cast<unsigned short>(m_context.Rdi & 0xFFFF));
+    case CV_AMD64_EAX:
+        return NumVariant(static_cast<unsigned long>(m_context.Rax & 0xFFFFFFFF));
+    case CV_AMD64_ECX:
+        return NumVariant(static_cast<unsigned long>(m_context.Rcx & 0xFFFFFFFF));
+    case CV_AMD64_EDX:
+        return NumVariant(static_cast<unsigned long>(m_context.Rdx & 0xFFFFFFFF));
+    case CV_AMD64_EBX:
+        return NumVariant(static_cast<unsigned long>(m_context.Rbx & 0xFFFFFFFF));
+    case CV_AMD64_ESP:
+        return NumVariant(static_cast<unsigned long>(m_context.Rsp & 0xFFFFFFFF));
+    case CV_AMD64_EBP:
+        return NumVariant(static_cast<unsigned long>(m_context.Rbp & 0xFFFFFFFF));
+    case CV_AMD64_ESI:
+        return NumVariant(static_cast<unsigned long>(m_context.Rsi & 0xFFFFFFFF));
+    case CV_AMD64_EDI:
+        return NumVariant(static_cast<unsigned long>(m_context.Rdi & 0xFFFFFFFF));
+    case CV_AMD64_ES:
+        return NumVariant(m_context.SegEs);
+    case CV_AMD64_CS:
+        return NumVariant(m_context.SegCs);
+    case CV_AMD64_SS:
+        return NumVariant(m_context.SegSs);
+    case CV_AMD64_DS:
+        return NumVariant(m_context.SegDs);
+    case CV_AMD64_FS:
+        return NumVariant(m_context.SegFs);
+    case CV_AMD64_GS:
+        return NumVariant(m_context.SegGs);
+    case CV_AMD64_FLAGS:
+        return NumVariant(m_context.EFlags);
+    case CV_AMD64_RIP:
+        return NumVariant(m_context.Rip);
+    case CV_AMD64_SIL:
+        return NumVariant(static_cast<unsigned char>(m_context.Rsi & 0xFF));
+    case CV_AMD64_DIL:
+        return NumVariant(static_cast<unsigned char>(m_context.Rdi & 0xFF));
+    case CV_AMD64_BPL:
+        return NumVariant(static_cast<unsigned char>(m_context.Rbp & 0xFF));
+    case CV_AMD64_SPL:
+       return NumVariant(static_cast<unsigned char>(m_context.Rsp & 0xFF));
+    case CV_AMD64_RAX:
+        return NumVariant(m_context.Rax);
+    case CV_AMD64_RBX:
+        return NumVariant(m_context.Rbx);
+    case  CV_AMD64_RDX:
+        return NumVariant(m_context.Rdx);
+    case CV_AMD64_RCX:
+        return NumVariant(m_context.Rcx);
+    case CV_AMD64_RSI:
+        return NumVariant(m_context.Rsi);
+    case CV_AMD64_RDI:
+        return NumVariant(m_context.Rdi);
+    case CV_AMD64_RBP:
+        return NumVariant(m_context.Rbp);
+    case CV_AMD64_RSP:
+        return NumVariant(m_context.Rsp);
+    case CV_AMD64_R8:
+        return NumVariant(m_context.R8);
+    case CV_AMD64_R9:
+        return NumVariant(m_context.R9);
+    case CV_AMD64_R10:
+        return NumVariant(m_context.R10);
+    case CV_AMD64_R11:
+        return NumVariant(m_context.R11);
+    case CV_AMD64_R12:
+        return NumVariant(m_context.R12);
+    case CV_AMD64_R13:
+        return NumVariant(m_context.R13);
+    case CV_AMD64_R14:
+        return NumVariant(m_context.R14);
+    case CV_AMD64_R15:
+        return NumVariant(m_context.R15);
+    }
 
-///////////////////////////////////////////////////////////////////////////////
-
-//void* CPUContextImpl::getContext()
-//{
-//    if ( m_processorType == IMAGE_FILE_MACHINE_I386 )
-//    {
-//        return &m_ctx_x86;
-//    }
-//
-//    if ( m_processorType == IMAGE_FILE_MACHINE_AMD64 )
-//    {
-//        return m_wow64 ? (void*)&m_ctx_wow64 : (void*)&m_ctx_amd64;
-//    }
-//
-//    throw DbgException( "unknown processor type");
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
-//unsigned long CPUContextImpl::getContextSize() 
-//{
-//    if ( m_processorType == IMAGE_FILE_MACHINE_I386 )
-//    {
-//        return sizeof(m_ctx_x86);
-//    }
-//
-//    if ( m_processorType == IMAGE_FILE_MACHINE_AMD64 )
-//    {
-//        return m_wow64 ? sizeof(m_ctx_wow64) : sizeof(m_ctx_amd64);
-//    }
-//
-//    throw DbgException( "unknown processor type");
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
-//unsigned long CPUContextImpl::getStackLength()
-//{
-//    HRESULT  hres;
-//
-//    ULONG   filledFrames = 1024;
-//    std::vector<DEBUG_STACK_FRAME> dbgFrames(filledFrames);
-//
-//    unsigned long contextSize = getContextSize();
-//
-//    hres = g_dbgMgr->control->GetContextStackTrace( 
-//        getContext(),
-//        contextSize,
-//        &dbgFrames[0],
-//        filledFrames,
-//        NULL, 
-//        filledFrames*contextSize,
-//        contextSize,
-//        &filledFrames );
-//
-//    if (S_OK != hres)
-//        throw DbgEngException( L"IDebugControl4::GetContextStackTrace", hres );
-//
-//    return filledFrames;
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
-//void CPUContextImpl::getStackFrame( unsigned long frameIndex, MEMOFFSET_64 &ip, MEMOFFSET_64 &ret, MEMOFFSET_64 &fp, MEMOFFSET_64 &sp )
-//{
-//    HRESULT  hres;
-//
-//    ULONG   filledFrames = 1024;
-//    std::vector<DEBUG_STACK_FRAME> dbgFrames(filledFrames);
-//
-//    unsigned long contextSize = getContextSize();
-//
-//    hres = g_dbgMgr->control->GetContextStackTrace( 
-//        getContext(),
-//        contextSize,
-//        &dbgFrames[0],
-//        filledFrames,
-//        NULL, 
-//        filledFrames*contextSize,
-//        contextSize,
-//        &filledFrames );
-//
-//    if (S_OK != hres)
-//        throw DbgEngException( L"IDebugControl4::GetContextStackTrace", hres );
-//
-//    if ( frameIndex >= filledFrames )
-//        throw IndexException( frameIndex );
-//
-//    ip = dbgFrames[frameIndex].InstructionOffset;
-//    ret = dbgFrames[frameIndex].ReturnOffset;
-//    fp = dbgFrames[frameIndex].FrameOffset;
-//    sp = dbgFrames[frameIndex].StackOffset;
-//}
-
-
+    std::stringstream sstr;
+    sstr << "AMD64 context: unsupported register index " << std::dec << index;
+    throw DbgException(sstr.str());
+}
 
 } // kdlib namespace end

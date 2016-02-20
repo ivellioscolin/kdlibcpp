@@ -88,9 +88,7 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual NumVariant getRegisterByIndex(unsigned long index) {
-        NOT_IMPLEMENTED();
-    }
+    virtual NumVariant getRegisterByIndex(unsigned long index); 
 
     virtual std::wstring getRegisterName(unsigned long index) {
         NOT_IMPLEMENTED();
@@ -121,7 +119,10 @@ public:
     }
 
 private:
+
     CONTEXT_X64  m_context;
+
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -146,9 +147,7 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual NumVariant getRegisterByIndex(unsigned long index) {
-        NOT_IMPLEMENTED();
-    }
+    virtual NumVariant getRegisterByIndex(unsigned long index);
 
     virtual std::wstring getRegisterName(unsigned long index) {
         NOT_IMPLEMENTED();
@@ -205,9 +204,7 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual NumVariant getRegisterByIndex(unsigned long index) {
-        NOT_IMPLEMENTED();
-    }
+    virtual NumVariant getRegisterByIndex(unsigned long index);
 
     virtual std::wstring getRegisterName(unsigned long index) {
         NOT_IMPLEMENTED();

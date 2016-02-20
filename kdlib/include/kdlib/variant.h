@@ -218,55 +218,55 @@ public:
         m_doubleVal = val;
     }
 
-    char asChar() {
+    char asChar() const {
         return cast( charT ).m_charVal;
     }
 
-    unsigned char asUChar() {
+    unsigned char asUChar() const {
         return cast( ucharT ).m_ucharVal;
     }
 
-    short asShort() {
+    short asShort() const {
         return cast( shortT ).m_shortVal;
     }
 
-    unsigned short asUShort() {
+    unsigned short asUShort() const {
         return cast( ushortT ).m_ushortVal;
     }
 
-    long asLong() {
+    long asLong() const {
         return cast( longT ).m_longVal;
     }
 
-    unsigned long asULong() {
+    unsigned long asULong() const {
         return cast( ulongT ).m_ulongVal;
     }
 
-    long long asLongLong() {
+    long long asLongLong() const {
         return cast( longlongT ).m_longlongVal;
     }
 
-    unsigned long long asULongLong() {
+    unsigned long long asULongLong() const {
         return cast( ulonglongT ).m_ulonglongVal;
     }
 
-    int asInt() {
+    int asInt() const {
         return cast( intT ).m_intVal;
     }
 
-    unsigned int asUInt() {
+    unsigned int asUInt() const {
         return cast( uintT ).m_uintVal;
     }
 
-    float asFloat() {
+    float asFloat() const {
         return cast( floatT ).m_floatVal;
     }
 
-    double asDouble() {
+    double asDouble() const {
         return cast( doubleT ).m_doubleVal;
     }
 
-    std::wstring asStr() {
+    std::wstring asStr() const {
 
         std::wstringstream sstr;
 
@@ -308,7 +308,7 @@ public:
         throw NumVariantError();
     }
 
-    std::wstring asHex() {
+    std::wstring asHex() const {
 
         std::wstringstream sstr;
 
@@ -350,59 +350,59 @@ public:
         throw NumVariantError();
     }
 
-    bool isChar() {
+    bool isChar() const {
         return m_numType == charT;
     }
 
-    bool isUChar() {
+    bool isUChar() const {
         return m_numType == ucharT;
     }
 
-    bool isShort() {
+    bool isShort() const {
         return m_numType == shortT;
     }
 
-    bool isUShort() {
+    bool isUShort() const {
         return m_numType == ushortT;
     }
 
-    bool isLong() {
+    bool isLong() const {
         return m_numType == longT;
     }
 
-    bool isULong() {
+    bool isULong() const {
         return m_numType == ulongT;
     }
 
-    bool isLongLong() {
+    bool isLongLong() const {
         return m_numType == longlongT;
     }
 
-    bool isULongLong() {
+    bool isULongLong() const {
         return m_numType == ulonglongT;
     }
 
-    bool isInt() {
+    bool isInt() const {
         return m_numType == intT;
     }
 
-    bool isUInt() {
+    bool isUInt() const {
         return m_numType == uintT;
     }
 
-    bool isFloat() {
+    bool isFloat() const {
         return m_numType == floatT;
     }
 
-    bool isDouble() {
+    bool isDouble() const  {
         return m_numType == doubleT;
     }
 
-    bool isSigned() {
+    bool isSigned() const {
         return NumVariant(-1).cast( m_numType ) < NumVariant(0);
     }
 
-    bool isInteger() {
+    bool isInteger() const {
         return !isFloat() && !isDouble();
     }
 

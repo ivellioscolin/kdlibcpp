@@ -20,9 +20,16 @@ DataAccessorPtr  getEmptyAccessor()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr  getRegisterAccessor(unsigned long regId)
+//DataAccessorPtr  getRegisterAccessor(unsigned long regId)
+//{
+//    return DataAccessorPtr(new RegisterAccessor(regId));
+//}
+
+///////////////////////////////////////////////////////////////////////////////
+
+DataAccessorPtr getVariantAccessor(const NumVariant& var)
 {
-    return DataAccessorPtr(new RegisterAccessor(regId));
+    return DataAccessorPtr(new VariantAccessor(var));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

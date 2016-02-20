@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <kdlib/dbgtypedef.h>
+#include <kdlib/variant.h>
 
 namespace kdlib {
 
@@ -46,8 +47,10 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr  getMemoryAccessor( MEMOFFSET_64  offset, size_t length);
-DataAccessorPtr  getRegisterAccessor(unsigned long regId);
+DataAccessorPtr getMemoryAccessor( MEMOFFSET_64  offset, size_t length);
+DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer);
+DataAccessorPtr getVariantAccessor(const NumVariant& var);
+//DataAccessorPtr  getRegisterAccessor(unsigned long regId);
 DataAccessorPtr  getEmptyAccessor();
 
 ///////////////////////////////////////////////////////////////////////////////
