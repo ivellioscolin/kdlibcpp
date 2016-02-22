@@ -756,6 +756,87 @@ NumVariant CPUContextI386::getRegisterByIndex(unsigned long index)
     throw DbgException(sstr.str());
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring  CPUContextI386::getRegisterName(unsigned long index)
+{
+    switch (index)
+    {
+    case CV_REG_AL:
+        return L"AL";
+    case CV_REG_CL:
+        return L"CL";
+    case CV_REG_DL:
+        return L"DL";
+    case CV_REG_BL:
+        return L"BL";
+    case CV_REG_AH:
+        return L"AH";
+    case CV_REG_CH:
+        return L"CH";
+    case CV_REG_DH:
+        return L"DH";
+    case CV_REG_BH:
+        return L"BH";
+    case CV_REG_AX:
+        return L"AX";
+    case CV_REG_CX:
+        return L"CX";
+    case CV_REG_DX:
+        return L"DX";
+    case CV_REG_BX:
+        return L"BX";
+    case CV_REG_SP:
+        return L"SP";
+    case CV_REG_BP:
+        return L"BP";
+    case CV_REG_SI:
+        return L"SI";
+    case CV_REG_DI:
+        return L"DI";
+    case CV_REG_EAX:
+        return L"EAX";
+    case CV_REG_ECX:
+        return L"ECX";
+    case CV_REG_EDX:
+        return L"EDX";
+    case CV_REG_EBX:
+        return L"EBX";
+    case CV_REG_ESP:
+        return L"ESP";
+    case CV_REG_EBP:
+        return L"EBP";
+    case CV_REG_ESI:
+        return L"ESI";
+    case CV_REG_EDI:
+        return L"EDI";
+    case CV_REG_ES:
+        return L"ES";
+    case CV_REG_CS:
+        return L"CS";
+    case CV_REG_SS:
+        return L"SS";
+    case CV_REG_DS:
+        return L"DS";
+    case CV_REG_FS:
+        return L"FS";
+    case CV_REG_GS:
+        return L"GS";
+    case CV_REG_IP:
+        return L"IP";
+    case CV_REG_FLAGS:
+        return L"FLAGS";
+    case CV_REG_EIP:
+        return L"EIP";
+    case CV_REG_EFLAGS:
+        return L"EFLAGS";
+    }
+
+    std::stringstream sstr;
+    sstr << "I386 context: unsupported register index " << std::dec << index;
+    throw DbgException(sstr.str());
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -835,6 +916,87 @@ NumVariant CPUContextWOW64::getRegisterByIndex(unsigned long index)
 
     std::stringstream sstr;
     sstr << "WOW64 context: unsupported register index " << std::dec << index;
+    throw DbgException(sstr.str());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring  CPUContextWOW64::getRegisterName(unsigned long index)
+{
+    switch (index)
+    {
+    case CV_REG_AL:
+        return L"AL";
+    case CV_REG_CL:
+        return L"CL";
+    case CV_REG_DL:
+        return L"DL";
+    case CV_REG_BL:
+        return L"BL";
+    case CV_REG_AH:
+        return L"AH";
+    case CV_REG_CH:
+        return L"CH";
+    case CV_REG_DH:
+        return L"DH";
+    case CV_REG_BH:
+        return L"BH";
+    case CV_REG_AX:
+        return L"AX";
+    case CV_REG_CX:
+        return L"CX";
+    case CV_REG_DX:
+        return L"DX";
+    case CV_REG_BX:
+        return L"BX";
+    case CV_REG_SP:
+        return L"SP";
+    case CV_REG_BP:
+        return L"BP";
+    case CV_REG_SI:
+        return L"SI";
+    case CV_REG_DI:
+        return L"DI";
+    case CV_REG_EAX:
+        return L"EAX";
+    case CV_REG_ECX:
+        return L"ECX";
+    case CV_REG_EDX:
+        return L"EDX";
+    case CV_REG_EBX:
+        return L"EBX";
+    case CV_REG_ESP:
+        return L"ESP";
+    case CV_REG_EBP:
+        return L"EBP";
+    case CV_REG_ESI:
+        return L"ESI";
+    case CV_REG_EDI:
+        return L"EDI";
+    case CV_REG_ES:
+        return L"ES";
+    case CV_REG_CS:
+        return L"CS";
+    case CV_REG_SS:
+        return L"SS";
+    case CV_REG_DS:
+        return L"DS";
+    case CV_REG_FS:
+        return L"FS";
+    case CV_REG_GS:
+        return L"GS";
+    case CV_REG_IP:
+        return L"IP";
+    case CV_REG_FLAGS:
+        return L"FLAGS";
+    case CV_REG_EIP:
+        return L"EIP";
+    case CV_REG_EFLAGS:
+        return L"EFLAGS";
+    }
+
+    std::stringstream sstr;
+    sstr << "I386 context: unsupported register index " << std::dec << index;
     throw DbgException(sstr.str());
 }
 
@@ -956,5 +1118,124 @@ NumVariant CPUContextAmd64::getRegisterByIndex(unsigned long index)
     sstr << "AMD64 context: unsupported register index " << std::dec << index;
     throw DbgException(sstr.str());
 }
+
+
+std::wstring CPUContextAmd64::getRegisterName(unsigned long index)
+{
+    switch (index)
+    {
+    case CV_AMD64_AL:
+        return L"AL";
+    case CV_AMD64_CL:
+        return L"CL";
+    case CV_AMD64_DL:
+        return L"DL";
+    case CV_AMD64_BL:
+        return L"BL";
+    case CV_AMD64_AH:
+        return L"AH";
+    case CV_AMD64_CH:
+        return L"CH";
+    case CV_AMD64_DH:
+        return L"DH";
+    case CV_AMD64_BH:
+        return L"BH";
+    case CV_AMD64_AX:
+        return L"AX";
+    case CV_AMD64_CX:
+        return L"CX";
+    case CV_AMD64_DX:
+        return L"DX";
+    case CV_AMD64_BX:
+        return L"BX";
+    case CV_AMD64_SP:
+        return L"SP";
+    case CV_AMD64_BP:
+        return L"BP";
+    case CV_AMD64_SI:
+        return L"SI";
+    case CV_AMD64_DI:
+        return L"DI";
+    case CV_AMD64_EAX:
+        return L"EAX";
+    case CV_AMD64_ECX:
+        return L"ECX";
+    case CV_AMD64_EDX:
+        return L"EDX";
+    case CV_AMD64_EBX:
+        return L"EBX";
+    case CV_AMD64_ESP:
+        return L"ESP";
+    case CV_AMD64_EBP:
+        return L"EBP";
+    case CV_AMD64_ESI:
+        return L"ESI";
+    case CV_AMD64_EDI:
+        return L"EDI";
+    case CV_AMD64_ES:
+        return L"ES";
+    case CV_AMD64_CS:
+        return L"CS";
+    case CV_AMD64_SS:
+        return L"SS";
+    case CV_AMD64_DS:
+        return L"DS";
+    case CV_AMD64_FS:
+        return L"FS";
+    case CV_AMD64_GS:
+        return L"GS";
+    case CV_AMD64_FLAGS:
+        return L"EFLAGS";
+    case CV_AMD64_RIP:
+        return L"RIP";
+    case CV_AMD64_SIL:
+        return L"SIL";
+    case CV_AMD64_DIL:
+        return L"DIL";
+    case CV_AMD64_BPL:
+        return L"BPL";
+    case CV_AMD64_SPL:
+        return L"SPL";
+    case CV_AMD64_RAX:
+        return L"RAX";
+    case CV_AMD64_RBX:
+        return L"RBX";
+    case  CV_AMD64_RDX:
+        return L"RDX";
+    case CV_AMD64_RCX:
+        return L"RCX";
+    case CV_AMD64_RSI:
+        return L"RSI";
+    case CV_AMD64_RDI:
+        return L"RDI";
+    case CV_AMD64_RBP:
+        return L"RBP";
+    case CV_AMD64_RSP:
+        return L"RSP";
+    case CV_AMD64_R8:
+        return L"R8";
+    case CV_AMD64_R9:
+        return L"R9";
+    case CV_AMD64_R10:
+        return L"R10";
+    case CV_AMD64_R11:
+        return L"R11";
+    case CV_AMD64_R12:
+        return L"R12";
+    case CV_AMD64_R13:
+        return L"R13";
+    case CV_AMD64_R14:
+        return L"R14";
+    case CV_AMD64_R15:
+        return L"R15";
+    }
+
+    std::stringstream sstr;
+    sstr << "AMD64 context: unsupported register index " << std::dec << index;
+    throw DbgException(sstr.str());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 } // kdlib namespace end

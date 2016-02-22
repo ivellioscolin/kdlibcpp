@@ -128,6 +128,16 @@ private:
     {
         throw DbgException("data accessor no data");
     }
+
+    virtual VarStorage getStorageType() const
+    {
+        return UnknownVar;
+    }
+
+    virtual std::wstring getRegisterName() const
+    {
+        throw DbgException("data accessor no data");
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -300,6 +310,11 @@ private:
         return m_begin;
     }
 
+    virtual VarStorage getStorageType() const
+    {
+        return MemoryVar;
+    }
+
 
 private:
 
@@ -388,156 +403,31 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class RegisterAccessor : public VariantAccessor
+{
+public:
+
+    RegisterAccessor(const NumVariant& registerValue, const std::wstring& registerName) :
+        VariantAccessor(registerValue),
+        m_regName(registerName)
+    {}
 
 
+    virtual VarStorage getStorageType() const
+    {
+        return RegisterVar;
+    }
 
-//class RegisterAccessor : public DataAccessor, boost::noncopyable
-//{
-//public:
-//
-//    RegisterAccessor(unsigned long  regId) :
-//        m_regId(regId)
-//    {}
-//
-//private:
-//
-//    virtual size_t getLength() const {
-//        CPURegType  regType = getRegisterType(m_regId);
-//
-//        switch (regType)
-//        {
-//        case RegInt8: return 1;
-//        case RegInt16: return 2;
-//        case RegInt32: return 4;
-//        case RegInt64: return 8;
-//        case RegFloat32: return 4;
-//        case RegFloat64: return 8;
-//        case RegFloat80: return 10;
-//        case RegFloat128: return 16;
-//        case RegVector64: return 8;
-//        case RegVector128: return 16;
-//        }
-//        throw DbgException("unknown register type");
-//    }
-//
-//    template <typename T>
-//    T getValue() const
-//    {
-//        char  buffer[16];
-//        getRegisterValue(m_regId, buffer, sizeof(buffer));
-//        return *reinterpret_cast<T*>(buffer);
-//    }
-//
-//    virtual unsigned char readByte(size_t pos) const
-//    {
-//        return getValue<unsigned char>();
-//    }
-//
-//    virtual char readSignByte(size_t pos) const
-//    {
-//        return getValue<char>();
-//    }
-//
-//    virtual unsigned short readWord(size_t pos) const
-//    {
-//        return getValue<unsigned short>();
-//    }
-//
-//    virtual short readSignWord(size_t pos) const
-//    {
-//        return getValue<short>();
-//    }
-//
-//    virtual unsigned long readDWord(size_t pos) const
-//    {
-//        return getValue<unsigned long>();
-//    }
-//
-//    virtual long readSignDWord(size_t pos) const
-//    {
-//        return getValue<long>();
-//    }
-//
-//    virtual unsigned long long readQWord(size_t pos) const
-//    {
-//        return getValue<unsigned long long>();
-//    }
-//
-//    virtual long long readSignQWord(size_t pos) const
-//    {
-//        return getValue<long long>();
-//    }
-//
-//
-//    virtual float readFloat(size_t pos) const
-//    {
-//        return getValue<float>();
-//    }
-//
-//    virtual double readDouble(size_t pos = 0) const
-//    {
-//        return getValue<double>();
-//    }
-//
-//    virtual void readBytes(std::vector<unsigned char>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//    virtual void readWords(std::vector<unsigned short>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//    virtual void readDWords(std::vector<unsigned long>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//    virtual void readQWords(std::vector<unsigned long long>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//    virtual void readSignBytes(std::vector<char>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//    virtual void readSignWords(std::vector<short>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//    virtual void readSignDWords(std::vector<long>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//    virtual void readSignQWords(std::vector<long long>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//    virtual void readFloats(std::vector<float>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//    virtual void readDoubles(std::vector<double>&  dataRange, size_t count, size_t  pos) const
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//    virtual DataAccessorPtr clone(size_t count, size_t  pos)
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//    virtual MEMOFFSET_64 getAddress() const
-//    {
-//        return ~0;
-//    }
-//
-//private:
-//
-//    unsigned long m_regId;
-//};
+    virtual std::wstring getRegisterName() const
+    {
+        return m_regName;
+    }
+
+private:
+
+    std::wstring  m_regName;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 
 }

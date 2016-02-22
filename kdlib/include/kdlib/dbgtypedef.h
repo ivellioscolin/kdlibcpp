@@ -162,6 +162,7 @@ struct SyntheticSymbol {
 };
 
 enum VarStorage {
+    UnknownVar,
     MemoryVar,
     RegisterVar
 };

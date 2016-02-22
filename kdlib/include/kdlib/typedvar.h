@@ -66,6 +66,8 @@ class TypedVar : private boost::noncopyable, public NumBehavior {
 public:
     
     virtual std::wstring str() = 0;
+    virtual VarStorage getStorage() const = 0;
+    virtual std::wstring  getRegisterName() const = 0;
     virtual MEMOFFSET_64 getAddress() const = 0;
     virtual MEMOFFSET_64 getDebugStart() const = 0;
     virtual MEMOFFSET_64 getDebugEnd() const = 0;

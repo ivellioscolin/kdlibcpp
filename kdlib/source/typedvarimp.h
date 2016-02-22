@@ -24,6 +24,16 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual VarStorage getStorage() const
+    {
+        return m_varData->getStorageType();
+    }
+
+    virtual std::wstring getRegisterName() const
+    {
+        return m_varData->getRegisterName();
+    }
+
     virtual MEMOFFSET_64 getAddress() const 
     {
         return m_varData->getAddress();

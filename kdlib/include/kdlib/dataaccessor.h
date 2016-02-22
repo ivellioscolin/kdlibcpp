@@ -43,6 +43,8 @@ public:
 
     virtual DataAccessorPtr clone(size_t count, size_t  pos=0) = 0;
     virtual MEMOFFSET_64 getAddress() const = 0;
+    virtual VarStorage getStorageType() const = 0;
+    virtual std::wstring getRegisterName() const = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +52,7 @@ public:
 DataAccessorPtr getMemoryAccessor( MEMOFFSET_64  offset, size_t length);
 DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer);
 DataAccessorPtr getVariantAccessor(const NumVariant& var);
-//DataAccessorPtr  getRegisterAccessor(unsigned long regId);
+DataAccessorPtr  getRegisterAccessor(const NumVariant& registerValue, const std::wstring& registerName);
 DataAccessorPtr  getEmptyAccessor();
 
 ///////////////////////////////////////////////////////////////////////////////
