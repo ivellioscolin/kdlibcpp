@@ -587,6 +587,18 @@ std::wstring TypedVarPointer::printValue() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr TypedVarPointer::getElement(size_t index)
+{
+    TypeInfoPtr     elementType = m_typeInfo->deref();
+
+    return loadTypedVar(
+        elementType,
+        m_typeInfo->getPtrSize() == 4 ? m_varData->readDWord() : m_varData->readQWord() +
+        elementType->getSize()*index);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr TypedVarArray::getElement( size_t index )
 {
     //if ( index >= m_typeInfo->getElementCount() )
