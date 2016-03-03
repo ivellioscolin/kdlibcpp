@@ -29,6 +29,16 @@ std::wstring printFieldValue( const kdlib::TypeInfoPtr& fieldType, const kdlib::
         return dynamic_cast<const kdlib::TypedVarPointer*>( fieldVar.get() )->printValue();
     }
 
+    if (fieldType->isBitField())
+    {
+        return dynamic_cast<const kdlib::TypedVarBitField*>(fieldVar.get())->printValue();
+    }
+
+    if (fieldType->isEnum())
+    {
+        return dynamic_cast<const kdlib::TypedVarEnum*>(fieldVar.get())->printValue();
+    }
+
     return L"";
 }
 
@@ -654,6 +664,23 @@ NumVariant TypedVarBitField::getValue() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypedVarBitField::printValue() const
+{
+    std::wstringstream  sstr;
+
+    try {
+        sstr << L"0x" << getValue().asHex() << L" (" << getValue().asStr() << L")";
+        return sstr.str();
+    }
+    catch (MemoryException&)
+    {
+    }
+
+    return L"Invalid memory";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring TypedVarEnum::str()
 {
     std::wstringstream       sstr;
@@ -666,7 +693,7 @@ std::wstring TypedVarEnum::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring TypedVarEnum::printValue()
+std::wstring TypedVarEnum::printValue() const
 {
     std::wstringstream   sstr;
 

@@ -212,7 +212,7 @@ protected:
 
     virtual std::wstring str();
 
-    std::wstring printFieldValue( const TypeInfoPtr& typeInfo, const TypedVarPtr& var );
+   // std::wstring printFieldValue( const TypeInfoPtr& typeInfo, const TypedVarPtr& var );
 };
 
 
@@ -281,6 +281,9 @@ public:
       {}
 
     virtual NumVariant getValue() const;
+
+
+    std::wstring printValue() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -299,7 +302,7 @@ public:
 
     virtual std::wstring str();
 
-    std::wstring printValue();
+    std::wstring printValue() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
