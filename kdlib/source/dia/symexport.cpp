@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <comutil.h>
+#include <DbgHelp.h>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
@@ -528,11 +529,16 @@ private:
         ULONG64  namesOffset = moduleBase + ptrDWord( exportDirOffset + 0x20 ); 
         ULONG64  ordinalsOffset = moduleBase + ptrDWord( exportDirOffset + 0x24 );
 
-        for ( ULONG i = 0; i < namesCount; ++i )
+        for ( ULONG i = 0; i < namesCount; ++i ) 
         {
             std::string  exportName = loadCStr( moduleBase + ptrDWord( namesOffset + 4 * i ) );
             USHORT  exportOrdinal = (USHORT)ptrWord( ordinalsOffset + 2 * i );
             ULONG rva = (ULONG)ptrDWord( funcRvaOffset + 4 * exportOrdinal );
+
+            std::vector<char> undecorBuffer(1000);
+            DWORD  undecorLength = UnDecorateSymbolName(exportName.c_str(), &undecorBuffer[0], (DWORD)undecorBuffer.size(), UNDNAME_NAME_ONLY);
+            if (undecorLength > 0)
+                exportName = std::string(&undecorBuffer[0], undecorLength);
 
             std::wstring wideExportNamr = _bstr_t( exportName.c_str() );
 
