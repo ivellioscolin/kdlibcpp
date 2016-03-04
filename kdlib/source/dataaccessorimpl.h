@@ -147,7 +147,7 @@ class MemoryAccessor : public EmptyAccessor
 public:
 
     MemoryAccessor(MEMOFFSET_64 offset, size_t length) :
-        m_begin(offset),
+        m_begin(addr64(offset)),
         m_length(length)
     {}
 
