@@ -311,7 +311,7 @@ StackPtr getStackWow64()
 
     ULONG   filledFrames = 1024;
     std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
-    std::vector<WOW64_CONTEXT>  contexts(filledFrames);
+   // std::vector<WOW64_CONTEXT>  contexts(filledFrames);
 
     WOW64_CONTEXT  wow64Context;
     ReadWow64Context( wow64Context);
@@ -320,21 +320,20 @@ StackPtr getStackWow64()
 
     hres =
         g_dbgMgr->control->GetContextStackTrace(
-        &wow64Context,
-        sizeof(WOW64_CONTEXT),
-        &frames[0],
-        filledFrames,
-        &contexts[0],
-        filledFrames*sizeof(WOW64_CONTEXT),
-        sizeof(WOW64_CONTEXT),
-        &filledFrames
-        );
+            &wow64Context,
+            sizeof(WOW64_CONTEXT),
+            &frames[0],
+            filledFrames,
+            NULL, //&contexts[0],
+            filledFrames*sizeof(WOW64_CONTEXT),
+            sizeof(WOW64_CONTEXT),
+            &filledFrames
+            );
 
     g_dbgMgr->setQuietNotiification(false);
 
     if (S_OK != hres)
         throw DbgEngException(L"IDebugControl::GetStackTrace", hres);
-
 
     std::vector<StackFramePtr>  stackFrames;
 
@@ -346,7 +345,7 @@ StackPtr getStackWow64()
             frames[i].ReturnOffset,
             frames[i].FrameOffset,
             frames[i].StackOffset,
-            CPUContextPtr(new CPUContextWOW64(contexts[i])))));
+            CPUContextPtr(new CPUContextWOW64(wow64Context)))));
     }
 
     return StackPtr(new StackImpl(stackFrames));
@@ -491,10 +490,7 @@ StackFramePtr getStackFrameWow64()
 
     ULONG   filledFrames = 1024;
     std::vector<DEBUG_STACK_FRAME>  frames(filledFrames);
-    std::vector<WOW64_CONTEXT>  contexts(filledFrames);
-
-    WOW64_CONTEXT  wow64Context;
-    ReadWow64Context(wow64Context);
+    //std::vector<WOW64_CONTEXT>  contexts(filledFrames);
 
     g_dbgMgr->setQuietNotiification(true);
 
@@ -508,17 +504,20 @@ StackFramePtr getStackFrameWow64()
         throw DbgEngException(L"IDebugSymbols::GetScope", hres);
     }
 
+    WOW64_CONTEXT  wow64Context;
+    ReadWow64Context(wow64Context);
+
     hres =
         g_dbgMgr->control->GetContextStackTrace(
-        NULL,
-        0,
-        &frames[0],
-        filledFrames,
-        &contexts[0],
-        filledFrames*sizeof(WOW64_CONTEXT),
-        sizeof(WOW64_CONTEXT),
-        &filledFrames
-        );
+            &wow64Context,
+            sizeof(wow64Context),
+            &frames[0],
+            filledFrames,
+            NULL, //&contexts[0],
+            filledFrames*sizeof(WOW64_CONTEXT),
+            sizeof(WOW64_CONTEXT),
+            &filledFrames
+            );
 
     if (FAILED(hres))
     {
@@ -534,7 +533,7 @@ StackFramePtr getStackFrameWow64()
         frames[frameNumber].ReturnOffset,
         frames[frameNumber].FrameOffset,
         frames[frameNumber].StackOffset,
-        CPUContextPtr(new CPUContextWOW64(contexts[frameNumber]))));
+        CPUContextPtr(new CPUContextWOW64(wow64Context))));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
