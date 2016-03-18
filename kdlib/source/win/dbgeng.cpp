@@ -1048,7 +1048,7 @@ MEMOFFSET_64 getProcessOffset( PROCESS_DEBUG_ID id )
     hres = g_dbgMgr->system->GetCurrentProcessDataOffset( &offset );
 
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessSystemId", hres );
+        throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessDataOffset", hres );
 
      return offset;
 }
