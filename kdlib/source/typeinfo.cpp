@@ -223,7 +223,9 @@ TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName )
     if ( TypeInfo::isComplexType( symbolName ) )
         return TypeInfo::getComplexTypeInfo( symbolName, symbolScope );
 
-    throw SymbolException(L"symbol not found");
+    std::wstringstream  sstr;
+    sstr << L'\'' << symbolName << L'\'' << L" - symbol not found";
+    throw SymbolException(sstr.str());
 }
 
 

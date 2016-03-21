@@ -186,7 +186,10 @@ TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
         }
     }
 
-    throw SymbolException(L"symbol not found");
+    std::wstringstream  sstr;
+    sstr << L'\'' << paramName << L'\'' << L" - function's parameter not found";
+    throw SymbolException(sstr.str());
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -301,7 +304,9 @@ TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
         }
     }
 
-    throw SymbolException(L"symbol not found");
+    std::wstringstream  sstr;
+    sstr << L'\'' << paramName << L'\'' << L" - local variable not found";
+    throw SymbolException(sstr.str());
 }
 
 /////////////////////////////////////////////////////////////////////////////
