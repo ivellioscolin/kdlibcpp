@@ -19,6 +19,9 @@ TEST_F(EventHandlerTest, KillProcessTargetChanged)
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
 
+    EXPECT_CALL(eventHandler, onProcessStart(_)).Times(1);
+    EXPECT_CALL(eventHandler, onProcessExit(_, ProcessTerminate, 0)).Times(1);
+
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusGo) ).Times(1);
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusBreak) ).Times(1);
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusNoDebuggee) ).Times(1);
@@ -41,6 +44,9 @@ TEST_F(EventHandlerTest, DetachProcessTargetChanged)
     EventHandlerMock    eventHandler;
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
+
+    EXPECT_CALL(eventHandler, onProcessStart(_)).Times(1);
+    EXPECT_CALL(eventHandler, onProcessExit(_, ProcessDetach, 0)).Times(1);
 
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusGo) ).Times(1);
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusBreak) ).Times(1);
@@ -65,6 +71,9 @@ TEST_F(EventHandlerTest, KillProcessesTargetChanged)
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
 
+    EXPECT_CALL(eventHandler, onProcessStart(_)).Times(2);
+    EXPECT_CALL(eventHandler, onProcessExit(_, ProcessTerminate, _)).Times(2);
+
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusGo) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusBreak) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusNoDebuggee) ).Times(1);
@@ -85,6 +94,9 @@ TEST_F(EventHandlerTest, DetachProcessesTargetChanged)
     EventHandlerMock    eventHandler;
 
     DefaultValue<kdlib::DebugCallbackResult>::Set( DebugCallbackNoChange );
+
+    EXPECT_CALL(eventHandler, onProcessStart(_)).Times(2);
+    EXPECT_CALL(eventHandler, onProcessExit(_, ProcessDetach, _)).Times(2);
 
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusGo) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onExecutionStatusChange(DebugStatusBreak) ).Times(AnyNumber());
@@ -111,6 +123,7 @@ TEST_F(EventHandlerTest, ChangeCurrentThread)
     EventHandlerMock    eventHandler;
     DefaultValue<kdlib::DebugCallbackResult>::Set(DebugCallbackNoChange);
 
+    EXPECT_CALL(eventHandler, onProcessExit(_, ProcessTerminate, _)).Times(1);
     EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(threadNumber-1);
     EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
 
@@ -131,6 +144,8 @@ TEST_F(EventHandlerTest, ScopeChange)
     targetGo();
 
     EventHandlerMock    eventHandler;
+
+    EXPECT_CALL(eventHandler, onProcessExit(_, ProcessTerminate, _)).Times(1);
 
     EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onChangeLocalScope()).Times(AtLeast(2));

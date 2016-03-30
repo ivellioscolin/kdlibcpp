@@ -38,7 +38,9 @@ public: // notification
 public: // process manipulation
 
     static unsigned int getNumberProcesses();
-    static void processAllStop();
+    static void processAllTerminate();
+    static void processAllDetach();
+
 
 public: // module manipulation
 

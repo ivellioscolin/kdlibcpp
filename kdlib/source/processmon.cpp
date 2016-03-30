@@ -61,7 +61,8 @@ public:
 
     DebugCallbackResult processStart(PROCESS_DEBUG_ID id);
     DebugCallbackResult processStop(PROCESS_DEBUG_ID id, ProcessExitReason reason, unsigned int ExitCode);
-    void processAllStop();
+    void processAllDetach();
+    void processAllTerminate();
     unsigned int getNumberProcesses();
 
     DebugCallbackResult createThread();
@@ -210,10 +211,18 @@ DebugCallbackResult ProcessMonitor::stopThread()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::processAllStop()
+void ProcessMonitor::processAllTerminate()
 {
-    g_procmon->processAllStop();
+    g_procmon->processAllTerminate();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::processAllDetach()
+{
+    g_procmon->processAllDetach();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -429,10 +438,24 @@ DebugCallbackResult ProcessMonitorImpl::stopThread()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::processAllStop()
+void ProcessMonitorImpl::processAllTerminate()
 {
-    boost::recursive_mutex::scoped_lock l(m_lock);
-    m_processMap.clear();
+    while (!m_processMap.empty())
+    {
+        PROCESS_DEBUG_ID id = m_processMap.begin()->first;
+        processStop(id, ProcessTerminate, 0);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::processAllDetach()
+{
+    while (!m_processMap.empty())
+    {
+        PROCESS_DEBUG_ID id = m_processMap.begin()->first;
+        processStop(id, ProcessDetach, 0);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

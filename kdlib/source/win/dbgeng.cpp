@@ -146,81 +146,56 @@ std::string DbgWideException::getCStrDesc( const std::wstring &desc )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void setInitialBreakOption()
+static void setInitialBreakOption(bool breakOnStart)
 {
     ULONG   opt;
-    HRESULT hres = g_dbgMgr->control->GetEngineOptions( &opt );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetEngineOptions", hres  );
+    HRESULT hres = g_dbgMgr->control->GetEngineOptions(&opt);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetEngineOptions", hres);
 
-    opt |= DEBUG_ENGOPT_INITIAL_BREAK;
-    hres = g_dbgMgr->control->SetEngineOptions( opt );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::SetEngineOptions", hres );
+    if (breakOnStart)
+    {
+        opt |= DEBUG_ENGOPT_INITIAL_BREAK;
+    }
+    else
+    {
+        opt &= ~DEBUG_ENGOPT_INITIAL_BREAK;
+    }
+
+    hres = g_dbgMgr->control->SetEngineOptions(opt);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::SetEngineOptions", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID startProcess( const std::wstring  &processName,  bool debugChildren )
+PROCESS_DEBUG_ID startProcess(const std::wstring  &processName, bool debugChildren, bool breakOnStart)
 {
-    if ( !isInintilized() )
-        initialize();
-
     HRESULT     hres;
 
-    setInitialBreakOption();
+    if (!isInintilized())
+        initialize();
 
-    std::vector< std::wstring::value_type >      cmdLine( processName.size() + 1 );
-    wcscpy_s( &cmdLine[0], cmdLine.size(), processName.c_str() );
+    setInitialBreakOption(breakOnStart);
 
-    STARTUPINFO  startupInfo = {};
-    startupInfo.cb = sizeof(startupInfo);
+    std::vector< std::wstring::value_type >      cmdLine(processName.size() + 1);
+    wcscpy_s(&cmdLine[0], cmdLine.size(), processName.c_str());
 
-    PROCESS_INFORMATION  processInfo = {};
-
-    BOOL  createResult = CreateProcessW( 
-        NULL,
+    hres = g_dbgMgr->client->CreateProcessAndAttachWide(
+        0,
         &cmdLine[0],
-        NULL, 
-        NULL,
-        FALSE, 
-        /* DETACHED_PROCESS |*/ CREATE_SUSPENDED | CREATE_NEW_CONSOLE,
-        NULL,
-        NULL,
-        &startupInfo,
-        &processInfo );
+        debugChildren ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS,
+        0,
+        DEBUG_ATTACH_DEFAULT);
 
-    if ( !createResult )
-        throw Win32Exception( "Failed to start process");
-
-    hres = g_dbgMgr->client->AttachProcess( 0, processInfo.dwProcessId,  DEBUG_ATTACH_DEFAULT ); //DEBUG_ATTACH_EXISTING );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugClient::AttachProcess", hres );
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugClient::CreateProcessAndAttach", hres);
 
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
+    if (FAILED(hres))
+        return -1;
 
-    PROCESS_DEBUG_ID  processId = getProcessIdBySystemId(processInfo.dwProcessId);
-
-    setCurrentProcessById(processId);
-
-    if ( debugChildren )
-    {
-        hres = g_dbgMgr->client->RemoveProcessOptions( DEBUG_PROCESS_ONLY_THIS_PROCESS );
-        if ( FAILED( hres ) )
-            throw DbgEngException( L"IDebugControl::RemoveProcessOptions", hres );
-    }
-
-    ProcessMonitor::processStart(processId);
-
-    ResumeThread(processInfo.hThread);
-
-    CloseHandle(processInfo.hProcess);
-    CloseHandle(processInfo.hThread);
-
-
-    return processId;
+    return getCurrentProcessId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,30 +228,24 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID attachProcess( PROCESS_ID pid )
+PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid, bool breakOnStart)
 {
     if ( !isInintilized() )
         initialize();
 
     HRESULT     hres;
 
-    setInitialBreakOption();
+    setInitialBreakOption(breakOnStart);
 
     hres = g_dbgMgr->client->AttachProcess( 0, pid, 0 );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::AttachProcess", hres );
 
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
+    if (FAILED(hres))
+        return -1;
 
-    PROCESS_DEBUG_ID  processId = getProcessIdBySystemId(pid);
-
-    setCurrentProcessById(processId);
-
-    ProcessMonitor::processStart(processId);
-
-    return processId;
+    return getCurrentProcessId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -314,7 +283,7 @@ void detachAllProcesses()
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
 
-    ProcessMonitor::processAllStop();
+    ProcessMonitor::processAllDetach();
 
     g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
 }
@@ -333,7 +302,7 @@ void terminateAllProcesses()
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
 
-    ProcessMonitor::processAllStop();
+    ProcessMonitor::processAllTerminate();
 
     g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
 }
@@ -360,7 +329,7 @@ PROCESS_DEBUG_ID loadDump( const std::wstring &fileName )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
 
-    ProcessMonitor::processStart(processId);
+   // ProcessMonitor::processStart(processId);
 
     return processId;
 }
@@ -383,7 +352,7 @@ void closeDump( PROCESS_DEBUG_ID processId )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
 
-    ProcessMonitor::processStop(processId, ProcessDetach, 0);
+   // ProcessMonitor::processStop(processId, ProcessDetach, 0);
 
     if ( ProcessMonitor::getNumberProcesses() == 0 )
         g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
@@ -431,7 +400,7 @@ PROCESS_DEBUG_ID attachKernel( const std::wstring &connectOptions )
     if ( !isInintilized() )
         initialize();
 
-    setInitialBreakOption();
+    setInitialBreakOption(true);
 
     HRESULT hres = 
         g_dbgMgr->client->AttachKernelWide(

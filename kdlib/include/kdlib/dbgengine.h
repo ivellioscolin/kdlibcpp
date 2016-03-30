@@ -18,8 +18,8 @@ void uninitialize();
 
 // manage debug target
 
-PROCESS_DEBUG_ID startProcess( const std::wstring  &processName, bool debugChildren = false );
-PROCESS_DEBUG_ID attachProcess( PROCESS_ID pid );
+PROCESS_DEBUG_ID startProcess(const std::wstring  &processName, bool debugChildren = false, bool breakOnStart = true);
+PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid, bool breakOnStart = true);
 void detachProcess( PROCESS_DEBUG_ID processId = -1);
 void terminateProcess( PROCESS_DEBUG_ID processId = -1);
 void detachAllProcesses();
