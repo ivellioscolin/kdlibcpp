@@ -149,6 +149,18 @@ enum ProcessExitReason {
     ProcessDetach
 };
 
+enum ProcessDebugOptions {
+    ProcessBreakOnStart    = 0x00000001,
+    ProcessBreakOnStop     = 0x00000002,
+    ProcessDebugChildren   = 0x00000004,
+    ProcessNoDebugHeap     = 0x00000008,
+
+    ProcessDebugDefault = ProcessBreakOnStart
+};
+
+typedef unsigned long  ProcessDebugFlags;
+
+
 struct FrameDesc {
     MEMOFFSET_64            instructionOffset;
     MEMOFFSET_64            returnOffset;

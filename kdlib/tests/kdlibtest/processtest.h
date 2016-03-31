@@ -26,7 +26,7 @@ TEST_F( ProcessTest, StartProcess )
 TEST_F(ProcessTest, StartProcessNoBreak)
 {
     PROCESS_DEBUG_ID   id;
-    ASSERT_NO_THROW(id = startProcess(L"targetapp.exe", false, false));
+    ASSERT_NO_THROW(id = startProcess(L"targetapp.exe", ProcessDebugDefault & ~(ProcessBreakOnStart)));
     EXPECT_NO_THROW(terminateProcess(id));
     EXPECT_EQ(0, kdlib::getNumberProcesses());
 }
@@ -167,14 +167,14 @@ TEST_F( ProcessTest, DISABLED_MixedProcessDump )
 TEST_F(ProcessTest,  ChildProcess)
 {
     PROCESS_DEBUG_ID   id1;
-    ASSERT_NO_THROW( id1 =  startProcess(L"targetapp.exe childprocess", true) );
+    ASSERT_NO_THROW(id1 = startProcess(L"targetapp.exe childprocess", ProcessDebugDefault | ProcessDebugChildren ));
 
     EXPECT_EQ( 1, getNumberProcesses() );
     targetGo();
     EXPECT_EQ( 2, getNumberProcesses() );
 
     PROCESS_DEBUG_ID   id2;
-    ASSERT_NO_THROW( id2 =  startProcess(L"targetapp.exe  childprocess", true) );
+    ASSERT_NO_THROW(id2 = startProcess(L"targetapp.exe  childprocess", ProcessDebugDefault | ProcessDebugChildren));
 
     EXPECT_EQ( 3, getNumberProcesses() );
     targetGo();
@@ -184,6 +184,7 @@ TEST_F(ProcessTest,  ChildProcess)
 
     EXPECT_EQ( 0, getNumberProcesses() );
 }
+
 
 TEST_F(ProcessTest, ThreadInfo)
 {

@@ -146,20 +146,29 @@ std::string DbgWideException::getCStrDesc( const std::wstring &desc )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void setInitialBreakOption(bool breakOnStart)
+static void setEngBreakOption(const ProcessDebugFlags& flags)
 {
     ULONG   opt;
     HRESULT hres = g_dbgMgr->control->GetEngineOptions(&opt);
     if (FAILED(hres))
         throw DbgEngException(L"IDebugControl::GetEngineOptions", hres);
 
-    if (breakOnStart)
+    if ((flags & ProcessBreakOnStart) != 0)
     {
         opt |= DEBUG_ENGOPT_INITIAL_BREAK;
     }
     else
     {
         opt &= ~DEBUG_ENGOPT_INITIAL_BREAK;
+    }
+
+    if ((flags & ProcessBreakOnStop) != 0)
+    {
+        opt |= DEBUG_ENGOPT_FINAL_BREAK;
+    }
+    else
+    {
+        opt &= ~DEBUG_ENGOPT_FINAL_BREAK;
     }
 
     hres = g_dbgMgr->control->SetEngineOptions(opt);
@@ -169,22 +178,25 @@ static void setInitialBreakOption(bool breakOnStart)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID startProcess(const std::wstring  &processName, bool debugChildren, bool breakOnStart)
+PROCESS_DEBUG_ID startProcess(const std::wstring  &processName, const ProcessDebugFlags& flags)
 {
     HRESULT     hres;
 
     if (!isInintilized())
         initialize();
 
-    setInitialBreakOption(breakOnStart);
+    setEngBreakOption(flags);
 
     std::vector< std::wstring::value_type >      cmdLine(processName.size() + 1);
     wcscpy_s(&cmdLine[0], cmdLine.size(), processName.c_str());
 
+    ULONG  createFlag = ((flags & ProcessDebugChildren) != 0) ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS;
+    createFlag |= ((flags & ProcessNoDebugHeap) != 0) ? DEBUG_CREATE_PROCESS_NO_DEBUG_HEAP : 0;
+
     hres = g_dbgMgr->client->CreateProcessAndAttachWide(
         0,
         &cmdLine[0],
-        debugChildren ? DEBUG_PROCESS : DEBUG_ONLY_THIS_PROCESS,
+        createFlag,
         0,
         DEBUG_ATTACH_DEFAULT);
 
@@ -228,14 +240,14 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid, bool breakOnStart)
+PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid, const ProcessDebugFlags& flags)
 {
     if ( !isInintilized() )
         initialize();
 
     HRESULT     hres;
 
-    setInitialBreakOption(breakOnStart);
+    setEngBreakOption(flags);
 
     hres = g_dbgMgr->client->AttachProcess( 0, pid, 0 );
     if ( FAILED( hres ) )
@@ -400,7 +412,7 @@ PROCESS_DEBUG_ID attachKernel( const std::wstring &connectOptions )
     if ( !isInintilized() )
         initialize();
 
-    setInitialBreakOption(true);
+    setEngBreakOption(ProcessBreakOnStart);
 
     HRESULT hres = 
         g_dbgMgr->client->AttachKernelWide(
