@@ -158,6 +158,16 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
     return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()) );
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSource)
+{
+    TypeInfoPtr varType = loadType( typeName );
+
+    return getTypedVar( varType, dataSource );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedVarPtr loadTypedVar(const TypeInfoPtr &varType, DataAccessorPtr& dataSource)
@@ -304,6 +314,19 @@ TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, size
         lst.push_back( loadTypedVar( typeInfo, offset + i * typeInfo->getSize() ) );
    
     return lst;
+}
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr TypedVarImp::castTo(const std::wstring& typeName)
+{
+    return loadTypedVar(typeName, m_varData);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr TypedVarImp::castTo(const TypeInfoPtr &typeInfo)
+{
+    return loadTypedVar(typeInfo, m_varData);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

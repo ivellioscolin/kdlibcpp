@@ -136,6 +136,10 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual TypedVarPtr castTo(const std::wstring& typeName);
+
+    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo);
+
 protected:
 
     TypedVarImp( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :

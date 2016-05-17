@@ -89,6 +89,8 @@ public:
     virtual TypeInfoPtr getType() const = 0;
     virtual NumVariant getValue() const = 0;
     virtual TypedVarPtr deref() = 0;
+    virtual TypedVarPtr castTo(const std::wstring& typeName) = 0;
+    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) = 0;
 
 protected:
 
