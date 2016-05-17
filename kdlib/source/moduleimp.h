@@ -82,6 +82,16 @@ protected:
     void
     reloadSymbols();
 
+    void
+    resetSymbols() 
+    {
+        m_symSession.reset();
+    }
+
+    bool isSymbolLoaded() const
+    {
+        return !m_exportSymbols && !m_noSymbols;
+    }
 
     MEMOFFSET_64 getSymbolVa( const std::wstring &symbolName );
     MEMOFFSET_32 getSymbolRva( const std::wstring &symbolName );
@@ -113,7 +123,7 @@ protected:
 
     SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" );
 
-	TypeNameList enumTypes(const std::wstring& mask = L"*");
+    TypeNameList enumTypes(const std::wstring& mask = L"*");
 
     std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 
@@ -154,6 +164,8 @@ protected:
     SymbolSessionPtr  m_symSession;
     bool m_isUnloaded;
     bool m_isUserMode;
+    bool m_exportSymbols;
+    bool m_noSymbols;
 };
 
 

@@ -33,6 +33,8 @@ public:
 
     DebugCallbackResult breakpointHit(BreakpointPtr& breakpoint);
 
+    void onChangeSymbolPaths();
+
 private:
 
     typedef std::map<MEMOFFSET_64, ModulePtr> ModuleMap;
@@ -605,13 +607,23 @@ void ProcessMonitorImpl::localScopeChange()
 
 void ProcessMonitorImpl::changeSymbolPaths()
 {
-    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
-    EventsCallbackList::iterator  it = m_callbacks.begin();
-
-    for (; it != m_callbacks.end(); ++it)
     {
-        (*it)->onChangeSymbolPaths();
+        boost::recursive_mutex::scoped_lock l(m_lock);
+
+        for ( ProcessMap::iterator  it = m_processMap.begin(); it != m_processMap.end(); ++it)
+           it->second->onChangeSymbolPaths();
+    }
+
+    {
+        boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+        EventsCallbackList::iterator  it = m_callbacks.begin();
+
+        for (; it != m_callbacks.end(); ++it)
+        {
+            (*it)->onChangeSymbolPaths();
+        }
     }
 }
 
@@ -890,6 +902,18 @@ DebugCallbackResult ProcessInfo::breakpointHit(BreakpointPtr& breakpoint)
 
 /////////////////////////////////////////////////////////////////////////////
 
+void ProcessInfo::onChangeSymbolPaths()
+{
+    boost::recursive_mutex::scoped_lock l(m_moduleLock);
+
+    for ( ModuleMap::iterator it = m_moduleMap.begin(); it != m_moduleMap.end(); ++it)
+    {
+        if ( !it->second->isSymbolLoaded() )
+            it->second->resetSymbols();
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 } //namesapce kdlib
 

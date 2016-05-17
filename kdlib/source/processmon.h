@@ -1,10 +1,10 @@
 #pragma once
 
 #include "kdlib/dbgtypedef.h"
-#include "kdlib/module.h"
 #include "kdlib/breakpoint.h"
 #include "kdlib/dbgcallbacks.h"
 #include "kdlib/typeinfo.h"
+#include "kdlib/module.h"
 
 namespace kdlib {
 

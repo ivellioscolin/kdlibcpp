@@ -55,6 +55,7 @@ ModuleImp::ModuleImp(const std::wstring &moduleName )
 {
     m_base = findModuleBase( moduleName );
     m_name = moduleName;
+    m_noSymbols = true;
     fillFields();
 }
 
@@ -64,6 +65,7 @@ ModuleImp::ModuleImp(MEMOFFSET_64 offset )
 {
     m_base = findModuleBase( addr64(offset) );
     m_name = getModuleName( m_base );
+    m_noSymbols = true;
     fillFields();
 }
 
@@ -139,6 +141,10 @@ SymbolSessionPtr& ModuleImp::getSymSession()
     if (m_symSession)
         return m_symSession;
 
+    m_exportSymbols = false;
+    m_noSymbols = false;
+
+
     try
     {
         m_symSession = loadSymbolFile( m_base, m_imageName);
@@ -171,12 +177,14 @@ SymbolSessionPtr& ModuleImp::getSymSession()
         m_symSession = loadSymbolFromExports(m_base);
         if (m_symSession)
         {
+            m_exportSymbols = true;
             return m_symSession;
         }
     }
     catch(const DbgException&)
     {}
 
+    m_noSymbols = true;
     m_symSession = loadNoSymbolSession();
 
     return m_symSession;

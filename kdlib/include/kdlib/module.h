@@ -52,9 +52,13 @@ public:
 
     virtual bool isUserMode() const = 0;
 
+    virtual bool isSymbolLoaded() const = 0;
+
     virtual std::wstring getSymFile() = 0;
 
     virtual void reloadSymbols() = 0;
+
+    virtual void resetSymbols() = 0;
 
     virtual MEMOFFSET_64 getSymbolVa( const std::wstring &symbolName ) = 0;
     
@@ -92,7 +96,7 @@ public:
 
     virtual SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" ) = 0;
 
-	virtual TypeNameList enumTypes(const std::wstring  &mask = L"*") = 0;
+    virtual TypeNameList enumTypes(const std::wstring  &mask = L"*") = 0;
 
     virtual std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement ) = 0;
 
