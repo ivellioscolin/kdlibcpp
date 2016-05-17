@@ -30,6 +30,7 @@ public: // notification
     static void executionStatusChange(ExecutionStatus status);
     static void breakpointsChange(PROCESS_DEBUG_ID id);
     static void localScopeChange();
+    static void changeSymbolPaths();
     static DebugCallbackResult exceptionHit(const ExceptionInfo& excinfo);
     static void debugOutput(const std::wstring& text);
     static void startInput();

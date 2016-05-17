@@ -21,6 +21,7 @@ struct DebugEventsCallback {
     virtual DebugCallbackResult onThreadStop() = 0;
     virtual void onCurrentThreadChange(THREAD_DEBUG_ID threadid) = 0;
     virtual void onChangeLocalScope() = 0;
+    virtual void onChangeSymbolPaths() = 0;
     virtual void onChangeBreakpoints() = 0;
     virtual void onDebugOutput(const std::wstring& text) = 0;
     virtual void onStartInput() = 0;

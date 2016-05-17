@@ -409,6 +409,8 @@ HRESULT STDMETHODCALLTYPE DebugManager::ChangeSymbolState(
                 ProcessMonitor::localScopeChange();
         }
 
+        if ((Flags & DEBUG_CSS_PATHS) != 0)
+            ProcessMonitor::changeSymbolPaths();
     }
     catch (kdlib::DbgException&)
     {

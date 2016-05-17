@@ -74,6 +74,7 @@ public:
     void currentThreadChange(THREAD_DEBUG_ID threadid);
     void executionStatusChange(ExecutionStatus status);
     void localScopeChange();
+    void changeSymbolPaths();
     void breakpointsChange(PROCESS_DEBUG_ID id);
     DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
     void debugOutput(const std::wstring& text);
@@ -271,6 +272,13 @@ void ProcessMonitor::executionStatusChange(ExecutionStatus status)
 void ProcessMonitor::localScopeChange()
 {
     g_procmon->localScopeChange();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::changeSymbolPaths()
+{
+    g_procmon->changeSymbolPaths();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -590,6 +598,20 @@ void ProcessMonitorImpl::localScopeChange()
     for (; it != m_callbacks.end(); ++it)
     {
         (*it)->onChangeLocalScope();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::changeSymbolPaths()
+{
+    boost::recursive_mutex::scoped_lock l(m_callbacksLock);
+
+    EventsCallbackList::iterator  it = m_callbacks.begin();
+
+    for (; it != m_callbacks.end(); ++it)
+    {
+        (*it)->onChangeSymbolPaths();
     }
 }
 

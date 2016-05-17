@@ -51,6 +51,9 @@ public:
     virtual void onChangeLocalScope()
     {}
 
+    virtual void onChangeSymbolPaths()
+    {}
+
     virtual void onChangeBreakpoints()
     {}
 

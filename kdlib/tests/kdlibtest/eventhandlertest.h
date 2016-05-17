@@ -9,6 +9,28 @@ using namespace testing;
 class EventHandlerTest : public BaseFixture 
 {
 public:
+
+    virtual void SetUp() 
+    {
+        BaseFixture::SetUp();
+        ASSERT_NO_THROW(m_symPath = getSymbolPath());
+    }
+
+    virtual void TearDown()
+    {
+        try 
+        {
+            setSymbolPath(m_symPath);
+            BaseFixture::TearDown();
+        }
+        catch (kdlib::DbgException&)
+        {
+        }
+    }
+
+private:
+
+    std::wstring  m_symPath;
 };
 
 
@@ -154,4 +176,23 @@ TEST_F(EventHandlerTest, ScopeChange)
     EXPECT_NO_THROW( debugCommand(L".frame 3") );
 
     EXPECT_NO_THROW( terminateAllProcesses() );
+}
+
+TEST_F(EventHandlerTest, SymbolPathChange)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe breakhandlertest"));
+
+    targetGo();
+
+    EventHandlerMock    eventHandler;
+
+    EXPECT_CALL(eventHandler, onChangeSymbolPaths()).Times(3);
+
+    EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
+
+    std::wstring sympath;
+
+    EXPECT_NO_THROW(debugCommand(L".sympath+ C:\\temp"));
+    EXPECT_NO_THROW(appendSymbolPath(L"C:\\temp2"));
+    EXPECT_NO_THROW(setSymbolPath(L"C:\\temp2"));
 }
