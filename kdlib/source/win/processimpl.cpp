@@ -432,7 +432,8 @@ protected:
     
     virtual void setCurrent() {
         setCurrentSystemById(m_systemId);
-        setCurrentProcessById(m_processId);
+        if ( !isKernelDebugging() )
+            setCurrentProcessById(m_processId);
         setCurrentThreadById(m_threadId);
     }
 

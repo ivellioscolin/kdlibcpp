@@ -2,6 +2,7 @@
 #pragma once
 
 #include "basefixture.h"
+#include "memdumpfixture.h"
 
 #include "kdlib/process.h"
 #include "kdlib/stack.h"
@@ -12,6 +13,25 @@ class TargetTest : public BaseFixture
 {
 public:
 };
+
+class KernelDumpTest : public MemDumpFixture
+{
+public:
+    KernelDumpTest() :
+        MemDumpFixture(getKernelDumpName())
+    {}
+
+    std::wstring getKernelDumpName()
+    {
+        return L"..\\..\\..\\kdlib\\tests\\dumps\\win8_x64_mem.cab";
+    }
+
+    bool is64BitSystem() {
+        return true;
+    }
+    
+};
+
 
 TEST_F(TargetTest, getTargetProcess )
 {
@@ -227,3 +247,73 @@ TEST_F(TargetTest, IpFrameStackOffset)
     EXPECT_EQ(kdlib::getFrameOffset(), targetThread->getFrameOffset());
     EXPECT_EQ(kdlib::getStackOffset(), targetThread->getStackOffset());
 }
+
+
+TEST_F(KernelDumpTest, LoadDump)
+{
+}
+
+TEST_F(KernelDumpTest, KernelTargetDesc)
+{
+    EXPECT_EQ(1UL, TargetSystem::getNumber());
+
+    TargetSystemPtr  targetSystem;
+    ASSERT_NO_THROW(targetSystem = TargetSystem::getCurrent());
+
+    std::wstring  targetSystemDesc;
+    EXPECT_NO_THROW(targetSystemDesc = targetSystem->getDescription());
+
+    EXPECT_TRUE(targetSystem->isDumpAnalyzing());
+    EXPECT_TRUE(targetSystem->isKernelDebugging());
+    EXPECT_EQ( is64BitSystem(), targetSystem->is64bitSystem() );
+}
+
+TEST_F(KernelDumpTest, KernelTargetProcess)
+{
+    TargetSystemPtr  targetSystem;
+    ASSERT_NO_THROW(targetSystem = TargetSystem::getCurrent());
+
+    unsigned long  procNumber = targetSystem->getNumberProcesses();
+    EXPECT_EQ(1, procNumber);
+
+    TargetProcessPtr  targetProcess;
+    ASSERT_NO_THROW(targetProcess = targetSystem->getCurrentProcess());
+
+    std::wstring  exeName;
+    EXPECT_NO_THROW( exeName = targetProcess->getExecutableName() );
+
+    EXPECT_LT( 0UL, targetProcess->getNumberThreads());
+    EXPECT_LT( 0UL, targetProcess->getNumberModules());
+}
+
+TEST_F(KernelDumpTest, KernelTargetThread)
+{
+    TargetProcessPtr  targetProcess;
+    ASSERT_NO_THROW(targetProcess = TargetProcess::getCurrent());
+    
+    unsigned long numberThread;
+    ASSERT_NO_THROW(numberThread = targetProcess->getNumberThreads());
+    EXPECT_NE( 0UL, numberThread);
+
+    for ( unsigned long i = 0; i < numberThread; ++i)
+    {
+        TargetThreadPtr  targetThread;
+        ASSERT_NO_THROW(targetThread = targetProcess->getThreadByIndex(i));
+        EXPECT_NE(0UL, targetThread->getFrameOffset());
+        EXPECT_NE(0UL, targetThread->getInstructionOffset());
+        EXPECT_NE(0UL, targetThread->getStackOffset());
+
+        EXPECT_THROW(targetThread->getSystemId(), kdlib::DbgException);
+        EXPECT_NE(0UL, targetThread->getTebOffset());
+
+        EXPECT_NO_THROW(targetThread->setCurrent());
+        EXPECT_TRUE(targetThread->isCurrent());
+
+        //unsigned long  registerNumber;
+        //ASSERT_NO_THROW(registerNumber = targetThread->getNumberRegisters());
+        //EXPECT_NE(0UL, registerNumber);
+    }
+
+}
+
+

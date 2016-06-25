@@ -164,6 +164,7 @@
     <ClInclude Include="disasmtest.h" />
     <ClInclude Include="eventhandlermock.h" />
     <ClInclude Include="eventhandlertest.h" />
+    <ClInclude Include="memdumpfixture.h" />
     <ClInclude Include="memorytest.h" />
     <ClInclude Include="moduletest.h" />
     <ClInclude Include="processtest.h" />
