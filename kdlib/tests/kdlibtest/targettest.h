@@ -336,6 +336,15 @@ TEST_F(KernelDumpTest, KernelTargetThread)
         //ASSERT_NO_THROW(registerNumber = targetThread->getNumberRegisters());
         //EXPECT_NE(0UL, registerNumber);
     }
+
+    int currentOccured = 0;
+    for ( unsigned long i = 0; i < numberThread; ++i)
+    {
+        if ( targetProcess->getThreadByIndex(i)->isCurrent() )
+            currentOccured++;
+    }
+
+    EXPECT_EQ(1, currentOccured);
 }
 
 TEST_F(KernelDumpTest, TwoDump)
