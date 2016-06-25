@@ -235,7 +235,10 @@ protected:
     }
 
     virtual void setCurrent() {
-        NOT_IMPLEMENTED();
+        if (isCurrent())
+            return;
+
+        switchContext();
     }
 
     virtual unsigned long getNumberThreads()
@@ -339,7 +342,7 @@ protected:
         if (m_systemId != getCurrentSystemId())
             setCurrentSystemById(m_systemId);
 
-        if (m_processId != getCurrentProcessId())
+        if ( !isKernelDebugging() && m_processId != getCurrentProcessId())
             setCurrentProcessById(m_processId);
     }
 
@@ -431,10 +434,8 @@ protected:
     }
     
     virtual void setCurrent() {
-        setCurrentSystemById(m_systemId);
-        if ( !isKernelDebugging() )
-            setCurrentProcessById(m_processId);
-        setCurrentThreadById(m_threadId);
+        if ( !isCurrent() )
+            switchContext();
     }
 
     virtual StackPtr getStack() {
@@ -501,13 +502,12 @@ protected:
         if (m_systemId != getCurrentSystemId())
             setCurrentSystemById(m_systemId);
 
-        if (m_processId != getCurrentProcessId())
+        if ( !isKernelDebugging()  && m_processId != getCurrentProcessId())
             setCurrentProcessById(m_processId);
 
         if (m_threadId != getCurrentThreadId())
             setCurrentThreadById(m_threadId);
     }
-
 
     THREAD_DEBUG_ID  m_threadId;
     PROCESS_DEBUG_ID  m_processId;

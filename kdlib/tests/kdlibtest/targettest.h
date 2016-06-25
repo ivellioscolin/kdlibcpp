@@ -14,12 +14,9 @@ class TargetTest : public BaseFixture
 public:
 };
 
-class KernelDumpTest : public MemDumpFixture
+class KernelDumpTest : public BaseFixture
 {
 public:
-    KernelDumpTest() :
-        MemDumpFixture(getKernelDumpName())
-    {}
 
     std::wstring getKernelDumpName()
     {
@@ -29,6 +26,24 @@ public:
     bool is64BitSystem() {
         return true;
     }
+
+    void loadDump()
+    {
+        PROCESS_DEBUG_ID  dumpId;
+
+        ASSERT_NO_THROW(dumpId = kdlib::loadDump(getKernelDumpName()));
+
+        m_dumpIds.push_back(dumpId);
+    }
+
+     virtual void TearDown() 
+     {
+         std::for_each(m_dumpIds.begin(), m_dumpIds.end(), kdlib::closeDump);
+     }
+
+private:
+
+    std::list<PROCESS_DEBUG_ID>  m_dumpIds;
     
 };
 
@@ -251,10 +266,14 @@ TEST_F(TargetTest, IpFrameStackOffset)
 
 TEST_F(KernelDumpTest, LoadDump)
 {
+    loadDump();
 }
+    
 
 TEST_F(KernelDumpTest, KernelTargetDesc)
 {
+    loadDump();
+
     EXPECT_EQ(1UL, TargetSystem::getNumber());
 
     TargetSystemPtr  targetSystem;
@@ -270,6 +289,8 @@ TEST_F(KernelDumpTest, KernelTargetDesc)
 
 TEST_F(KernelDumpTest, KernelTargetProcess)
 {
+    loadDump();
+
     TargetSystemPtr  targetSystem;
     ASSERT_NO_THROW(targetSystem = TargetSystem::getCurrent());
 
@@ -288,6 +309,8 @@ TEST_F(KernelDumpTest, KernelTargetProcess)
 
 TEST_F(KernelDumpTest, KernelTargetThread)
 {
+    loadDump();
+
     TargetProcessPtr  targetProcess;
     ASSERT_NO_THROW(targetProcess = TargetProcess::getCurrent());
     
@@ -313,7 +336,22 @@ TEST_F(KernelDumpTest, KernelTargetThread)
         //ASSERT_NO_THROW(registerNumber = targetThread->getNumberRegisters());
         //EXPECT_NE(0UL, registerNumber);
     }
+}
 
+TEST_F(KernelDumpTest, TwoDump)
+{
+    loadDump();
+    loadDump();
+
+    ASSERT_EQ(2UL, TargetSystem::getNumber());
+
+    for ( unsigned long i = 0; i < TargetSystem::getNumber(); ++i)
+    {
+        TargetSystemPtr  targetSystem;
+        ASSERT_NO_THROW( targetSystem = TargetSystem::getByIndex(i));
+
+        EXPECT_NO_THROW( targetSystem->getProcessById(0)->setCurrent() );
+    }
 }
 
 
