@@ -6,6 +6,7 @@
 
 #include "kdlib/typedvar.h"
 #include "kdlib/module.h"
+#include "kdlib/stack.h"
 
 #include "typedvarimp.h"
 
@@ -126,6 +127,13 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
 
     if ( moduleName.empty() )
     {
+        StackFramePtr  frame = getCurrentStackFrame();
+        if (frame->findLocalVar(varName))
+            return frame->getLocalVar(varName);
+
+        if (frame->findParam(varName))
+            return frame->getTypedParam(varName);
+
         MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
         module = loadModule( moduleOffset );
     }

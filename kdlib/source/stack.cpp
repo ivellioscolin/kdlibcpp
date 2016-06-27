@@ -194,6 +194,33 @@ TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
 
 /////////////////////////////////////////////////////////////////////////////
 
+bool  StackFrameImpl::findParam(const std::wstring& paramName)
+{
+    SymbolPtrList  vars = getParams();
+
+    SymbolPtrList::iterator it = vars.begin();
+    for (; it != vars.end(); ++it)
+    {
+        if ((*it)->getName() == paramName)
+        {
+            SymbolPtr  sym = *it;
+
+            unsigned long  location = sym->getLocType();
+
+            if (location == LocIsEnregistered || location == LocIsRegRel || location == LocIsNull )
+            {
+                return true;
+            }
+
+            throw DbgException("unknown variable storage");
+        }
+    }
+    
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 unsigned long StackFrameImpl::getLocalVarCount()
 {
     try
@@ -307,6 +334,33 @@ TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
     std::wstringstream  sstr;
     sstr << L'\'' << paramName << L'\'' << L" - local variable not found";
     throw SymbolException(sstr.str());
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+bool StackFrameImpl::findLocalVar(const std::wstring& varName)
+{
+    SymbolPtrList  vars = getLocalVars();
+
+    SymbolPtrList::iterator it = vars.begin();
+    for (; it != vars.end(); ++it)
+    {
+        if ((*it)->getName() == varName)
+        {
+            SymbolPtr  sym = *it;
+
+            unsigned long  location = sym->getLocType();
+
+            if (location == LocIsEnregistered || location == LocIsRegRel || location == LocIsNull)
+            {
+                return true;
+            }
+
+            throw DbgException("unknown variable storage");
+        }
+    }
+
+    return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -80,11 +80,13 @@ public:
     virtual TypedVarPtr getTypedParam(unsigned long index);
     virtual std::wstring  getTypedParamName(unsigned long index);
     virtual TypedVarPtr getTypedParam(const std::wstring& paramName);
+    virtual bool findParam(const std::wstring& paramName);
 
     virtual unsigned long getLocalVarCount();
     virtual TypedVarPtr getLocalVar(unsigned long index);
     virtual TypedVarPtr getLocalVar(const std::wstring& paramName);
     virtual std::wstring  getLocalVarName(unsigned long index);
+    virtual bool findLocalVar(const std::wstring& varName);
 
     virtual unsigned long getStaticVarCount() {
         NOT_IMPLEMENTED();
@@ -99,6 +101,10 @@ public:
     }
 
     virtual std::wstring  getStaticVarName(unsigned long index) {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool findStaticVar(const std::wstring& varName) {
         NOT_IMPLEMENTED();
     }
 public:

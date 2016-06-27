@@ -31,18 +31,21 @@ public:
 
     virtual unsigned long getTypedParamCount() = 0;
     virtual TypedVarPtr getTypedParam(unsigned long index) = 0;
-    virtual std::wstring  getTypedParamName(unsigned long index) = 0;
+    virtual std::wstring getTypedParamName(unsigned long index) = 0;
     virtual TypedVarPtr getTypedParam(const std::wstring& paramName) = 0;
+    virtual bool findParam(const std::wstring& paramName) = 0;
 
     virtual unsigned long getLocalVarCount() = 0;
     virtual TypedVarPtr getLocalVar(unsigned long index) = 0;
-    virtual TypedVarPtr getLocalVar(const std::wstring& paramName) = 0;
+    virtual TypedVarPtr getLocalVar(const std::wstring& varName) = 0;
     virtual std::wstring  getLocalVarName(unsigned long index) = 0;
+    virtual bool findLocalVar(const std::wstring& varName) = 0;
 
     virtual unsigned long getStaticVarCount() = 0;
     virtual TypedVarPtr getStaticVar(unsigned long index) = 0;
     virtual TypedVarPtr getStaticVar(const std::wstring& paramName) = 0;
     virtual std::wstring  getStaticVarName(unsigned long index) = 0;
+    virtual bool findStaticVar(const std::wstring& varName) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
