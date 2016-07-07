@@ -233,8 +233,9 @@ TEST_F(TargetTest, TwoSystem)
     ASSERT_NO_THROW(writeDump(L"targetapp1.dmp", false));
     ASSERT_NO_THROW(terminateProcess(id));
 
-    ASSERT_NO_THROW(loadDump(L"targetapp0.dmp"));
-    ASSERT_NO_THROW(loadDump(L"targetapp1.dmp"));
+    PROCESS_DEBUG_ID  id1, id2;
+    ASSERT_NO_THROW(id1 = loadDump(L"targetapp0.dmp"));
+    ASSERT_NO_THROW(id2 = loadDump(L"targetapp1.dmp"));
 
     EXPECT_LE(2UL, TargetSystem::getNumber());
 
@@ -246,6 +247,9 @@ TEST_F(TargetTest, TwoSystem)
         std::wstring  targetSystemDesc;
         EXPECT_NO_THROW(targetSystemDesc = targetSystem->getDescription());
     }
+
+    EXPECT_NO_THROW(closeDump(id1));
+    EXPECT_NO_THROW(closeDump(id2));
 }
 
 TEST_F(TargetTest, IpFrameStackOffset)
@@ -266,6 +270,8 @@ TEST_F(TargetTest, IpFrameStackOffset)
 
 TEST_F(KernelDumpTest, LoadDump)
 {
+    std::wstring  str = TargetSystem::getCurrent()->getDescription();
+
     loadDump();
 }
     
@@ -273,8 +279,6 @@ TEST_F(KernelDumpTest, LoadDump)
 TEST_F(KernelDumpTest, KernelTargetDesc)
 {
     loadDump();
-
-    EXPECT_EQ(1UL, TargetSystem::getNumber());
 
     TargetSystemPtr  targetSystem;
     ASSERT_NO_THROW(targetSystem = TargetSystem::getCurrent());
@@ -352,14 +356,13 @@ TEST_F(KernelDumpTest, TwoDump)
     loadDump();
     loadDump();
 
-    ASSERT_EQ(2UL, TargetSystem::getNumber());
-
     for ( unsigned long i = 0; i < TargetSystem::getNumber(); ++i)
     {
         TargetSystemPtr  targetSystem;
         ASSERT_NO_THROW( targetSystem = TargetSystem::getByIndex(i));
 
-        EXPECT_NO_THROW( targetSystem->getProcessById(0)->setCurrent() );
+        if (targetSystem->isDumpAnalyzing())
+            EXPECT_NO_THROW( targetSystem->getProcessById(0)->setCurrent() );
     }
 }
 

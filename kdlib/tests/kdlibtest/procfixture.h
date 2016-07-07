@@ -5,6 +5,8 @@
 #include "gtest/gtest.h"
 #include "kdlib/dbgengine.h"
 #include "kdlib/module.h"
+#include "kdlib/exceptions.h"
+
 
 class ProcessFixture : public ::testing::Test 
 {
@@ -32,7 +34,7 @@ protected:
     virtual void TearDown() {
         try {
             kdlib::terminateProcess( m_processId );
-        } catch(DbgException&)
+        } catch(kdlib::DbgException&)
         {}
     }
 
