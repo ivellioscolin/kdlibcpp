@@ -147,10 +147,10 @@ float stackTestRun1( int a, const float& b, const std::string& c )
         {
 
             char  localChars[0x100];
+            static float staticFloat = 3.5f;
            //c.copy(localChars, c.size());
             strcpy_s(localChars, 0x100, c.c_str() );
             stackTestRun2( a, localFloat, localChars );
-            static float staticFloat = 3.5f;
             return 1.1f + staticLong + staticFloat;
         }
     }

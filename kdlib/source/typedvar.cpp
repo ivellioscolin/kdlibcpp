@@ -134,6 +134,9 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
         if (frame->findParam(varName))
             return frame->getTypedParam(varName);
 
+        if (frame->findStaticVar(varName))
+            return frame->getStaticVar(varName);
+
         MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
         module = loadModule( moduleOffset );
     }

@@ -202,18 +202,7 @@ bool  StackFrameImpl::findParam(const std::wstring& paramName)
     for (; it != vars.end(); ++it)
     {
         if ((*it)->getName() == paramName)
-        {
-            SymbolPtr  sym = *it;
-
-            unsigned long  location = sym->getLocType();
-
-            if (location == LocIsEnregistered || location == LocIsRegRel || location == LocIsNull )
-            {
-                return true;
-            }
-
-            throw DbgException("unknown variable storage");
-        }
+            return true;
     }
     
     return false;
@@ -346,18 +335,108 @@ bool StackFrameImpl::findLocalVar(const std::wstring& varName)
     for (; it != vars.end(); ++it)
     {
         if ((*it)->getName() == varName)
+            return true;
+    }
+
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+unsigned long StackFrameImpl::getStaticVarCount()
+{
+    try 
+    {
+        return static_cast<unsigned long>(getStaticVars().size());
+    }
+    catch (DbgException&)
+    {
+    }
+
+    return 0UL;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr StackFrameImpl::getStaticVar(unsigned long index)
+{
+    SymbolPtrList  vars = getStaticVars();
+
+    SymbolPtrList::iterator it = vars.begin();
+    if (index >= vars.size())
+        throw IndexException(index);
+
+    std::advance(it, index);
+
+    SymbolPtr  sym = *it;
+
+    unsigned long  location = sym->getLocType();
+
+    if (location == LocIsStatic)
+    {
+        MEMOFFSET_64  offset = sym->getVa();
+        return loadTypedVar(loadType(sym), offset);
+    }
+
+    throw DbgException("unknown variable storage");
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr StackFrameImpl::getStaticVar(const std::wstring& paramName)
+{
+    SymbolPtrList  vars = getStaticVars();
+
+    SymbolPtrList::iterator it = vars.begin();
+    for (; it != vars.end(); ++it)
+    {
+        if ((*it)->getName() == paramName)
         {
             SymbolPtr  sym = *it;
 
             unsigned long  location = sym->getLocType();
 
-            if (location == LocIsEnregistered || location == LocIsRegRel || location == LocIsNull)
+            if (location == LocIsStatic)
             {
-                return true;
+                MEMOFFSET_64  offset = sym->getVa();
+                return loadTypedVar(loadType(sym), offset);
             }
 
             throw DbgException("unknown variable storage");
         }
+    }
+
+    std::wstringstream  sstr;
+    sstr << L'\'' << paramName << L'\'' << L" - static local variable not found";
+    throw SymbolException(sstr.str());
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+std::wstring  StackFrameImpl::getStaticVarName(unsigned long index)
+{
+    SymbolPtrList  vars = getStaticVars();
+
+    SymbolPtrList::iterator it = vars.begin();
+    std::advance(it, index);
+
+    if (it == vars.end())
+        throw IndexException(index);
+
+    return (*it)->getName();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+bool StackFrameImpl::findStaticVar(const std::wstring& varName)
+{
+    SymbolPtrList  vars = getLocalVars();
+
+    SymbolPtrList::iterator it = vars.begin();
+    for (; it != vars.end(); ++it)
+    {
+        if ((*it)->getName() == varName)
+            return true;
     }
 
     return false;
@@ -431,6 +510,50 @@ SymbolPtrList StackFrameImpl::getParams()
 
 /////////////////////////////////////////////////////////////////////////////
 
+SymbolPtrList StackFrameImpl::getStaticVars()
+{
+    ModulePtr mod = loadModule(m_ip);
+
+    MEMDISPLACEMENT displacemnt;
+    SymbolPtr symFunc = mod->getSymbolByVa(m_ip, SymTagFunction, &displacemnt);
+
+    SymbolPtrList  lst;
+
+    DebugRange  debugRange = getFuncDebugRange(symFunc);
+
+    if (!inDebugRange(debugRange, m_ip))
+        return lst;
+
+    //find var in current scope
+    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
+
+    SymbolPtrList::iterator it;
+    for (it = symList.begin(); it != symList.end(); it++)
+    {
+        if ((*it)->getDataKind() == DataIsStaticLocal)
+        {
+            std::wstring  name = (*it)->getName();
+            if (!name.empty())
+                lst.push_back(*it);
+        }
+    }
+
+    //find inners scopes
+    SymbolPtrList scopeList = symFunc->findChildren(SymTagBlock);
+    SymbolPtrList::iterator itScope = scopeList.begin();
+
+    for (; itScope != scopeList.end(); ++itScope)
+    {
+        SymbolPtrList  innerVars = getBlockStaticVars(*itScope);
+
+        lst.insert(lst.end(), innerVars.begin(), innerVars.end());
+    }
+
+    return lst;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 SymbolPtrList  StackFrameImpl::getBlockLocalVars(SymbolPtr& sym)
 {
     SymbolPtrList  lst;
@@ -464,6 +587,44 @@ SymbolPtrList  StackFrameImpl::getBlockLocalVars(SymbolPtr& sym)
     return lst;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+SymbolPtrList  StackFrameImpl::getBlockStaticVars(SymbolPtr& sym)
+{
+    SymbolPtrList  lst;
+
+    DebugRange  debugRange = getBlockRange(sym);
+
+    if (!inDebugRange(debugRange, m_ip))
+        return lst;
+
+    // find var in current scope
+    SymbolPtrList symList = sym->findChildren(SymTagData);
+
+    SymbolPtrList::iterator it;
+    for (it = symList.begin(); it != symList.end(); it++)
+    {
+        if ((*it)->getDataKind() == DataIsStaticLocal)
+        {
+            std::wstring  name = (*it)->getName();
+            if (!name.empty())
+                lst.push_back(*it);
+        }
+    }
+
+    // find inners scopes
+    SymbolPtrList scopeList = sym->findChildren(SymTagBlock);
+    SymbolPtrList::iterator itScope = scopeList.begin();
+
+    for (; itScope != scopeList.end(); ++itScope)
+    {
+        SymbolPtrList  innerVars = getBlockStaticVars(*itScope);
+
+        lst.insert(lst.end(), innerVars.begin(), innerVars.end());
+    }
+
+    return lst;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

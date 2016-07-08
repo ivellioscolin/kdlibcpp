@@ -126,11 +126,13 @@ TEST_F(StackTest, StaticVars)
     ASSERT_NO_THROW(frame = getStack()->getFrame(2));
 
     EXPECT_EQ( 2, frame->getStaticVarCount() );
-    EXPECT_EQ( 1, *frame->getStaticVar(L"staticLong"));
     EXPECT_EQ(1, *frame->getStaticVar(0));
+    EXPECT_EQ(1, *frame->getStaticVar(L"staticLong"));
+    EXPECT_EQ(L"staticLong", frame->getStaticVarName(0));
 
     EXPECT_THROW(frame->getStaticVar(2), IndexException);
     EXPECT_THROW(frame->getStaticVar(-1), IndexException);
+    EXPECT_THROW(frame->getStaticVarName(2), IndexException);
     EXPECT_THROW(frame->getStaticVar(L"Notexist"), SymbolException);
 }
 

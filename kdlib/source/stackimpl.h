@@ -88,30 +88,20 @@ public:
     virtual std::wstring  getLocalVarName(unsigned long index);
     virtual bool findLocalVar(const std::wstring& varName);
 
-    virtual unsigned long getStaticVarCount() {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual TypedVarPtr getStaticVar(unsigned long index) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual TypedVarPtr getStaticVar(const std::wstring& paramName) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual std::wstring  getStaticVarName(unsigned long index) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual bool findStaticVar(const std::wstring& varName) {
-        NOT_IMPLEMENTED();
-    }
+    virtual unsigned long getStaticVarCount();
+    virtual TypedVarPtr getStaticVar(unsigned long index);
+    virtual TypedVarPtr getStaticVar(const std::wstring& paramName);
+    virtual std::wstring  getStaticVarName(unsigned long index);
+    virtual bool findStaticVar(const std::wstring& varName);
 public:
 
     SymbolPtrList getLocalVars();
     SymbolPtrList getParams();
+    SymbolPtrList getStaticVars();
+
     SymbolPtrList getBlockLocalVars(SymbolPtr& sym);
+    SymbolPtrList getBlockStaticVars(SymbolPtr& sym);
+
     MEMOFFSET_64 getOffset(unsigned long regRel, MEMOFFSET_REL relOffset);
 
     MEMOFFSET_64  m_ip;
