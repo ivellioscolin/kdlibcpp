@@ -2061,7 +2061,12 @@ void getNearSyntheticSymbols( MEMOFFSET_64 offset, std::vector< SyntheticSymbol 
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::GetNearNameByOffsetWide", hres);
 
-    return getSyntheticSymbols(&buffer[0], syntheticSymbols);
+    // synthetic symbol must contain <module_name>!<symbol_name>
+    std::wstring name(&buffer[0]);
+    if (std::wstring::npos == name.find(L'!'))
+        return;
+
+    return getSyntheticSymbols(name, syntheticSymbols);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
