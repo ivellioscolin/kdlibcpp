@@ -126,6 +126,18 @@ public:
         return TargetProcess::getById(id);
     }
 
+    virtual TargetProcessPtr getProcessBySystemId(PROCESS_ID pid)
+    {
+        if (isCurrent())
+            return TargetProcess::getBySystemId(pid);
+
+        ContextAutoRestore  contextRestore;
+
+        setCurrentSystemById(m_systemId);
+
+        return TargetProcess::getBySystemId(pid);
+    }
+
     virtual TargetProcessPtr getCurrentProcess() 
     {
         if (isCurrent())
@@ -363,6 +375,11 @@ TargetProcessPtr TargetProcess::getByIndex(unsigned long index)
 TargetProcessPtr TargetProcess::getById(PROCESS_DEBUG_ID id)
 {
     return boost::make_shared<TargetProcessImpl>(id);
+}
+
+TargetProcessPtr TargetProcess::getBySystemId(PROCESS_ID pid)
+{
+    return boost::make_shared<TargetProcessImpl>(getProcessIdBySystemId(pid));
 }
 
 unsigned long TargetProcess::getNumber() 

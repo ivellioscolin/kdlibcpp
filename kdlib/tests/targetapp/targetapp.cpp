@@ -94,6 +94,7 @@ int breakpointTestRun()
     return 0;
 }
 
+
 class stackTestClass
 {
 public:
@@ -112,12 +113,11 @@ public:
     long  m_param;
 };
 
+//#ifdef _DEBUG
+//#pragma optimize( "", on )
+//#endif
 
-#ifdef _DEBUG
-#pragma optimize( "g", on )
-#endif
-
-std::string __fastcall stackTestRun2( int a, double b, const char* c )
+std::string __stdcall stackTestRun2( int a, double b, const char* c )
 {
     int  localInt = 10;
 
@@ -130,9 +130,9 @@ std::string __fastcall stackTestRun2( int a, double b, const char* c )
         return std::string("Buy!");
 }
 
-#ifdef _DEBUG
-#pragma optimize( "", off )
-#endif
+//#ifdef _DEBUG
+//#pragma optimize( "", off )
+//#endif
 
 float stackTestRun1( int a, const float& b, const std::string& c )
 {

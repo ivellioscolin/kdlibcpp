@@ -47,6 +47,34 @@ private:
     
 };
 
+TEST_F(TargetTest, getTargetSystem)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    TargetSystemPtr  targetSystem;
+    ASSERT_NO_THROW( targetSystem = TargetSystem::getCurrent() );
+}
+
+
+TEST_F(TargetTest, getSystemProcess)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    TargetSystemPtr  targetSystem;
+    ASSERT_NO_THROW( targetSystem = TargetSystem::getCurrent() );
+
+    EXPECT_NO_THROW( targetSystem->getCurrentProcess() );
+    EXPECT_NO_THROW( targetSystem->getProcessByIndex(0) );
+
+    PROCESS_ID  pid = -1;
+    EXPECT_NO_THROW( pid = targetSystem->getProcessByIndex(0)->getSystemId() );
+    EXPECT_EQ( pid, targetSystem->getProcessBySystemId(pid)->getSystemId() );
+
+    EXPECT_THROW( targetSystem->getProcessBySystemId(12345), DbgException );
+}
+
 
 TEST_F(TargetTest, getTargetProcess )
 {
@@ -54,13 +82,16 @@ TEST_F(TargetTest, getTargetProcess )
     ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
 
     TargetProcessPtr  targetProcess;
-    ASSERT_NO_THROW( targetProcess = TargetProcess::getCurrent());
+    EXPECT_NO_THROW( targetProcess = TargetProcess::getCurrent());
     EXPECT_TRUE( 0 != targetProcess );
-    ASSERT_NO_THROW( targetProcess = TargetProcess::getByIndex(0));
+    EXPECT_NO_THROW( targetProcess = TargetProcess::getByIndex(0));
     EXPECT_TRUE( 0 != targetProcess );
-    ASSERT_NO_THROW(targetProcess = TargetProcess::getByIndex(1));
+    EXPECT_NO_THROW(targetProcess = TargetProcess::getByIndex(1));
     EXPECT_TRUE(0 != targetProcess);
     EXPECT_THROW(TargetProcess::getByIndex(2), IndexException);
+
+    EXPECT_TRUE( TargetProcess::getByIndex(0)->getSystemId(), TargetProcess::getBySystemId(TargetProcess::getByIndex(0))->getSystemId());
+    EXPECT_THROW( TargetProcess::getBySystemId(12345), DbgException );
 }
 
 TEST_F(TargetTest, getSystemId)

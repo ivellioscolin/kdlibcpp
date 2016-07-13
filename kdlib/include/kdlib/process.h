@@ -47,6 +47,7 @@ public:
     virtual unsigned long getNumberProcesses() = 0;
     virtual TargetProcessPtr getProcessByIndex(unsigned long index) = 0;
     virtual TargetProcessPtr getProcessById(PROCESS_DEBUG_ID id) = 0;
+    virtual TargetProcessPtr getProcessBySystemId(PROCESS_ID pid) = 0;
     virtual TargetProcessPtr getCurrentProcess() = 0;
 
 };
@@ -60,6 +61,7 @@ public:
     static TargetProcessPtr  getCurrent();
     static TargetProcessPtr  getByIndex(unsigned long index);
     static TargetProcessPtr  getById(PROCESS_DEBUG_ID id);
+    static TargetProcessPtr  getBySystemId(PROCESS_ID pid);
     static unsigned long getNumber();
 
 public:
