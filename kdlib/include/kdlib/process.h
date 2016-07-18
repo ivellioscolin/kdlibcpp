@@ -82,6 +82,8 @@ public:
 
     virtual unsigned long getNumberModules() = 0;
     virtual ModulePtr getModuleByIndex(unsigned long index) = 0;
+    virtual ModulePtr getModuleByOffset(MEMOFFSET_64  offset) = 0;
+    virtual ModulePtr getModuleByName(const std::wstring& name) = 0;
 
     virtual unsigned long getNumberBreakpoints() = 0;
     virtual BreakpointPtr getBreakpoint(unsigned long index) = 0;

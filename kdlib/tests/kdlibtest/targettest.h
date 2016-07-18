@@ -184,6 +184,22 @@ TEST_F(TargetTest, EnumModules)
     }
 }
 
+TEST_F(TargetTest, GetModule)
+{
+    PROCESS_DEBUG_ID  procId;
+    ASSERT_NO_THROW(procId = startProcess(L"targetapp.exe multithread"));
+    ASSERT_NO_THROW(targetGo());
+
+    TargetProcessPtr  process;
+    ASSERT_NO_THROW(process = TargetProcess::getCurrent());
+
+    ModulePtr  module;
+
+    ASSERT_NO_THROW( module = process->getModuleByIndex(0) );
+    EXPECT_EQ( module->getBase(), process->getModuleByOffset(module->getBase())->getBase());
+    EXPECT_NO_THROW(process->getModuleByName(L"targetapp"));
+}
+
 TEST_F(TargetTest, currentThread)
 {
     ASSERT_NO_THROW(startProcess(L"targetapp.exe"));

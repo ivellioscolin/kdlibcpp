@@ -337,6 +337,30 @@ protected:
         return kdlib::loadModule(kdlib::getModuleOffsetByIndex(index));
     }
 
+    virtual ModulePtr getModuleByOffset(MEMOFFSET_64  offset)
+    {
+        if (isCurrent())
+            return kdlib::loadModule(offset);
+
+        ContextAutoRestore   contextRestore;
+
+        switchContext();
+
+        return kdlib::loadModule(offset);
+    }
+
+    virtual ModulePtr getModuleByName(const std::wstring& name)
+    {
+        if (isCurrent())
+            return kdlib::loadModule(name);
+
+        ContextAutoRestore   contextRestore;
+
+        switchContext();
+
+        return kdlib::loadModule(name);
+    }
+
     virtual unsigned long getNumberBreakpoints() 
     {
         if (isCurrent())
