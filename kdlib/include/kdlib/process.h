@@ -77,6 +77,7 @@ public:
     virtual unsigned long getNumberThreads() = 0;
     virtual TargetThreadPtr getThreadByIndex(unsigned long index) = 0;
     virtual TargetThreadPtr getThreadById(THREAD_DEBUG_ID id) = 0;
+    virtual TargetThreadPtr getThreadBySystemId(THREAD_ID tid) = 0;
     virtual TargetThreadPtr getCurrentThread() = 0;
 
     virtual unsigned long getNumberModules() = 0;
@@ -95,6 +96,7 @@ public:
     static TargetThreadPtr getCurrent();
     static TargetThreadPtr getByIndex(unsigned long index);
     static TargetThreadPtr getById(THREAD_DEBUG_ID id);
+    static TargetThreadPtr getBySystemId(THREAD_ID tid);
     static unsigned long getNumber();
 
 public:

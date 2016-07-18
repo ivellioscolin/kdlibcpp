@@ -276,7 +276,7 @@ TEST_F( TypedVarTest, FunctionDebugRange )
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"startChildProcess" ) );
 
     ASSERT_GE(std::ptrdiff_t(funcptr->getDebugStart()), std::ptrdiff_t(funcptr->getAddress()));
-    ASSERT_LE(std::ptrdiff_t(funcptr->getDebugEnd()), std::ptrdiff_t(funcptr->getAddress()) + funcptr->getSize());
+    ASSERT_LE(std::ptrdiff_t(funcptr->getDebugEnd()), static_cast<std::ptrdiff_t>(std::ptrdiff_t(funcptr->getAddress()) + funcptr->getSize()));
 }
 
 

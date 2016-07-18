@@ -289,6 +289,18 @@ protected:
         return TargetThread::getById(id);
     }
 
+    virtual TargetThreadPtr getThreadBySystemId(THREAD_ID tid)
+    {
+        if (isCurrent())
+            return TargetThread::getBySystemId(tid);
+
+        ContextAutoRestore  contextRestore;
+
+        switchContext();
+
+        return TargetThread::getBySystemId(tid);
+    }
+
     virtual TargetThreadPtr getCurrentThread()
     {
         if (isCurrent())
@@ -543,6 +555,11 @@ TargetThreadPtr TargetThread::getByIndex(unsigned long index) {
 TargetThreadPtr TargetThread::getById(THREAD_DEBUG_ID id)
 {
     return boost::make_shared<TargetThreadImpl>(id);
+}
+
+TargetThreadPtr TargetThread::getBySystemId(THREAD_ID tid)
+{
+    return boost::make_shared<TargetThreadImpl>(getThreadIdBySystemId(tid));
 }
 
 unsigned long TargetThread::getNumber() 

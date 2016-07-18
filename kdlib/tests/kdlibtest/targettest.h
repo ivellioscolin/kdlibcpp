@@ -90,7 +90,7 @@ TEST_F(TargetTest, getTargetProcess )
     EXPECT_TRUE(0 != targetProcess);
     EXPECT_THROW(TargetProcess::getByIndex(2), IndexException);
 
-    EXPECT_TRUE( TargetProcess::getByIndex(0)->getSystemId(), TargetProcess::getBySystemId(TargetProcess::getByIndex(0))->getSystemId());
+    EXPECT_EQ( TargetProcess::getByIndex(0)->getSystemId(), TargetProcess::getBySystemId(TargetProcess::getByIndex(0)->getSystemId())->getSystemId());
     EXPECT_THROW( TargetProcess::getBySystemId(12345), DbgException );
 }
 
@@ -150,6 +150,20 @@ TEST_F(TargetTest, enumThreads)
     }
 }
 
+TEST_F(TargetTest, getThread)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    TargetProcessPtr  process;
+    ASSERT_NO_THROW(process = TargetProcess::getCurrent());
+
+
+    TargetThreadPtr  thread;
+    ASSERT_NO_THROW( thread = process->getThreadByIndex(0) );
+    EXPECT_EQ( thread->getId(), process->getThreadById(thread->getId())->getId());
+    EXPECT_EQ( thread->getId(), process->getThreadBySystemId(thread->getSystemId())->getId());
+}
+
 TEST_F(TargetTest, EnumModules)
 {
     PROCESS_DEBUG_ID  procId;
@@ -168,7 +182,6 @@ TEST_F(TargetTest, EnumModules)
         ModulePtr  module;
         ASSERT_NO_THROW(module = process->getModuleByIndex(i));
     }
-
 }
 
 TEST_F(TargetTest, currentThread)
