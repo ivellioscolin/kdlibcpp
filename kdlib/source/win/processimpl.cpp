@@ -23,9 +23,11 @@ public:
        m_systemId = getCurrentSystemId();
     }
 
-    TargetSystemImpl(SYSTEM_DEBUG_ID systemId):
-        m_systemId(systemId)
-        {}
+    TargetSystemImpl(SYSTEM_DEBUG_ID systemId)
+    {
+        kdlib::checkSystemById(systemId);
+        m_systemId = systemId;
+    }
 
     virtual std::wstring getDescription() 
     {
@@ -191,6 +193,7 @@ public:
 
     TargetProcessImpl(PROCESS_DEBUG_ID processId) 
     {
+        kdlib::checkProcessById(processId);
         m_processId = processId;
         m_systemId = getCurrentSystemId();
     }
@@ -204,6 +207,19 @@ protected:
     {
         return m_processId;
     }
+
+    virtual bool isKernelDebugging() 
+    {
+        if (isCurrent())
+            return kdlib::isKernelDebugging();
+
+        ContextAutoRestore  contextRestore;
+
+        switchContext();
+
+        return kdlib::isKernelDebugging();
+    }
+
     
     virtual std::wstring getExecutableName()
     {
@@ -390,7 +406,7 @@ protected:
         if (m_systemId != getCurrentSystemId())
             setCurrentSystemById(m_systemId);
 
-        if ( !isKernelDebugging() && m_processId != getCurrentProcessId())
+        if ( !kdlib::isKernelDebugging() && m_processId != getCurrentProcessId())
             setCurrentProcessById(m_processId);
     }
 
@@ -432,6 +448,7 @@ public:
 
     TargetThreadImpl(THREAD_DEBUG_ID id)
     {
+        kdlib::checkThreadById(id);
         m_threadId = id;
         m_processId = getCurrentProcessId();
         m_systemId = getCurrentSystemId();
@@ -451,6 +468,18 @@ protected:
     virtual SYSTEM_DEBUG_ID getId()
     {
         return m_threadId;
+    }
+
+    virtual bool isKernelDebugging() 
+    {
+        if (isCurrent())
+            return kdlib::isKernelDebugging();
+
+        ContextAutoRestore  contextRestore;
+
+        switchContext();
+
+        return kdlib::isKernelDebugging();
     }
 
     virtual THREAD_ID getSystemId() 
@@ -555,7 +584,7 @@ protected:
         if (m_systemId != getCurrentSystemId())
             setCurrentSystemById(m_systemId);
 
-        if ( !isKernelDebugging()  && m_processId != getCurrentProcessId())
+        if ( !kdlib::isKernelDebugging()  && m_processId != getCurrentProcessId())
             setCurrentProcessById(m_processId);
 
         if (m_threadId != getCurrentThreadId())

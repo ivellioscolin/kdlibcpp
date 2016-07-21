@@ -877,6 +877,31 @@ SYSTEM_DEBUG_ID getCurrentSystemId()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void checkSystemById(SYSTEM_DEBUG_ID id)
+{
+    HRESULT      hres;
+
+    ULONG  systemCount = 0;
+    hres = g_dbgMgr->system->GetNumberSystems(&systemCount);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects3::GetNumberSystems", hres);
+
+    std::vector<ULONG>  ids(systemCount);
+
+    hres = g_dbgMgr->system->GetSystemIdsByIndex(0, systemCount, &ids[0]);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects3::GetSystemIdsByIndex", hres);
+
+    if ( ids.end() == std::find( ids.begin(), ids.end(), id) )
+    {
+        std::stringstream  sstr;
+        sstr << "There is no target system with Id = " << id;
+        throw DbgException(sstr.str());
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring getSystemDesc(SYSTEM_DEBUG_ID id)
 {
     bool current = id == CURRENT_SYSTEM_ID || id == getCurrentSystemId();
@@ -937,6 +962,31 @@ PROCESS_DEBUG_ID getCurrentProcessId()
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres ); 
 
     return  PROCESS_DEBUG_ID(id);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void checkProcessById(PROCESS_DEBUG_ID id)
+{
+    HRESULT      hres;
+
+    ULONG  processCount = 0;
+    hres = g_dbgMgr->system->GetNumberProcesses(&processCount);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects3::GetNumberProcesses", hres);
+
+    std::vector<ULONG>  ids(processCount);
+
+    hres = g_dbgMgr->system->GetProcessIdsByIndex(0, processCount, &ids[0], NULL);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects3::GetProcessIdsByIndex", hres);
+
+    if ( ids.end() == std::find( ids.begin(), ids.end(), id) )
+    {
+        std::stringstream  sstr;
+        sstr << "There is no target process with Id = " << id;
+        throw DbgException(sstr.str());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1150,6 +1200,31 @@ unsigned long getNumberThreads()
         return 0UL;
 
     return number;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void checkThreadById(THREAD_DEBUG_ID id)
+{
+    HRESULT      hres;
+
+    ULONG  threadCount = 0;
+    hres = g_dbgMgr->system->GetNumberThreads(&threadCount);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects3::GetNumberThreads", hres);
+
+    std::vector<ULONG>  ids(threadCount);
+
+    hres = g_dbgMgr->system->GetThreadIdsByIndex(0, threadCount, &ids[0], NULL);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSystemObjects3::GetThreadIdsByIndex", hres);
+
+    if ( ids.end() == std::find( ids.begin(), ids.end(), id) )
+    {
+        std::stringstream  sstr;
+        sstr << "There is no target thread with Id = " << id;
+        throw DbgException(sstr.str());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

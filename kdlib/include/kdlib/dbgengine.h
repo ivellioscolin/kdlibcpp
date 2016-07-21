@@ -85,9 +85,8 @@ void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displac
 #define CURRENT_SYSTEM_ID  (-1)
 
 THREAD_DEBUG_ID getCurrentThreadId();
-
 unsigned long getNumberThreads();
-
+void checkThreadById(THREAD_DEBUG_ID id);
 THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset);
 THREAD_DEBUG_ID getThreadIdBySystemId(THREAD_ID tid);
 THREAD_DEBUG_ID getThreadIdByIndex(unsigned long index);
@@ -106,6 +105,7 @@ void setCurrentThread(MEMOFFSET_64 offset);
 
 unsigned long getNumberProcesses();
 PROCESS_DEBUG_ID getCurrentProcessId();
+void checkProcessById(PROCESS_DEBUG_ID id);
 PROCESS_DEBUG_ID getProcessIdByOffset( MEMOFFSET_64 offset );
 PROCESS_DEBUG_ID getProcessIdBySystemId( PROCESS_ID pid );
 PROCESS_DEBUG_ID getProcessIdByIndex(unsigned long index);
@@ -125,9 +125,9 @@ void setCurrentProcess( MEMOFFSET_64  offset );
 
 unsigned long  getNumberSystems();
 SYSTEM_DEBUG_ID getCurrentSystemId();
+void checkSystemById(SYSTEM_DEBUG_ID id);
 SYSTEM_DEBUG_ID getSystemIdByIndex(unsigned long index);
 std::wstring getSystemDesc(SYSTEM_DEBUG_ID id = CURRENT_SYSTEM_ID);
-
 void setCurrentSystemById(SYSTEM_DEBUG_ID id);
 
 ExecutionStatus targetExecutionStatus();

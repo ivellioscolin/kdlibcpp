@@ -66,6 +66,8 @@ public:
 
 public:
 
+    virtual bool isKernelDebugging() = 0;
+
     virtual std::wstring getExecutableName() = 0;
     virtual PROCESS_ID getSystemId() = 0;
     virtual MEMOFFSET_64 getPebOffset() = 0;
@@ -103,6 +105,8 @@ public:
 
 public:
     
+    virtual bool isKernelDebugging() = 0;
+
     virtual THREAD_DEBUG_ID getId() = 0;
     virtual THREAD_ID getSystemId() = 0;
     virtual MEMOFFSET_64 getTebOffset() = 0;
