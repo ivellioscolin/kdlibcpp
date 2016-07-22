@@ -227,11 +227,16 @@ class OutputReader : public IDebugOutputCallbacks, private boost::noncopyable {
 
 public:
 
-    explicit OutputReader() 
+    explicit OutputReader(IDebugClient5*  client)
     {
-        HRESULT  hres = DebugCreate( __uuidof(IDebugClient5), (void **)&m_client );
+        HRESULT  hres;
+
+        m_callbacks = NULL;
+        m_client = client;
+
+        hres = m_client->GetOutputCallbacks(&m_callbacks);
         if ( FAILED( hres ) )
-            throw DbgEngException(L"DebugCreate", hres);
+            throw DbgEngException( L"IDebugClient::GetOutputCallbacks", hres);
 
         hres = m_client->SetOutputCallbacks(this );
         if ( FAILED( hres ) )
@@ -240,7 +245,7 @@ public:
 
     ~OutputReader() 
     {
-        m_client->SetOutputCallbacks(NULL);
+        m_client->SetOutputCallbacks(m_callbacks);
     }
 
     const std::wstring&
@@ -279,6 +284,8 @@ private:
     std::wstring                        m_readLine;
 
     CComPtr<IDebugClient5>              m_client;
+
+    PDEBUG_OUTPUT_CALLBACKS             m_callbacks;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

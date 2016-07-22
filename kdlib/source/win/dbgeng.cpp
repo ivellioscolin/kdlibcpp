@@ -473,11 +473,9 @@ std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
 
     if ( suppressOutput )
     {
-        OutputReader    outReader;
+        OutputReader    outReader( g_dbgMgr->client );
 
-        CComQIPtr<IDebugControl4>  control = outReader.getClient();
-
-        hres = control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
+        hres =  g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
 
         if ( FAILED( hres ) )
             throw  DbgEngException( L"IDebugControl::ExecuteWide", hres ); 
@@ -1902,11 +1900,9 @@ void removeExtension(const std::wstring &extPath )
 std::wstring callExtension( EXTENSION_ID extHandle, const std::wstring command, const std::wstring  &params  )
 {
     HRESULT  hres;
-    OutputReader    outReader;
+    OutputReader    outReader(g_dbgMgr->client);
 
-    CComQIPtr<IDebugControl4>  control = outReader.getClient();
-
-    hres = control->CallExtensionWide( extHandle, command.c_str(), params.c_str() );
+    hres = g_dbgMgr->control->CallExtensionWide( extHandle, command.c_str(), params.c_str() );
 
     if ( FAILED( hres ) )
         throw  DbgEngException( L"IDebugControl::CallExtension", hres ); 
