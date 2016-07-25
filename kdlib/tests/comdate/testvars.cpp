@@ -43,9 +43,27 @@ long long longlongArray[] = { 100, -200, 123456789, -123456789, -1 };
 float floatArray[] = { 1.0f, 0.001f, -199.999f, 20000.01f, 0.111111f };
 double doubleArray[] = { 1.0000000, 0.0000000001, -199.99999999998, 200000.00000001, 0.3333333333 };
 
+unsigned char ucharArrayPlace[] = { 0 };
+unsigned short ushortArrayPlace[] = { 0 };
+unsigned long ulongArrayPlace[] = { 0 };
+unsigned long long ulonglongArrayPlace[] = { 0 };
+char charArrayPlace[] = { 0 };
+short shortArrayPlace[] = { 0 };
+long longArrayPlace[] = { 0 };
+long long longlongArrayPlace[] = { 0 };
+float floatArrayPlace[] = { 0 };
+double doubleArrayPlace[] = { 0 };
+
 unsigned long long bigValue = 0x8080808080808080;
 unsigned long long *pbigValue = &bigValue;
 unsigned long long **ppbigValue = &pbigValue;
+
+float floatValue = -0.1f;
+double doubleValue = -0.1;
+
+unsigned long long ullValuePlace = 0;
+float floatValuePlace = 0;
+double doubleValuePlace = 0;
 
 unsigned long long &ref_bigValue = bigValue;
 unsigned long long *&ref_pbigValue = pbigValue;

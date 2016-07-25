@@ -37,9 +37,28 @@ extern long long longlongArray[TEST_ARRAY_SIZE];
 extern float floatArray[TEST_ARRAY_SIZE];
 extern double doubleArray[TEST_ARRAY_SIZE];
 
+extern unsigned char ucharArrayPlace[TEST_ARRAY_SIZE];
+extern unsigned short ushortArrayPlace[TEST_ARRAY_SIZE];
+extern unsigned long ulongArrayPlace[TEST_ARRAY_SIZE];
+extern unsigned long long ulonglongArrayPlace[TEST_ARRAY_SIZE];
+extern char charArrayPlace[TEST_ARRAY_SIZE];
+extern short shortArrayPlace[TEST_ARRAY_SIZE];
+extern long longArrayPlace[TEST_ARRAY_SIZE];
+extern long long longlongArrayPlace[TEST_ARRAY_SIZE];
+extern float floatArrayPlace[TEST_ARRAY_SIZE];
+extern double doubleArrayPlace[TEST_ARRAY_SIZE];
+
 extern unsigned long long bigValue;
 extern unsigned long long *pbigValue;
 extern unsigned long long **ppbigValue;
+
+extern float floatValue;
+extern double doubleValue;
+
+extern unsigned long long ullValuePlace;
+extern float floatValuePlace;
+extern double doubleValuePlace;
+
 
 extern unsigned long long &ref_bigValue;
 extern unsigned long long *&ref_pbigValue;

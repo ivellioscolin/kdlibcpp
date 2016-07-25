@@ -75,6 +75,30 @@ void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void writeMemory( MEMOFFSET_64 offset, const void* buffer, size_t length, bool phyAddr = false, unsigned long *written = 0 )
+{
+    if ( written )
+        *written = 0;
+
+    HRESULT hres;
+
+    if ( phyAddr == false )
+    {
+        offset = addr64( offset );
+
+        hres = g_dbgMgr->dataspace->WriteVirtual( offset, const_cast<PVOID>(buffer), numeric_cast<ULONG>(length), written );
+    }
+    else
+    {
+        hres = g_dbgMgr->dataspace->WritePhysical( offset, const_cast<PVOID>(buffer),  numeric_cast<ULONG>(length), written );
+    }
+
+    if ( FAILED( hres ) )
+        throw MemoryException( offset, phyAddr );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool readMemoryUnsafe( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr, unsigned long *readed  )
 {
     HRESULT hres;
@@ -131,7 +155,7 @@ bool isVaRegionValid(MEMOFFSET_64 addr, size_t length)
     if (length > 0xFFFFFFFF)
         return false;
 
-    hres = g_dbgMgr->dataspace->GetValidRegionVirtual(addr, length, &validBase, &validSize);
+    hres = g_dbgMgr->dataspace->GetValidRegionVirtual(addr, numeric_cast<ULONG>(length), &validBase, &validSize);
 
     return hres == S_OK && validBase == addr && validSize == length;
 }

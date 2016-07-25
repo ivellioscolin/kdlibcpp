@@ -51,7 +51,7 @@ unsigned long long  ptrQWord( MEMOFFSET_64 offset )
 
 unsigned long long ptrMWord( MEMOFFSET_64 offset )
 {
-    return ptrSize() == 8 ? ptrQWord( offset ) : ptrDWord(offset );
+    return ptrSize() == 8 ? ptrQWord( offset ) : ptrDWord( offset );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ long long ptrSignQWord( MEMOFFSET_64 offset )
 
 long long ptrSignMWord( MEMOFFSET_64 offset )
 {
-    return ptrSize() == 8 ? ptrSignQWord( offset ) : ptrSignDWord(offset );
+    return ptrSize() == 8 ? ptrSignQWord( offset ) : ptrSignDWord( offset );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,6 +101,92 @@ float ptrSingleFloat( MEMOFFSET_64 offset )
 double ptrDoubleFloat( MEMOFFSET_64 offset )
 {
     return readPtr<double>(offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+void setImpl( MEMOFFSET_64 offset, T value )
+{
+    writeMemory( offset, &value, sizeof(value), false );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setByte( MEMOFFSET_64 offset, unsigned char value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setWord( MEMOFFSET_64 offset, unsigned short value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setDWord( MEMOFFSET_64 offset, unsigned long value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setQWord( MEMOFFSET_64 offset, unsigned long long value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setSignByte( MEMOFFSET_64 offset, char value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setSignWord( MEMOFFSET_64 offset, short value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setSignDWord( MEMOFFSET_64 offset, long value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setSignQWord( MEMOFFSET_64 offset, long long value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setSingleFloat( MEMOFFSET_64 offset, float value )
+{
+    setImpl(offset, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void setDoubleFloat( MEMOFFSET_64 offset, double value )
+{
+    setImpl(offset, value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -192,6 +278,99 @@ std::vector<double> loadDoubles( MEMOFFSET_64 offset, unsigned long number, bool
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<typename T>
+void writeArray( MEMOFFSET_64 offset, const std::vector<T> &values, bool phyAddr )
+{
+    if (values.empty())
+        return;
+
+    const auto length = values.size() * sizeof(T);
+
+    if (!phyAddr && !isVaRegionValid(offset, length))
+        throw MemoryException(offset);
+
+    writeMemory( offset, &values[0], length, phyAddr );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void writeBytes(MEMOFFSET_64 offset, const std::vector<unsigned char> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void writeWords( MEMOFFSET_64 offset, const std::vector<unsigned short> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void writeDWords( MEMOFFSET_64 offset, const std::vector<unsigned long> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void writeQWords( MEMOFFSET_64 offset, std::vector<unsigned long long> const &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void writeSignBytes( MEMOFFSET_64 offset, const std::vector<char> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void writeSignWords( MEMOFFSET_64 offset, const std::vector<short> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void writeSignDWords( MEMOFFSET_64 offset, const std::vector<long> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void writeSignQWords( MEMOFFSET_64 offset, std::vector<long long> const &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void writeFloats( MEMOFFSET_64 offset, const std::vector<float> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+void writeDoubles( MEMOFFSET_64 offset, const std::vector<double> &values, bool phyAddr )
+{
+    writeArray(offset, values, phyAddr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string loadChars( MEMOFFSET_64 offset, unsigned long number, bool phyAddr )
 {
     unsigned long  bufferSize = (unsigned long)(sizeof(std::vector<char>::value_type)*number);
@@ -275,6 +454,21 @@ std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset, size_t psize )
        ptrs.push_back( entryAddress );
     
     return ptrs;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setPtr(MEMOFFSET_64 offset, MEMOFFSET_64 value, size_t psize)
+{
+    psize = psize == 0 ? ptrSize() : psize;
+
+    if ( psize == 4 )
+        return setDWord( offset, value & std::numeric_limits<MEMOFFSET_32>::max() );
+
+    if ( psize == 8 )
+        return setQWord( offset, value );
+
+    throw DbgException("unknown pointer size");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
