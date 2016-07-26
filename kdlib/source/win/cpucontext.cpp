@@ -1111,6 +1111,54 @@ NumVariant CPUContextAmd64::getRegisterByIndex(unsigned long index)
         return NumVariant(m_context.R14);
     case CV_AMD64_R15:
         return NumVariant(m_context.R15);
+    case CV_AMD64_R8B:
+        return NumVariant(static_cast<unsigned char>(m_context.R8 & 0xFF));
+    case CV_AMD64_R9B:
+        return NumVariant(static_cast<unsigned char>(m_context.R9 & 0xFF));
+    case CV_AMD64_R10B:
+        return NumVariant(static_cast<unsigned char>(m_context.R10 & 0xFF));
+    case CV_AMD64_R11B:
+        return NumVariant(static_cast<unsigned char>(m_context.R11 & 0xFF));
+    case CV_AMD64_R12B:
+        return NumVariant(static_cast<unsigned char>(m_context.R12 & 0xFF));
+    case CV_AMD64_R13B:
+        return NumVariant(static_cast<unsigned char>(m_context.R13 & 0xFF));
+    case CV_AMD64_R14B:
+        return NumVariant(static_cast<unsigned char>(m_context.R14 & 0xFF));
+    case CV_AMD64_R15B:
+        return NumVariant(static_cast<unsigned char>(m_context.R15 & 0xFF));
+    case CV_AMD64_R8W:
+        return NumVariant(static_cast<unsigned short>(m_context.R8 & 0xFFFF));
+    case CV_AMD64_R9W:
+        return NumVariant(static_cast<unsigned short>(m_context.R9 & 0xFFFF));
+    case CV_AMD64_R10W:
+        return NumVariant(static_cast<unsigned short>(m_context.R10 & 0xFFFF));
+    case CV_AMD64_R11W:
+        return NumVariant(static_cast<unsigned short>(m_context.R11 & 0xFFFF));
+    case CV_AMD64_R12W:
+        return NumVariant(static_cast<unsigned short>(m_context.R12 & 0xFFFF));
+    case CV_AMD64_R13W:
+        return NumVariant(static_cast<unsigned short>(m_context.R13 & 0xFFFF));
+    case CV_AMD64_R14W:
+        return NumVariant(static_cast<unsigned short>(m_context.R14 & 0xFFFF));
+    case CV_AMD64_R15W:
+        return NumVariant(static_cast<unsigned short>(m_context.R15 & 0xFFFF));
+    case CV_AMD64_R8D:
+        return NumVariant(static_cast<unsigned long>(m_context.R8 & 0xFFFFFFFF));
+    case CV_AMD64_R9D:
+        return NumVariant(static_cast<unsigned long>(m_context.R9 & 0xFFFFFFFF));
+    case CV_AMD64_R10D:
+        return NumVariant(static_cast<unsigned long>(m_context.R10 & 0xFFFFFFFF));
+    case CV_AMD64_R11D:
+        return NumVariant(static_cast<unsigned long>(m_context.R11 & 0xFFFFFFFF));
+    case CV_AMD64_R12D:
+        return NumVariant(static_cast<unsigned long>(m_context.R12 & 0xFFFFFFFF));
+    case CV_AMD64_R13D:
+        return NumVariant(static_cast<unsigned long>(m_context.R13 & 0xFFFFFFFF));
+    case CV_AMD64_R14D:
+        return NumVariant(static_cast<unsigned long>(m_context.R14 & 0xFFFFFFFF));
+    case CV_AMD64_R15D:
+        return NumVariant(static_cast<unsigned long>(m_context.R15 & 0xFFFFFFFF));
     }
 
     std::stringstream sstr;
@@ -1227,6 +1275,54 @@ std::wstring CPUContextAmd64::getRegisterName(unsigned long index)
         return L"R14";
     case CV_AMD64_R15:
         return L"R15";
+    case CV_AMD64_R8B:
+        return L"R8B";
+    case CV_AMD64_R9B:
+        return L"R9B";
+    case CV_AMD64_R10B:
+        return L"R10B";
+    case CV_AMD64_R11B:
+        return L"R11B";
+    case CV_AMD64_R12B:
+        return L"R12B";
+    case CV_AMD64_R13B:
+        return L"R13B";
+    case CV_AMD64_R14B:
+        return L"R14B";
+    case CV_AMD64_R15B:
+        return L"R15B";
+    case CV_AMD64_R8W:
+        return L"R8W";
+    case CV_AMD64_R9W:
+        return L"R9W";
+    case CV_AMD64_R10W:
+        return L"R10W";
+    case CV_AMD64_R11W:
+        return L"R11W";
+    case CV_AMD64_R12W:
+        return L"R12W";
+    case CV_AMD64_R13W:
+        return L"R13W";
+    case CV_AMD64_R14W:
+        return L"R14W";
+    case CV_AMD64_R15W:
+        return L"R15W";
+    case CV_AMD64_R8D:
+        return L"R8D";
+    case CV_AMD64_R9D:
+        return L"R9D";
+    case CV_AMD64_R10D:
+        return L"R10D";
+    case CV_AMD64_R11D:
+        return L"R11D";
+    case CV_AMD64_R12D:
+        return L"R12D";
+    case CV_AMD64_R13D:
+        return L"R13D";
+    case CV_AMD64_R14D:
+        return L"R14D";
+    case CV_AMD64_R15D:
+        return L"R15D";
     }
 
     std::stringstream sstr;
