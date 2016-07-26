@@ -75,11 +75,7 @@ unsigned long StackFrameImpl::getTypedParamCount()
 {
     try {
 
-        ModulePtr mod = loadModule(m_ip);
-
-        TypedVarPtr func = mod->getFunctionByAddr(m_ip);
-
-        return static_cast<unsigned long>(func->getElementCount());
+        return static_cast<unsigned long>(getParams().size());
 
     }
     catch (DbgException&)
