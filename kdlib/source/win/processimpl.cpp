@@ -581,12 +581,6 @@ protected:
 
     void switchContext()
     {
-        if (m_systemId != getCurrentSystemId())
-            setCurrentSystemById(m_systemId);
-
-        if ( !kdlib::isKernelDebugging()  && m_processId != getCurrentProcessId())
-            setCurrentProcessById(m_processId);
-
         if (m_threadId != getCurrentThreadId())
             setCurrentThreadById(m_threadId);
     }
