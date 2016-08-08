@@ -21,6 +21,7 @@ TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName );
 
 TypeInfoPtr defineStruct( const std::wstring &structName, size_t align = 0 );
 TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align = 0 );
+TypeInfoPtr defineFunction( const TypeInfoPtr& returnType, CallingConventionType callconv = CallConv_NearC);
 
 size_t getSymbolSize( const std::wstring &name );
 MEMOFFSET_64 getSymbolOffset( const std::wstring &name );

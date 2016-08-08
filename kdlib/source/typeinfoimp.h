@@ -377,9 +377,8 @@ protected:
 
 class TypeInfoFunction : public TypeInfoImp
 {
-public:
 
-    TypeInfoFunction( SymbolPtr& symbol );
+public:
 
 protected:
 
@@ -387,15 +386,34 @@ protected:
         return getName();
     }
 
-    virtual std::wstring getName();
-    virtual std::pair<std::wstring, std::wstring> splitName();
-
-    virtual size_t getPtrSize() {
-        return getPtrSizeBySymbol( m_symbol );
-    }
 
     virtual bool isFunction() {
         return true;
+    }
+
+    virtual std::wstring getName();
+
+    virtual std::pair<std::wstring, std::wstring> splitName();
+
+protected:
+
+    typedef std::vector< TypeInfoPtr > Args;
+    Args m_args;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+
+class TypeInfoSymbolFunction : public TypeInfoFunction
+{
+public:
+
+    TypeInfoSymbolFunction( SymbolPtr& symbol );
+
+protected:
+
+    virtual size_t getPtrSize() {
+        return getPtrSizeBySymbol( m_symbol );
     }
 
     virtual size_t getElementCount() {
@@ -426,9 +444,6 @@ private:
     SymbolPtr m_symbol;
 
     bool m_hasThis;
-
-    typedef std::vector< SymbolPtr > Args;
-    Args m_args;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -286,11 +286,11 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
         break;
 
     case SymTagFunction:
-        ptr = TypeInfoPtr( new TypeInfoFunction( symbol->getType() ) );
+        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol->getType() ) );
         break;
 
     case SymTagFunctionType:
-        ptr = TypeInfoPtr( new TypeInfoFunction( symbol ) );
+        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol ) );
         break;
 
     case SymTagTypedef:
@@ -1004,14 +1004,14 @@ void TypeInfoEnum::getFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoFunction::TypeInfoFunction( SymbolPtr& symbol ) :
+TypeInfoSymbolFunction::TypeInfoSymbolFunction( SymbolPtr& symbol ) :
     m_symbol(symbol),
     m_hasThis(false)
 {
     // add this
     try
     {
-        m_args.push_back( m_symbol->getObjectPointerType() );
+        m_args.push_back( loadType(m_symbol->getObjectPointerType()) );
         m_hasThis = true;
     }
     catch(const SymbolException &)
@@ -1020,7 +1020,10 @@ TypeInfoFunction::TypeInfoFunction( SymbolPtr& symbol ) :
 
     // add args
     SymbolPtrList lstArgs = m_symbol->findChildren(SymTagFunctionArgType);
-    m_args.insert( m_args.end(), lstArgs.begin(), lstArgs.end() );
+
+    for ( SymbolPtrList::iterator it = lstArgs.begin(); it != lstArgs.end(); ++it)
+        m_args.push_back(loadType(*it));
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1043,27 +1046,20 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
     sstr << L"(";
 
 
-    TypeInfoPtr classParent;
-    try
-    {
-        classParent = getClassParent();
-    }
-    catch(const SymbolException &)
-    {
-    }
+    TypeInfoPtr classParent = getClassParent();
 
-    bool objectPointerTypePresent = false;
-    try
-    {
-        m_symbol->getObjectPointerType();
-        objectPointerTypePresent = true;
-    }
-    catch(const SymbolException &)
-    {
-    }
+    //bool objectPointerTypePresent = false;
+    //try
+    //{
+    //    m_symbol->getObjectPointerType();
+    //    objectPointerTypePresent = true;
+    //}
+    //catch(const SymbolException &)
+    //{
+    //}
 
     CallingConventionType ccType = getCallingConvention();
-    if (ccType == CallConv_NearC && classParent && objectPointerTypePresent)
+    if (ccType == CallConv_NearC && classParent && hasThis())
         ccType = CallConv_ThisCall;
 
     switch (ccType)
@@ -1104,7 +1100,7 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
     sstr << L")(";
 
     Args::iterator itArg = m_args.begin();
-    if (CallConv_ThisCall == ccType && m_hasThis)
+    if (CallConv_ThisCall == ccType && hasThis())
         ++itArg;
 
     bool bIsFirstArg = true;
@@ -1115,7 +1111,7 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
         else
             sstr << L", ";
 
-        TypeInfoPtr argType = loadType( *itArg );
+        TypeInfoPtr argType = *itArg ;
         if (argType->isNoType())
         {
             // Variadic function
@@ -1124,7 +1120,7 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
         }
         else
         {
-            sstr << loadType( *itArg )->getName();
+            sstr << (*itArg)->getName();
         }
     }
 
@@ -1137,32 +1133,39 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoFunction::getElement( size_t index )
+TypeInfoPtr TypeInfoSymbolFunction::getElement( size_t index )
 {
     if ( index >= m_args.size() )
         throw IndexException( index );
-    return loadType( m_args[index] );
+    return m_args[index];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CallingConventionType TypeInfoFunction::getCallingConvention()
+CallingConventionType TypeInfoSymbolFunction::getCallingConvention()
 {
     return static_cast< CallingConventionType >( m_symbol->getCallingConvention() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoFunction::getReturnType()
+TypeInfoPtr TypeInfoSymbolFunction::getReturnType()
 {
     return loadType(m_symbol->getType());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoFunction::getClassParent()
+TypeInfoPtr TypeInfoSymbolFunction::getClassParent()
 {
-    return loadType(m_symbol->getClassParent());
+    try 
+    {
+        return loadType(m_symbol->getClassParent());
+    }
+    catch(SymbolException&)
+    {}
+
+    return TypeInfoPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

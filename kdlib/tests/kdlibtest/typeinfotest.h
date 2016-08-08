@@ -475,3 +475,16 @@ TEST_F(TypeInfoTest, ArrayOverflow)
     EXPECT_THROW(intType->arrayOf(-1), TypeException);
 
 }
+
+TEST_F(TypeInfoTest, DefineFunc)
+{
+    TypeInfoPtr  testFunction1;
+
+    ASSERT_NO_THROW( testFunction1 = defineFunction(loadType(L"Int1B") ) );
+    EXPECT_EQ(L"Int1B(__cdecl)()", testFunction1->getName());
+
+    TypeInfoPtr  testFunction2;
+    ASSERT_NO_THROW( testFunction2 = defineFunction(loadType(L"Char*") ) );
+    ASSERT_NO_THROW( testFunction2->appendField(L"arg1", loadType(L"Int1B") ) );
+    ASSERT_NO_THROW( testFunction2->appendField(L"arg2", loadType(L"Double") ) );
+}

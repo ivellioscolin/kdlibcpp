@@ -114,6 +114,40 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class CustomFunction : public TypeInfoFunction
+{
+public:
+     CustomFunction(const TypeInfoPtr& returnType, CallingConventionType  callconv) :
+         m_returnType(returnType),
+         m_callconv(callconv)
+        {}
+
+protected:
+
+
+    virtual TypeInfoPtr getReturnType() {
+        return m_returnType;
+    }
+
+    virtual TypeInfoPtr getClassParent() {
+        return TypeInfoPtr();
+    }
+
+    virtual CallingConventionType getCallingConvention()
+    {
+        return m_callconv;
+    }
+
+    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) {
+        m_args.push_back(fieldType);
+    }
+
+    TypeInfoPtr  m_returnType;
+    CallingConventionType  m_callconv;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoPtr defineStruct( const std::wstring &structName, size_t align )
 {
     return TypeInfoPtr( new CustomStruct(structName, align) );
@@ -124,6 +158,13 @@ TypeInfoPtr defineStruct( const std::wstring &structName, size_t align )
 TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align )
 {
     return TypeInfoPtr( new CustomUnion(unionName, align) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr defineFunction(const TypeInfoPtr& returnType, CallingConventionType  callconv)
+{
+    return TypeInfoPtr( new CustomFunction(returnType, callconv) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
