@@ -1617,6 +1617,90 @@ void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
+{
+    HRESULT  hres;
+
+    if ( index >= getRegisterNumber() )
+        throw IndexException(index);
+
+    DEBUG_VALUE  dbgvalue = {};
+
+    hres = g_dbgMgr->registers->GetValue(index, &dbgvalue );
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+
+
+    switch ( dbgvalue.Type )
+    {
+    case DEBUG_VALUE_INT8: 
+        if ( bufferSize < sizeof(unsigned char) )
+            throw DbgException( "Insufficient buffer size" ); 
+        dbgvalue.I8 = *(unsigned char*)buffer;
+        break;
+
+    case DEBUG_VALUE_INT16: 
+        if ( bufferSize < sizeof(unsigned short) )
+            throw DbgException( "Insufficient buffer size" ); 
+        dbgvalue.I16 = *(unsigned short*)buffer;
+        break;
+
+    case DEBUG_VALUE_INT32: 
+        if ( bufferSize < sizeof(unsigned long) )
+            throw DbgException( "Insufficient buffer size" ); 
+        dbgvalue.I32 = *(unsigned long*)buffer;
+        break;
+
+    case DEBUG_VALUE_INT64: 
+        if ( bufferSize < sizeof(unsigned long long) )
+            throw DbgException( "Insufficient buffer size" ); 
+        dbgvalue.I64 = *(unsigned long long*)buffer;
+        break;
+
+    case DEBUG_VALUE_FLOAT32: 
+        if ( bufferSize < sizeof(float) )
+            throw DbgException( "Insufficient buffer size" ); 
+        dbgvalue.F32 = *(float*)buffer;
+        break;
+
+    case DEBUG_VALUE_FLOAT64: 
+        if ( bufferSize < sizeof(double) )
+            throw DbgException( "Insufficient buffer size" ); 
+        dbgvalue.F64 = *(double*)buffer;
+        break;
+
+    case DEBUG_VALUE_FLOAT80:
+        if ( bufferSize < sizeof(dbgvalue.F80Bytes) )
+            throw DbgException( "Insufficient buffer size" ); 
+        memcpy_s(dbgvalue.F80Bytes, sizeof(dbgvalue.F80Bytes), buffer, bufferSize);
+        break;
+
+    case DEBUG_VALUE_FLOAT128:
+        if ( bufferSize < sizeof(dbgvalue.F128Bytes) )
+            throw DbgException( "Insufficient buffer size" ); 
+        memcpy_s(dbgvalue.F128Bytes, sizeof(dbgvalue.F128Bytes), buffer, bufferSize);
+        break;
+
+    case DEBUG_VALUE_VECTOR64:
+        if ( bufferSize < sizeof(dbgvalue.VI64) )
+            throw DbgException( "Insufficient buffer size" ); 
+        memcpy_s(dbgvalue.VI64, sizeof(dbgvalue.VI64), buffer, bufferSize);
+        break;
+
+    case DEBUG_VALUE_VECTOR128:
+        if ( bufferSize < 2*sizeof(dbgvalue.VI64) )
+            throw DbgException( "Insufficient buffer size" ); 
+        memcpy_s(dbgvalue.VI64, 2*sizeof(dbgvalue.VI64), buffer, bufferSize);
+        break;
+     }
+
+    hres = g_dbgMgr->registers->SetValue(index, &dbgvalue);
+    if ( FAILED(hres) )
+        throw DbgEngException( L"IDebugRegisters::SetValue", hres ); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 unsigned long long loadMSR(unsigned long msrIndex )
 {
     HRESULT  hres;

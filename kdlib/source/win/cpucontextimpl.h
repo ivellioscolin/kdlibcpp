@@ -27,7 +27,15 @@ protected:
 
     virtual NumVariant getRegisterByName( const std::wstring &name);
 
+    virtual void setRegisterByName( const std::wstring &name, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual NumVariant getRegisterByIndex( unsigned long index );
+
+    virtual void setRegisterByIndex( unsigned long index, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
 
     virtual std::wstring getRegisterName( unsigned long index );
 
@@ -35,24 +43,29 @@ protected:
         return m_values.size();
     }
 
+    virtual void restore();
+
     virtual MEMOFFSET_64 getIP() {
         return m_ip;
+    }
+
+    virtual void setIP(MEMOFFSET_64 ip) {
+        NOT_IMPLEMENTED();
     }
 
     virtual MEMOFFSET_64 getSP() {
         return m_sp;
     }
 
+    virtual void setSP(MEMOFFSET_64 sp) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual MEMOFFSET_64 getFP() {
         return m_fp;
     }
 
-
-    virtual unsigned long long loadMSR( unsigned long msrIndex ) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual void setMSR( unsigned long msrIndex, unsigned long long value ) {
+    virtual void setFP(MEMOFFSET_64 fp) {
         NOT_IMPLEMENTED();
     }
 
@@ -84,11 +97,25 @@ public:
         return CPU_AMD64;
     }
 
+    virtual void restore() {
+        NOT_IMPLEMENTED();
+    }
+
+
     virtual NumVariant getRegisterByName(const std::wstring &name) {
         NOT_IMPLEMENTED();
     }
 
+    virtual void setRegisterByName( const std::wstring &name, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual NumVariant getRegisterByIndex(unsigned long index); 
+
+    virtual void setRegisterByIndex( unsigned long index, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
+
 
     virtual std::wstring getRegisterName(unsigned long index);
 
@@ -100,7 +127,15 @@ public:
         NOT_IMPLEMENTED();
     }
 
+    virtual void setIP(MEMOFFSET_64 ip) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual MEMOFFSET_64 getSP() {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void setSP(MEMOFFSET_64 sp) {
         NOT_IMPLEMENTED();
     }
 
@@ -108,19 +143,13 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual unsigned long long loadMSR(unsigned long msrIndex) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual void setMSR(unsigned long msrIndex, unsigned long long value) {
+    virtual void setFP(MEMOFFSET_64 fp) {
         NOT_IMPLEMENTED();
     }
 
 private:
 
     CONTEXT_X64  m_context;
-
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -141,11 +170,24 @@ public:
         return CPU_I386;
     }
 
+    virtual void restore() {
+        NOT_IMPLEMENTED();
+    }
+
+
     virtual NumVariant getRegisterByName(const std::wstring &name) {
         NOT_IMPLEMENTED();
     }
 
+    virtual void setRegisterByName( const std::wstring &name, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual NumVariant getRegisterByIndex(unsigned long index);
+
+    virtual void setRegisterByIndex( unsigned long index, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
 
     virtual std::wstring getRegisterName(unsigned long index);
 
@@ -157,7 +199,15 @@ public:
         NOT_IMPLEMENTED();
     }
 
+    virtual void setIP(MEMOFFSET_64 ip) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual MEMOFFSET_64 getSP() {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void setSP(MEMOFFSET_64 sp) {
         NOT_IMPLEMENTED();
     }
 
@@ -165,11 +215,7 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual unsigned long long loadMSR(unsigned long msrIndex) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual void setMSR(unsigned long msrIndex, unsigned long long value) {
+    virtual void setFP(MEMOFFSET_64 fp) {
         NOT_IMPLEMENTED();
     }
 
@@ -196,11 +242,24 @@ public:
         return CPU_I386;
     }
 
+    virtual void restore() {
+        NOT_IMPLEMENTED();
+    }
+
+
     virtual NumVariant getRegisterByName(const std::wstring &name) {
         NOT_IMPLEMENTED();
     }
 
+    virtual void setRegisterByName( const std::wstring &name, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual NumVariant getRegisterByIndex(unsigned long index);
+
+    virtual void setRegisterByIndex( unsigned long index, const NumVariant& value) {
+        NOT_IMPLEMENTED();
+    }
 
     virtual std::wstring getRegisterName(unsigned long index);
 
@@ -212,7 +271,15 @@ public:
         NOT_IMPLEMENTED();
     }
 
+    virtual void setIP(MEMOFFSET_64 ip) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual MEMOFFSET_64 getSP() {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void setSP(MEMOFFSET_64 sp) {
         NOT_IMPLEMENTED();
     }
 
@@ -220,11 +287,7 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual unsigned long long loadMSR(unsigned long msrIndex) {
-        NOT_IMPLEMENTED();
-    }
-
-    virtual void setMSR(unsigned long msrIndex, unsigned long long value) {
+    virtual void setFP(MEMOFFSET_64 fp) {
         NOT_IMPLEMENTED();
     }
 
@@ -234,5 +297,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
 
 }

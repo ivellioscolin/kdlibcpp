@@ -82,7 +82,83 @@ NumVariant getRegisterByIndex(unsigned long index)
     case RegFloat128:
     case RegVector64:
     case RegVector128:
-        return NumVariant();
+        throw DbgException( "unsupported registry type");
+    }
+
+    throw DbgException( "unsupported registry type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setRegisterByName(const std::wstring& regName, const NumVariant& value)
+{
+    unsigned long index = getRegsiterIndex(regName);
+    return setRegisterByIndex(index, value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setRegisterByIndex(unsigned long index, const NumVariant& value)
+{
+    CPURegType  regType = getRegisterType(index);
+
+    switch( regType )
+    {
+    case  RegInt8:
+        {
+            unsigned char  val = value.asUChar();
+            setRegisterValue( index, &val, sizeof(val) );
+            return;
+        }
+        break;
+
+    case  RegInt16:
+        {
+            unsigned short  val = value.asUShort();
+            setRegisterValue( index, &val, sizeof(val) );
+            return;
+        }
+        break;
+
+    case  RegInt32:
+        {
+            unsigned long  val = value.asULong();
+            getRegisterValue( index, &val, sizeof(val) );
+            return;
+        }
+        break;
+
+
+    case  RegInt64:
+        {
+            unsigned long long  val = value.asULongLong();
+            getRegisterValue( index, &val, sizeof(val) );
+            return;
+        }
+        break;
+
+    case  RegFloat32:
+        {
+            float  val = value.asFloat();
+            getRegisterValue( index, &val, sizeof(val) );
+            return;
+        }
+        break;
+
+
+    case  RegFloat64:
+        {
+            double  val = value.asDouble();
+            getRegisterValue( index, &val, sizeof(val) );
+            return;
+        }
+        break;
+
+    case RegFloat80:
+    case RegFloat128:
+    case RegVector64:
+    case RegVector128:
+        throw DbgException( "unsupported registry type");
     }
 
     throw DbgException( "unsupported registry type");
@@ -124,7 +200,7 @@ CPUContextImpl::CPUContextImpl()
         }
         catch (const DbgException &)
         {
-            // some registers values are not available (for crash dump)
+           // m_values.push_back( std::make_pair(name, NumVariant()) );
         }
     }
 
@@ -164,6 +240,32 @@ std::wstring CPUContextImpl::getRegisterName( unsigned long index )
         throw IndexException(index);
 
     return m_values[index].first;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextImpl::restore()
+{
+    for ( size_t  i = 0; i < m_values.size(); ++i)
+    {
+        try 
+        {
+            kdlib::setRegisterByName( m_values[i].first, m_values[i].second );
+        }
+        catch (const DbgException &)
+        {
+        }
+
+        //const std::wstring name = kdlib::getRegisterName(i);
+        //try
+        //{
+        //    m_values.push_back( std::move( std::make_pair( name, kdlib::getRegisterByIndex(i) ) ) );
+        //}
+        //catch (const DbgException &)
+        //{
+        //    // some registers values are not available (for crash dump)
+        //}
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

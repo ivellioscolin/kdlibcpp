@@ -156,6 +156,7 @@ unsigned long getRegsiterIndex(const std::wstring &name );
 CPURegType getRegisterType(unsigned long index );
 std::wstring getRegisterName(unsigned long index );
 void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize );
+void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize );
 CPUType getCPUType();
 CPUType getCPUMode();
 void setCPUMode(CPUType mode );
