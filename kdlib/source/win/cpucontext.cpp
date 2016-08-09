@@ -4,6 +4,7 @@
 
 #include "kdlib/dbgengine.h"
 #include "kdlib/exceptions.h"
+#include "kdlib/memaccess.h"
 
 #include "stackimpl.h"
 #include "cpucontextimpl.h"
@@ -123,7 +124,7 @@ void setRegisterByIndex(unsigned long index, const NumVariant& value)
     case  RegInt32:
         {
             unsigned long  val = value.asULong();
-            getRegisterValue( index, &val, sizeof(val) );
+            setRegisterValue( index, &val, sizeof(val) );
             return;
         }
         break;
@@ -132,7 +133,7 @@ void setRegisterByIndex(unsigned long index, const NumVariant& value)
     case  RegInt64:
         {
             unsigned long long  val = value.asULongLong();
-            getRegisterValue( index, &val, sizeof(val) );
+            setRegisterValue( index, &val, sizeof(val) );
             return;
         }
         break;
@@ -140,7 +141,7 @@ void setRegisterByIndex(unsigned long index, const NumVariant& value)
     case  RegFloat32:
         {
             float  val = value.asFloat();
-            getRegisterValue( index, &val, sizeof(val) );
+            setRegisterValue( index, &val, sizeof(val) );
             return;
         }
         break;
@@ -149,7 +150,7 @@ void setRegisterByIndex(unsigned long index, const NumVariant& value)
     case  RegFloat64:
         {
             double  val = value.asDouble();
-            getRegisterValue( index, &val, sizeof(val) );
+            setRegisterValue( index, &val, sizeof(val) );
             return;
         }
         break;
@@ -175,97 +176,198 @@ CPUContextPtr loadCPUContext()
 
 CPUContextImpl::CPUContextImpl()
 {
-    HRESULT  hres;
+    m_cpuType = kdlib::getCPUType();
 
-    hres = g_dbgMgr->control->GetActualProcessorType( (PULONG)&m_cpuType );
-    
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetActualProcessorType", hres );
-
-    hres = g_dbgMgr->control->GetEffectiveProcessorType( (PULONG)&m_cpuMode );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetEffectiveProcessorType", hres );
-
+    m_cpuMode = kdlib::getCPUMode();
 
     unsigned long  registerNumber = kdlib::getRegisterNumber();
-
-    m_values.reserve(registerNumber);
 
     for ( unsigned long  i = 0; i < registerNumber; ++i)
     {
         const std::wstring name = kdlib::getRegisterName(i);
         try
         {
-            m_values.push_back( std::move( std::make_pair( name, kdlib::getRegisterByIndex(i) ) ) );
+            m_indexedValues.insert( std::make_pair( i, kdlib::getRegisterByIndex(i) ) );
+            m_indexedNames.insert( std::make_pair( name, i ) );
         }
         catch (const DbgException &)
         {
-           // m_values.push_back( std::make_pair(name, NumVariant()) );
         }
     }
-
-    m_ip = getInstructionOffset();
-    m_sp = getStackOffset();
-    m_fp = getFrameOffset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 NumVariant CPUContextImpl::getRegisterByName( const std::wstring &name)
 {
-    for ( unsigned long  i = 0; i < m_values.size(); ++i)
-    {
-        if (m_values[i].first == name )
-            return m_values[i].second;
-    }
+    std::map<std::wstring, unsigned long>::iterator  foundName = m_indexedNames.find(name);
 
-    throw DbgException("register not found");
+    if ( foundName == m_indexedNames.end() )
+        throw DbgException("register not found");
+
+    return m_indexedValues[foundName->second];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 NumVariant CPUContextImpl::getRegisterByIndex( unsigned long index )
 {
-    if ( index >= m_values.size() )
+    std::map<unsigned long, NumVariant>::iterator  found = m_indexedValues.find(index);
+
+    if ( found == m_indexedValues.end() )
         throw IndexException(index);
 
-    return m_values[index].second;
+    return m_indexedValues[index];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 std::wstring CPUContextImpl::getRegisterName( unsigned long index )
 {
-    if ( index >= m_values.size() )
-        throw IndexException(index);
+    for ( std::map<std::wstring, unsigned long>::iterator it = m_indexedNames.begin(); it != m_indexedNames.end(); ++it)
+    {
+        if ( it->second == index )
+            return it->first;
+    }
 
-    return m_values[index].first;
+    throw IndexException(index);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void CPUContextImpl::restore()
 {
-    for ( size_t  i = 0; i < m_values.size(); ++i)
-    {
+   for(  std::map<unsigned long, NumVariant>::iterator it = m_indexedValues.begin(); it != m_indexedValues.end(); ++it )
+   {
         try 
         {
-            kdlib::setRegisterByName( m_values[i].first, m_values[i].second );
+            kdlib::setRegisterByIndex( it->first, it->second);
         }
         catch (const DbgException &)
         {
         }
+   }
+}
 
-        //const std::wstring name = kdlib::getRegisterName(i);
-        //try
-        //{
-        //    m_values.push_back( std::move( std::make_pair( name, kdlib::getRegisterByIndex(i) ) ) );
-        //}
-        //catch (const DbgException &)
-        //{
-        //    // some registers values are not available (for crash dump)
-        //}
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 CPUContextImpl::getIP()
+{
+    if ( m_cpuType == CPU_I386 )
+    {
+        return addr64( getRegisterByName(L"eip").asULong() );
     }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
+    {
+        return addr64( getRegisterByName(L"eip").asULong() );
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    {
+        return addr64( getRegisterByName(L"rip").asULongLong() );
+    }
+
+    throw DbgException("Unknown CPU type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextImpl::setIP(MEMOFFSET_64 ip)
+{
+    if ( m_cpuType == CPU_I386 )
+    {
+        setRegisterByName(L"eip", NumVariant(ip));
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
+    {
+        setRegisterByName(L"eip", NumVariant(ip));
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    {
+        setRegisterByName(L"rip", NumVariant(ip));
+    }
+
+    assert(0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 CPUContextImpl::getSP()
+{
+    if ( m_cpuType == CPU_I386 )
+    {
+        return addr64( getRegisterByName(L"esp").asULong() );
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
+    {
+        return addr64( getRegisterByName(L"esp").asULong() );
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    {
+        return addr64( getRegisterByName(L"rsp").asULongLong() );
+    }
+
+    throw DbgException("Unknown CPU type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextImpl::setSP(MEMOFFSET_64 sp)
+{
+    if ( m_cpuType == CPU_I386 )
+    {
+        setRegisterByName(L"esp", NumVariant(sp));
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
+    {
+        setRegisterByName(L"esp", NumVariant(sp));
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    {
+        setRegisterByName(L"rsp", NumVariant(sp));
+    }
+
+
+    assert(0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 CPUContextImpl::getFP()
+{
+    if ( m_cpuType == CPU_I386 )
+    {
+        return addr64( getRegisterByName(L"ebp").asULong() );
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
+    {
+        return addr64( getRegisterByName(L"ebp").asULong() );
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    {
+        return addr64( getRegisterByName(L"rbp").asULongLong() );
+    }
+
+    throw DbgException("Unknown CPU type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextImpl::setFP(MEMOFFSET_64 fp)
+{
+    if ( m_cpuType == CPU_I386 )
+    {
+        setRegisterByName(L"ebp", NumVariant(fp));
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
+    {
+        setRegisterByName(L"ebp", NumVariant(fp));
+    }
+    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    {
+        setRegisterByName(L"rbp", NumVariant(fp));
+    }
+
+    assert(0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

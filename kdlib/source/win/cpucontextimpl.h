@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "kdlib/cpucontext.h"
 
 #include "threadctx.h"
@@ -40,46 +42,30 @@ protected:
     virtual std::wstring getRegisterName( unsigned long index );
 
     virtual unsigned long getRegisterNumber() {
-        return m_values.size();
+        return static_cast<unsigned long>(m_indexedValues.size());
     }
 
     virtual void restore();
 
-    virtual MEMOFFSET_64 getIP() {
-        return m_ip;
-    }
+    virtual MEMOFFSET_64 getIP();
 
-    virtual void setIP(MEMOFFSET_64 ip) {
-        NOT_IMPLEMENTED();
-    }
+    virtual void setIP(MEMOFFSET_64 ip);
 
-    virtual MEMOFFSET_64 getSP() {
-        return m_sp;
-    }
+    virtual MEMOFFSET_64 getSP();
 
-    virtual void setSP(MEMOFFSET_64 sp) {
-        NOT_IMPLEMENTED();
-    }
+    virtual void setSP(MEMOFFSET_64 sp);
 
-    virtual MEMOFFSET_64 getFP() {
-        return m_fp;
-    }
+    virtual MEMOFFSET_64 getFP();
 
-    virtual void setFP(MEMOFFSET_64 fp) {
-        NOT_IMPLEMENTED();
-    }
+    virtual void setFP(MEMOFFSET_64 fp);
 
 protected:
 
     CPUType  m_cpuType;
     CPUType  m_cpuMode;
 
-    std::vector< std::pair<std::wstring, NumVariant> >  m_values;
-    
-    MEMOFFSET_64  m_ip;
-    MEMOFFSET_64  m_sp;
-    MEMOFFSET_64  m_fp;
-
+    std::map<unsigned long, NumVariant> m_indexedValues;
+    std::map<std::wstring, unsigned long>  m_indexedNames;
 };
 
 class CPUContextAmd64 : public CPUContext

@@ -22,3 +22,19 @@ TEST_F( CPUContextTest, GetRegisters )
     EXPECT_NE( 0, cpu->getSP() );
 }
 
+TEST_F( CPUContextTest, RestoreContext )
+{
+    CPUContextPtr  cpu;
+    ASSERT_NO_THROW( cpu = loadCPUContext() );
+
+    ASSERT_NO_THROW( setRegisterByIndex( 10, getRegisterByIndex(10) + 10 ) );
+    ASSERT_NO_THROW( setRegisterByName( L"eax", getRegisterByName(L"eax") + 121 ) );
+
+    EXPECT_NE( cpu->getRegisterByIndex(10), getRegisterByIndex(10) );
+
+    EXPECT_NO_THROW( cpu->restore() );
+
+    EXPECT_EQ( cpu->getRegisterByIndex(10), getRegisterByIndex(10) );
+    EXPECT_EQ( cpu->getRegisterByName(L"eax"), getRegisterByName(L"eax") );
+}
+
