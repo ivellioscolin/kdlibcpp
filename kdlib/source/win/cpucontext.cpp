@@ -167,6 +167,20 @@ void setRegisterByIndex(unsigned long index, const NumVariant& value)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void pushInStack(const NumVariant& value)
+{
+    NOT_IMPLEMENTED();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void popFromStack(NumVariant& value)
+{
+    NOT_IMPLEMENTED();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 CPUContextPtr loadCPUContext()
 {
     return CPUContextPtr( new CPUContextImpl() );
@@ -253,15 +267,11 @@ void CPUContextImpl::restore()
 
 MEMOFFSET_64 CPUContextImpl::getIP()
 {
-    if ( m_cpuType == CPU_I386 )
+    if ( m_cpuMode == CPU_I386 )
     {
         return addr64( getRegisterByName(L"eip").asULong() );
     }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
-    {
-        return addr64( getRegisterByName(L"eip").asULong() );
-    }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    else if ( m_cpuMode == CPU_AMD64 )
     {
         return addr64( getRegisterByName(L"rip").asULongLong() );
     }
@@ -273,15 +283,11 @@ MEMOFFSET_64 CPUContextImpl::getIP()
 
 void CPUContextImpl::setIP(MEMOFFSET_64 ip)
 {
-    if ( m_cpuType == CPU_I386 )
+    if ( m_cpuMode == CPU_I386 )
     {
         setRegisterByName(L"eip", NumVariant(ip));
     }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
-    {
-        setRegisterByName(L"eip", NumVariant(ip));
-    }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    else if ( m_cpuMode == CPU_AMD64 )
     {
         setRegisterByName(L"rip", NumVariant(ip));
     }
@@ -293,15 +299,11 @@ void CPUContextImpl::setIP(MEMOFFSET_64 ip)
 
 MEMOFFSET_64 CPUContextImpl::getSP()
 {
-    if ( m_cpuType == CPU_I386 )
+    if ( m_cpuMode == CPU_I386 )
     {
         return addr64( getRegisterByName(L"esp").asULong() );
     }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
-    {
-        return addr64( getRegisterByName(L"esp").asULong() );
-    }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    else if ( m_cpuMode == CPU_AMD64 )
     {
         return addr64( getRegisterByName(L"rsp").asULongLong() );
     }
@@ -313,36 +315,27 @@ MEMOFFSET_64 CPUContextImpl::getSP()
 
 void CPUContextImpl::setSP(MEMOFFSET_64 sp)
 {
-    if ( m_cpuType == CPU_I386 )
+    if ( m_cpuMode == CPU_I386 )
     {
         setRegisterByName(L"esp", NumVariant(sp));
     }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
+    else if ( m_cpuMode == CPU_I386 )
     {
         setRegisterByName(L"esp", NumVariant(sp));
     }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
-    {
-        setRegisterByName(L"rsp", NumVariant(sp));
-    }
 
-
-    assert(0);
+    throw DbgException("Unknown CPU type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 MEMOFFSET_64 CPUContextImpl::getFP()
 {
-    if ( m_cpuType == CPU_I386 )
+    if ( m_cpuMode == CPU_I386 )
     {
         return addr64( getRegisterByName(L"ebp").asULong() );
     }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
-    {
-        return addr64( getRegisterByName(L"ebp").asULong() );
-    }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    else if ( m_cpuMode == CPU_AMD64 )
     {
         return addr64( getRegisterByName(L"rbp").asULongLong() );
     }
@@ -354,15 +347,11 @@ MEMOFFSET_64 CPUContextImpl::getFP()
 
 void CPUContextImpl::setFP(MEMOFFSET_64 fp)
 {
-    if ( m_cpuType == CPU_I386 )
+    if ( m_cpuMode == CPU_I386 )
     {
         setRegisterByName(L"ebp", NumVariant(fp));
     }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_I386 )
-    {
-        setRegisterByName(L"ebp", NumVariant(fp));
-    }
-    else if ( m_cpuType == CPU_AMD64 && m_cpuMode == CPU_AMD64 )
+    else if (m_cpuMode == CPU_AMD64 )
     {
         setRegisterByName(L"rbp", NumVariant(fp));
     }

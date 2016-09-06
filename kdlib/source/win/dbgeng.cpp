@@ -9,6 +9,7 @@
 #include "kdlib/dbgengine.h"
 #include "kdlib/stack.h"
 #include "kdlib/disasm.h"
+#include "kdlib/cpucontext.h"
 
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
@@ -1452,12 +1453,82 @@ MEMOFFSET_64 getFrameOffset()
 {
     HRESULT  hres;
     MEMOFFSET_64 offset;
-    hres =  g_dbgMgr->registers->GetFrameOffset( &offset );
+    hres = g_dbgMgr->registers->GetFrameOffset( &offset );
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetFrameOffset", hres ); 
 
     return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setInstructionOffset(MEMOFFSET_64 offset)
+{
+
+    unsigned long  regIndex;
+        
+    switch( getCPUMode() )
+    {
+    case CPU_I386:
+        regIndex = getRegsiterIndex(L"eip");
+        break;
+
+    case CPU_AMD64:
+        regIndex = getRegsiterIndex(L"rip");
+        break;
+
+    default:
+        throw DbgException( "Unknown processor type" );
+    }
+
+    setRegisterByIndex(regIndex, offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setStackOffset(MEMOFFSET_64 offset)
+{
+    unsigned long  regIndex;
+        
+    switch( getCPUMode() )
+    {
+    case CPU_I386:
+        regIndex = getRegsiterIndex(L"esp");
+        break;
+
+    case CPU_AMD64:
+        regIndex = getRegsiterIndex(L"rsp");
+        break;
+
+    default:
+        throw DbgException( "Unknown processor type" );
+    }
+
+    setRegisterByIndex(regIndex, offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setFrameOffset(MEMOFFSET_64 offset)
+{
+    unsigned long  regIndex;
+        
+    switch( getCPUMode() )
+    {
+    case CPU_I386:
+        regIndex = getRegsiterIndex(L"ebp");
+        break;
+
+    case CPU_AMD64:
+        regIndex = getRegsiterIndex(L"rbp");
+        break;
+
+    default:
+        throw DbgException( "Unknown processor type" );
+    }
+
+    setRegisterByIndex(regIndex, offset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
