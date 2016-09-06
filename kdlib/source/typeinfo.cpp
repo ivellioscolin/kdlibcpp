@@ -908,7 +908,19 @@ void TypeInfoUdt::getFields(
                 }
                 break;
             case DataIsStaticMember:
-                fieldPtr = SymbolUdtField::getStaticField( childSym, childSym->getName(),childSym->getVa() );
+
+                std::wstring  fieldName = childSym->getName();
+                MEMOFFSET_64  staticOffset = 0L;
+
+                try 
+                {
+                    staticOffset = childSym->getVa();
+                }
+                catch(SymbolException& )
+                {}
+
+                fieldPtr = SymbolUdtField::getStaticField(childSym, fieldName, staticOffset);
+
                 break;
             }
 
