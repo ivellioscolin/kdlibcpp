@@ -176,6 +176,7 @@
     <ClInclude Include="typedvartest.h" />
     <ClInclude Include="typeinfotest.h" />
     <ClInclude Include="varianttest.h" />
+    <ClInclude Include="winapitest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\comdate\testfunc.cpp" />

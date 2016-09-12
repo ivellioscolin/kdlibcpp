@@ -1,14 +1,15 @@
 #include "stdafx.h"
+#include <string.h>
 
 #pragma optimize("g", off)
 
 #include "test/testfunc.h"
 
-void
+double
 static
 LocalStaticFunc( int a, float b )
 {
-    b = a + b;
+   return a + b;
 }
 
 void 
@@ -21,18 +22,76 @@ CdeclFunc( int a, float b)
    LocalStaticFunc(c,d);
 }
 
+int
+__cdecl
+CdeclFuncReturn( int a, char* b )
+{
+    return a + strlen(b);
+}
+
+long long
+__cdecl
+CdeclFuncLong( unsigned long long a )
+{
+    return a + 5;
+}
+
+float
+__cdecl
+CdeclFuncFloat( float a, float b )
+{
+    return a*b;
+}
+
+double
+__cdecl
+CdeclFuncDouble( double a, double b )
+{
+    return (a+b)/2.0;
+}
+
 void
 __stdcall
 StdcallFunc( int a, float b )
 {
-   LocalStaticFunc(a,b);
+   LocalStaticFunc(a + 10, b / 2 );
 }
 
-void
+short
+__stdcall
+StdcallFuncRet( char a, long b)
+{
+    return b/a;
+}
+
+long long
+__stdcall
+StdcallFuncLong( unsigned long long a, unsigned long long b)
+{
+    return a & b;
+}
+
+float
+__stdcall
+StdcallFuncFloat(float a, float b)
+{
+    return a/b;
+}
+
+double
+__stdcall
+StdcallFuncDouble(double a, double b)
+{
+    return a + b;
+}
+
+
+
+double
 __fastcall
 FastcallFunc( int a, float b )
 {
-   LocalStaticFunc(a,b);
+   return LocalStaticFunc(a,b);
 }
 
 void
@@ -87,3 +146,5 @@ void __fastcall PureCFastcallFunc( int a, float b )
 void VariadicFunc(int, ...)
 {
 }
+
+

@@ -619,8 +619,10 @@ ExecutionStatus targetStepIn()
 ExecutionStatus targetStepOut()
 {
     g_dbgMgr->setQuietNotiification(true);
-    while (Disasm().opmnemo() != L"ret")
+
+    while (Disasm().opmnemo().find(L"ret") != 0 )
         targetChangeStatus(DEBUG_STATUS_STEP_OVER);
+
     g_dbgMgr->setQuietNotiification(false);
 
     return targetChangeStatus(DEBUG_STATUS_STEP_INTO);
@@ -1529,6 +1531,23 @@ void setFrameOffset(MEMOFFSET_64 offset)
     }
 
     setRegisterByIndex(regIndex, offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 getReturnReg()
+{
+    switch( getCPUMode() )
+    {
+    case CPU_I386:
+        return static_cast<MEMOFFSET_64>(getRegisterByName(L"edx").asULong()) << 32 ^
+            static_cast<MEMOFFSET_64>(static_cast<MEMOFFSET_64>(getRegisterByName(L"eax").asULong()));
+
+    case CPU_AMD64:
+        return static_cast<MEMOFFSET_64>(getRegisterByName(L"rax").asULongLong());
+    }
+
+    throw DbgException( "Unknown processor type" );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

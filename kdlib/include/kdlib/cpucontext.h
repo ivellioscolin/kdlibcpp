@@ -72,6 +72,12 @@ NumVariant getRegisterByIndex(unsigned long regIndex);
 void setRegisterByName(const std::wstring& regName, const NumVariant& value);
 void setRegisterByIndex(unsigned long regIndex, const NumVariant& value);
 
+void pushInStack(const NumVariant& value);
+void popFromStack(NumVariant& value);
+
+MEMOFFSET_64 stackAlloc(unsigned short byteCount);
+MEMOFFSET_64 stackFree(unsigned short byteCount);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 

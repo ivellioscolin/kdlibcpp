@@ -2,13 +2,17 @@
 
 #include <iomanip>
 
+#include <stdarg.h>
+
 #include <boost/regex.hpp>
 
 #include "kdlib/typedvar.h"
 #include "kdlib/module.h"
 #include "kdlib/stack.h"
+#include "kdlib/cpucontext.h"
 
 #include "typedvarimp.h"
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -763,6 +767,317 @@ std::wstring TypedVarEnum::printValue() const
 std::wstring TypedVarFunction::str()
 {
     return m_typeInfo->getName();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void makeFastCallArgsX86(std::list<NumVariant> args)
+{
+    int i = 0;
+    for ( std::list<NumVariant>::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, ++i)
+    {
+        pushInStack(*it);
+
+        switch( i )
+        {
+        case 0:
+            kdlib::setRegisterByName(L"ecx", *it);
+            break;
+        case 1:
+            kdlib::setRegisterByName(L"edx", *it);
+            break;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void makeFastCallArgsX64(std::list<NumVariant> args)
+{
+    int i = 0;
+
+    for ( std::list<NumVariant>::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, ++i)
+    {
+        pushInStack(*it);
+
+        switch( i )
+        {
+        case 0:
+            if ( it->isDouble() )
+                kdlib::setRegisterByName(L"xmm0", *it);
+            else
+                kdlib::setRegisterByName(L"rcx", *it);
+            break;
+        case 1:
+            if ( it->isDouble() )
+                kdlib::setRegisterByName(L"xmm1", *it);
+            else
+                kdlib::setRegisterByName(L"rdx", *it);
+            break;
+        case 2:
+            if ( it->isDouble() )
+                kdlib::setRegisterByName(L"xmm2", *it);
+            else
+                kdlib::setRegisterByName(L"r8", *it);
+            break;
+        case 3:
+            if ( it->isDouble() )
+                kdlib::setRegisterByName(L"xmm2", *it);
+            else
+                kdlib::setRegisterByName(L"r9", *it);
+            break;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant TypedVarFunction::call( int numArgs, ... )
+{
+    if ( numArgs !=  m_typeInfo->getElementCount() )
+        throw TypeException(L"wrong  argument count");
+
+    va_list arglst;
+    va_start(arglst, numArgs);
+
+    NumVariant   retVal;
+
+    CPUContextAutoRestore  cpuContext;
+
+    std::list<NumVariant>  argLst;
+
+    for ( int  i = 0; i < numArgs; ++i)
+    {
+        NumVariant  var;
+
+        TypeInfoPtr  argType = m_typeInfo->getElement(i);
+
+        if ( argType->isBase() )
+        {
+            if ( argType->getName() == L"Float" )
+            {
+                var = static_cast<float>( va_arg(arglst, double) );
+            }
+            else 
+            if ( argType->getName() == L"Double" )
+            {
+                var = static_cast<double>( va_arg(arglst, double) );
+            }
+            else
+            {
+                switch( argType->getSize() )
+                {
+                case 1:
+                    var = va_arg(arglst, char);
+                    break;
+                case 2:
+                    var = va_arg(arglst, short);
+                    break;
+                case 4:
+                    var = va_arg(arglst, long);
+                    break;
+                case 8:
+                    var = va_arg(arglst, long long );
+                    break;
+                default:
+                    throw TypeException(L"unsupported call argument");
+                }
+            }
+        }
+        else if ( argType->isPointer() || argType->isArray() )
+        {
+            switch ( argType->getPtrSize() )
+            {
+            case 4:
+                var = va_arg(arglst, long);
+                break;
+
+            case 8:
+                var = va_arg(arglst, long long);
+                break;
+
+            default:
+                throw TypeException(L"unsupported call argument");
+            }
+        }
+        else
+        {
+            throw TypeException(L"unsupported call argument");
+        }
+
+        argLst.push_back(var);
+    }
+
+    switch (getCPUMode() )
+    {
+        case CPU_I386:
+        {
+            switch( m_typeInfo->getCallingConvention() ) 
+            {
+                case CallConv_NearC:
+                    retVal = callCdecl(argLst);
+                    break;
+
+                case CallConv_NearStd:
+                    retVal = callStd(argLst);
+                    break;
+
+                case CallConv_NearFast:
+                    retVal = callFast(argLst);
+                    break;
+
+                default:
+                    throw TypeException(L"unsupported calling convention");
+            }
+
+            break;
+        }
+        case CPU_AMD64:
+
+            retVal = callX64(argLst);
+            break;
+
+        default:
+            throw DbgException( "Unknown processor type" );
+    }
+
+    va_end(arglst);
+    
+    return retVal;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant TypedVarFunction::callCdecl(std::list<NumVariant> args)
+{
+    std::for_each( args.rbegin(), args.rend(), pushInStack );
+
+    pushInStack( static_cast<unsigned long>(getInstructionOffset()));
+
+    setInstructionOffset( getAddress() );
+
+    targetStepOut();
+
+    TypeInfoPtr  retType =  m_typeInfo->getReturnType();
+
+    if (retType->isBase() )
+    {
+        if ( retType->getName() == L"Float" )
+        {
+            NOT_IMPLEMENTED();
+        }
+        else 
+        if ( retType->getName() == L"Double" )
+        {
+            NOT_IMPLEMENTED();
+        }
+        else
+        {
+            if ( retType->getSize() == 8 )
+            {
+                return getReturnReg();
+            }
+
+            return static_cast<unsigned long>(getReturnReg());
+        }
+    }
+    else if ( retType->isPointer() )
+    {
+        return static_cast<unsigned long>(getReturnReg());
+    }
+
+    throw "unsupported return type";
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant TypedVarFunction::callStd(std::list<NumVariant> args)
+{
+    return callCdecl(args);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant TypedVarFunction::callFast(std::list<NumVariant> args)
+{
+    NOT_IMPLEMENTED();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant TypedVarFunction::callX64(std::list<NumVariant> args)
+{
+    if ( args.size() < 4 )
+    {
+        setStackOffset( getStackOffset() - 8 * ( 4 - args.size() ) );
+    }
+
+    int i = args.size() - 1;
+    for ( std::list<NumVariant>::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
+    {
+        pushInStack(*it);
+
+        switch(i)
+        {
+        case 0:
+            if (it->isInteger() )
+                setRegisterByName(L"rcx", *it);
+            else
+                NOT_IMPLEMENTED();
+            break;
+
+        case 1:
+            if (it->isInteger() )
+                setRegisterByName(L"rdx", *it);
+            else
+                NOT_IMPLEMENTED();
+            break;
+
+        case 2:
+            if (it->isInteger() )
+                setRegisterByName(L"r8", *it);
+            else
+                NOT_IMPLEMENTED();
+            break;
+
+        case 3:
+            if (it->isInteger() )
+                setRegisterByName(L"r9", *it);
+            else
+                NOT_IMPLEMENTED();
+            break;
+
+        }
+    }
+
+    pushInStack( getInstructionOffset());
+
+    setInstructionOffset( getAddress() );
+
+    targetStepOut();
+
+    TypeInfoPtr  retType =  m_typeInfo->getReturnType();
+
+    if (retType->isBase() )
+    {
+        if ( retType->getName() == L"Float" )
+        {
+            NOT_IMPLEMENTED();
+        }
+        else 
+        if ( retType->getName() == L"Double" )
+        {
+            NOT_IMPLEMENTED();
+        }
+
+        return getReturnReg();
+    }
+    else if ( retType->isPointer() )
+    {
+        return getReturnReg();
+    }
+
+    throw "unsupported return type";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

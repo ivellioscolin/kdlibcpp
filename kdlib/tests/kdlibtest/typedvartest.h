@@ -290,3 +290,52 @@ TEST_F(TypedVarTest, getVTBL)
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod1"));
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(1)).find(L"virtMethod2"));
 }
+
+TEST_F(TypedVarTest, FunctionCall)
+{
+    TypedVarPtr funcptr;
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncReturn" ) );
+    EXPECT_EQ( 5 + 5, funcptr->call(2, 5, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress()) ) );
+    EXPECT_EQ( 100500 + 5, funcptr->call(2, 100500, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress()) ) );
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncLong" ) );
+    EXPECT_EQ( 0x100000000ULL + 5, funcptr->call(1, 0x100000000ULL) );
+    EXPECT_EQ( 10 + 5, funcptr->call(1, (unsigned long long)10));
+
+    //ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncFloat" ) );
+    //EXPECT_FLOAT_EQ( 1.5f * 3.2f, funcptr->call(2, (float)1.5f, (float)3.2f).asFloat() );
+    //EXPECT_FLOAT_EQ( 10 * -3.2f, funcptr->call(2, (float)10, (float)-3.2f).asFloat() );
+
+    //ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncDouble" ) );
+    //EXPECT_DOUBLE_EQ( (1.2 + 3.4) / 2, funcptr->call(2, (double)1.2, (double)3.4).asDouble() );
+    //EXPECT_DOUBLE_EQ( (-1.2 + 7.4) / 2, funcptr->call(2, (double)-1.2, (double)7.4).asDouble() );
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncRet" ) );
+    EXPECT_EQ( 100/2, funcptr->call(2, 2, 100 ) );
+    EXPECT_EQ( 300/3, funcptr->call(2, 3, 300 ) );
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncLong" ) );
+    EXPECT_EQ( 0x100000001 & 1, funcptr->call(2, 0x100000001, 1ULL ) );
+    EXPECT_EQ( 2 & 0xF, funcptr->call(2, 2ULL, 0xFULL ) );
+  
+
+    //ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncFloat" ) );
+    //EXPECT_FLOAT_EQ( 3.0f/1.5f, funcptr->call(2, 3.0f, 1.5f ) );
+    //EXPECT_FLOAT_EQ( 25.0f/-0.1f, funcptr->call(2, 25.0f, -0.1f ).asFloat() );
+
+    //ASSERT_NO_THROW(funcptr = loadTypedVar( L"StdcallFuncDouble" ) );
+    //EXPECT_DOUBLE_EQ( 2.9 + 3.1, funcptr->call(2, 2.9, 3.1).asDouble() );
+    //EXPECT_DOUBLE_EQ( -2.9 + 13.1, funcptr->call(2, -2.9, 13.1).asDouble() );
+}
+
+TEST_F(TypedVarTest, CustomDefineFunctionCall)
+{
+    TypeInfoPtr  FuncType;
+    ASSERT_NO_THROW( FuncType = defineFunction( loadType(L"Void*"), kdlib::CallConv_NearStd) );
+    ASSERT_NO_THROW( FuncType->appendField(L"var1", kdlib::loadType(L"WChar*") ) );
+    ASSERT_NO_THROW( FuncType->appendField(L"var2", kdlib::loadType(L"UInt4B") ) );
+
+    TypedVarPtr  funcPtr;
+    ASSERT_NO_THROW( funcPtr = loadTypedVar(FuncType, 0x10000) );
+}

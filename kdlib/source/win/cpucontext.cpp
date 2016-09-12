@@ -167,9 +167,90 @@ void setRegisterByIndex(unsigned long index, const NumVariant& value)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+int alignStackPointer( int byteCount )
+{
+    int machineWord;
+
+    switch( getCPUMode() )
+    {
+    case CPU_I386:
+        machineWord = 4;
+        break;
+
+    case CPU_AMD64:
+        machineWord = 8;
+        break;
+
+    default:
+        throw DbgException( "Unknown processor type" );
+    }
+
+    return ( ( byteCount - 1) / machineWord + 1 ) * machineWord;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 stackAlloc(unsigned short byteCount)
+{
+    byteCount = alignStackPointer(byteCount);
+
+    MEMOFFSET_64  offset = getStackOffset() - byteCount;
+    setStackOffset(offset);
+    return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 stackFree(unsigned short byteCount)
+{
+    byteCount = alignStackPointer(byteCount);
+
+    MEMOFFSET_64  offset = getStackOffset() + byteCount;
+    setStackOffset(offset);
+    return offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void pushInStack(const NumVariant& value)
 {
-    NOT_IMPLEMENTED();
+    if ( value.isChar() || value.isUChar() )
+    {
+        setByte( stackAlloc(1), value.asUChar() );
+        return;
+    }
+
+    if ( value.isShort() || value.isUShort() )
+    {
+        setWord( stackAlloc(2), value.asUShort() );
+        return;
+    }
+
+    if ( value.isLong() || value.isULong() )
+    {
+        setDWord( stackAlloc(4), value.asULong() );
+        return;
+    }
+
+    if ( value.isLongLong() || value.isULongLong() )
+    {
+        setQWord( stackAlloc(8), value.asULongLong() );
+        return;
+    }
+
+    if ( value.isFloat() )
+    {
+        setSingleFloat( stackAlloc(4), value.asFloat() );
+        return;
+    }
+
+    if ( value.isDouble() )
+    {
+        setDoubleFloat( stackAlloc(8), value.asDouble() );
+        return;
+    }
+
+    throw DbgException("unsupported argument type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,6 +259,7 @@ void popFromStack(NumVariant& value)
 {
     NOT_IMPLEMENTED();
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

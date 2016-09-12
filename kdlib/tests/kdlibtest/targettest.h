@@ -330,9 +330,9 @@ TEST_F(TargetTest, IpFrameStackOffset)
 
 TEST_F(KernelDumpTest, LoadDump)
 {
-    std::wstring  str = TargetSystem::getCurrent()->getDescription();
-
     loadDump();
+
+    std::wstring  str = TargetSystem::getCurrent()->getDescription();
 }
     
 

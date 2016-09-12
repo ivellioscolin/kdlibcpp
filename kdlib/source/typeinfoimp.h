@@ -391,6 +391,20 @@ protected:
         return true;
     }
 
+    virtual size_t getSize() {
+        return getPtrSize();
+    }
+
+    virtual size_t getElementCount() {
+        return m_args.size();
+    }
+
+    virtual TypeInfoPtr getElement( size_t index ) {
+        if ( index < m_args.size() )
+            return m_args[index];
+        throw IndexException(index);
+    }
+
     virtual std::wstring getName();
 
     virtual std::pair<std::wstring, std::wstring> splitName();

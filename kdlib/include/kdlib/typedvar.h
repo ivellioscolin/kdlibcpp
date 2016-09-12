@@ -91,6 +91,7 @@ public:
     virtual TypedVarPtr deref() = 0;
     virtual TypedVarPtr castTo(const std::wstring& typeName) = 0;
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) = 0;
+    virtual NumVariant call( int numArgs, ... ) = 0;
 
 protected:
 

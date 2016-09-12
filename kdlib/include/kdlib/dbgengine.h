@@ -166,6 +166,8 @@ CPUType getCPUMode();
 void setCPUMode(CPUType mode );
 void switchCPUMode();
 
+MEMOFFSET_64 getReturnReg();
+
 unsigned long long loadMSR(unsigned long msrIndex );
 void setMSR(unsigned long msrIndex, unsigned long long value );
 void getStackTrace(std::vector<FrameDesc> &stackTrace);

@@ -431,6 +431,14 @@ TEST_F( TypeInfoTest, FunctionName )
     ASSERT_NO_THROW(ti = loadTypedVar(L"FuncReturnClass")->getType());
     EXPECT_EQ(L"FuncTestClass(__cdecl)()", ti->getName());
 
+    ASSERT_NO_THROW(ti = loadTypedVar(L"StdcallFunc")->getType());
+
+#ifdef _WIN64
+    EXPECT_EQ(L"Void(__cdecl)(Int4B, Float)", ti->getName());
+#else
+    EXPECT_EQ(L"Void(__stdcall)(Int4B, Float)", ti->getName());
+#endif
+    
     ASSERT_NO_THROW( ti = loadTypedVar(L"ArrayOfCdeclFuncPtr")->getType()->getElement(0)->deref() );
     EXPECT_EQ(L"Void(__cdecl)(Int4B, Float)", ti->getName());
 
@@ -487,4 +495,10 @@ TEST_F(TypeInfoTest, DefineFunc)
     ASSERT_NO_THROW( testFunction2 = defineFunction(loadType(L"Char*") ) );
     ASSERT_NO_THROW( testFunction2->appendField(L"arg1", loadType(L"Int1B") ) );
     ASSERT_NO_THROW( testFunction2->appendField(L"arg2", loadType(L"Double") ) );
+
+    EXPECT_EQ( 2, testFunction2->getElementCount() );
+    EXPECT_EQ( L"Double", testFunction2->getElement(1)->getName() );
+    EXPECT_EQ( L"Char*", testFunction2->getReturnType()->getName() );
+
+    EXPECT_THROW( testFunction2->getElement(2), IndexException);
 }

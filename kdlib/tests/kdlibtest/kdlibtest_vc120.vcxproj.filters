@@ -65,6 +65,9 @@
     <ClInclude Include="memdumpfixture.h">
       <Filter>testfixtures</Filter>
     </ClInclude>
+    <ClInclude Include="winapitest.h">
+      <Filter>testcases</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.kdlibtest_vc120.config" />
