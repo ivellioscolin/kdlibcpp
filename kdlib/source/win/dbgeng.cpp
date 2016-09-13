@@ -1720,66 +1720,65 @@ void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
 
-
     switch ( dbgvalue.Type )
     {
     case DEBUG_VALUE_INT8: 
-        if ( bufferSize < sizeof(unsigned char) )
-            throw DbgException( "Insufficient buffer size" ); 
-        dbgvalue.I8 = *(unsigned char*)buffer;
+        if ( bufferSize > sizeof(unsigned char) )
+            throw DbgException( "Buffer too big" ); 
+        memcpy_s(dbgvalue.RawBytes, sizeof(unsigned char), buffer, bufferSize );
         break;
 
     case DEBUG_VALUE_INT16: 
-        if ( bufferSize < sizeof(unsigned short) )
-            throw DbgException( "Insufficient buffer size" ); 
-        dbgvalue.I16 = *(unsigned short*)buffer;
+        if ( bufferSize > sizeof(unsigned short) )
+            throw DbgException( "Buffer too big" ); 
+        memcpy_s(dbgvalue.RawBytes, sizeof(unsigned short), buffer, bufferSize );
         break;
 
     case DEBUG_VALUE_INT32: 
-        if ( bufferSize < sizeof(unsigned long) )
-            throw DbgException( "Insufficient buffer size" ); 
-        dbgvalue.I32 = *(unsigned long*)buffer;
+        if ( bufferSize > sizeof(unsigned long) )
+            throw DbgException( "Buffer too big" ); 
+        memcpy_s(dbgvalue.RawBytes, sizeof(unsigned long), buffer, bufferSize );
         break;
 
     case DEBUG_VALUE_INT64: 
-        if ( bufferSize < sizeof(unsigned long long) )
-            throw DbgException( "Insufficient buffer size" ); 
-        dbgvalue.I64 = *(unsigned long long*)buffer;
+        if ( bufferSize > sizeof(unsigned long long) )
+            throw DbgException( "Buffer too big" ); 
+        memcpy_s(dbgvalue.RawBytes, sizeof(unsigned long long), buffer, bufferSize );
         break;
 
     case DEBUG_VALUE_FLOAT32: 
-        if ( bufferSize < sizeof(float) )
-            throw DbgException( "Insufficient buffer size" ); 
-        dbgvalue.F32 = *(float*)buffer;
+        if ( bufferSize > sizeof(float) )
+            throw DbgException( "Buffer too big" ); 
+        memcpy_s(dbgvalue.RawBytes, sizeof(float), buffer, bufferSize );
         break;
 
     case DEBUG_VALUE_FLOAT64: 
-        if ( bufferSize < sizeof(double) )
-            throw DbgException( "Insufficient buffer size" ); 
-        dbgvalue.F64 = *(double*)buffer;
+        if ( bufferSize > sizeof(double) )
+            throw DbgException( "Buffer too big" ); 
+        memcpy_s(dbgvalue.RawBytes, sizeof(double), buffer, bufferSize );
         break;
 
     case DEBUG_VALUE_FLOAT80:
-        if ( bufferSize < sizeof(dbgvalue.F80Bytes) )
-            throw DbgException( "Insufficient buffer size" ); 
+        if ( bufferSize > sizeof(dbgvalue.F80Bytes) )
+            throw DbgException( "Buffer too big" ); 
         memcpy_s(dbgvalue.F80Bytes, sizeof(dbgvalue.F80Bytes), buffer, bufferSize);
         break;
 
     case DEBUG_VALUE_FLOAT128:
-        if ( bufferSize < sizeof(dbgvalue.F128Bytes) )
-            throw DbgException( "Insufficient buffer size" ); 
+        if ( bufferSize > sizeof(dbgvalue.F128Bytes) )
+            throw DbgException( "Buffer too big" ); 
         memcpy_s(dbgvalue.F128Bytes, sizeof(dbgvalue.F128Bytes), buffer, bufferSize);
         break;
 
     case DEBUG_VALUE_VECTOR64:
-        if ( bufferSize < sizeof(dbgvalue.VI64) )
-            throw DbgException( "Insufficient buffer size" ); 
+        if ( bufferSize > sizeof(dbgvalue.VI64) )
+            throw DbgException( "Buffer too big" ); 
         memcpy_s(dbgvalue.VI64, sizeof(dbgvalue.VI64), buffer, bufferSize);
         break;
 
     case DEBUG_VALUE_VECTOR128:
-        if ( bufferSize < 2*sizeof(dbgvalue.VI64) )
-            throw DbgException( "Insufficient buffer size" ); 
+        if ( bufferSize > 2*sizeof(dbgvalue.VI64) )
+            throw DbgException( "Buffer to big" ); 
         memcpy_s(dbgvalue.VI64, 2*sizeof(dbgvalue.VI64), buffer, bufferSize);
         break;
      }
