@@ -771,63 +771,44 @@ std::wstring TypedVarFunction::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void makeFastCallArgsX86(std::list<NumVariant> args)
+NumVariant TypedVarFunction::call( const CallArgList& arglst)
 {
-    int i = 0;
-    for ( std::list<NumVariant>::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, ++i)
-    {
-        pushInStack(*it);
+    NumVariant   retVal;
 
-        switch( i )
+    switch (getCPUMode() )
+    {
+        case CPU_I386:
         {
-        case 0:
-            kdlib::setRegisterByName(L"ecx", *it);
-            break;
-        case 1:
-            kdlib::setRegisterByName(L"edx", *it);
+            switch( m_typeInfo->getCallingConvention() ) 
+            {
+                case CallConv_NearC:
+                    retVal = callCdecl(arglst);
+                    break;
+
+                case CallConv_NearStd:
+                    retVal = callStd(arglst);
+                    break;
+
+                case CallConv_NearFast:
+                    retVal = callFast(arglst);
+                    break;
+
+                default:
+                    throw TypeException(L"unsupported calling convention");
+            }
+
             break;
         }
+        case CPU_AMD64:
+
+            retVal = callX64(arglst);
+            break;
+
+        default:
+            throw DbgException( "Unknown processor type" );
     }
-}
 
-///////////////////////////////////////////////////////////////////////////////
-
-void makeFastCallArgsX64(std::list<NumVariant> args)
-{
-    int i = 0;
-
-    for ( std::list<NumVariant>::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, ++i)
-    {
-        pushInStack(*it);
-
-        switch( i )
-        {
-        case 0:
-            if ( it->isDouble() )
-                kdlib::setRegisterByName(L"xmm0", *it);
-            else
-                kdlib::setRegisterByName(L"rcx", *it);
-            break;
-        case 1:
-            if ( it->isDouble() )
-                kdlib::setRegisterByName(L"xmm1", *it);
-            else
-                kdlib::setRegisterByName(L"rdx", *it);
-            break;
-        case 2:
-            if ( it->isDouble() )
-                kdlib::setRegisterByName(L"xmm2", *it);
-            else
-                kdlib::setRegisterByName(L"r8", *it);
-            break;
-        case 3:
-            if ( it->isDouble() )
-                kdlib::setRegisterByName(L"xmm2", *it);
-            else
-                kdlib::setRegisterByName(L"r9", *it);
-            break;
-        }
-    }
+    return retVal;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -840,11 +821,7 @@ NumVariant TypedVarFunction::call( int numArgs, ... )
     va_list arglst;
     va_start(arglst, numArgs);
 
-    NumVariant   retVal;
-
-    CPUContextAutoRestore  cpuContext;
-
-    std::list<NumVariant>  argLst;
+    CallArgList  args;
 
     for ( int  i = 0; i < numArgs; ++i)
     {
@@ -856,28 +833,28 @@ NumVariant TypedVarFunction::call( int numArgs, ... )
         {
             if ( argType->getName() == L"Float" )
             {
-                var = static_cast<float>( va_arg(arglst, double) );
+                args.push_back( static_cast<float>( va_arg(arglst, double) ) );
             }
             else 
             if ( argType->getName() == L"Double" )
             {
-                var = static_cast<double>( va_arg(arglst, double) );
+                args.push_back( va_arg(arglst, double) );
             }
             else
             {
                 switch( argType->getSize() )
                 {
                 case 1:
-                    var = va_arg(arglst, char);
+                    args.push_back( va_arg(arglst, char) );
                     break;
                 case 2:
-                    var = va_arg(arglst, short);
+                    args.push_back( va_arg(arglst, short) );
                     break;
                 case 4:
-                    var = va_arg(arglst, long);
+                    args.push_back( va_arg(arglst, long) );
                     break;
                 case 8:
-                    var = va_arg(arglst, long long );
+                    args.push_back( va_arg(arglst, long long ) );
                     break;
                 default:
                     throw TypeException(L"unsupported call argument");
@@ -889,11 +866,11 @@ NumVariant TypedVarFunction::call( int numArgs, ... )
             switch ( argType->getPtrSize() )
             {
             case 4:
-                var = va_arg(arglst, long);
+                args.push_back( va_arg(arglst, long) );
                 break;
 
             case 8:
-                var = va_arg(arglst, long long);
+                args.push_back( va_arg(arglst, long long) );
                 break;
 
             default:
@@ -904,53 +881,21 @@ NumVariant TypedVarFunction::call( int numArgs, ... )
         {
             throw TypeException(L"unsupported call argument");
         }
-
-        argLst.push_back(var);
-    }
-
-    switch (getCPUMode() )
-    {
-        case CPU_I386:
-        {
-            switch( m_typeInfo->getCallingConvention() ) 
-            {
-                case CallConv_NearC:
-                    retVal = callCdecl(argLst);
-                    break;
-
-                case CallConv_NearStd:
-                    retVal = callStd(argLst);
-                    break;
-
-                case CallConv_NearFast:
-                    retVal = callFast(argLst);
-                    break;
-
-                default:
-                    throw TypeException(L"unsupported calling convention");
-            }
-
-            break;
-        }
-        case CPU_AMD64:
-
-            retVal = callX64(argLst);
-            break;
-
-        default:
-            throw DbgException( "Unknown processor type" );
     }
 
     va_end(arglst);
-    
-    return retVal;
+
+    return call(args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callCdecl(std::list<NumVariant> args)
+NumVariant TypedVarFunction::callCdecl(const CallArgList& args)
 {
-    std::for_each( args.rbegin(), args.rend(), pushInStack );
+    CPUContextAutoRestore  cpuContext;
+
+    for ( CallArgList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it)
+       it->pushInStack();
 
     pushInStack( static_cast<unsigned long>(getInstructionOffset()));
 
@@ -991,58 +936,60 @@ NumVariant TypedVarFunction::callCdecl(std::list<NumVariant> args)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callStd(std::list<NumVariant> args)
+NumVariant TypedVarFunction::callStd(const CallArgList& args)
 {
     return callCdecl(args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callFast(std::list<NumVariant> args)
+NumVariant TypedVarFunction::callFast(const CallArgList& args)
 {
     NOT_IMPLEMENTED();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callX64(std::list<NumVariant> args)
+NumVariant TypedVarFunction::callX64(const CallArgList& args)
 {
+    CPUContextAutoRestore  cpuContext;
+
     if ( args.size() < 4 )
     {
         setStackOffset( getStackOffset() - 8 * ( 4 - args.size() ) );
     }
 
     int i = args.size() - 1;
-    for ( std::list<NumVariant>::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
+    for ( CallArgList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
     {
-        pushInStack(*it);
+        it->pushInStack();
 
         switch(i)
         {
         case 0:
-            if (it->isInteger() )
-                setRegisterByName(L"rcx", *it);
+            if ( !it->isFloat() )
+                it->saveToRegister(L"rcx");
             else
                 NOT_IMPLEMENTED();
             break;
 
         case 1:
-            if (it->isInteger() )
-                setRegisterByName(L"rdx", *it);
+            if ( !it->isFloat() )
+                it->saveToRegister(L"rdx");
             else
                 NOT_IMPLEMENTED();
             break;
 
         case 2:
-            if (it->isInteger() )
-                setRegisterByName(L"r8", *it);
+            if ( !it->isFloat() )
+                it->saveToRegister(L"r8");
             else
                 NOT_IMPLEMENTED();
             break;
 
         case 3:
-            if (it->isInteger() )
-                setRegisterByName(L"r9", *it);
+            if ( !it->isFloat() )
+                it->saveToRegister(L"r9");
             else
                 NOT_IMPLEMENTED();
             break;

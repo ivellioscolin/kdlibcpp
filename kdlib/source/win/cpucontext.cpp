@@ -260,6 +260,20 @@ void popFromStack(NumVariant& value)
     NOT_IMPLEMENTED();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void CallArg::pushInStack() const
+{
+    writeBytes(stackAlloc(m_rawBuffer.size()), m_rawBuffer);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CallArg::saveToRegister(const std::wstring& regName) const
+{
+    unsigned long   regIndex  = getRegsiterIndex(regName);
+    setRegisterValue(regIndex,const_cast<unsigned char*>(&m_rawBuffer[0]), m_rawBuffer.size() );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

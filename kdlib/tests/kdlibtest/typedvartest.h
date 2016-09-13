@@ -329,6 +329,29 @@ TEST_F(TypedVarTest, FunctionCall)
     //EXPECT_DOUBLE_EQ( -2.9 + 13.1, funcptr->call(2, -2.9, 13.1).asDouble() );
 }
 
+TEST_F(TypedVarTest, FunctionCallWithArgList)
+{
+    TypedVarPtr funcptr;
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncReturn" ) );
+    EXPECT_EQ( 5 + 5, funcptr->call( { 5, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress() ) } ) );
+    EXPECT_EQ( 100500 + 5, funcptr->call( { 100500, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress() ) } ) );
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncLong" ) );
+    CallArgList  args = { 0x100000000ULL };
+    EXPECT_EQ( 0x100000000ULL + 5, funcptr->call(args) );
+    args = { 10ULL };
+    EXPECT_EQ( 10 + 5, funcptr->call(args));
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncRet" ) );
+    EXPECT_EQ( 100/2, funcptr->call( { 2, 100 } ) );
+    EXPECT_EQ( 300/3, funcptr->call( { 3, 300 } ) );
+
+    ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncLong" ) );
+    EXPECT_EQ( 0x100000001 & 1, funcptr->call( { 0x100000001, 1ULL } ) );
+    EXPECT_EQ( 2 & 0xF, funcptr->call( { 2ULL, 0xFULL } ) );
+}
+
 TEST_F(TypedVarTest, CustomDefineFunctionCall)
 {
     TypeInfoPtr  FuncType;

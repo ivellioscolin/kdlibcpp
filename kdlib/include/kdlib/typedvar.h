@@ -25,6 +25,57 @@ typedef boost::shared_ptr<StackFrame>  StackFramePtr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class CallArg
+{
+public:
+
+    template<typename T>
+    CallArg(const T& arg)
+    {
+        const char *begin = reinterpret_cast<const char*>(&arg);
+        const char *end = begin + sizeof(T);
+        m_isFloat = false;
+        m_rawBuffer.insert(m_rawBuffer.begin(), begin, end);
+    }
+
+    CallArg(float& arg)
+    {
+        const char *begin = reinterpret_cast<const char*>(&arg);
+        const char *end = begin + sizeof(float);
+        m_isFloat = true;
+        m_rawBuffer.insert(m_rawBuffer.begin(), begin, end);
+    }
+
+    CallArg(double& arg)
+    {
+        const char *begin = reinterpret_cast<const char*>(&arg);
+        const char *end = begin + sizeof(double);
+        m_isFloat = true;
+        m_rawBuffer.insert(m_rawBuffer.begin(), begin, end);
+    }
+    
+    size_t size() const {
+        return m_rawBuffer.size();
+    }
+
+    void pushInStack() const;
+
+    void saveToRegister(const std::wstring& regName) const;
+
+    bool isFloat() const {
+        return m_isFloat;
+    }
+
+private:
+
+    bool  m_isFloat;
+    std::vector<unsigned char>  m_rawBuffer;
+};
+
+typedef std::list<CallArg>   CallArgList;
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr loadTypedVar( const std::wstring &varName );
 
 TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 addr );
@@ -92,6 +143,7 @@ public:
     virtual TypedVarPtr castTo(const std::wstring& typeName) = 0;
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) = 0;
     virtual NumVariant call( int numArgs, ... ) = 0;
+    virtual NumVariant call(const CallArgList& arglst) = 0;
 
 protected:
 

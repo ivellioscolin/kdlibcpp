@@ -145,6 +145,11 @@ protected:
         throw TypeException( L"is not a function" );
     }
 
+    virtual NumVariant call(const CallArgList& arglst) 
+    {
+        throw TypeException( L" is not a function");
+    }
+
 protected:
 
     TypedVarImp( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
@@ -336,12 +341,14 @@ public:
 
     virtual NumVariant call( int numArgs, ... );
 
+    virtual NumVariant call( const CallArgList& arglst) ;
+
 protected:
 
-    NumVariant callCdecl(std::list<NumVariant> args);
-    NumVariant callStd(std::list<NumVariant> args);
-    NumVariant callFast(std::list<NumVariant> args);
-    NumVariant callX64(std::list<NumVariant> args);
+    NumVariant callCdecl(const CallArgList& arglst);
+    NumVariant callStd(const CallArgList& arglst);
+    NumVariant callFast(const CallArgList& arglst);
+    NumVariant callX64(const CallArgList& arglst);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

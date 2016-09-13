@@ -15,7 +15,7 @@
 #include "cputest.h"
 #include "stacktest.h"
 #include "disasmtest.h"
-//#include "targettest.h"
+#include "targettest.h"
 #include "winapitest.h"
 
 class Environment : public ::testing::Environment {
