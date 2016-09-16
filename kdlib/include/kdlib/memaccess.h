@@ -75,6 +75,9 @@ std::wstring loadWChars( MEMOFFSET_64 offset, unsigned long  number, bool phyAdd
 std::string loadCStr( MEMOFFSET_64 offset );
 std::wstring loadWStr( MEMOFFSET_64 offset );
 
+void writeCStr( MEMOFFSET_64 offset, const std::string& str);
+void writeWStr( MEMOFFSET_64 offset, const std::wstring& str);
+
 MEMOFFSET_64 ptrPtr( MEMOFFSET_64 offset, size_t psize = 0 );
 std::vector<MEMOFFSET_64> loadPtrs( MEMOFFSET_64 offset, unsigned long count, size_t psize = 0 );
 std::vector<MEMOFFSET_64> loadPtrList( MEMOFFSET_64 offset, size_t psize = 0 );

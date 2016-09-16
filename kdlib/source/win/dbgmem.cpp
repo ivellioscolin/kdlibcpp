@@ -236,6 +236,20 @@ std::wstring loadWStr( MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void writeCStr( MEMOFFSET_64 offset, const std::string& str)
+{
+   writeMemory( offset, str.c_str(), str.size() + 1 );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void writeWStr( MEMOFFSET_64 offset, const std::wstring& str)
+{
+   writeMemory( offset, str.c_str(), sizeof(wchar_t)*( str.size() + 1 ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const std::vector<char>& pattern )
 {
     if ( pattern.empty() )
