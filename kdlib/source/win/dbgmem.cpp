@@ -194,7 +194,7 @@ std::string loadCStr( MEMOFFSET_64 offset )
     if ( FAILED( hres ) )
         throw MemoryException( offset );
                            
-    return std::string( &buffer[0] );
+    return std::string( &buffer[0], buffer.size() - 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -205,7 +205,7 @@ std::wstring loadWStr( MEMOFFSET_64 offset )
  
     offset = addr64( offset );
 
-    ULONG   strLength = 0;
+    ULONG   strBytes = 0;
 
     HRESULT     hres = 
         g_dbgMgr->dataspace->ReadUnicodeStringVirtualWide(
@@ -213,25 +213,25 @@ std::wstring loadWStr( MEMOFFSET_64 offset )
             maxLength,
             NULL,
             0,
-            &strLength );
+            &strBytes );
 
     if ( FAILED( hres ) )
         throw MemoryException( offset );
 
-    std::vector<wchar_t>  buffer(strLength);
+    std::vector<wchar_t>  buffer(strBytes/sizeof(wchar_t));
         
     hres = 
         g_dbgMgr->dataspace->ReadUnicodeStringVirtualWide(
             offset,
-            strLength,
+            strBytes,
             &buffer[0],
-            strLength,
+            static_cast<ULONG>(buffer.size()),
             NULL );
     
     if ( FAILED( hres ) )
         throw MemoryException( offset );
-                           
-    return std::wstring( &buffer[0] );
+
+     return std::wstring( &buffer[0], buffer.size() - 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
