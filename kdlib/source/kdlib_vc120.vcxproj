@@ -207,7 +207,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <NuGetPackageImportStamp>2818977a</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>76638a94</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
@@ -399,6 +399,8 @@
     <Import Project="..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets" Condition="Exists('..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets')" />
     <Import Project="..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets" Condition="Exists('..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets')" />
     <Import Project="..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets" Condition="Exists('..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets')" />
+    <Import Project="..\..\packages\clang.3.9.0\build\native\clang.targets" Condition="Exists('..\..\packages\clang.3.9.0\build\native\clang.targets')" />
+    <Import Project="..\..\packages\llvm.3.9.0\build\native\llvm.targets" Condition="Exists('..\..\packages\llvm.3.9.0\build\native\llvm.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -412,5 +414,7 @@
     <Error Condition="!Exists('..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets'))" />
     <Error Condition="!Exists('..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets'))" />
     <Error Condition="!Exists('..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets'))" />
+    <Error Condition="!Exists('..\..\packages\clang.3.9.0\build\native\clang.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\clang.3.9.0\build\native\clang.targets'))" />
+    <Error Condition="!Exists('..\..\packages\llvm.3.9.0\build\native\llvm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\llvm.3.9.0\build\native\llvm.targets'))" />
   </Target>
 </Project>
