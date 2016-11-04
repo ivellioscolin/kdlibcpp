@@ -286,11 +286,11 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
         break;
 
     case SymTagFunction:
-        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol->getType() ) );
+        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol ) );
         break;
 
     case SymTagFunctionType:
-        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol ) );
+        ptr = TypeInfoPtr( new TypeInfoSymbolFunctionPrototype( symbol ) );
         break;
 
     case SymTagTypedef:
@@ -808,6 +808,33 @@ bool TypeInfoFields::isVirtualMember( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool TypeInfoFields::isMethodMember( const std::wstring &name )
+{
+    checkFields();
+
+    size_t  pos = name.find_first_of( L'.');
+
+    TypeFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
+
+    if ( pos == std::wstring::npos )
+        return fieldPtr->isMethod();
+
+    TypeInfoPtr  fieldType = fieldPtr->getTypeInfo();
+
+    return fieldType->isMethodMember( std::wstring( name, pos + 1 ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoFields::isMethodMember( size_t index )
+{
+    checkFields();
+
+    return m_fields.lookup( index )->isMethod();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 size_t TypeInfoFields::getAlignReq()
 {
     size_t alignReq = 1;
@@ -942,6 +969,22 @@ void TypeInfoUdt::getFields(
 
             m_fields.push_back( fieldPtr );
         }
+        else
+        if ( symTag == SymTagFunction)
+        {
+            TypeFieldPtr  fieldPtr;
+
+            if ( baseVirtualSym )
+            {
+                fieldPtr = SymbolUdtField::getVirtualMethodField( childSym, childSym->getName() );
+            }
+            else
+            {
+                fieldPtr = SymbolUdtField::getMethodField( childSym, childSym->getName() );
+            }
+
+            m_fields.push_back( fieldPtr );
+        }
     }  
 }
 
@@ -1016,7 +1059,7 @@ void TypeInfoEnum::getFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoSymbolFunction::TypeInfoSymbolFunction( SymbolPtr& symbol ) :
+TypeInfoSymbolFunctionPrototype::TypeInfoSymbolFunctionPrototype( SymbolPtr& symbol ) :
     m_symbol(symbol),
     m_hasThis(false)
 {
@@ -1040,7 +1083,7 @@ TypeInfoSymbolFunction::TypeInfoSymbolFunction( SymbolPtr& symbol ) :
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring TypeInfoFunction::getName()
+std::wstring TypeInfoFunctionPrototype::getName()
 {
     std::pair<std::wstring, std::wstring> splittedName = splitName();
     return splittedName.first + splittedName.second;
@@ -1048,7 +1091,7 @@ std::wstring TypeInfoFunction::getName()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
+std::pair<std::wstring, std::wstring> TypeInfoFunctionPrototype::splitName()
 {
     std::pair<std::wstring, std::wstring> splittedName;
 
@@ -1145,7 +1188,7 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoSymbolFunction::getElement( size_t index )
+TypeInfoPtr TypeInfoSymbolFunctionPrototype::getElement( size_t index )
 {
     if ( index >= m_args.size() )
         throw IndexException( index );
@@ -1154,21 +1197,21 @@ TypeInfoPtr TypeInfoSymbolFunction::getElement( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CallingConventionType TypeInfoSymbolFunction::getCallingConvention()
+CallingConventionType TypeInfoSymbolFunctionPrototype::getCallingConvention()
 {
     return static_cast< CallingConventionType >( m_symbol->getCallingConvention() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoSymbolFunction::getReturnType()
+TypeInfoPtr TypeInfoSymbolFunctionPrototype::getReturnType()
 {
     return loadType(m_symbol->getType());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoSymbolFunction::getClassParent()
+TypeInfoPtr TypeInfoSymbolFunctionPrototype::getClassParent()
 {
     try 
     {

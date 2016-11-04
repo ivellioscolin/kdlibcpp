@@ -81,6 +81,9 @@ public:
     virtual bool isVirtualMember( const std::wstring &name ) = 0;
     virtual bool isVirtualMember( size_t index ) = 0;
 
+    virtual bool isMethodMember( const std::wstring &name ) = 0;
+    virtual bool isMethodMember( size_t index ) = 0;
+
     virtual NumVariant getValue() const = 0;
 
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;

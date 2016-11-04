@@ -162,6 +162,14 @@ protected:
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
+    virtual bool isMethodMember( const std::wstring &name ) {
+        throw TypeException( getName(), L"type is not a struct" ); 
+    }
+
+    virtual bool isMethodMember( size_t index ) {
+        throw TypeException( getName(), L"type is not a struct" ); 
+    }
+
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
@@ -256,6 +264,8 @@ protected:
     virtual bool isStaticMember( size_t index );
     virtual bool isVirtualMember( const std::wstring &name );
     virtual bool isVirtualMember( size_t index );
+    virtual bool isMethodMember( const std::wstring &name );
+    virtual bool isMethodMember( size_t index );
 
     virtual size_t getAlignReq();
 
@@ -375,7 +385,7 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoFunction : public TypeInfoImp
+class TypeInfoFunctionPrototype : public TypeInfoImp
 {
 
 public:
@@ -418,11 +428,11 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 
 
-class TypeInfoSymbolFunction : public TypeInfoFunction
+class TypeInfoSymbolFunctionPrototype : public TypeInfoFunctionPrototype
 {
 public:
 
-    TypeInfoSymbolFunction( SymbolPtr& symbol );
+    TypeInfoSymbolFunctionPrototype( SymbolPtr& symbol );
 
 protected:
 
@@ -458,6 +468,35 @@ private:
     SymbolPtr m_symbol;
 
     bool m_hasThis;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoSymbolFunction : public TypeInfoSymbolFunctionPrototype
+{
+public:
+
+    TypeInfoSymbolFunction(const SymbolPtr& symbol) :
+        TypeInfoSymbolFunctionPrototype(symbol->getType()),
+        m_symbol(symbol)
+    {}
+
+    virtual NumVariant getValue() const 
+    {
+        try 
+        {
+            return m_symbol->getVa();
+        }
+        catch(SymbolException&)
+        {}
+
+        throw TypeException(L"function has no body");
+    }
+
+private:
+
+    SymbolPtr m_symbol;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

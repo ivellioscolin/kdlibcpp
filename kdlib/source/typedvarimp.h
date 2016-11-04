@@ -221,6 +221,10 @@ protected:
         return m_typeInfo->getElementName( index );
     }
 
+    size_t getElementIndex(const std::wstring&  elementName) {
+        return m_typeInfo->getElementIndex(elementName);
+    }
+
     MEMDISPLACEMENT getVirtualBaseDisplacement( const std::wstring &fieldName );
     MEMDISPLACEMENT getVirtualBaseDisplacement( size_t index );
 
@@ -422,6 +426,25 @@ protected:
     MEMOFFSET_64 getDebugXImpl(SymTags symTag) const;
 
     SymbolPtr  m_symbol;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypedVarMethodBound : public TypedVarFunction
+{
+
+public:
+
+    TypedVarMethodBound(
+        const TypeInfoPtr& prototype,
+        const DataAccessorPtr &dataSource, 
+        const std::wstring& name, 
+        MEMOFFSET_64 thisValue);
+
+private:
+
+    MEMOFFSET_64   m_this;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

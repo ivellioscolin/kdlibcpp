@@ -12,6 +12,7 @@
 #include <windows.h>
 
 #include "test/testfunc.h"
+#include "test/testvars.h"
 
 int breakOnRun();
 int breakpointTestRun();
@@ -24,6 +25,8 @@ void __cdecl sleepThread(void*);
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+    g_classChild.childMethod();
+
     if ( argc <= 1 )
     {
         return breakOnRun();

@@ -182,8 +182,11 @@ std::list<int> StdListCreator()
 
 std::list<int>  g_stdList = StdListCreator();
 
-
-
-
 void VariadicFunc(int, ...);
 volatile decltype(&VariadicFunc) g_variadicFuncPtr = &VariadicFunc;
+
+namespace testspace {
+
+testClass1  g_testClass;
+
+}

@@ -215,7 +215,10 @@ public:
     int m_childField2;
     structTest m_childField3;
     enumType m_enumField;
-    void childMethod() const {}
+    void childMethod() const {
+        static int a = 10;
+        a++;
+    }
     virtual void virtMethod1() {}
     virtual void virtMethod2() {}
 
@@ -287,6 +290,39 @@ extern listEntry deadlockEntry;
 
 extern std::string  g_stdString;
 extern std::wstring  g_stdWString;
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace testspace {
+
+
+class testClass1 {
+
+public:
+
+    class nestedClass {
+    public:
+        nestedClass() : m_member(100500) {}
+
+        int getMember() const {
+            return m_member;
+        }
+
+    private:
+        int  m_member;
+    };
+
+
+private:
+
+    nestedClass  m_nestedMember;
+
+};
+
+extern  testClass1  g_testClass;
+
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

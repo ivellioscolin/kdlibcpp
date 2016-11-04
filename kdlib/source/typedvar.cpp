@@ -434,24 +434,46 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 {
     TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
 
-    if ( m_typeInfo->isStaticMember(fieldName) )
+    if ( m_typeInfo->isMethodMember(fieldName) )
     {
-        MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
+        MEMOFFSET_64  funcStart = 0;
+        try {
+            funcStart = fieldType->getValue().asULongLong();
+        }
+        catch(TypeException&)
+        {}
+         
+        MEMOFFSET_64  thisValue = m_varData->getAddress();
 
-        //if ( staticOffset == 0 )
-        //   NOT_IMPLEMENTED();
+        std::wstring  name = m_typeInfo->getName();
+        name += L"::";
+        name += fieldName;
 
-        return  loadTypedVar( fieldType, staticOffset );
+        return TypedVarPtr( new TypedVarMethodBound(fieldType, getMemoryAccessor(funcStart, 0 ), name, thisValue ) );;
+    }
+    else
+    {
+        if ( m_typeInfo->isStaticMember(fieldName) )
+        {
+            MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
+
+            //if ( staticOffset == 0 )
+            //   NOT_IMPLEMENTED();
+
+            return  loadTypedVar( fieldType, staticOffset );
+        }
+
+        MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
+
+        if ( m_typeInfo->isVirtualMember( fieldName ) )
+        {
+            fieldOffset += getVirtualBaseDisplacement( fieldName );
+        }
+
+        return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
     }
 
-    MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
-
-    if ( m_typeInfo->isVirtualMember( fieldName ) )
-    {
-        fieldOffset += getVirtualBaseDisplacement( fieldName );
-    }
-
-    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+    throw TypeException(L"unknown member type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1212,6 +1234,18 @@ std::wstring TypedVarVtbl::str()
     }
 
     return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarMethodBound::TypedVarMethodBound( 
+    const TypeInfoPtr& typeInfo,
+    const DataAccessorPtr &dataSource, 
+    const std::wstring& name, 
+    MEMOFFSET_64 m_thisvalue) :
+        TypedVarFunction( typeInfo, dataSource, name),
+        m_this( m_thisvalue )
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////

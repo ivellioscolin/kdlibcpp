@@ -205,10 +205,11 @@ TEST_F( TypedVarTest, VirtualMember )
 
     ASSERT_NO_THROW( var = loadTypedVar(L"g_virtChild") );
     EXPECT_EQ( -100, *var->getElement(L"m_baseField") );
-    EXPECT_EQ( -100, *var->getElement(5) );
+  
+    EXPECT_EQ( -100, *var->getElement( var->getElementIndex(L"m_baseField") ));
 
     ASSERT_NO_THROW( var = loadTypedVar(L"g_classChild") );
-    EXPECT_EQ( g_classChild.m_staticField, *var->getElement(6) );
+    EXPECT_EQ( g_classChild.m_staticField, *var->getElement( var->getElementIndex(L"m_staticField") ) );
 }
 
 TEST_F( TypedVarTest, LoadTypedVarList )
@@ -283,10 +284,10 @@ TEST_F( TypedVarTest, FunctionDebugRange )
 TEST_F(TypedVarTest, getVTBL)
 {
     TypedVarPtr  vtbl;
-    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
+    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(0x0b)->deref());
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod3"));
 
-    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(4)->deref());
+    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(0x13)->deref());
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod1"));
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(1)).find(L"virtMethod2"));
 }
@@ -361,4 +362,26 @@ TEST_F(TypedVarTest, CustomDefineFunctionCall)
 
     TypedVarPtr  funcPtr;
     ASSERT_NO_THROW( funcPtr = loadTypedVar(FuncType, 0x10000) );
+}
+
+TEST_F(TypedVarTest, GetMethod)
+{
+    TypedVarPtr  g_classChild;
+    TypedVarPtr  childMethod;
+
+    ASSERT_NO_THROW( g_classChild = loadTypedVar( L"g_classChild" ) );
+    ASSERT_NO_THROW( childMethod = g_classChild->getElement( L"childMethod") );
+
+    EXPECT_EQ( L"classChild::childMethod", childMethod->getName() );
+    EXPECT_EQ( childMethod->getAddress(), loadTypedVar( childMethod->getName() )->getAddress() );
+}
+
+TEST_F(TypedVarTest, Namespace)
+{
+    TypedVarPtr  g_testClass;
+    EXPECT_THROW( g_testClass = loadTypedVar(L"g_testClass"), SymbolException );
+    ASSERT_NO_THROW( g_testClass = loadTypedVar(L"testspace::g_testClass"));
+
+    EXPECT_EQ( L"testspace::testClass1::nestedClass::getMember", g_testClass->getElement(L"m_nestedMember")->getElement(L"getMember")->getName());
+
 }
