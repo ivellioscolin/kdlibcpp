@@ -383,5 +383,15 @@ TEST_F(TypedVarTest, Namespace)
     ASSERT_NO_THROW( g_testClass = loadTypedVar(L"testspace::g_testClass"));
 
     EXPECT_EQ( L"testspace::testClass1::nestedClass::getMember", g_testClass->getElement(L"m_nestedMember")->getElement(L"getMember")->getName());
+}
 
+TEST_F(TypedVarTest, CallMethod)
+{
+    TypedVarPtr  g_classChild;
+    TypedVarPtr  childMethod;
+
+    ASSERT_NO_THROW( g_classChild = loadTypedVar( L"g_classChild" ) );
+    ASSERT_NO_THROW( childMethod = loadTypedVar( L"classChild::childMethod" ) );
+
+    EXPECT_EQ( 100*5, childMethod->call( { reinterpret_cast<void*>(g_classChild->getAddress()), 100 } ) );
 }

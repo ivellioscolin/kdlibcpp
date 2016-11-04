@@ -25,7 +25,7 @@ void __cdecl sleepThread(void*);
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-    g_classChild.childMethod();
+    g_classChild.childMethod(10);
 
     if ( argc <= 1 )
     {

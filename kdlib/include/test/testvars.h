@@ -215,9 +215,10 @@ public:
     int m_childField2;
     structTest m_childField3;
     enumType m_enumField;
-    void childMethod() const {
+    int childMethod(int var) const {
         static int a = 10;
         a++;
+        return var * 5;
     }
     virtual void virtMethod1() {}
     virtual void virtMethod2() {}

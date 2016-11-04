@@ -815,6 +815,10 @@ NumVariant TypedVarFunction::call( const CallArgList& arglst)
                     retVal = callFast(arglst);
                     break;
 
+                case CallConv_ThisCall:
+                    retVal = callThis(arglst);
+                    break;
+
                 default:
                     throw TypeException(L"unsupported calling convention");
             }
@@ -968,6 +972,60 @@ NumVariant TypedVarFunction::callStd(const CallArgList& args)
 NumVariant TypedVarFunction::callFast(const CallArgList& args)
 {
     NOT_IMPLEMENTED();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant TypedVarFunction::callThis(const CallArgList& args)
+{
+    CPUContextAutoRestore  cpuContext;
+
+    for ( CallArgList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it)
+    {
+        if ( it != std::prev(args.rend()) )
+        {
+            it->pushInStack();
+        }
+    }
+
+    if ( args.size() > 0 )
+        args.front().saveToRegister(L"ecx");
+
+    pushInStack( static_cast<unsigned long>(getInstructionOffset()));
+
+    setInstructionOffset( getAddress() );
+
+    targetStepOut();
+
+    TypeInfoPtr  retType =  m_typeInfo->getReturnType();
+
+    if (retType->isBase() )
+    {
+        if ( retType->getName() == L"Float" )
+        {
+            NOT_IMPLEMENTED();
+        }
+        else 
+        if ( retType->getName() == L"Double" )
+        {
+            NOT_IMPLEMENTED();
+        }
+        else
+        {
+            if ( retType->getSize() == 8 )
+            {
+                return getReturnReg();
+            }
+
+            return static_cast<unsigned long>(getReturnReg());
+        }
+    }
+    else if ( retType->isPointer() )
+    {
+        return static_cast<unsigned long>(getReturnReg());
+    }
+
+    throw "unsupported return type";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
