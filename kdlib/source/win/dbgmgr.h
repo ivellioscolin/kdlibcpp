@@ -61,6 +61,20 @@ private:
     bool                        m_remote;
     bool                        m_quietNotification;
 
+    template< class T >
+    bool QueryInterface_Case(
+        _In_ REFIID InterfaceId,
+        _Out_ PVOID* Interface
+        )
+    {
+        if (!IsEqualIID(InterfaceId, __uuidof(T)))
+            return false;
+
+        *reinterpret_cast<T**>(Interface) = this;
+        AddRef();
+        return true;
+    }
+
 public:
 
     STDMETHOD_(ULONG, AddRef)() { return 1; }
@@ -74,19 +88,24 @@ public:
     {
         *Interface = NULL;
 
-        if (IsEqualIID(InterfaceId, __uuidof(IUnknown)) ||
-            IsEqualIID(InterfaceId, __uuidof(IDebugEventCallbacksWide)) ||
-            IsEqualIID(InterfaceId, __uuidof(IDebugOutputCallbacksWide)) ||
-            IsEqualIID(InterfaceId, __uuidof(IDebugInputCallbacks)) )
+//        if (QueryInterface_Case<IUnknown>(InterfaceId, Interface))
+//            return S_OK;
+        // error C2594: '=' : ambiguous conversions from 'kdlib::DebugManager *' to 'IUnknown *'
+        if (IsEqualIID(InterfaceId, __uuidof(IUnknown)))
         {
             *Interface = this;
             AddRef();
             return S_OK;
         }
-        else
-        {
-            return E_NOINTERFACE;
-        }
+
+        if (QueryInterface_Case<IDebugEventCallbacksWide>(InterfaceId, Interface))
+            return S_OK;
+        if (QueryInterface_Case<IDebugOutputCallbacksWide>(InterfaceId, Interface))
+            return S_OK;
+        if (QueryInterface_Case<IDebugInputCallbacks>(InterfaceId, Interface))
+            return S_OK;
+
+        return E_NOINTERFACE;
     }
 
     // IDebugEventCallbacks impls
