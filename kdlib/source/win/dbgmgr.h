@@ -61,7 +61,7 @@ private:
     bool                        m_remote;
     bool                        m_quietNotification;
 
-    template< class T >
+    template< class T, class TCast=T >
     bool QueryInterface_Case(
         _In_ REFIID InterfaceId,
         _Out_ PVOID* Interface
@@ -70,7 +70,7 @@ private:
         if (!IsEqualIID(InterfaceId, __uuidof(T)))
             return false;
 
-        *reinterpret_cast<T**>(Interface) = this;
+        *reinterpret_cast<TCast**>(Interface) = this;
         AddRef();
         return true;
     }
@@ -88,16 +88,8 @@ public:
     {
         *Interface = NULL;
 
-//        if (QueryInterface_Case<IUnknown>(InterfaceId, Interface))
-//            return S_OK;
-        // error C2594: '=' : ambiguous conversions from 'kdlib::DebugManager *' to 'IUnknown *'
-        if (IsEqualIID(InterfaceId, __uuidof(IUnknown)))
-        {
-            *Interface = this;
-            AddRef();
+        if (QueryInterface_Case<IUnknown, IDebugEventCallbacksWide>(InterfaceId, Interface))
             return S_OK;
-        }
-
         if (QueryInterface_Case<IDebugEventCallbacksWide>(InterfaceId, Interface))
             return S_OK;
         if (QueryInterface_Case<IDebugOutputCallbacksWide>(InterfaceId, Interface))
