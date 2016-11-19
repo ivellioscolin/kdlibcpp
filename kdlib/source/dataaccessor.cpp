@@ -34,10 +34,9 @@ DataAccessorPtr getVariantAccessor(const NumVariant& var)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr  getRegisterAccessor(const NumVariant& registerValue, const std::wstring& registerName)
+DataAccessorPtr  getRegisterAccessor(const std::wstring& registerName)
 {
-    return DataAccessorPtr(new RegisterAccessor(registerValue, registerName));
-
+    return DataAccessorPtr(new RegisterAccessor(registerName));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

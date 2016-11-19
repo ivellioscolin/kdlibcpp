@@ -105,7 +105,7 @@ TypedVarPtr StackFrameImpl::getTypedParam(unsigned long index)
     {
         unsigned long  regId = sym->getRegisterId();
 
-        return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterByIndex(regId), m_cpuContext->getRegisterName(regId)));
+        return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterName(regId)));
        // return loadTypedVar(loadType(sym), getVariantAccessor(m_cpuContext->getRegisterByIndex(regId)));
     }
     else if (location == LocIsRegRel)
@@ -160,7 +160,7 @@ TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
             {
                 unsigned long  regId = sym->getRegisterId();
 
-                return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterByIndex(regId), m_cpuContext->getRegisterName(regId)));
+                return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterName(regId)));
                 //return loadTypedVar(loadType(sym), getVariantAccessor(m_cpuContext->getRegisterByIndex(regId)));
             }
             else if (location == LocIsRegRel)
@@ -239,8 +239,8 @@ TypedVarPtr StackFrameImpl::getLocalVar(unsigned long index)
     {
         unsigned long  regId = sym->getRegisterId();
 
-        return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterByIndex(regId), m_cpuContext->getRegisterName(regId)));
-        //return loadTypedVar(loadType(sym), getVariantAccessor(m_cpuContext->getRegisterByIndex(regId)));
+        return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterName(regId)));
+
     }
     else if (location == LocIsRegRel)
     {
@@ -294,7 +294,7 @@ TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
             {
                 unsigned long  regId = sym->getRegisterId();
 
-                return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterByIndex(regId), m_cpuContext->getRegisterName(regId)));
+                return loadTypedVar(loadType(sym), getRegisterAccessor(m_cpuContext->getRegisterName(regId)));
                 //return loadTypedVar(loadType(sym), getVariantAccessor(m_cpuContext->getRegisterByIndex(regId)));
             }
             else if (location == LocIsRegRel)

@@ -1626,6 +1626,54 @@ std::wstring getRegisterName( unsigned long index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t getRegisterSize(unsigned long index)
+{
+    HRESULT  hres;
+
+    if ( index >= getRegisterNumber() )
+        throw IndexException(index);
+
+    DEBUG_VALUE  dbgvalue = {};
+    hres = g_dbgMgr->registers->GetValue(index,&dbgvalue);
+
+    switch ( dbgvalue.Type )
+    {
+    case DEBUG_VALUE_INT8: 
+        return sizeof(unsigned char);
+
+    case DEBUG_VALUE_INT16: 
+        return sizeof(unsigned short);
+
+    case DEBUG_VALUE_INT32: 
+        return sizeof(unsigned long);
+
+    case DEBUG_VALUE_INT64: 
+        return sizeof(unsigned long long);
+
+    case DEBUG_VALUE_FLOAT32: 
+        return sizeof(float);
+
+    case DEBUG_VALUE_FLOAT64: 
+        return sizeof(double);
+
+    case DEBUG_VALUE_FLOAT80:
+        return sizeof(dbgvalue.F80Bytes);
+
+    case DEBUG_VALUE_FLOAT128:
+        return sizeof(dbgvalue.F128Bytes);
+
+    case DEBUG_VALUE_VECTOR64:
+        return sizeof(dbgvalue.VI64);
+
+    case DEBUG_VALUE_VECTOR128:
+        return  2*sizeof(dbgvalue.VI64);
+    }
+
+    throw DbgException( "Unknown regsiter type" ); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
 {
     HRESULT  hres;
