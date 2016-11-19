@@ -407,8 +407,8 @@ private:
     {
         if ( count > m_length - pos )
             throw DbgException("memory accessor range error");
-
-        dataRange = loadBytes(m_begin + pos, count);
+ 
+        dataRange = loadBytes(m_begin + pos, static_cast<unsigned long>(count) );
     }
 
     virtual void writeBytes( const std::vector<unsigned char>&  dataRange, size_t pos=0) 
@@ -423,7 +423,7 @@ private:
         if ( count > m_length / sizeof(unsigned short) - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadWords(m_begin + pos* sizeof(unsigned short), count);
+        dataRange = loadWords(m_begin + pos* sizeof(unsigned short), static_cast<unsigned long>(count) );
     }
 
     virtual void writeWords( const std::vector<unsigned short>&  dataRange, size_t pos=0) 
@@ -439,7 +439,7 @@ private:
         if ( count > m_length / sizeof(unsigned long) - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadDWords(m_begin + pos* sizeof(unsigned long), count);
+        dataRange = loadDWords(m_begin + pos* sizeof(unsigned long), static_cast<unsigned long>(count) );
     }
 
     virtual void writeDWords( const std::vector<unsigned long>&  dataRange, size_t  pos=0)
@@ -455,7 +455,7 @@ private:
         if ( count > m_length / sizeof(unsigned long long) - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadQWords(m_begin + pos* sizeof(unsigned long long), count);
+        dataRange = loadQWords(m_begin + pos* sizeof(unsigned long long), static_cast<unsigned long>(count) );
     }
 
     virtual void writeQWords( const std::vector<unsigned long long>&  dataRange, size_t  pos=0)
@@ -471,7 +471,7 @@ private:
         if ( count > m_length - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadSignBytes(m_begin + pos* sizeof(char), count);
+        dataRange = loadSignBytes(m_begin + pos* sizeof(char), static_cast<unsigned long>(count) );
     }
 
     virtual void writeSignBytes( const std::vector<char>&  dataRange, size_t  pos=0)
@@ -487,7 +487,7 @@ private:
         if ( count > m_length / sizeof(short) - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadSignWords(m_begin + pos* sizeof(short), count);
+        dataRange = loadSignWords(m_begin + pos* sizeof(short), static_cast<unsigned long>(count) );
     }
 
     virtual void writeSignWords( const std::vector<short>&  dataRange, size_t  pos=0)
@@ -503,7 +503,7 @@ private:
         if ( count > m_length / sizeof(long) - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadSignDWords(m_begin + pos* sizeof(long), count);
+        dataRange = loadSignDWords(m_begin + pos* sizeof(long), static_cast<unsigned long>(count));
     }
 
     virtual void writeSignDWords( const std::vector<long>&  dataRange, size_t  pos=0)
@@ -519,7 +519,7 @@ private:
         if ( count > m_length / sizeof(long long) - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadSignQWords(m_begin + pos* sizeof(long long), count);
+        dataRange = loadSignQWords(m_begin + pos* sizeof(long long), static_cast<unsigned long>(count) );
     }
 
     virtual void writeSignQWords( const std::vector<long long>&  dataRange, size_t  pos=0)
@@ -535,7 +535,7 @@ private:
         if ( count > m_length / sizeof(float) - pos )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadFloats(m_begin + pos* sizeof(float), count);
+        dataRange = loadFloats(m_begin + pos* sizeof(float), static_cast<unsigned long>(count));
     }
 
     virtual void writeFloats( const std::vector<float>&  dataRange, size_t  pos=0) 
@@ -551,7 +551,7 @@ private:
         if ( count > m_length / sizeof(double) || pos > m_length / sizeof(double) - count )
             throw DbgException("memory accessor range error");
 
-        dataRange = loadDoubles(m_begin + pos* sizeof(double), count);
+        dataRange = loadDoubles(m_begin + pos* sizeof(double), static_cast<unsigned long>(count));
     }
 
     virtual void writeDoubles( const std::vector<double>&  dataRange, size_t  pos=0) 
@@ -796,7 +796,7 @@ public:
 
     virtual void writeBytes( const std::vector<unsigned char>&  dataRange, size_t pos=0) 
     {
-        writeValues<unsigned char>(dataRange, pos);
+       writeValues<unsigned char>(dataRange, pos);
     }
 
     virtual void readWords(std::vector<unsigned short>& dataRange, size_t count, size_t pos = 0) const
@@ -945,10 +945,10 @@ private:
         if ( dataRange.size() > regSize/sizeof(T) - pos )
             throw DbgException("register accessor range error");
 
-        std::vector<char>  regValue(regSize);
+        std::vector<T>  regValue(regSize/sizeof(T));
         kdlib::getRegisterValue(regIndex, &regValue[0], regSize);
 
-        std::copy( dataRange.begin(), dataRange.end(), reinterpret_cast<char*>(&regValue[pos*sizeof(T)]) );
+        std::copy( dataRange.begin(), dataRange.end(), regValue.begin() + pos );
 
         kdlib::setRegisterValue(regIndex, &regValue[0], regSize);
     }
