@@ -845,7 +845,7 @@ private:
 
         dataRange = std::vector<T>(
             reinterpret_cast<const T*>(&m_buffer[pos*sizeof(T)]), 
-            reinterpret_cast<const T*>(&m_buffer[(pos + count-1)*sizeof(T)]) );
+            reinterpret_cast<const T*>(&m_buffer[pos*sizeof(T)]) + count );
     }
 
     template <typename T>
@@ -1193,7 +1193,7 @@ private:
 
         dataRange = std::vector<T>(
             reinterpret_cast<T*>(&regValue[pos*sizeof(T)]), 
-            reinterpret_cast<T*>(&regValue[(pos + count - 1)*sizeof(T)]) );
+            reinterpret_cast<T*>(&regValue[pos*sizeof(T)]) + count );
     }
 
     template <typename T>
