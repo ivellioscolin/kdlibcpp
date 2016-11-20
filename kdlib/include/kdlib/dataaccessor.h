@@ -33,7 +33,7 @@ public:
     virtual void writeSignWord(short value, size_t pos=0) = 0;
 
     virtual unsigned long readDWord(size_t pos=0) const = 0;
-    virtual void writeDWord(unsigned long value, size_t pos) = 0;
+    virtual void writeDWord(unsigned long value, size_t pos=0) = 0;
 
     virtual long readSignDWord(size_t pos=0) const = 0;
     virtual void writeSignDWord(long value, size_t pos=0) = 0;
@@ -90,6 +90,7 @@ public:
 DataAccessorPtr  getEmptyAccessor();
 DataAccessorPtr getMemoryAccessor( MEMOFFSET_64  offset, size_t length);
 DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer);
+DataAccessorPtr getCacheAccessor(size_t bufferSize);
 //DataAccessorPtr getVariantAccessor(const NumVariant& var);
 DataAccessorPtr  getRegisterAccessor(const std::wstring& registerName);
 
