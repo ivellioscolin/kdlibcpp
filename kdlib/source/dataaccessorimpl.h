@@ -589,14 +589,269 @@ public:
         m_buffer(buffer)
     {}
 
+private:
+
     virtual size_t getLength() const
     {
         return m_buffer.size();
     }
 
+    virtual unsigned char readByte(size_t pos = 0) const
+    {
+        return getValue<unsigned char>(pos);
+    }
+
+    virtual void writeByte(unsigned char value, size_t pos=0) 
+    {
+        setValue<unsigned char>(value,pos);
+    }
+
+    virtual char readSignByte(size_t pos = 0) const
+    {
+        return getValue<char>(pos);
+    }
+
+    virtual void writeSignByte(char value, size_t pos=0) 
+    {
+        setValue<char>(value,pos);
+    }
+
+    virtual unsigned short readWord(size_t pos = 0) const
+    {
+        return getValue<unsigned short>(pos);
+    }
+
+    virtual void writeWord(unsigned short value, size_t pos=0) 
+    {
+        setValue<unsigned short>(value,pos);
+    }
+
+    virtual short readSignWord(size_t pos = 0) const
+    {
+        return getValue<short>(pos);
+    }
+
+    virtual void writeSignWord(short value, size_t pos=0)
+    {
+        setValue<short>(value,pos);
+    }
+
+    virtual unsigned long readDWord(size_t pos = 0) const
+    {
+        return getValue<unsigned long>(pos);
+    }
+
+    virtual void writeDWord(unsigned long value, size_t pos)
+    {
+        setValue<unsigned long>(value,pos);
+    }
+
+    virtual long readSignDWord(size_t pos = 0) const
+    {
+        return getValue<long>(pos);
+    }
+
+    virtual void writeSignDWord(long value, size_t pos=0) 
+    {
+        setValue<long>(value,pos);
+    }
+
+    virtual unsigned long long readQWord(size_t pos = 0) const
+    {
+        return getValue<unsigned long long>(pos);
+    }
+
+    virtual void writeQWord(unsigned long long value, size_t pos=0) 
+    {
+        setValue<unsigned long long>(value,pos);
+    }
+
+    virtual long long readSignQWord(size_t pos = 0) const
+    {
+        return getValue<long long>(pos);
+    }
+
+    virtual void writeSignQWord(long long value, size_t pos=0) 
+    {
+        setValue<long long>(value,pos);
+    }
+
+    virtual float readFloat(size_t pos = 0) const
+    {
+        return getValue<float>(pos);
+    }
+
+    virtual void writeFloat(float value, size_t pos=0)
+    {
+        setValue<float>(value,pos);
+    }
+
+    virtual double readDouble(size_t pos = 0) const
+    {
+        return getValue<double>(pos);
+    }
+
+    virtual void writeDouble(double value, size_t pos=0) 
+    {
+        setValue<double>(value,pos);
+    }
+
+    virtual void readBytes(std::vector<unsigned char>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<unsigned char>(dataRange, count, pos);
+    }
+
+    virtual void writeBytes( const std::vector<unsigned char>&  dataRange, size_t pos=0)
+    {
+        writeValues<unsigned char>(dataRange, pos);
+    }
+
+    virtual void readWords(std::vector<unsigned short>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<unsigned short>(dataRange, count, pos);
+    }
+
+    virtual void writeWords( const std::vector<unsigned short>&  dataRange, size_t pos=0)
+    {
+        writeValues<unsigned short>(dataRange, pos);
+    }
+
+    virtual void readDWords(std::vector<unsigned long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<unsigned long>(dataRange, count, pos);
+    }
+
+    virtual void writeDWords( const std::vector<unsigned long>&  dataRange, size_t  pos=0) 
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual void readQWords(std::vector<unsigned long long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<unsigned long long>(dataRange, count, pos);
+    }
+
+    virtual void writeQWords( const std::vector<unsigned long long>&  dataRange, size_t  pos=0) 
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual void readSignBytes(std::vector<char>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<char>(dataRange, count, pos);
+    }
+
+    virtual void writeSignBytes( const std::vector<char>&  dataRange, size_t  pos=0)
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual void readSignWords(std::vector<short>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<short>(dataRange, count, pos);
+    }
+
+    virtual void writeSignWords( const std::vector<short>&  dataRange, size_t  pos=0) 
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual void readSignDWords(std::vector<long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<long>(dataRange, count, pos);
+    }
+
+    virtual void writeSignDWords( const std::vector<long>&  dataRange, size_t  pos=0)
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual void readSignQWords(std::vector<long long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<long long>(dataRange, count, pos);
+    }
+
+    virtual void writeSignQWords( const std::vector<long long>&  dataRange, size_t  pos=0) 
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual void readFloats(std::vector<float>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<float>(dataRange, count, pos);
+    }
+
+    virtual void writeFloats( const std::vector<float>&  dataRange, size_t  pos=0) 
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual void readDoubles(std::vector<double>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues<double>(dataRange, count, pos);
+    }
+
+    virtual void writeDoubles( const std::vector<double>&  dataRange, size_t  pos=0) 
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual MEMOFFSET_64 getAddress() const
+    {
+        throw DbgException("data accessor no data");
+    }
+
+    virtual VarStorage getStorageType() const
+    {
+        return UnknownVar;
+    }
+
+    virtual std::wstring getRegisterName() const
+    {
+        throw DbgException("data accessor no data");
+    }
+
 private:
 
     std::vector<char>  m_buffer;
+
+    template <typename T>
+    T getValue(size_t pos) const
+    {
+        if ( pos >= m_buffer.size() / sizeof(T) )
+            throw DbgException("cache accessor range error");
+
+        return *reinterpret_cast<const T*>( &m_buffer[pos*sizeof(T)] );
+    }
+
+    template <typename T>
+    void setValue(T& value, size_t pos)
+    {
+        if ( pos >= m_buffer.size() / sizeof(T) )
+            throw DbgException("cache accessor range error");
+
+        *reinterpret_cast<T*>( &m_buffer[pos*sizeof(T)] ) = value;
+    }
+
+    template <typename T>
+    void readValues(std::vector<T>& dataRange, size_t count, size_t pos) const
+    {
+        if ( count > m_buffer.size() / sizeof(T)  - pos)
+            throw DbgException("cache accessor range error");
+
+        dataRange = std::vector<T>(
+            reinterpret_cast<const T*>(&m_buffer[pos*sizeof(T)]), 
+            reinterpret_cast<const T*>(&m_buffer[(pos + count)*sizeof(T)]) );
+    }
+
+    template <typename T>
+    void writeValues( const std::vector<T>&  dataRange, size_t pos) 
+    {
+        if ( dataRange.size() > m_buffer.size() / sizeof(T) - pos )
+            throw DbgException("cache accessor range error");
+
+        memcpy( &m_buffer[pos*sizeof(T)], &dataRange[0], dataRange.size()*sizeof(T) );
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
