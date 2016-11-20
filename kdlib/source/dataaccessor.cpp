@@ -20,13 +20,6 @@ DataAccessorPtr  getEmptyAccessor()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//DataAccessorPtr  getRegisterAccessor(unsigned long regId)
-//{
-//    return DataAccessorPtr(new RegisterAccessor(regId));
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
 DataAccessorPtr getVariantAccessor(const NumVariant& var)
 {
     return DataAccessorPtr(new VariantAccessor(var));
@@ -37,6 +30,20 @@ DataAccessorPtr getVariantAccessor(const NumVariant& var)
 DataAccessorPtr  getRegisterAccessor(const std::wstring& registerName)
 {
     return DataAccessorPtr(new RegisterAccessor(registerName));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+DataAccessorPtr getCacheAccessor(size_t bufferSize)
+{
+    return DataAccessorPtr(new CacheAccessor(bufferSize) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer)
+{
+    return DataAccessorPtr(new CacheAccessor(buffer) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

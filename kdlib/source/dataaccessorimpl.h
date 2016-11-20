@@ -589,6 +589,10 @@ public:
         m_buffer(buffer)
     {}
 
+    CacheAccessor(size_t size):
+        m_buffer(size)
+    {}
+
 private:
 
     virtual size_t getLength() const
@@ -841,7 +845,7 @@ private:
 
         dataRange = std::vector<T>(
             reinterpret_cast<const T*>(&m_buffer[pos*sizeof(T)]), 
-            reinterpret_cast<const T*>(&m_buffer[(pos + count)*sizeof(T)]) );
+            reinterpret_cast<const T*>(&m_buffer[(pos + count-1)*sizeof(T)]) );
     }
 
     template <typename T>
@@ -1189,7 +1193,7 @@ private:
 
         dataRange = std::vector<T>(
             reinterpret_cast<T*>(&regValue[pos*sizeof(T)]), 
-            reinterpret_cast<T*>(&regValue[(pos + count)*sizeof(T)]) );
+            reinterpret_cast<T*>(&regValue[(pos + count - 1)*sizeof(T)]) );
     }
 
     template <typename T>
