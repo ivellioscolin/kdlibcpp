@@ -27,6 +27,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
     g_classChild.childMethod(10);
 
+    g_stdString.find_first_of('S');
+
     if ( argc <= 1 )
     {
         return breakOnRun();
