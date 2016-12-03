@@ -357,6 +357,8 @@ protected:
     virtual TypeInfoPtr getClassParent();
 
     virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype=L"");
+    virtual TypeInfoPtr getMethod( size_t index );
+    virtual size_t getMethodsCount();
 
     virtual TypeInfoPtr getBaseClass( const std::wstring& className);
     virtual TypeInfoPtr getBaseClass( size_t index );

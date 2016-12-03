@@ -910,6 +910,26 @@ TypeInfoPtr  TypeInfoUdt::getMethod( const std::wstring &name, const std::wstrin
     throw TypeException(sstr.str() );
 }
 
+TypeInfoPtr TypeInfoUdt::getMethod(size_t index)
+{
+    SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
+
+    if ( index >= methods.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = methods.begin();
+    std::advance(it, index);
+    return loadType(*it);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoUdt::getMethodsCount()
+{
+     SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
+     return methods.size();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TypeInfoPtr TypeInfoUdt::getBaseClass( const std::wstring& className)
