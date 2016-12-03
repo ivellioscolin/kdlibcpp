@@ -45,6 +45,12 @@ double
 __fastcall
 FastcallFunc( int a, float b );
 
+bool
+OverloadedFunc(int a);
+
+bool
+OverloadedFunc(float a);
+
 class FuncTestClass
 {
 public:

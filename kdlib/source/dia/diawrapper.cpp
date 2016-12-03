@@ -738,6 +738,13 @@ bool DiaSymbol::isVirtualBaseClass()
 
 //////////////////////////////////////////////////////////////////////////////
 
+bool DiaSymbol::isVirtual()
+{
+    return !!callSymbol(get_virtual);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 SymbolPtr DiaSession::findByRva( ULONG rva, ULONG symTag, LONG* pdisplacement )
 {
     DiaSymbolPtr child;

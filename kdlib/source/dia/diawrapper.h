@@ -97,6 +97,8 @@ public:
 
     bool isVirtualBaseClass();
 
+    bool isVirtual();
+
     ULONG getBaseType();
 
     ULONG getBitPosition();

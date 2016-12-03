@@ -208,6 +208,11 @@ class ExportSymbolBase : public Symbol
         NOT_IMPLEMENTED();
     }
 
+    virtual bool isVirtual() 
+    {
+        NOT_IMPLEMENTED();
+    }
+
     virtual unsigned long getRegisterId()
     {
         NOT_IMPLEMENTED();

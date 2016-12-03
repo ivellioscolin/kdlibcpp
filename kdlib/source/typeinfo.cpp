@@ -808,30 +808,30 @@ bool TypeInfoFields::isVirtualMember( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool TypeInfoFields::isMethodMember( const std::wstring &name )
-{
-    checkFields();
-
-    size_t  pos = name.find_first_of( L'.');
-
-    TypeFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
-
-    if ( pos == std::wstring::npos )
-        return fieldPtr->isMethod();
-
-    TypeInfoPtr  fieldType = fieldPtr->getTypeInfo();
-
-    return fieldType->isMethodMember( std::wstring( name, pos + 1 ) );
-}
+//bool TypeInfoFields::isMethodMember( const std::wstring &name )
+//{
+//    checkFields();
+//
+//    size_t  pos = name.find_first_of( L'.');
+//
+//    TypeFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
+//
+//    if ( pos == std::wstring::npos )
+//        return fieldPtr->isMethod();
+//
+//    TypeInfoPtr  fieldType = fieldPtr->getTypeInfo();
+//
+//    return fieldType->isMethodMember( std::wstring( name, pos + 1 ) );
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool TypeInfoFields::isMethodMember( size_t index )
-{
-    checkFields();
-
-    return m_fields.lookup( index )->isMethod();
-}
+//bool TypeInfoFields::isMethodMember( size_t index )
+//{
+//    checkFields();
+//
+//    return m_fields.lookup( index )->isMethod();
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -882,6 +882,75 @@ std::wstring TypeInfoUdt::str()
 TypeInfoPtr TypeInfoUdt::getClassParent()
 {
     return loadType(m_symbol->getClassParent());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr  TypeInfoUdt::getMethod( const std::wstring &name, const std::wstring&  prototype)
+{
+    if ( !prototype.empty()  )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
+
+    for ( SymbolPtrList::iterator  it = methods.begin(); it != methods.end(); ++it )
+    {
+        SymbolPtr  method = *it;
+
+        std::wstring  methodName = method->getName();
+
+        if ( methodName == name )
+            return loadType(method);
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this method :" << name;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoUdt::getBaseClass( const std::wstring& className)
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+            return loadType(baseClass);
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoUdt::getBaseClass( size_t index )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    return loadType(*it);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoUdt::getBaseClassesCount()
+{
+    return m_symbol->getChildCount(SymTagBaseClass);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -969,22 +1038,7 @@ void TypeInfoUdt::getFields(
 
             m_fields.push_back( fieldPtr );
         }
-        else
-        if ( symTag == SymTagFunction)
-        {
-            TypeFieldPtr  fieldPtr;
 
-            if ( baseVirtualSym )
-            {
-                fieldPtr = SymbolUdtField::getVirtualMethodField( childSym, childSym->getName() );
-            }
-            else
-            {
-                fieldPtr = SymbolUdtField::getMethodField( childSym, childSym->getName() );
-            }
-
-            m_fields.push_back( fieldPtr );
-        }
     }  
 }
 
@@ -992,11 +1046,12 @@ void TypeInfoUdt::getFields(
 
 void TypeInfoUdt::getVirtualFields()
 {
-    size_t   childCount = m_symbol->getChildCount(SymTagBaseClass);
 
-    for ( unsigned long i = 0; i < childCount; ++i )
+    SymbolPtrList  baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  baseClass = baseClasses.begin(); baseClass != baseClasses.end(); ++baseClass)
     {
-        SymbolPtr  childSym = m_symbol->getChildByIndex( i );
+         SymbolPtr  childSym = *baseClass;
 
         if ( !childSym->isVirtualBaseClass() )
             continue;
@@ -1009,8 +1064,25 @@ void TypeInfoUdt::getVirtualFields()
             childSym->getVirtualBaseDispIndex(),
             childSym->getVirtualBaseDispSize() );
     }
-}
 
+    //size_t   childCount = m_symbol->getChildCount(SymTagBaseClass);
+
+    //for ( unsigned long i = 0; i < childCount; ++i )
+    //{
+    //    SymbolPtr  childSym = m_symbol->getChildByIndex( i );
+
+    //    if ( !childSym->isVirtualBaseClass() )
+    //        continue;
+
+    //    getFields( 
+    //        childSym,
+    //        childSym,
+    //        0,
+    //        childSym->getVirtualBasePointerOffset(),
+    //        childSym->getVirtualBaseDispIndex(),
+    //        childSym->getVirtualBaseDispSize() );
+    //}
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1257,6 +1329,7 @@ size_t TypeInfoVtbl::getElementCount()
 {
     return m_symbol->getCount();
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

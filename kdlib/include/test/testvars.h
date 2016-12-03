@@ -176,11 +176,19 @@ extern pstructAbstract g_structAbstract;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class classBase1 {
+class classProBase1  {
+
+public:
+
+    int proBaseMethod(long a) const { return a * 10; }
+
+};
+
+class classBase1 : public classProBase1 {
 public:
     int m_baseField;
-    void baseMethod() const {}
-    virtual void virtMethod1() =  0;
+    int baseMethod( long a) const { return proBaseMethod(a) + m_baseField; }
+    virtual int virtMethod1(int a) =  0;
     virtual void virtMethod2() =  0;
 
     classBase1() :
@@ -215,16 +223,22 @@ public:
     int m_childField2;
     structTest m_childField3;
     enumType m_enumField;
-    int childMethod(int var) const {
-        static int a = 10;
-        a++;
-        return var * 5;
+    int childMethod(int var) const{
+        baseMethod(33);
+        staticMethod(10,1);
+        return m_childField * 5;
     }
-    virtual void virtMethod1() {}
+    virtual int virtMethod1(int a) { return 1;}
+    
     virtual void virtMethod2() {}
 
+    static char staticMethod( int a, int b ) { return static_cast<char>(a/b); }
+
+    void noBodyFunc(int a);
+
     classChild() :
-        m_enumField( THREE )
+        m_enumField( THREE ),
+        m_childField(1000)
         {}
 };
 
@@ -235,35 +249,38 @@ extern classChild  g_classChild;
 
 class virtualBase1 : public virtual classBase1 {
 
+public:
+
     int     m_member;
 
-public:
     virtualBase1() : m_member(123){}
 
-    virtual void virtMethod1() {}
+    virtual int virtMethod1(int a) { return a * 10; }
     virtual void virtMethod2() {}
 };
 
 
 class virtualBase2 : public virtual classBase1
 {
+public:
+
     int     m_member;
 
-public:
     virtualBase2() : m_member(345){}
 
-    virtual void virtMethod1() {}
+    virtual int virtMethod1(int a) { return a / 10; }
 };
 
 class virtualChild : public virtualBase1, public  virtualBase2
 {
+public:
+
     int     m_member;
 
-    virtual void virtMethod1() {}
+    virtual int virtMethod1(int a) { return a + 101; }
     virtual void virtMethod2() {}
     virtual void virtMethod3() {}
 
-public:
     virtualChild() : m_member(678) {}
 };
 

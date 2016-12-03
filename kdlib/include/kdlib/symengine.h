@@ -197,6 +197,7 @@ public:
     virtual bool isConstant() = 0;
     virtual bool isIndirectVirtualBaseClass() = 0;
     virtual bool isVirtualBaseClass() = 0;
+    virtual bool isVirtual() = 0;
     virtual unsigned long getRegisterId() = 0;
     virtual unsigned long getRegRealativeId() = 0;  // <- RegRealativeId
     virtual SymbolPtr getObjectPointerType() = 0; // "this" for method

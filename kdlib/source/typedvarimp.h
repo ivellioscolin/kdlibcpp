@@ -126,6 +126,16 @@ protected:
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
+    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"")
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no methods");
+    }
+    
+    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no methods");
+    }
+
     virtual unsigned long getElementReg(const std::wstring& fieldName)
     {
         NOT_IMPLEMENTED();
@@ -140,12 +150,14 @@ protected:
 
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo);
 
-    virtual NumVariant call( int numArgs, ... ) 
+    virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const
     {
-        throw TypeException( L"is not a function" );
+        std::vector<unsigned char>  buffer;
+        m_varData->readBytes(buffer, m_varData->getLength() );
+        stream->writeBytes(buffer);
     }
 
-    virtual NumVariant call(const CallArgList& arglst) 
+    virtual TypedValue call(const TypedValueList& arglst)
     {
         throw TypeException( L" is not a function");
     }
@@ -230,7 +242,18 @@ protected:
 
     virtual std::wstring str();
 
+    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"");
+    
+    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    {
+        NOT_IMPLEMENTED();
+    }
+
    // std::wstring printFieldValue( const TypeInfoPtr& typeInfo, const TypedVarPtr& var );
+
+protected:
+
+    TypedVarPtr getMethodRecursive( const std::wstring& filedName, TypeInfoPtr&  baseClass );
 };
 
 
@@ -343,17 +366,19 @@ public:
 
     virtual std::wstring str();
 
-    virtual NumVariant call( int numArgs, ... );
-
-    virtual NumVariant call( const CallArgList& arglst) ;
+    virtual TypedValue call(const TypedValueList& arglst);
 
 protected:
 
-    NumVariant callCdecl(const CallArgList& arglst);
-    NumVariant callStd(const CallArgList& arglst);
-    NumVariant callFast(const CallArgList& arglst);
-    NumVariant callThis(const CallArgList& arglst);
-    NumVariant callX64(const CallArgList& arglst);
+    TypedValueList castArgs(const TypedValueList& arglst);
+    TypedValue castBaseArg(TypeInfoPtr&  destType, const TypedValue& arg);
+    TypedValue castPtrArg(TypeInfoPtr&  destType, const TypedValue& arg);
+
+    TypedValue callCdecl(const TypedValueList& arglst);
+    TypedValue callStd(const TypedValueList& arglst);
+    TypedValue callFast(const TypedValueList& arglst);
+    TypedValue callThis(const TypedValueList& arglst);
+    TypedValue callX64(const TypedValueList& arglst);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -376,7 +401,7 @@ public:
         return m_typeInfo->getElementCount();
     }
 
-    virtual  TypedVarPtr getElement(size_t index);
+    virtual TypedVarPtr getElement(size_t index);
 
     virtual std::wstring str(); 
 };
@@ -442,10 +467,23 @@ public:
         const std::wstring& name, 
         MEMOFFSET_64 thisValue);
 
+     virtual TypedValue call(const TypedValueList& arglst);
+
 private:
 
     MEMOFFSET_64   m_this;
 
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypedVarMethodUnbound : public TypedVarFunction
+{
+public:
+
+    TypedVarMethodUnbound(const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name):
+       TypedVarFunction(typeInfo, dataSource, name )
+    {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

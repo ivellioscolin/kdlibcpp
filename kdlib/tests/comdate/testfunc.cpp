@@ -85,13 +85,24 @@ StdcallFuncDouble(double a, double b)
     return a + b;
 }
 
-
-
 double
 __fastcall
 FastcallFunc( int a, float b )
 {
    return LocalStaticFunc(a,b);
+}
+
+
+bool
+OverloadedFunc(int a)
+{
+    return a > 10;
+}
+
+bool
+OverloadedFunc(float a)
+{
+    return a < 1.0f;
 }
 
 void

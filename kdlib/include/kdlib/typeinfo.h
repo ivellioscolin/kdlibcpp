@@ -81,8 +81,16 @@ public:
     virtual bool isVirtualMember( const std::wstring &name ) = 0;
     virtual bool isVirtualMember( size_t index ) = 0;
 
-    virtual bool isMethodMember( const std::wstring &name ) = 0;
-    virtual bool isMethodMember( size_t index ) = 0;
+    virtual bool isVirtual() = 0;
+
+    virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") = 0;
+    virtual TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) = 0;
+    virtual TypeInfoPtr getMethod( size_t index ) = 0;
+    virtual size_t getMethodsCount() = 0;
+
+    virtual TypeInfoPtr getBaseClass( const std::wstring& className) = 0;
+    virtual TypeInfoPtr getBaseClass( size_t index ) = 0;
+    virtual size_t getBaseClassesCount() = 0;
 
     virtual NumVariant getValue() const = 0;
 

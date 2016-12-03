@@ -153,16 +153,6 @@ public:
         return TypeFieldPtr(p);
     }
 
-    static TypeFieldPtr getMethodField(
-        const SymbolPtr& sym,
-        const std::wstring& name
-        )
-    {
-        SymbolUdtField *p = new SymbolUdtField( sym, name );
-        p->m_methodMember = true;
-        return TypeFieldPtr(p);
-    }
-
     static TypeFieldPtr getVirtualMethodField(
         const SymbolPtr& sym,
         const std::wstring& name 

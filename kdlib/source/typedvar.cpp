@@ -330,6 +330,133 @@ TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, TypeInfoPtr &typeInfo, size
    
     return lst;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadCharVar( char var ) 
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(char) );
+    accessor->writeSignByte(var);
+    return getTypedVar( loadType(L"Int1B"), accessor);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadShortVar( short var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(short) );
+    accessor->writeSignWord(var);
+    return getTypedVar( loadType(L"Int2B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadLongVar( long var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(long) );
+    accessor->writeSignDWord(var);
+    return getTypedVar( loadType(L"Int4B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadLongLongVar( long long var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(long long) );
+    accessor->writeSignQWord(var);
+    return getTypedVar( loadType(L"Int8B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadUCharVar( unsigned char var ) 
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned char) );
+    accessor->writeByte(var);
+    return getTypedVar( loadType(L"UInt1B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadUShortVar( unsigned short var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned short) );
+    accessor->writeWord(var);
+    return getTypedVar( loadType(L"UInt2B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadULongVar( unsigned long var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned long) );
+    accessor->writeDWord(var);
+    return getTypedVar( loadType(L"UInt4B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadULongLongVar( unsigned long long var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned long long) );
+    accessor->writeQWord(var);
+    return getTypedVar( loadType(L"UInt8B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadIntVar( int var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(int) );
+    accessor->writeSignDWord(var);
+    return getTypedVar( loadType(L"Int4B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadUIntVar( unsigned int var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned int) );
+    accessor->writeDWord(var);
+    return getTypedVar( loadType(L"UInt4B"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadWCharVar(wchar_t var) 
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(wchar_t) );
+    accessor->writeWord(var);
+    return getTypedVar( loadType(L"WChar"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadBoolVar(bool var) 
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(char) );
+    accessor->writeByte(var);
+    return getTypedVar( loadType(L"Bool"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadFloatVar( float var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(float) );
+    accessor->writeFloat(var);
+    return getTypedVar( loadType(L"Float"), accessor );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr loadDoubleVar( double var )
+{
+    DataAccessorPtr  accessor = getCacheAccessor( sizeof(double) );
+    accessor->writeDouble(var);
+    return getTypedVar( loadType(L"Double"), accessor );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedVarPtr TypedVarImp::castTo(const std::wstring& typeName)
@@ -434,46 +561,86 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 {
     TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
 
-    if ( m_typeInfo->isMethodMember(fieldName) )
+    if ( m_typeInfo->isStaticMember(fieldName) )
     {
+        MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
+
+        //if ( staticOffset == 0 )
+        //   NOT_IMPLEMENTED();
+
+        return  loadTypedVar( fieldType, staticOffset );
+    }
+
+    MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
+
+    if ( m_typeInfo->isVirtualMember( fieldName ) )
+    {
+        fieldOffset += getVirtualBaseDisplacement( fieldName );
+    }
+
+    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr TypedVarUdt::getMethod( const std::wstring &methodName, const std::wstring&  prototype)
+{
+    if ( !prototype.empty() )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    //m_typeInfo->getElement("
+
+    TypedVarPtr  methodVar = getMethodRecursive(methodName, m_typeInfo);
+    if ( methodVar )
+        return methodVar;
+
+    std::wstringstream  sstr;
+    sstr << m_typeInfo->getName() << " has no this method :" << methodName;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr TypedVarUdt::getMethodRecursive( const std::wstring& methodName, TypeInfoPtr&  typeInfo)
+{
+    try {   
+
+        TypeInfoPtr methodType = typeInfo->getMethod(methodName);
+
         MEMOFFSET_64  funcStart = 0;
         try {
-            funcStart = fieldType->getValue().asULongLong();
+            funcStart = methodType->getValue().asULongLong();
         }
         catch(TypeException&)
         {}
-         
-        MEMOFFSET_64  thisValue = m_varData->getAddress();
 
-        std::wstring  name = m_typeInfo->getName();
+        std::wstring  name = typeInfo->getName();
         name += L"::";
-        name += fieldName;
+        name += methodName;
 
-        return TypedVarPtr( new TypedVarMethodBound(fieldType, getMemoryAccessor(funcStart, 0 ), name, thisValue ) );;
+        if ( !methodType->hasThis() )
+        {
+            return TypedVarPtr( new TypedVarMethodUnbound(methodType, getMemoryAccessor(funcStart, 0 ), name ) );
+        }
+        else
+        {
+            MEMOFFSET_64  thisValue = m_varData->getAddress();
+            return TypedVarPtr( new TypedVarMethodBound(methodType, getMemoryAccessor(funcStart, 0 ), name, thisValue ) );
+        }
     }
-    else
+    catch( TypeException& )
+    {}
+
+    for ( size_t i = 0; i < typeInfo->getBaseClassesCount(); ++i )
     {
-        if ( m_typeInfo->isStaticMember(fieldName) )
-        {
-            MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
+        TypeInfoPtr  baseClass = typeInfo->getBaseClass(i);
 
-            //if ( staticOffset == 0 )
-            //   NOT_IMPLEMENTED();
-
-            return  loadTypedVar( fieldType, staticOffset );
-        }
-
-        MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
-
-        if ( m_typeInfo->isVirtualMember( fieldName ) )
-        {
-            fieldOffset += getVirtualBaseDisplacement( fieldName );
-        }
-
-        return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+        return getMethodRecursive(methodName, baseClass);
     }
 
-    throw TypeException(L"unknown member type");
+    return TypedVarPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -793,9 +960,12 @@ std::wstring TypedVarFunction::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::call( const CallArgList& arglst)
+TypedValue  TypedVarFunction::call(const TypedValueList& arglst)
 {
-    NumVariant   retVal;
+    if ( getAddress() == 0 )
+        throw TypeException(L"function has no body");
+
+    TypedValueList  castedArgs = castArgs(arglst);
 
     switch (getCPUMode() )
     {
@@ -804,20 +974,16 @@ NumVariant TypedVarFunction::call( const CallArgList& arglst)
             switch( m_typeInfo->getCallingConvention() ) 
             {
                 case CallConv_NearC:
-                    retVal = callCdecl(arglst);
-                    break;
+                    return callCdecl(castedArgs);
 
                 case CallConv_NearStd:
-                    retVal = callStd(arglst);
-                    break;
+                    return callStd(castedArgs);
 
                 case CallConv_NearFast:
-                    retVal = callFast(arglst);
-                    break;
+                    return callFast(castedArgs);
 
                 case CallConv_ThisCall:
-                    retVal = callThis(arglst);
-                    break;
+                    return callThis(castedArgs);
 
                 default:
                     throw TypeException(L"unsupported calling convention");
@@ -826,102 +992,147 @@ NumVariant TypedVarFunction::call( const CallArgList& arglst)
             break;
         }
         case CPU_AMD64:
-
-            retVal = callX64(arglst);
-            break;
-
-        default:
-            throw DbgException( "Unknown processor type" );
+            return callX64(castedArgs);
     }
 
-    return retVal;
+    throw DbgException( "Unknown processor type" );
 }
 
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::call( int numArgs, ... )
+TypedValueList TypedVarFunction::castArgs(const TypedValueList& arglst)
 {
-    if ( numArgs !=  m_typeInfo->getElementCount() )
+    if ( arglst.size() != m_typeInfo->getElementCount() )
         throw TypeException(L"wrong  argument count");
 
-    va_list arglst;
-    va_start(arglst, numArgs);
+    TypedValueList  castedArgs;
 
-    CallArgList  args;
-
-    for ( int  i = 0; i < numArgs; ++i)
+    for ( int i = 0; i < m_typeInfo->getElementCount(); ++i )
     {
-        NumVariant  var;
+         TypeInfoPtr  argType = m_typeInfo->getElement(i);
 
-        TypeInfoPtr  argType = m_typeInfo->getElement(i);
+         if ( argType->isBase() )
+         {
+             if ( argType->getName() == L"Float" )
+                 throw TypeException(L"unsupported argument type");
 
-        if ( argType->isBase() )
-        {
-            if ( argType->getName() == L"Float" )
-            {
-                args.push_back( static_cast<float>( va_arg(arglst, double) ) );
-            }
-            else 
-            if ( argType->getName() == L"Double" )
-            {
-                args.push_back( va_arg(arglst, double) );
-            }
-            else
-            {
-                switch( argType->getSize() )
-                {
-                case 1:
-                    args.push_back( va_arg(arglst, char) );
-                    break;
-                case 2:
-                    args.push_back( va_arg(arglst, short) );
-                    break;
-                case 4:
-                    args.push_back( va_arg(arglst, long) );
-                    break;
-                case 8:
-                    args.push_back( va_arg(arglst, long long ) );
-                    break;
-                default:
-                    throw TypeException(L"unsupported call argument");
-                }
-            }
-        }
-        else if ( argType->isPointer() || argType->isArray() )
-        {
-            switch ( argType->getPtrSize() )
-            {
-            case 4:
-                args.push_back( va_arg(arglst, long) );
-                break;
+             if ( argType->getName() == L"Double" )
+                 throw TypeException(L"unsupported argument type");
 
-            case 8:
-                args.push_back( va_arg(arglst, long long) );
-                break;
+            castedArgs.push_back( castBaseArg(argType, arglst[i]) );
 
-            default:
-                throw TypeException(L"unsupported call argument");
-            }
-        }
-        else
-        {
-            throw TypeException(L"unsupported call argument");
-        }
+            continue;
+         }
+
+         if ( argType->isPointer() || argType->isArray() )
+         {
+             castedArgs.push_back( castPtrArg(argType, arglst[i]) );
+
+             continue;
+         }
+
+         throw TypeException(L"unsupported argument type");
     }
 
-    va_end(arglst);
+    return castedArgs;
+}
 
-    return call(args);
+/////////////////////////////////////////////////////////////////////////////
+
+TypedValue TypedVarFunction::castBaseArg(TypeInfoPtr& destType, const TypedValue& arg)
+{
+    if ( !arg.getType()->isBase() && !arg.getType()->isEnum() )
+        throw TypeException(L"failed to cast argument");
+
+    NumVariant  var = arg.getValue();
+
+    if (destType->getName() == L"Char")
+        return TypedValue( var.asChar() );
+
+    if (destType->getName() == L"WChar")
+        return TypedValue( var.asUShort() );
+
+    if (destType->getName() == L"Int1B")
+        return TypedValue( var.asChar() );
+
+    if (destType->getName() == L"UInt1B")
+        return TypedValue( var.asUChar() );
+
+    if (destType->getName() == L"Int2B")
+        return TypedValue( var.asShort() );
+
+    if (destType->getName() == L"UInt2B") 
+        return TypedValue( var.asUShort() );
+
+    if (destType->getName() == L"Int4B")
+        return TypedValue( var.asLong() );
+
+    if (destType->getName() == L"UInt4B")
+        return TypedValue( var.asULong() );
+
+    if (destType->getName() == L"Int8B" )
+        return TypedValue( var.asLongLong() );
+
+    if (destType->getName() == L"UInt8B" )
+        return TypedValue( var.asULongLong() );
+
+    if (destType->getName() == L"Long")
+        return TypedValue( var.asLong() );
+
+    if (destType->getName() == L"ULong")
+        return TypedValue( var.asULong() );
+
+    if (destType->getName() == L"Float")
+        return TypedValue( var.asFloat() );
+
+    if (destType->getName() == L"Double")
+        return TypedValue( var.asDouble() );
+
+    if (destType->getName() == L"Bool")
+        return TypedValue( var.asChar() );
+
+    throw TypeException(L"failed to cast argument");
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+TypedValue TypedVarFunction::castPtrArg(TypeInfoPtr& destType, const TypedValue& arg)
+{
+
+    if ( arg.getType()->isPointer() || arg.getType()->isBase() )
+    {
+        NumVariant  var = arg.getValue();
+
+        if ( destType->getPtrSize() == 4 )
+            return TypedValue( var.asULong() );
+
+        if ( destType->getPtrSize() == 8 )
+            return TypedValue( var.asULongLong() );
+    }
+    else
+    if ( arg.getType()->isArray() )
+    {
+        if ( destType->getPtrSize() == 4 )
+            return TypedValue( static_cast<unsigned long>(arg.getAddress()) );
+
+        if ( destType->getPtrSize() == 8 )
+            return TypedValue( static_cast<unsigned long long>(arg.getAddress()) );
+    }
+
+    throw TypeException(L"failed to cast argument");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callCdecl(const CallArgList& args)
+TypedValue TypedVarFunction::callCdecl(const TypedValueList& args)
 {
     CPUContextAutoRestore  cpuContext;
 
-    for ( CallArgList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it)
-       it->pushInStack();
+    for ( TypedValueList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it)
+    {
+        size_t  argSize = it->getSize();
+        it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
+    }
 
     pushInStack( static_cast<unsigned long>(getInstructionOffset()));
 
@@ -962,34 +1173,33 @@ NumVariant TypedVarFunction::callCdecl(const CallArgList& args)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callStd(const CallArgList& args)
+TypedValue TypedVarFunction::callStd(const TypedValueList& args)
 {
     return callCdecl(args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callFast(const CallArgList& args)
+TypedValue TypedVarFunction::callFast(const TypedValueList& args)
 {
     NOT_IMPLEMENTED();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callThis(const CallArgList& args)
+TypedValue TypedVarFunction::callThis(const TypedValueList& args)
 {
     CPUContextAutoRestore  cpuContext;
 
-    for ( CallArgList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it)
+    for ( TypedValueList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it)
     {
-        if ( it != std::prev(args.rend()) )
-        {
-            it->pushInStack();
-        }
-    }
+        size_t  argSize = it->getSize();
 
-    if ( args.size() > 0 )
-        args.front().saveToRegister(L"ecx");
+        if ( it + 1 == args.rend() )
+            it->writeBytes(getRegisterAccessor(L"ecx"), argSize);
+        else
+            it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
+    }
 
     pushInStack( static_cast<unsigned long>(getInstructionOffset()));
 
@@ -1030,7 +1240,7 @@ NumVariant TypedVarFunction::callThis(const CallArgList& args)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant TypedVarFunction::callX64(const CallArgList& args)
+TypedValue TypedVarFunction::callX64(const TypedValueList& args)
 {
     CPUContextAutoRestore  cpuContext;
 
@@ -1040,40 +1250,28 @@ NumVariant TypedVarFunction::callX64(const CallArgList& args)
     }
 
     int i = args.size() - 1;
-    for ( CallArgList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
+    for ( TypedValueList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
     {
-        it->pushInStack();
+        size_t  argSize = it->getSize();
+        it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
 
         switch(i)
         {
         case 0:
-            if ( !it->isFloat() )
-                it->saveToRegister(L"rcx");
-            else
-                NOT_IMPLEMENTED();
+            it->writeBytes(getRegisterAccessor(L"rcx"), argSize);
             break;
 
         case 1:
-            if ( !it->isFloat() )
-                it->saveToRegister(L"rdx");
-            else
-                NOT_IMPLEMENTED();
+            it->writeBytes(getRegisterAccessor(L"rdx"), argSize);
             break;
 
         case 2:
-            if ( !it->isFloat() )
-                it->saveToRegister(L"r8");
-            else
-                NOT_IMPLEMENTED();
+            it->writeBytes(getRegisterAccessor(L"r8"), argSize);
             break;
 
         case 3:
-            if ( !it->isFloat() )
-                it->saveToRegister(L"r9");
-            else
-                NOT_IMPLEMENTED();
+            it->writeBytes(getRegisterAccessor(L"r9"), argSize);
             break;
-
         }
     }
 
@@ -1268,7 +1466,7 @@ TypedVarPtr TypedVarVtbl::getElement(size_t index)
     if (index >= m_typeInfo->getElementCount())
         throw IndexException(index);
 
-    TypeInfoPtr     elementType = loadType(L"Void*");
+    TypeInfoPtr  elementType = loadType(L"Void*");
 
     return loadTypedVar(elementType, m_varData->getAddress() + elementType->getSize()*index);
 }
@@ -1307,5 +1505,15 @@ TypedVarMethodBound::TypedVarMethodBound(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+TypedValue TypedVarMethodBound::call(const TypedValueList& arglst)
+{
+    TypedValueList  argListWithThis = arglst;
+    argListWithThis.insert( argListWithThis.begin(), m_this );
+    return TypedVarFunction::call(argListWithThis);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 } // end kdlib namesapce

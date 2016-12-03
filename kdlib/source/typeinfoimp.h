@@ -98,6 +98,10 @@ protected:
         return m_constant;
     }
 
+    virtual bool isVirtual() {
+        throw TypeException( getName(), L"type is not class method" );
+    }
+
     virtual TypeInfoPtr getElement( const std::wstring &name ) {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
@@ -160,6 +164,34 @@ protected:
 
     virtual bool isVirtualMember( size_t index ) {
         throw TypeException( getName(), L"type is not a struct" ); 
+    }
+
+    virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype)  {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual TypeInfoPtr getMethod( size_t index ) {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual size_t getMethodsCount() {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual TypeInfoPtr getBaseClass( const std::wstring& className) {
+        throw TypeException( getName(), L"type has no base class" ); 
+    }
+
+    virtual TypeInfoPtr getBaseClass( size_t index ) {
+        throw TypeException( getName(), L"type has no base class" ); 
+    }
+
+    virtual size_t getBaseClassesCount() {
+        throw TypeException( getName(), L"type has no base class" ); 
     }
 
     virtual bool isMethodMember( const std::wstring &name ) {
@@ -264,8 +296,6 @@ protected:
     virtual bool isStaticMember( size_t index );
     virtual bool isVirtualMember( const std::wstring &name );
     virtual bool isVirtualMember( size_t index );
-    virtual bool isMethodMember( const std::wstring &name );
-    virtual bool isMethodMember( size_t index );
 
     virtual size_t getAlignReq();
 
@@ -326,6 +356,12 @@ protected:
 
     virtual TypeInfoPtr getClassParent();
 
+    virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype=L"");
+
+    virtual TypeInfoPtr getBaseClass( const std::wstring& className);
+    virtual TypeInfoPtr getBaseClass( size_t index );
+    virtual size_t getBaseClassesCount();
+
 protected:
 
     SymbolPtr  m_symbol;
@@ -345,8 +381,6 @@ protected:
         size_t m_virtualDispSize = 0 );
 
     void getVirtualFields();
-
-    
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -492,6 +526,12 @@ public:
 
         throw TypeException(L"function has no body");
     }
+
+    virtual bool isVirtual()
+    {
+        return m_symbol->isVirtual();
+    }
+
 
 private:
 

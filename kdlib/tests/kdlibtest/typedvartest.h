@@ -284,10 +284,10 @@ TEST_F( TypedVarTest, FunctionDebugRange )
 TEST_F(TypedVarTest, getVTBL)
 {
     TypedVarPtr  vtbl;
-    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(0x0b)->deref());
+    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod3"));
 
-    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(0x13)->deref());
+    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(4)->deref());
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod1"));
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(1)).find(L"virtMethod2"));
 }
@@ -297,12 +297,12 @@ TEST_F(TypedVarTest, FunctionCall)
     TypedVarPtr funcptr;
 
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncReturn" ) );
-    EXPECT_EQ( 5 + 5, funcptr->call(2, 5, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress()) ) );
-    EXPECT_EQ( 100500 + 5, funcptr->call(2, 100500, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress()) ) );
+    EXPECT_EQ( 5 + 5, funcptr->call( { 5, loadTypedVar(L"helloStr") } ) );
+    EXPECT_EQ( 100500 + 5, funcptr->call( {100500, loadTypedVar(L"helloStr") } ) );
 
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncLong" ) );
-    EXPECT_EQ( 0x100000000ULL + 5, funcptr->call(1, 0x100000000ULL) );
-    EXPECT_EQ( 10 + 5, funcptr->call(1, (unsigned long long)10));
+    EXPECT_EQ( 0x100000000ULL + 5, funcptr->call( { 0x100000000ULL } ) );
+    EXPECT_EQ( 10 + 5, funcptr->call( {10} ) );
 
     //ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncFloat" ) );
     //EXPECT_FLOAT_EQ( 1.5f * 3.2f, funcptr->call(2, (float)1.5f, (float)3.2f).asFloat() );
@@ -313,13 +313,12 @@ TEST_F(TypedVarTest, FunctionCall)
     //EXPECT_DOUBLE_EQ( (-1.2 + 7.4) / 2, funcptr->call(2, (double)-1.2, (double)7.4).asDouble() );
 
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncRet" ) );
-    EXPECT_EQ( 100/2, funcptr->call(2, 2, 100 ) );
-    EXPECT_EQ( 300/3, funcptr->call(2, 3, 300 ) );
+    EXPECT_EQ( 100/2, funcptr->call( { 2, 100 } ) );
+    EXPECT_EQ( 300/3, funcptr->call( { 3, 300 } ) );
 
     ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncLong" ) );
-    EXPECT_EQ( 0x100000001 & 1, funcptr->call(2, 0x100000001, 1ULL ) );
-    EXPECT_EQ( 2 & 0xF, funcptr->call(2, 2ULL, 0xFULL ) );
-  
+    EXPECT_EQ( 0x100000001 & 1, funcptr->call({ 0x100000001, 1 } ) );
+    EXPECT_EQ( 2 & 0xF, funcptr->call( { 2ULL, 0xFULL } ) );  
 
     //ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncFloat" ) );
     //EXPECT_FLOAT_EQ( 3.0f/1.5f, funcptr->call(2, 3.0f, 1.5f ) );
@@ -330,38 +329,20 @@ TEST_F(TypedVarTest, FunctionCall)
     //EXPECT_DOUBLE_EQ( -2.9 + 13.1, funcptr->call(2, -2.9, 13.1).asDouble() );
 }
 
-TEST_F(TypedVarTest, FunctionCallWithArgList)
-{
-    TypedVarPtr funcptr;
-
-    ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncReturn" ) );
-    EXPECT_EQ( 5 + 5, funcptr->call( { 5, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress() ) } ) );
-    EXPECT_EQ( 100500 + 5, funcptr->call( { 100500, reinterpret_cast<void*>(loadTypedVar(L"helloStr")->getAddress() ) } ) );
-
-    ASSERT_NO_THROW( funcptr = loadTypedVar( L"CdeclFuncLong" ) );
-    CallArgList  args = { 0x100000000ULL };
-    EXPECT_EQ( 0x100000000ULL + 5, funcptr->call(args) );
-    args = { 10ULL };
-    EXPECT_EQ( 10 + 5, funcptr->call(args));
-
-    ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncRet" ) );
-    EXPECT_EQ( 100/2, funcptr->call( { 2, 100 } ) );
-    EXPECT_EQ( 300/3, funcptr->call( { 3, 300 } ) );
-
-    ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncLong" ) );
-    EXPECT_EQ( 0x100000001 & 1, funcptr->call( { 0x100000001, 1ULL } ) );
-    EXPECT_EQ( 2 & 0xF, funcptr->call( { 2ULL, 0xFULL } ) );
-}
 
 TEST_F(TypedVarTest, CustomDefineFunctionCall)
 {
     TypeInfoPtr  FuncType;
-    ASSERT_NO_THROW( FuncType = defineFunction( loadType(L"Void*"), kdlib::CallConv_NearStd) );
-    ASSERT_NO_THROW( FuncType->appendField(L"var1", kdlib::loadType(L"WChar*") ) );
-    ASSERT_NO_THROW( FuncType->appendField(L"var2", kdlib::loadType(L"UInt4B") ) );
+    ASSERT_NO_THROW( FuncType = defineFunction( loadType(L"Int2B"), kdlib::CallConv_NearStd) );
+    ASSERT_NO_THROW( FuncType->appendField(L"var1", kdlib::loadType(L"Char") ) );
+    ASSERT_NO_THROW( FuncType->appendField(L"var2", kdlib::loadType(L"Long") ) );
 
     TypedVarPtr  funcPtr;
-    ASSERT_NO_THROW( funcPtr = loadTypedVar(FuncType, 0x10000) );
+    ASSERT_NO_THROW( funcPtr = loadTypedVar(FuncType, getSymbolOffset(L"StdcallFuncRet") ) );
+    EXPECT_EQ( 10/2, funcPtr->call( { 2, 10.0 } ) );
+
+    EXPECT_THROW( funcPtr->call( { 10 } ), TypeException ); //wrong arg number
+    EXPECT_THROW( funcPtr->call( { loadTypedVar(L"Void*", 10 ) } ), TypeException ); //wrong type
 }
 
 TEST_F(TypedVarTest, GetMethod)
@@ -370,11 +351,39 @@ TEST_F(TypedVarTest, GetMethod)
     TypedVarPtr  childMethod;
 
     ASSERT_NO_THROW( g_classChild = loadTypedVar( L"g_classChild" ) );
-    ASSERT_NO_THROW( childMethod = g_classChild->getElement( L"childMethod") );
+    ASSERT_NO_THROW( childMethod = g_classChild->getMethod( L"childMethod") );
 
     EXPECT_EQ( L"classChild::childMethod", childMethod->getName() );
+    EXPECT_EQ( kdlib::getSymbolOffset(L"classChild::childMethod"), childMethod->getAddress() );
+
     EXPECT_EQ( childMethod->getAddress(), loadTypedVar( childMethod->getName() )->getAddress() );
 }
+
+TEST_F(TypedVarTest, GetInheritMethod)
+{
+    TypedVarPtr  g_classChild;
+    TypedVarPtr  method;
+
+    ASSERT_NO_THROW( g_classChild = loadTypedVar( L"g_classChild" ) );
+    ASSERT_NO_THROW( method = g_classChild->getMethod( L"proBaseMethod") );
+
+    EXPECT_EQ( L"classProBase1::proBaseMethod", method->getName() );
+    EXPECT_EQ( kdlib::getSymbolOffset(L"classProBase1::proBaseMethod"), method->getAddress() );
+}
+
+
+/*TEST_F(TypedVarTest, GetVirtualMethod)
+{
+    MEMOFFSET_64  methodAddr = kdlib::getSymbolOffset(L"virtualChild::virtMethod1");
+    MEMOFFSET_64  varAddr = kdlib::getSymbolOffset(L"g_virtChild");
+
+    loadTypedVar(L"g_virtChild")->getElement(L"a");
+
+    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"virtualChild"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
+    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"virtualBase1"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
+    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"virtualBase2"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
+    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"classBase1"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
+}*/
 
 TEST_F(TypedVarTest, Namespace)
 {
@@ -382,16 +391,34 @@ TEST_F(TypedVarTest, Namespace)
     EXPECT_THROW( g_testClass = loadTypedVar(L"g_testClass"), SymbolException );
     ASSERT_NO_THROW( g_testClass = loadTypedVar(L"testspace::g_testClass"));
 
-    EXPECT_EQ( L"testspace::testClass1::nestedClass::getMember", g_testClass->getElement(L"m_nestedMember")->getElement(L"getMember")->getName());
+    EXPECT_EQ( L"testspace::testClass1::nestedClass::getMember", g_testClass->getElement(L"m_nestedMember")->getMethod(L"getMember")->getName());
 }
 
 TEST_F(TypedVarTest, CallMethod)
 {
-    TypedVarPtr  g_classChild;
+    TypedVarPtr  ptrClassChild;
     TypedVarPtr  childMethod;
 
-    ASSERT_NO_THROW( g_classChild = loadTypedVar( L"g_classChild" ) );
+    ASSERT_NO_THROW( ptrClassChild = loadTypedVar( L"g_classChild" ) );
     ASSERT_NO_THROW( childMethod = loadTypedVar( L"classChild::childMethod" ) );
 
-    EXPECT_EQ( 100*5, childMethod->call( { reinterpret_cast<void*>(g_classChild->getAddress()), 100 } ) );
+    EXPECT_EQ( g_classChild.childMethod(100), childMethod->call( { ptrClassChild->getAddress(), 100 } ) );
+    EXPECT_EQ( g_classChild.childMethod(100), ptrClassChild->getMethod(L"childMethod")->call( { 100 } ) );
 }
+
+
+TEST_F(TypedVarTest, CallStaticMethod)
+{
+    TypedVarPtr  ptrClassChild;
+
+    ASSERT_NO_THROW( ptrClassChild = loadTypedVar( L"g_classChild" ) );
+    EXPECT_EQ( g_classChild.staticMethod(20,10), ptrClassChild->getMethod(L"staticMethod")->call( { 20, 10 } ) );
+}
+
+TEST_F(TypedVarTest, CallNoBodyMethod)
+{
+    TypedVarPtr  ptrClassChild;
+    ASSERT_NO_THROW( ptrClassChild = loadTypedVar( L"g_classChild" ) );
+    EXPECT_THROW( ptrClassChild->getMethod(L"noBodyFunc")->call( { 10 } ), TypeException );
+}
+
