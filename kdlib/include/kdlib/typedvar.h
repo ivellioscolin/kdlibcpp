@@ -134,6 +134,7 @@ class TypedValue : public NumBehavior
 public:
 
     TypedValue(const TypedVarPtr& var) : m_value(var){}
+    TypedValue(const NumVariant& var );
 
     TypedValue( char var ) : m_value( loadCharVar(var) ) {}
     TypedValue( short var) : m_value( loadShortVar(var) ) {}

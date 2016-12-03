@@ -1515,5 +1515,63 @@ TypedValue TypedVarMethodBound::call(const TypedValueList& arglst)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedValue::TypedValue(const NumVariant& var)
+{
+    if ( var.isChar() )
+    {
+        m_value = loadCharVar(var.asChar());
+    }
+    else if ( var.isShort() )
+    {
+        m_value = loadShortVar(var.asShort());
+    }
+    else if ( var.isLong() )
+    {
+        m_value = loadLongVar(var.asLong());
+    }
+    else if ( var.isLongLong() )
+    {
+        m_value = loadLongLongVar(var.asLongLong());
+    }
+    else if ( var.isUChar() )
+    {
+        m_value = loadUCharVar(var.asUChar() );
+    }
+    else if ( var.isUShort() )
+    {
+        m_value = loadUShortVar(var.asUShort());
+    }
+    else if ( var.isULong() )
+    {
+        m_value = loadULongVar(var.asULong() );
+    }
+    else if ( var.isULongLong() )
+    {
+        m_value = loadULongLongVar(var.asULongLong() );
+    }
+    else if ( var.isInt() )
+    {
+        m_value = loadIntVar(var.asInt() );
+    }
+    else if ( var.isUInt() )
+    {
+        m_value = loadUIntVar(var.asUInt() );
+    }
+    else if ( var.isFloat() )
+    {
+        m_value = loadFloatVar(var.asFloat() );
+    }
+    else if ( var.isDouble() )
+    {
+        m_value = loadDoubleVar(var.asDouble() );
+    }
+    else
+    {
+        throw TypeException(L"Failed to convet NumVariant to TypedVar");
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 } // end kdlib namesapce
