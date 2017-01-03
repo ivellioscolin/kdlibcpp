@@ -194,6 +194,30 @@ protected:
         throw TypeException( getName(), L"type has no base class" ); 
     }
 
+    virtual MEMOFFSET_REL getBaseClassOffset( const std::wstring &name ) {
+        throw TypeException( getName(), L"type has no base class" ); 
+    }
+
+    virtual MEMOFFSET_REL getBaseClassOffset( size_t index ) {
+        throw TypeException( getName(), L"type has no base class" );
+    }
+
+    virtual bool isBaseClassVirtual( const std::wstring &name ) {
+        throw TypeException( getName(), L"type has no base class" );
+    }
+
+    virtual bool isBaseClassVirtual( size_t index ) {
+        throw TypeException( getName(), L"type has no base class" );
+    }
+
+    virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
+        throw TypeException( getName(), L"type is not virtual inherited" );
+    }
+
+    virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
+        throw TypeException( getName(), L"type is not virtual inherited" );
+    }
+
     virtual bool isMethodMember( const std::wstring &name ) {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
@@ -232,6 +256,15 @@ protected:
 
     virtual size_t getAlignReq() {
         throw TypeException( getName(), L"has no alignment-requirement" );
+    }
+
+    virtual TypeInfoPtr getVTBL() {
+        throw TypeException( getName(), L"has no VTBL" );
+    }
+
+    virtual MEMOFFSET_REL getVtblOffset() 
+    {
+        throw TypeException( getName(), L"type is not a virtual method" ); 
     }
 
 public:
@@ -363,6 +396,18 @@ protected:
     virtual TypeInfoPtr getBaseClass( const std::wstring& className);
     virtual TypeInfoPtr getBaseClass( size_t index );
     virtual size_t getBaseClassesCount();
+
+    virtual MEMOFFSET_REL getBaseClassOffset( const std::wstring &name );
+    virtual MEMOFFSET_REL getBaseClassOffset( size_t index );
+
+    virtual bool isBaseClassVirtual( const std::wstring &name );
+    virtual bool isBaseClassVirtual( size_t index );
+
+    virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
+    virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
+
+    virtual TypeInfoPtr getVTBL();
+
 
 protected:
 
@@ -534,6 +579,10 @@ public:
         return m_symbol->isVirtual();
     }
 
+    virtual MEMOFFSET_REL getVtblOffset() 
+    {
+        return m_symbol->getVirtualBaseOffset();
+    }
 
 private:
 

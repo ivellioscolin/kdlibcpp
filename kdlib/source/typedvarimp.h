@@ -249,11 +249,20 @@ protected:
         NOT_IMPLEMENTED();
     }
 
-   // std::wstring printFieldValue( const TypeInfoPtr& typeInfo, const TypedVarPtr& var );
 
 protected:
 
-    TypedVarPtr getMethodRecursive( const std::wstring& filedName, TypeInfoPtr&  baseClass );
+    TypedVarPtr getMethodRecursive( 
+        const std::wstring& methodName,
+        TypeInfoPtr&  baseClass,
+        MEMOFFSET_REL startOffset
+        );
+
+    TypedVarPtr getVirtualMethodRecursive( 
+        const std::wstring& methodName, 
+        TypeInfoPtr&  baseClass,
+        MEMOFFSET_REL startOffset
+        );
 };
 
 

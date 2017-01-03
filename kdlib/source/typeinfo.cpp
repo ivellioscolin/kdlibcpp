@@ -806,32 +806,6 @@ bool TypeInfoFields::isVirtualMember( size_t index )
     return m_fields.lookup( index )->isVirtualMember();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-//bool TypeInfoFields::isMethodMember( const std::wstring &name )
-//{
-//    checkFields();
-//
-//    size_t  pos = name.find_first_of( L'.');
-//
-//    TypeFieldPtr  fieldPtr = m_fields.lookup( std::wstring( name, 0, pos) );
-//
-//    if ( pos == std::wstring::npos )
-//        return fieldPtr->isMethod();
-//
-//    TypeInfoPtr  fieldType = fieldPtr->getTypeInfo();
-//
-//    return fieldType->isMethodMember( std::wstring( name, pos + 1 ) );
-//}
-
-///////////////////////////////////////////////////////////////////////////////
-
-//bool TypeInfoFields::isMethodMember( size_t index )
-//{
-//    checkFields();
-//
-//    return m_fields.lookup( index )->isMethod();
-//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -975,6 +949,134 @@ size_t TypeInfoUdt::getBaseClassesCount()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+MEMOFFSET_REL TypeInfoUdt::getBaseClassOffset( const std::wstring &className )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+        {
+            return baseClass->getOffset();
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL TypeInfoUdt::getBaseClassOffset( size_t index )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    return (*it)->getOffset();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoUdt::isBaseClassVirtual( const std::wstring &className )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+        {
+            return baseClass->isVirtualBaseClass();
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoUdt::isBaseClassVirtual( size_t index )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    return (*it)->isVirtualBaseClass();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypeInfoUdt::getBaseClassVirtualDisplacement( const std::wstring &className, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+        {
+            virtualBasePtr = baseClass->getVirtualBasePointerOffset();
+            virtualDispIndex = baseClass->getVirtualBaseDispIndex();
+            virtualDispSize = baseClass->getVirtualBaseDispSize();
+            return;
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypeInfoUdt::getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    std::wstring  name = (*it)->getName();
+
+    virtualBasePtr = (*it)->getVirtualBasePointerOffset();
+    virtualDispIndex = (*it)->getVirtualBaseDispIndex();
+    virtualDispSize = (*it)->getVirtualBaseDispSize();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoUdt::getVTBL()
+{
+    return loadType( m_symbol->getVirtualTableShape() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoUdt::getFields()
 {
     getFields( m_symbol, SymbolPtr() );
@@ -1073,6 +1175,8 @@ void TypeInfoUdt::getVirtualFields()
     {
          SymbolPtr  childSym = *baseClass;
 
+         std::wstring  baseClassName = childSym->getName();
+
         if ( !childSym->isVirtualBaseClass() )
             continue;
 
@@ -1084,24 +1188,6 @@ void TypeInfoUdt::getVirtualFields()
             childSym->getVirtualBaseDispIndex(),
             childSym->getVirtualBaseDispSize() );
     }
-
-    //size_t   childCount = m_symbol->getChildCount(SymTagBaseClass);
-
-    //for ( unsigned long i = 0; i < childCount; ++i )
-    //{
-    //    SymbolPtr  childSym = m_symbol->getChildByIndex( i );
-
-    //    if ( !childSym->isVirtualBaseClass() )
-    //        continue;
-
-    //    getFields( 
-    //        childSym,
-    //        childSym,
-    //        0,
-    //        childSym->getVirtualBasePointerOffset(),
-    //        childSym->getVirtualBaseDispIndex(),
-    //        childSym->getVirtualBaseDispSize() );
-    //}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

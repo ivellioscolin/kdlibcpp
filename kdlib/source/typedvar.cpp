@@ -590,9 +590,7 @@ TypedVarPtr TypedVarUdt::getMethod( const std::wstring &methodName, const std::w
         NOT_IMPLEMENTED();
     }
 
-    //m_typeInfo->getElement("
-
-    TypedVarPtr  methodVar = getMethodRecursive(methodName, m_typeInfo);
+    TypedVarPtr  methodVar = getMethodRecursive(methodName, m_typeInfo, 0);
     if ( methodVar )
         return methodVar;
 
@@ -603,11 +601,16 @@ TypedVarPtr TypedVarUdt::getMethod( const std::wstring &methodName, const std::w
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr TypedVarUdt::getMethodRecursive( const std::wstring& methodName, TypeInfoPtr&  typeInfo)
+TypedVarPtr TypedVarUdt::getMethodRecursive( const std::wstring& methodName, TypeInfoPtr&  typeInfo, MEMOFFSET_REL startOffset)
 {
     try {   
 
         TypeInfoPtr methodType = typeInfo->getMethod(methodName);
+
+        if ( methodType->isVirtual() )
+        {
+            return getVirtualMethodRecursive(methodName, typeInfo, startOffset);
+        }
 
         MEMOFFSET_64  funcStart = 0;
         try {
@@ -637,10 +640,85 @@ TypedVarPtr TypedVarUdt::getMethodRecursive( const std::wstring& methodName, Typ
     {
         TypeInfoPtr  baseClass = typeInfo->getBaseClass(i);
 
-        return getMethodRecursive(methodName, baseClass);
+        return getMethodRecursive(methodName, baseClass, startOffset + typeInfo->getBaseClassOffset(i) );
     }
 
     return TypedVarPtr();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr TypedVarUdt::getVirtualMethodRecursive( 
+    const std::wstring& methodName,
+    TypeInfoPtr&  classType,
+    MEMOFFSET_REL  startOffset
+    )
+{
+    for ( size_t i = 0; i < classType->getBaseClassesCount(); ++i )
+    {
+        TypedVarPtr  virtMethod;
+
+        if ( classType->isBaseClassVirtual(i) )
+        {
+             TypeInfoPtr  baseClass = classType->getBaseClass(i);
+
+             std::wstring  baseClassName = baseClass->getName();
+
+             MEMOFFSET_32 virtualBasePtr = 0;
+             size_t  virtualDispIndex = 0;
+             size_t  virtualDispSize = 0;
+
+             m_typeInfo->getBaseClassVirtualDisplacement(baseClassName, virtualBasePtr, virtualDispIndex, virtualDispSize );
+    
+             MEMOFFSET_64 vfnptr = m_varData->getAddress() + virtualBasePtr;
+             MEMOFFSET_64 vtbl = m_typeInfo->getPtrSize() == 4 ? ptrDWord( vfnptr ) : ptrQWord(vfnptr);
+             MEMDISPLACEMENT displacement =  ptrSignDWord( vtbl + virtualDispIndex*virtualDispSize );
+             MEMOFFSET_REL baseClassOffset = virtualBasePtr + displacement;
+
+             virtMethod = getVirtualMethodRecursive(methodName, baseClass, baseClassOffset );
+        }
+        else
+        {
+            TypeInfoPtr  baseClass = classType->getBaseClass(i);
+
+            std::wstring baseClassName = baseClass->getName();
+
+            MEMOFFSET_REL  baseClassOffset = classType->getBaseClassOffset(i);
+
+            virtMethod = getVirtualMethodRecursive(methodName, baseClass, startOffset + baseClassOffset );
+        }
+
+        if ( virtMethod )
+            return virtMethod;
+    }
+
+    TypeInfoPtr methodType;
+
+    try {  
+
+        std::wstring className = classType->getName();
+
+        methodType = classType->getMethod(methodName);
+
+    }
+    catch( TypeException& )
+    {}
+
+    if (!methodType || !methodType->isVirtual() )
+        return TypedVarPtr();
+
+    TypeInfoPtr  vtblType = classType->getVTBL();
+    TypedVarPtr  vtbl = loadTypedVar( vtblType->ptrTo(), m_varData->getAddress() + startOffset )->deref();
+    MEMOFFSET_REL  methodOffset = methodType->getVtblOffset();
+
+    std::wstring  name = classType->getName();
+    name += L"::";
+    name += methodName;
+
+    MEMOFFSET_64  thisValue = m_varData->getAddress();
+    MEMOFFSET_64  methodAddr = vtbl->getElement( methodOffset / vtblType->getPtrSize() )->asULongLong();
+
+    return TypedVarPtr( new TypedVarMethodBound(methodType, getMemoryAccessor(methodAddr, 0 ), name, thisValue ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

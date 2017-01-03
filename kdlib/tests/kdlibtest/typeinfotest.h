@@ -318,14 +318,12 @@ TEST_F(TypeInfoTest, EnumVirtualField)
         EXPECT_NO_THROW( typeInfo->getElement(i) );
 }
 
-TEST_F(TypeInfoTest, VTBL)
+
+TEST_F(TypeInfoTest, GetVTBL)
 {
     TypeInfoPtr vtblInfo;
-    ASSERT_NO_THROW(vtblInfo = loadType(L"g_virtChild")->getElement(2)->deref());
-    EXPECT_TRUE(vtblInfo->isVtbl());
-    EXPECT_EQ(1, vtblInfo->getElementCount());
-    ASSERT_NO_THROW(vtblInfo = loadType(L"g_virtChild")->getElement(4)->deref());
-    EXPECT_TRUE(vtblInfo->isVtbl());
+    ASSERT_NO_THROW(vtblInfo = loadType(L"classBase1")->getVTBL() );
+    EXPECT_TRUE(vtblInfo->isVtbl() );
     EXPECT_EQ(2, vtblInfo->getElementCount());
 }
 
@@ -514,6 +512,25 @@ TEST_F(TypeInfoTest, GetBaseClass)
 
     EXPECT_THROW( g_classChild->getBaseClass(2), IndexException);
     EXPECT_THROW( g_classChild->getBaseClass(L"invalidBaseName"), TypeException);
+}
+
+TEST_F(TypeInfoTest, GetBaseClassOffset)
+{
+    TypeInfoPtr  g_classChild;
+    ASSERT_NO_THROW( g_classChild = loadType(L"g_classChild") );
+
+    EXPECT_EQ( 0, g_classChild->getBaseClassOffset(0) );
+    EXPECT_EQ( g_classChild->getBaseClass(0)->getSize(), g_classChild->getBaseClassOffset(1) );
+    EXPECT_THROW( g_classChild->getBaseClassOffset(2), IndexException);
+
+    EXPECT_EQ( g_classChild->getBaseClassOffset(0), g_classChild->getBaseClassOffset(L"classBase1") );
+    EXPECT_EQ( g_classChild->getBaseClassOffset(1), g_classChild->getBaseClassOffset(L"classBase2") );
+}
+
+TEST_F(TypeInfoTest, IsBaseClassVirtual)
+{
+    EXPECT_TRUE( loadType(L"virtualBase1")->isBaseClassVirtual(L"classBase1") );
+    EXPECT_FALSE( loadType(L"virtualChild")->isBaseClassVirtual(1) );
 }
 
 TEST_F(TypeInfoTest, GetMethod)

@@ -237,6 +237,16 @@ class ExportSymbolBase : public Symbol
     {
         NOT_IMPLEMENTED();
     }
+
+    virtual SymbolPtr getVirtualTableShape()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual unsigned long getVirtualBaseOffset()
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -206,6 +206,14 @@ public:
         m_count( 1234 ),
         m_baseField( 100 )
         {}
+    
+    virtual int virtMethod3() {
+        return 23;
+    }
+
+    virtual int virtMethod4() {
+        return 24;
+    }
 };
 
 
@@ -232,6 +240,14 @@ public:
     
     virtual void virtMethod2() {}
 
+    virtual int virtMethod3() {
+        return 123;
+    }
+
+    virtual int virtMethod4() {
+        return 124;
+    }
+
     static char staticMethod( int a, int b ) { return static_cast<char>(a/b); }
 
     void noBodyFunc(int a);
@@ -243,6 +259,7 @@ public:
 };
 
 extern classChild  g_classChild;
+extern classBase2*  g_polimorphChild;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -279,12 +296,14 @@ public:
 
     virtual int virtMethod1(int a) { return a + 101; }
     virtual void virtMethod2() {}
-    virtual void virtMethod3() {}
+    virtual int virtChildMethod() { return 10001; }
 
     virtualChild() : m_member(678) {}
 };
 
 extern virtualChild       g_virtChild;
+extern virtualBase2*      g_polimorphVirtChild1;
+extern classBase1*        g_polimorphVirtChild2;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -343,7 +362,6 @@ extern  testClass1  g_testClass;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
 
 #pragma pack ( pop )
 

@@ -285,7 +285,7 @@ TEST_F(TypedVarTest, getVTBL)
 {
     TypedVarPtr  vtbl;
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
-    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod3"));
+    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtChildMethod"));
 
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(4)->deref());
     EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod1"));
@@ -371,19 +371,11 @@ TEST_F(TypedVarTest, GetInheritMethod)
     EXPECT_EQ( kdlib::getSymbolOffset(L"classProBase1::proBaseMethod"), method->getAddress() );
 }
 
-
-/*TEST_F(TypedVarTest, GetVirtualMethod)
+TEST_F(TypedVarTest, GetVirtualMethod)
 {
-    MEMOFFSET_64  methodAddr = kdlib::getSymbolOffset(L"virtualChild::virtMethod1");
-    MEMOFFSET_64  varAddr = kdlib::getSymbolOffset(L"g_virtChild");
-
-    loadTypedVar(L"g_virtChild")->getElement(L"a");
-
-    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"virtualChild"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
-    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"virtualBase1"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
-    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"virtualBase2"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
-    EXPECT_EQ( methodAddr, loadTypedVar( loadType(L"classBase1"), varAddr )->getMethod(L"virtMethod1")->getAddress() );
-}*/
+    ASSERT_NO_THROW( loadTypedVar( L"g_classChild" )->getMethod( L"virtMethod4") );
+    ASSERT_NO_THROW( loadTypedVar( L"g_virtChild" )->getMethod(L"virtMethod1") );
+}
 
 TEST_F(TypedVarTest, Namespace)
 {
@@ -421,4 +413,20 @@ TEST_F(TypedVarTest, CallNoBodyMethod)
     ASSERT_NO_THROW( ptrClassChild = loadTypedVar( L"g_classChild" ) );
     EXPECT_THROW( ptrClassChild->getMethod(L"noBodyFunc")->call( { 10 } ), TypeException );
 }
+
+TEST_F(TypedVarTest, CallVirtualMethod)
+{
+    EXPECT_EQ( g_classChild.virtMethod4(), loadTypedVar( L"g_classChild" )->getMethod(L"virtMethod4")->call({}) );
+    EXPECT_EQ( g_polimorphChild->virtMethod4(), loadTypedVar( L"g_polimorphChild" )->deref()->getMethod(L"virtMethod4")->call({}) );
+}
+
+TEST_F(TypedVarTest, CallVirtualMethodVirtualInherit)
+{
+    EXPECT_EQ( g_virtChild.virtMethod1(100), loadTypedVar( L"g_virtChild" )->getMethod(L"virtMethod1")->call({100}) );
+    EXPECT_EQ( g_polimorphVirtChild1->virtMethod1(200), loadTypedVar( L"g_polimorphVirtChild1" )->deref()->getMethod(L"virtMethod1")->call({200}) );
+    EXPECT_EQ( g_polimorphVirtChild2->virtMethod1(300), loadTypedVar( L"g_polimorphVirtChild2" )->deref()->getMethod(L"virtMethod1")->call({300}) );
+    EXPECT_EQ( g_virtChild.virtChildMethod(), loadTypedVar( L"g_virtChild" )->getMethod(L"virtChildMethod")->call({}) );
+}
+
+
 

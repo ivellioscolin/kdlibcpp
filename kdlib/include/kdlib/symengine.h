@@ -203,6 +203,8 @@ public:
     virtual SymbolPtr getObjectPointerType() = 0; // "this" for method
     virtual unsigned long getCallingConvention() = 0; // <- CallingConventionType
     virtual SymbolPtr getClassParent() = 0; // "this" for method
+    virtual SymbolPtr getVirtualTableShape() = 0;
+    virtual unsigned long getVirtualBaseOffset() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
