@@ -12,6 +12,7 @@
 #include "kdlib/cpucontext.h"
 
 #include "typedvarimp.h"
+#include "typeinfoimp.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +60,7 @@ std::wstring getSymbolName( kdlib::SymbolPtr& symbol )
     return L"";
 
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -585,12 +587,8 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 
 TypedVarPtr TypedVarUdt::getMethod( const std::wstring &methodName, const std::wstring&  prototype)
 {
-    if ( !prototype.empty() )
-    {
-        NOT_IMPLEMENTED();
-    }
 
-    TypedVarPtr  methodVar = getMethodRecursive(methodName, m_typeInfo, 0);
+    TypedVarPtr  methodVar = getMethodRecursive(methodName, prototype, m_typeInfo, 0);
     if ( methodVar )
         return methodVar;
 
@@ -601,15 +599,20 @@ TypedVarPtr TypedVarUdt::getMethod( const std::wstring &methodName, const std::w
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr TypedVarUdt::getMethodRecursive( const std::wstring& methodName, TypeInfoPtr&  typeInfo, MEMOFFSET_REL startOffset)
+TypedVarPtr TypedVarUdt::getMethodRecursive( 
+    const std::wstring& methodName,
+    const std::wstring& methodPrototype, 
+    TypeInfoPtr&  typeInfo,
+    MEMOFFSET_REL startOffset
+    )
 {
     try {   
 
-        TypeInfoPtr methodType = typeInfo->getMethod(methodName);
+        TypeInfoPtr methodType = typeInfo->getMethod(methodName, methodPrototype);
 
         if ( methodType->isVirtual() )
         {
-            return getVirtualMethodRecursive(methodName, typeInfo, startOffset);
+            return getVirtualMethodRecursive(methodName, getMethodPrototype(methodType), typeInfo, startOffset);
         }
 
         MEMOFFSET_64  funcStart = 0;
@@ -640,7 +643,9 @@ TypedVarPtr TypedVarUdt::getMethodRecursive( const std::wstring& methodName, Typ
     {
         TypeInfoPtr  baseClass = typeInfo->getBaseClass(i);
 
-        return getMethodRecursive(methodName, baseClass, startOffset + typeInfo->getBaseClassOffset(i) );
+        TypedVarPtr  methodVar = getMethodRecursive(methodName, methodPrototype, baseClass, startOffset + typeInfo->getBaseClassOffset(i) );
+        if ( methodVar )
+            return methodVar;
     }
 
     return TypedVarPtr();
@@ -650,6 +655,7 @@ TypedVarPtr TypedVarUdt::getMethodRecursive( const std::wstring& methodName, Typ
 
 TypedVarPtr TypedVarUdt::getVirtualMethodRecursive( 
     const std::wstring& methodName,
+    const std::wstring& methodPrototype, 
     TypeInfoPtr&  classType,
     MEMOFFSET_REL  startOffset
     )
@@ -675,7 +681,7 @@ TypedVarPtr TypedVarUdt::getVirtualMethodRecursive(
              MEMDISPLACEMENT displacement =  ptrSignDWord( vtbl + virtualDispIndex*virtualDispSize );
              MEMOFFSET_REL baseClassOffset = virtualBasePtr + displacement;
 
-             virtMethod = getVirtualMethodRecursive(methodName, baseClass, baseClassOffset );
+             virtMethod = getVirtualMethodRecursive(methodName, methodPrototype, baseClass, baseClassOffset );
         }
         else
         {
@@ -685,7 +691,7 @@ TypedVarPtr TypedVarUdt::getVirtualMethodRecursive(
 
             MEMOFFSET_REL  baseClassOffset = classType->getBaseClassOffset(i);
 
-            virtMethod = getVirtualMethodRecursive(methodName, baseClass, startOffset + baseClassOffset );
+            virtMethod = getVirtualMethodRecursive(methodName, methodPrototype, baseClass, startOffset + baseClassOffset );
         }
 
         if ( virtMethod )
@@ -698,7 +704,7 @@ TypedVarPtr TypedVarUdt::getVirtualMethodRecursive(
 
         std::wstring className = classType->getName();
 
-        methodType = classType->getMethod(methodName);
+        methodType = classType->getMethod(methodName, methodPrototype);
 
     }
     catch( TypeException& )

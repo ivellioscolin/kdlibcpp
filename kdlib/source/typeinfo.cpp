@@ -313,6 +313,147 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring  callingConventionAsStr(kdlib::CallingConventionType  calltype)
+{
+    using namespace kdlib;
+
+    switch (calltype)
+    {
+    case CallConv_NearC:
+        return L"__cdecl";
+        break;
+
+    case CallConv_NearFast:
+        return L"__fastcall";
+        break;
+
+    case CallConv_NearStd:
+        return  L"__stdcall";
+        break;
+
+    case CallConv_ThisCall:
+        return L"__thiscall";
+        break;
+
+    case CallConv_ClrCall:
+        return L"__clrcall";
+        break;
+
+    }
+
+    throw TypeException(L"unknown calling convention");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring  getMethodPrototype( kdlib::TypeInfoPtr&  methodType )
+{
+    using namespace kdlib;
+
+    std::wstringstream  sstr;
+
+    std::wstring  returnType = methodType->getReturnType()->getName();
+  
+    CallingConventionType ccType = methodType->getCallingConvention();
+    if (ccType == CallConv_NearC && methodType->hasThis())
+        ccType = CallConv_ThisCall;
+
+    std::wstring  callType = callingConventionAsStr(ccType);
+
+    std::wstringstream  sargs;
+
+    for ( size_t i = CallConv_ThisCall == ccType && methodType->hasThis() ? 1 : 0; i < methodType->getElementCount(); ++i )
+    {
+        if ( !sargs.str().empty() )
+           sargs << L',';
+
+        TypeInfoPtr argType = methodType->getElement(i);
+        if (argType->isNoType())
+        {
+            // Variadic function
+            sargs << "...";
+        }
+        else
+        {
+            sargs << argType->getName();
+        }
+    }
+
+    sstr << returnType << L'(' << callType << ')' << L'(' << sargs.str() << L')';
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static const boost::wregex  prototypeMatch1(L"(\\w+)\\s*\\(\\s*(\\w+)\\s*\\)\\s*\\((.*)\\)");
+static const boost::wregex  prototypeMatch2(L"(\\w+)\\s*\\(\\s*(\\w+)\\s+(\\w+)::\\s*\\)\\s*\\((.*)\\)");
+
+bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodPrototype)
+{
+    boost::wsmatch    matchResult;
+
+    std::wstring  returnType;
+    std::wstring  callConversion;
+    std::wstring  className;
+    std::wstring  args;
+
+    if ( boost::regex_match( methodPrototype, matchResult, prototypeMatch1  ) )
+    {
+        returnType = std::wstring(matchResult[1].first, matchResult[1].second);
+        callConversion = std::wstring(matchResult[2].first, matchResult[2].second);
+        args = std::wstring(matchResult[3].first, matchResult[3].second);
+    }
+    else
+    if ( boost::regex_match( methodPrototype, matchResult, prototypeMatch2  ) )
+    {
+        returnType = std::wstring(matchResult[1].first, matchResult[1].second);
+        callConversion = std::wstring(matchResult[2].first, matchResult[2].second);
+        className = std::wstring(matchResult[3].first, matchResult[3].second);
+        args= std::wstring (matchResult[4].first, matchResult[4].second);
+    }
+    else
+        return false;
+ 
+    if ( returnType != methodType->getReturnType()->getName() )
+        return false;
+
+    CallingConventionType ccType = methodType->getCallingConvention();
+    if (ccType == CallConv_NearC && methodType->hasThis())
+        ccType = CallConv_ThisCall;
+
+    if ( callConversion != callingConventionAsStr(ccType) )
+        return false;
+
+    if ( !className.empty() && className != methodType->getClassParent()->getName() )
+        return false;
+
+    args.erase( std::remove_if(args.begin(), args.end(), std::isspace), args.end());
+
+    std::wstringstream  sargs;
+
+    for ( size_t i = CallConv_ThisCall == ccType && methodType->hasThis() ? 1 : 0; i < methodType->getElementCount(); ++i )
+    {
+        if ( !sargs.str().empty() )
+            sargs << L',';
+
+        TypeInfoPtr argType = methodType->getElement(i);
+        if (argType->isNoType())
+        {
+            // Variadic function
+            sargs << "...";
+        }
+        else
+        {
+            sargs << argType->getName();
+        }
+    }
+
+    return args == sargs.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static const boost::wregex baseMatch(L"^(Char)|(WChar)|(Int1B)|(UInt1B)|(Int2B)|(UInt2B)|(Int4B)|(UInt4B)|(Int8B)|(UInt8B)|(Long)|(ULong)|(Float)|(Bool)|(Double)|(Void)|(Hresult)|(NoType)$" );
 
 bool TypeInfo::isBaseType( const std::wstring &typeName )
@@ -862,10 +1003,6 @@ TypeInfoPtr TypeInfoUdt::getClassParent()
 
 TypeInfoPtr  TypeInfoUdt::getMethod( const std::wstring &name, const std::wstring&  prototype)
 {
-    if ( !prototype.empty()  )
-    {
-        NOT_IMPLEMENTED();
-    }
 
     SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
 
@@ -876,7 +1013,11 @@ TypeInfoPtr  TypeInfoUdt::getMethod( const std::wstring &name, const std::wstrin
         std::wstring  methodName = method->getName();
 
         if ( methodName == name )
-            return loadType(method);
+        {
+            TypeInfoPtr  methodType = loadType(method);
+            if ( prototype.empty() || isPrototypeMatch( methodType, prototype ) )
+                return methodType;
+        }
     }
 
     std::wstringstream  sstr;
@@ -1238,8 +1379,7 @@ void TypeInfoEnum::getFields()
 ///////////////////////////////////////////////////////////////////////////////
 
 TypeInfoSymbolFunctionPrototype::TypeInfoSymbolFunctionPrototype( SymbolPtr& symbol ) :
-    m_symbol(symbol),
-    m_hasThis(false)
+    m_symbol(symbol)
 {
     // add this
     try
@@ -1278,21 +1418,8 @@ std::pair<std::wstring, std::wstring> TypeInfoFunctionPrototype::splitName()
     sstr << getReturnType()->getName();
     sstr << L"(";
 
-
-    TypeInfoPtr classParent = getClassParent();
-
-    //bool objectPointerTypePresent = false;
-    //try
-    //{
-    //    m_symbol->getObjectPointerType();
-    //    objectPointerTypePresent = true;
-    //}
-    //catch(const SymbolException &)
-    //{
-    //}
-
     CallingConventionType ccType = getCallingConvention();
-    if (ccType == CallConv_NearC && classParent && hasThis())
+    if (ccType == CallConv_NearC && hasThis())
         ccType = CallConv_ThisCall;
 
     switch (ccType)
@@ -1322,10 +1449,12 @@ std::pair<std::wstring, std::wstring> TypeInfoFunctionPrototype::splitName()
         break;
     }
 
+    TypeInfoPtr classParent = getClassParent();
     if (classParent)
     {
         sstr << L" " << classParent->getName() << "::";
     }
+
     splittedName.first = sstr.str();
 
     std::wstringstream().swap(sstr);

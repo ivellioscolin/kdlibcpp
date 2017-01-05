@@ -19,6 +19,10 @@ inline size_t getPtrSizeBySymbol( SymbolPtr &typeSym )
     return typeSym->getSize();
 }
 
+std::wstring  getMethodPrototype( kdlib::TypeInfoPtr&  methodType );
+
+bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodPrototype);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -428,6 +432,7 @@ protected:
         size_t m_virtualDispSize = 0 );
 
     void getVirtualFields();
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -471,6 +476,10 @@ class TypeInfoFunctionPrototype : public TypeInfoImp
 
 public:
 
+    TypeInfoFunctionPrototype() : 
+        m_hasThis(false)
+        {}
+
 protected:
 
     virtual std::wstring str() {
@@ -496,6 +505,10 @@ protected:
         throw IndexException(index);
     }
 
+    virtual bool hasThis() {
+        return m_hasThis;
+    }
+
     virtual std::wstring getName();
 
     virtual std::pair<std::wstring, std::wstring> splitName();
@@ -504,6 +517,8 @@ protected:
 
     typedef std::vector< TypeInfoPtr > Args;
     Args m_args;
+
+    bool m_hasThis;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -531,10 +546,6 @@ protected:
 
     virtual TypeInfoPtr getReturnType();
 
-    virtual bool hasThis() {
-        return m_hasThis;
-    }
-
     virtual size_t getSize() {
         return m_symbol->getSize();
     }
@@ -548,7 +559,6 @@ protected:
 private:
     SymbolPtr m_symbol;
 
-    bool m_hasThis;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

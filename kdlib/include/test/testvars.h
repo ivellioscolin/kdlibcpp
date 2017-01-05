@@ -182,6 +182,11 @@ public:
 
     int proBaseMethod(long a) const { return a * 10; }
 
+    virtual int virtMethod1(float a)
+    {
+        return -10;
+    }
+
 };
 
 class classBase1 : public classProBase1 {
@@ -214,6 +219,10 @@ public:
     virtual int virtMethod4() {
         return 24;
     }
+
+    float overloadMethod(float a, float b) {
+        return a*b;
+    }
 };
 
 
@@ -231,11 +240,13 @@ public:
     int m_childField2;
     structTest m_childField3;
     enumType m_enumField;
+
     int childMethod(int var) const{
         baseMethod(33);
         staticMethod(10,1);
         return m_childField * 5;
     }
+
     virtual int virtMethod1(int a) { return 1;}
     
     virtual void virtMethod2() {}
@@ -251,6 +262,14 @@ public:
     static char staticMethod( int a, int b ) { return static_cast<char>(a/b); }
 
     void noBodyFunc(int a);
+
+    int overloadMethod(int a) {
+        return a*10;
+    }
+
+    int overloadMethod(int a, int b) {
+        return a*b;
+    }
 
     classChild() :
         m_enumField( THREE ),

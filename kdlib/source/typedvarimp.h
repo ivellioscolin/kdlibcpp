@@ -254,15 +254,19 @@ protected:
 
     TypedVarPtr getMethodRecursive( 
         const std::wstring& methodName,
+        const std::wstring& methodPrototype,
         TypeInfoPtr&  baseClass,
         MEMOFFSET_REL startOffset
         );
 
     TypedVarPtr getVirtualMethodRecursive( 
         const std::wstring& methodName, 
+        const std::wstring& methodPrototype,
         TypeInfoPtr&  baseClass,
         MEMOFFSET_REL startOffset
         );
+
+    
 };
 
 

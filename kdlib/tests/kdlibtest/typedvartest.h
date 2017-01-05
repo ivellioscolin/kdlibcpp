@@ -189,7 +189,7 @@ TEST_F( TypedVarTest, ContainingRecord )
     EXPECT_EQ( 0, *liststr->getElement(L"num") );
 }
 
-TEST_F( TypedVarTest, StaticMember )
+TEST_F( TypedVarTest, DISABLED_StaticMember )
 {
     TypedVarPtr   var;
     ASSERT_NO_THROW( var = loadTypedVar(L"g_classChild") );
@@ -281,7 +281,7 @@ TEST_F( TypedVarTest, FunctionDebugRange )
 }
 
 
-TEST_F(TypedVarTest, getVTBL)
+TEST_F(TypedVarTest, DISABLED_getVTBL)
 {
     TypedVarPtr  vtbl;
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
@@ -357,6 +357,16 @@ TEST_F(TypedVarTest, GetMethod)
     EXPECT_EQ( kdlib::getSymbolOffset(L"classChild::childMethod"), childMethod->getAddress() );
 
     EXPECT_EQ( childMethod->getAddress(), loadTypedVar( childMethod->getName() )->getAddress() );
+}
+
+TEST_F(TypedVarTest, GetMethodWithPrototype)
+{
+    TypedVarPtr  g_classChild;
+    TypedVarPtr  childMethod;
+
+    ASSERT_NO_THROW( g_classChild = loadTypedVar( L"g_classChild" ) );
+    ASSERT_NO_THROW( g_classChild->getMethod( L"overloadMethod", L"Int4B(__thiscall)(Int4B)" ) );
+    ASSERT_NO_THROW( g_classChild->getMethod( L"overloadMethod", L"Float(__thiscall)(Float, Float)" ) );
 }
 
 TEST_F(TypedVarTest, GetInheritMethod)
