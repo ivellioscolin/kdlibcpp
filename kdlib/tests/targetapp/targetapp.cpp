@@ -26,6 +26,8 @@ void __cdecl sleepThread(void*);
 int _tmain(int argc, _TCHAR* argv[])
 {
     g_classChild.childMethod(10);
+    g_classChild.overloadMethod(10);
+    g_classChild.overloadMethod(10,20);
 
     g_stdString.find_first_of('S');
 
