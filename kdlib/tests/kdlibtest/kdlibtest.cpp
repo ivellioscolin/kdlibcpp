@@ -17,6 +17,7 @@
 #include "disasmtest.h"
 #include "targettest.h"
 #include "winapitest.h"
+#include "crttest.h"
 
 class Environment : public ::testing::Environment {
 public:

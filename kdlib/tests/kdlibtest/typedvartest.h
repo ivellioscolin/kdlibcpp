@@ -320,6 +320,8 @@ TEST_F(TypedVarTest, FunctionCall)
     EXPECT_EQ( 0x100000001 & 1, funcptr->call({ 0x100000001, 1 } ) );
     EXPECT_EQ( 2 & 0xF, funcptr->call( { 2ULL, 0xFULL } ) );  
 
+    EXPECT_NO_THROW( loadTypedVar( L"CdeclVoidFunc" )->call( {} ) );
+
     //ASSERT_NO_THROW( funcptr = loadTypedVar( L"StdcallFuncFloat" ) );
     //EXPECT_FLOAT_EQ( 3.0f/1.5f, funcptr->call(2, 3.0f, 1.5f ) );
     //EXPECT_FLOAT_EQ( 25.0f/-0.1f, funcptr->call(2, 25.0f, -0.1f ).asFloat() );

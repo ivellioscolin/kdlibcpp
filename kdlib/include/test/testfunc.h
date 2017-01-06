@@ -1,5 +1,9 @@
 #pragma once
 
+void
+__cdecl
+CdeclVoidFunc();
+
 void 
 __cdecl
 CdeclFunc( int a, float b);

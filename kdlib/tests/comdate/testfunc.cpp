@@ -5,6 +5,15 @@
 
 #include "test/testfunc.h"
 
+
+void
+__cdecl
+CdeclVoidFunc()
+{
+    static int a = 0;
+    a++;
+}
+
 double
 static
 LocalStaticFunc( int a, float b )

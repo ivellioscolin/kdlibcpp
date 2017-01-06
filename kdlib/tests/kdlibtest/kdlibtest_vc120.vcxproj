@@ -161,6 +161,7 @@
     <ClInclude Include="basefixture.h" />
     <ClInclude Include="breakhandler.h" />
     <ClInclude Include="cputest.h" />
+    <ClInclude Include="crttest.h" />
     <ClInclude Include="disasmtest.h" />
     <ClInclude Include="eventhandlermock.h" />
     <ClInclude Include="eventhandlertest.h" />

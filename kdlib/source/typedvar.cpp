@@ -1251,8 +1251,12 @@ TypedValue TypedVarFunction::callCdecl(const TypedValueList& args)
     {
         return static_cast<unsigned long>(getReturnReg());
     }
+    else if ( retType->isVoid() )
+    {
+        return TypedVarPtr();
+    }
 
-    throw "unsupported return type";
+    throw TypeException(L"unsupported return type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1318,8 +1322,12 @@ TypedValue TypedVarFunction::callThis(const TypedValueList& args)
     {
         return static_cast<unsigned long>(getReturnReg());
     }
+    else if ( retType->isVoid() )
+    {
+        return TypedVarPtr();
+    }
 
-    throw "unsupported return type";
+    throw TypeException(L"unsupported return type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1385,8 +1393,12 @@ TypedValue TypedVarFunction::callX64(const TypedValueList& args)
     {
         return getReturnReg();
     }
+    else if ( retType->isVoid() )
+    {
+        return TypedVarPtr();
+    }
 
-    throw "unsupported return type";
+    throw TypeException(L"unsupported return type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

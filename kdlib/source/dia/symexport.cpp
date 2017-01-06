@@ -120,7 +120,7 @@ class ExportSymbolBase : public Symbol
 
     virtual ULONG getLocType()
     {
-        NOT_IMPLEMENTED();
+        return LocIsStatic;
     }
     
     virtual MachineTypes getMachineType()
@@ -150,7 +150,7 @@ class ExportSymbolBase : public Symbol
 
     virtual SymTags getSymTag()
     {
-        NOT_IMPLEMENTED();
+        return SymTagPublicSymbol;
     }
 
     virtual SymbolPtr getType()
