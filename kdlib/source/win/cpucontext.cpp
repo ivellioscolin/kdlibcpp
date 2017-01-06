@@ -279,6 +279,9 @@ void popFromStack(NumVariant& value)
 
 CPUContextPtr loadCPUContext()
 {
+    if ( kdlib::getCPUMode() == CPU_AMD64 )
+        return CPUContextPtr( new CPUContextAmd64() );
+
     return CPUContextPtr( new CPUContextImpl() );
 }
 
@@ -1286,6 +1289,28 @@ std::wstring  CPUContextWOW64::getRegisterName(unsigned long index)
     std::stringstream sstr;
     sstr << "I386 context: unsupported register index " << std::dec << index;
     throw DbgException(sstr.str());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+CPUContextAmd64::CPUContextAmd64()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->GetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextAmd64::restore()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->SetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

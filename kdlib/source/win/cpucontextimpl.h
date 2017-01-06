@@ -71,6 +71,9 @@ protected:
 class CPUContextAmd64 : public CPUContext
 {
 public:
+
+    CPUContextAmd64();
+
     CPUContextAmd64(const CONTEXT_X64& ctx) :
         m_context(ctx)
     {}
@@ -83,10 +86,7 @@ public:
         return CPU_AMD64;
     }
 
-    virtual void restore() {
-        NOT_IMPLEMENTED();
-    }
-
+    virtual void restore();
 
     virtual NumVariant getRegisterByName(const std::wstring &name) {
         NOT_IMPLEMENTED();

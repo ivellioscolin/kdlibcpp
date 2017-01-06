@@ -12,7 +12,7 @@ public:
     CPUContextTest() : ProcessFixture( L"cputest" ) {}
 };
 
-TEST_F( CPUContextTest, GetRegisters )
+TEST_F( CPUContextTest, DISABLED_GetRegisters )
 {
     CPUContextPtr  cpu;
     ASSERT_NO_THROW( cpu = loadCPUContext() );
@@ -22,7 +22,7 @@ TEST_F( CPUContextTest, GetRegisters )
     EXPECT_NE( 0, cpu->getSP() );
 }
 
-TEST_F( CPUContextTest, RestoreContext )
+TEST_F( CPUContextTest, DISABLED_RestoreContext )
 {
     CPUContextPtr  cpu;
     ASSERT_NO_THROW( cpu = loadCPUContext() );
