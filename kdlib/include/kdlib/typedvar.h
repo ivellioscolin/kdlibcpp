@@ -132,6 +132,7 @@ protected:
 class TypedValue : public NumBehavior
 {
 public:
+    TypedValue();
 
     TypedValue(const TypedVarPtr& var) : m_value(var){}
     TypedValue(const NumVariant& var );

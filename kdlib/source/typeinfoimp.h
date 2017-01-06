@@ -650,8 +650,7 @@ class TypeInfoVoid: public TypeInfoImp
 {
 public:
 
-    TypeInfoVoid( size_t ptrSize )
-    {}
+    TypeInfoVoid( size_t ptrSize=0 );
 
 protected:
 

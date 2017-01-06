@@ -419,7 +419,164 @@ public:
     virtual std::wstring str(); 
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+class TypedVarVoid : public TypedVar
+{
+public:
+
+    TypedVarVoid()
+    {}
+
+    virtual std::wstring str() 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual NumVariant getValue() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    } 
+
+    virtual VarStorage getStorage() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring getRegisterName() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_64 getAddress() const 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_64 getDebugStart() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_64 getDebugEnd() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual size_t getSize() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring getName() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypeInfoPtr getType() const;
+
+    virtual TypedVarPtr deref() 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr getElement( const std::wstring& fieldName ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr getElement( size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_REL getElementOffset( size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual VarStorage getElementStorage(const std::wstring& fieldName)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual VarStorage getElementStorage(size_t index)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual size_t getElementCount()
+     {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring getElementName( size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual size_t getElementIndex( const std::wstring&  elementName )
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"")
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+    
+    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual unsigned long getElementReg(const std::wstring& fieldName)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual unsigned long getElementReg(size_t index)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr castTo(const std::wstring& typeName)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedValue call(const TypedValueList& arglst)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+};
+
+//////////////////////////////////////////////////////////////////////////////
 
 class SymbolFunction : public TypedVarFunction
 {

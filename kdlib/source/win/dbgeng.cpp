@@ -618,14 +618,29 @@ ExecutionStatus targetStepIn()
 
 ExecutionStatus targetStepOut()
 {
+    ULONG  codeLevel;
+    HRESULT  hres;
+
+    hres = g_dbgMgr->control->GetCodeLevel(&codeLevel);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetCodeLevel", hres);
+
+    hres = g_dbgMgr->control->SetCodeLevel(DEBUG_LEVEL_ASSEMBLY);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::SetCodeLevel", hres);
+
     g_dbgMgr->setQuietNotiification(true);
 
     while (Disasm().opmnemo().find(L"ret") != 0 )
         targetChangeStatus(DEBUG_STATUS_STEP_OVER);
 
+    ExecutionStatus exstatus = targetChangeStatus(DEBUG_STATUS_STEP_INTO);
+ 
     g_dbgMgr->setQuietNotiification(false);
 
-    return targetChangeStatus(DEBUG_STATUS_STEP_INTO);
+    g_dbgMgr->control->SetCodeLevel(codeLevel);
+
+    return exstatus;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

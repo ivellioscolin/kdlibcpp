@@ -1253,7 +1253,7 @@ TypedValue TypedVarFunction::callCdecl(const TypedValueList& args)
     }
     else if ( retType->isVoid() )
     {
-        return TypedVarPtr();
+        return TypedVarPtr( new TypedVarVoid() );
     }
 
     throw TypeException(L"unsupported return type");
@@ -1324,7 +1324,7 @@ TypedValue TypedVarFunction::callThis(const TypedValueList& args)
     }
     else if ( retType->isVoid() )
     {
-        return TypedVarPtr();
+        return TypedVarPtr( new TypedVarVoid() );
     }
 
     throw TypeException(L"unsupported return type");
@@ -1395,7 +1395,7 @@ TypedValue TypedVarFunction::callX64(const TypedValueList& args)
     }
     else if ( retType->isVoid() )
     {
-        return TypedVarPtr();
+        return TypedVarPtr( new TypedVarVoid() );
     }
 
     throw TypeException(L"unsupported return type");
@@ -1590,6 +1590,13 @@ std::wstring TypedVarVtbl::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr TypedVarVoid::getType() const
+{
+    return TypeInfoPtr( new TypeInfoVoid() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarMethodBound::TypedVarMethodBound( 
     const TypeInfoPtr& typeInfo,
     const DataAccessorPtr &dataSource, 
@@ -1607,6 +1614,13 @@ TypedValue TypedVarMethodBound::call(const TypedValueList& arglst)
     TypedValueList  argListWithThis = arglst;
     argListWithThis.insert( argListWithThis.begin(), m_this );
     return TypedVarFunction::call(argListWithThis);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedValue::TypedValue()
+{
+    m_value = TypedVarPtr( new TypedVarVoid() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1666,6 +1680,8 @@ TypedValue::TypedValue(const NumVariant& var)
         throw TypeException(L"Failed to convet NumVariant to TypedVar");
     }
 }
+
+    
 
 ///////////////////////////////////////////////////////////////////////////////
 
