@@ -41,6 +41,8 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSou
 
 TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, DataAccessorPtr& dataSource);
 
+TypedVarPtr loadTypedVar( const std::wstring &funcName, const std::wstring &prototype);
+
 TypedVarPtr containingRecord( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName );
 
 TypedVarPtr containingRecord( MEMOFFSET_64 addr, TypeInfoPtr &typeInfo, const std::wstring &fieldName );
@@ -83,6 +85,8 @@ class TypedVar :  public NumBehavior {
     friend TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSource );
 
     friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, DataAccessorPtr& dataSource );
+
+    friend TypedVarPtr loadTypedVar( const std::wstring &funcName, const std::wstring &prototype);
 
 public:
     
@@ -268,8 +272,7 @@ public:
     TypedValue call(const TypedValueList& arglst) {
         return m_value->call(arglst);
     }
-
-
+    
 private:
     TypedVarPtr  m_value;
 };

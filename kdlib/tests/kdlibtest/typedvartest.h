@@ -347,6 +347,12 @@ TEST_F(TypedVarTest, CustomDefineFunctionCall)
     EXPECT_THROW( funcPtr->call( { loadTypedVar(L"Void*", 10 ) } ), TypeException ); //wrong type
 }
 
+TEST_F(TypedVarTest, OverloadFunctionCall)
+{
+    EXPECT_EQ( true, loadTypedVar(L"OverloadedFunc", L"Bool(__cdecl)(Int4B)")->call({11}) );
+    EXPECT_EQ( true, loadTypedVar(L"OverloadedFunc", L"Bool(__cdecl)(Int4B,Int4B)")->call({20,21}) );
+}
+
 TEST_F(TypedVarTest, GetMethod)
 {
     TypedVarPtr  g_classChild;

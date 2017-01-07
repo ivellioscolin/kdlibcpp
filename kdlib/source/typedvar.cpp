@@ -197,6 +197,43 @@ TypedVarPtr loadTypedVar(const TypeInfoPtr &varType, DataAccessorPtr& dataSource
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr loadTypedVar( const std::wstring &funcName, const std::wstring &prototype)
+{
+    std::wstring     moduleName;
+    std::wstring     symName;
+
+    splitSymName( funcName, moduleName, symName );
+
+    ModulePtr  module;
+
+    if ( moduleName.empty() )
+    {
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol( symName );
+        module = loadModule( moduleOffset );
+    }
+    else
+    {
+        module = loadModule( moduleName );
+    }
+
+    SymbolPtrList  functions = module->getSymbolScope()->findChildren(SymTagFunction);
+
+    for ( SymbolPtrList::iterator  it = functions.begin(); it != functions.end(); ++it )
+    {
+        SymbolPtr  sym = *it;
+        if ( sym->getName() == funcName  )
+        {
+            TypeInfoPtr  funcType = loadType(sym->getType());
+            if ( isPrototypeMatch( funcType, prototype ) )
+                return loadTypedVar(sym);
+        }
+    }
+
+    throw TypeException(L"failed to find symbol");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName )
 {
     std::wstring     moduleName;

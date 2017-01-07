@@ -109,9 +109,9 @@ OverloadedFunc(int a)
 }
 
 bool
-OverloadedFunc(float a)
+OverloadedFunc(int a, int b)
 {
-    return a < 1.0f;
+    return a < b;
 }
 
 void

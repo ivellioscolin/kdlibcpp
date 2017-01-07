@@ -53,7 +53,7 @@ bool
 OverloadedFunc(int a);
 
 bool
-OverloadedFunc(float a);
+OverloadedFunc(int a, int b);
 
 class FuncTestClass
 {
