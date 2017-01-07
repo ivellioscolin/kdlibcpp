@@ -279,8 +279,21 @@ void popFromStack(NumVariant& value)
 
 CPUContextPtr loadCPUContext()
 {
-    if ( kdlib::getCPUMode() == CPU_AMD64 )
-        return CPUContextPtr( new CPUContextAmd64() );
+    switch( kdlib::getCPUType() )
+    {
+    case CPU_AMD64:
+
+        if ( kdlib::getCPUMode() == CPU_AMD64 )
+            return CPUContextPtr( new CPUContextAmd64() );
+        else if ( kdlib::getCPUMode() == CPU_I386 )
+            return CPUContextPtr( new CPUContextWOW64() );
+
+        throw DbgException("Unknown CPU Mode");
+
+    case CPU_I386:
+
+        return CPUContextPtr( new CPUContextI386() ); 
+    }
 
     return CPUContextPtr( new CPUContextImpl() );
 }
@@ -965,6 +978,27 @@ void resetCurrentStackFrame()
         throw DbgEngException(L"IDebugSymbols::ResetScope", hres);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+CPUContextI386::CPUContextI386()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->GetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextI386::restore()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->SetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1128,6 +1162,27 @@ std::wstring  CPUContextI386::getRegisterName(unsigned long index)
     throw DbgException(sstr.str());
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+CPUContextWOW64::CPUContextWOW64()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->GetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextWOW64::restore()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->SetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

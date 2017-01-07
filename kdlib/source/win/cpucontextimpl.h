@@ -143,6 +143,9 @@ private:
 class CPUContextI386: public CPUContext
 {
 public:
+
+    CPUContextI386();
+
     CPUContextI386(const CONTEXT_X86& ctx) :
         m_context(ctx)
     {}
@@ -156,10 +159,7 @@ public:
         return CPU_I386;
     }
 
-    virtual void restore() {
-        NOT_IMPLEMENTED();
-    }
-
+    virtual void restore();
 
     virtual NumVariant getRegisterByName(const std::wstring &name) {
         NOT_IMPLEMENTED();
@@ -215,6 +215,9 @@ private:
 class CPUContextWOW64 : public CPUContext
 {
 public:
+
+    CPUContextWOW64();
+
     CPUContextWOW64(const WOW64_CONTEXT& ctx) :
         m_context(ctx)
     {}
@@ -228,9 +231,7 @@ public:
         return CPU_I386;
     }
 
-    virtual void restore() {
-        NOT_IMPLEMENTED();
-    }
+    virtual void restore();
 
 
     virtual NumVariant getRegisterByName(const std::wstring &name) {
