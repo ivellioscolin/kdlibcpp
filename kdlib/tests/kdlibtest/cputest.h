@@ -22,19 +22,22 @@ TEST_F( CPUContextTest, DISABLED_GetRegisters )
     EXPECT_NE( 0, cpu->getSP() );
 }
 
-TEST_F( CPUContextTest, DISABLED_RestoreContext )
+TEST_F( CPUContextTest, RestoreContext )
 {
+
+    NumVariant reg1, reg2;
+    ASSERT_NO_THROW(reg1 = getRegisterByIndex(10));
+    ASSERT_NO_THROW(reg2 = getRegisterByName(L"eax"));
+
     CPUContextPtr  cpu;
     ASSERT_NO_THROW( cpu = loadCPUContext() );
 
-    ASSERT_NO_THROW( setRegisterByIndex( 10, getRegisterByIndex(10) + 10 ) );
-    ASSERT_NO_THROW( setRegisterByName( L"eax", getRegisterByName(L"eax") + 121 ) );
-
-    EXPECT_NE( cpu->getRegisterByIndex(10), getRegisterByIndex(10) );
+    ASSERT_NO_THROW( setRegisterByIndex( 10,  reg1 + 10 ) );
+    ASSERT_NO_THROW( setRegisterByName( L"eax", reg2 + 121 ) );
 
     EXPECT_NO_THROW( cpu->restore() );
 
-    EXPECT_EQ( cpu->getRegisterByIndex(10), getRegisterByIndex(10) );
-    EXPECT_EQ( cpu->getRegisterByName(L"eax"), getRegisterByName(L"eax") );
+    EXPECT_EQ( reg1, getRegisterByIndex(10) );
+    EXPECT_EQ( reg2, getRegisterByName(L"eax") );
 }
 
