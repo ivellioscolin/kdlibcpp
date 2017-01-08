@@ -115,6 +115,7 @@ protected:
     TypedVarPtr getTypedVarByAddr( MEMOFFSET_64 offset );
     TypedVarPtr getTypedVarByName( const std::wstring &symName );
     TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr );
+    TypedVarPtr getTypedVarWithPrototype( const std::wstring &symName, const std::wstring &prototype);
     TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,  const std::wstring &fieldName );
     TypedVarPtr getFunctionByAddr( MEMOFFSET_64 offset );
 

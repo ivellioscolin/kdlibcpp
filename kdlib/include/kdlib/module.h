@@ -86,6 +86,8 @@ public:
 
     virtual TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr ) = 0;
 
+    virtual TypedVarPtr getTypedVarWithPrototype( const std::wstring &symName, const std::wstring &prototype) = 0;
+
     virtual TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName ) = 0;
     
     virtual TypedVarPtr getFunctionByAddr( MEMOFFSET_64 offset ) = 0;
