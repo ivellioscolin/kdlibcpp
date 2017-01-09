@@ -17,7 +17,7 @@ namespace kdlib {
 
 NumVariant getRegisterByName(const std::wstring& regName)
 {
-    unsigned long index = getRegsiterIndex(regName);
+    unsigned long index = getRegisterIndex(regName);
     return getRegisterByIndex(index);
 }
 
@@ -93,7 +93,7 @@ NumVariant getRegisterByIndex(unsigned long index)
 
 void setRegisterByName(const std::wstring& regName, const NumVariant& value)
 {
-    unsigned long index = getRegsiterIndex(regName);
+    unsigned long index = getRegisterIndex(regName);
     return setRegisterByIndex(index, value);
 }
 

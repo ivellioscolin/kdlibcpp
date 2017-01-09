@@ -943,7 +943,7 @@ public:
 
     virtual size_t getLength() const
     {
-        unsigned long  regIndex = kdlib::getRegsiterIndex(m_regName);
+        unsigned long  regIndex = kdlib::getRegisterIndex(m_regName);
         return kdlib::getRegisterSize(regIndex);
     }
 
@@ -1153,7 +1153,7 @@ private:
     template <typename T>
     T getValue(size_t pos) const
     {
-        unsigned long  regIndex = kdlib::getRegsiterIndex(m_regName);
+        unsigned long  regIndex = kdlib::getRegisterIndex(m_regName);
         size_t  regSize = kdlib::getRegisterSize(regIndex);
         if ( pos >= regSize/sizeof(T) )
             throw DbgException("register accessor range error");
@@ -1167,7 +1167,7 @@ private:
     template <typename T>
     void setValue(T& value, size_t pos)
     {
-        unsigned long  regIndex = kdlib::getRegsiterIndex(m_regName);
+        unsigned long  regIndex = kdlib::getRegisterIndex(m_regName);
         size_t  regSize = kdlib::getRegisterSize(regIndex);
         if ( pos >= regSize/sizeof(T) )
             throw DbgException("register accessor range error");
@@ -1183,7 +1183,7 @@ private:
     template <typename T>
     void readValues(std::vector<T>& dataRange, size_t count, size_t pos) const
     {
-        unsigned long  regIndex = kdlib::getRegsiterIndex(m_regName);
+        unsigned long  regIndex = kdlib::getRegisterIndex(m_regName);
         size_t  regSize = kdlib::getRegisterSize(regIndex);
         if ( count > regSize/sizeof(T)  - pos)
             throw DbgException("register accessor range error");
@@ -1199,7 +1199,7 @@ private:
     template <typename T>
     void writeValues( const std::vector<T>&  dataRange, size_t pos) 
     {
-        unsigned long  regIndex = kdlib::getRegsiterIndex(m_regName);
+        unsigned long  regIndex = kdlib::getRegisterIndex(m_regName);
         size_t  regSize = kdlib::getRegisterSize(regIndex);
         if ( dataRange.size() > regSize/sizeof(T) - pos )
             throw DbgException("register accessor range error");

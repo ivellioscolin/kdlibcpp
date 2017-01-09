@@ -1488,11 +1488,11 @@ void setInstructionOffset(MEMOFFSET_64 offset)
     switch( getCPUMode() )
     {
     case CPU_I386:
-        regIndex = getRegsiterIndex(L"eip");
+        regIndex = getRegisterIndex(L"eip");
         break;
 
     case CPU_AMD64:
-        regIndex = getRegsiterIndex(L"rip");
+        regIndex = getRegisterIndex(L"rip");
         break;
 
     default:
@@ -1511,11 +1511,11 @@ void setStackOffset(MEMOFFSET_64 offset)
     switch( getCPUMode() )
     {
     case CPU_I386:
-        regIndex = getRegsiterIndex(L"esp");
+        regIndex = getRegisterIndex(L"esp");
         break;
 
     case CPU_AMD64:
-        regIndex = getRegsiterIndex(L"rsp");
+        regIndex = getRegisterIndex(L"rsp");
         break;
 
     default:
@@ -1534,11 +1534,11 @@ void setFrameOffset(MEMOFFSET_64 offset)
     switch( getCPUMode() )
     {
     case CPU_I386:
-        regIndex = getRegsiterIndex(L"ebp");
+        regIndex = getRegisterIndex(L"ebp");
         break;
 
     case CPU_AMD64:
-        regIndex = getRegsiterIndex(L"rbp");
+        regIndex = getRegisterIndex(L"rbp");
         break;
 
     default:
@@ -1581,7 +1581,7 @@ unsigned long getRegisterNumber()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long getRegsiterIndex( const std::wstring &name )
+unsigned long getRegisterIndex( const std::wstring &name )
 {
     HRESULT  hres;
     ULONG  index;
