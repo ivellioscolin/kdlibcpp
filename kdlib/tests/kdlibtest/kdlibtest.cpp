@@ -19,6 +19,10 @@
 #include "winapitest.h"
 #include "crttest.h"
 
+#ifdef _M_AMD64 
+#include "regtest_x64.h"
+#endif
+
 class Environment : public ::testing::Environment {
 public:
   virtual ~Environment() {}

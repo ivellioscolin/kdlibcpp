@@ -71,6 +71,9 @@
     <ClInclude Include="crttest.h">
       <Filter>testcases</Filter>
     </ClInclude>
+    <ClInclude Include="regtest_x64.h">
+      <Filter>testcases</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.kdlibtest_vc120.config" />
