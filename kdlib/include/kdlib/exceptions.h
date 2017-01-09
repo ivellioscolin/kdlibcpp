@@ -107,8 +107,13 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////////
 
-class CPUException : public DbgException
+class CPUException : public DbgWideException
 {
+public:
+
+    CPUException( const std::wstring  &desc ) :
+        DbgWideException( desc )
+        {}
 };
 
 /////////////////////////////////////////////////////////////////////////////////

@@ -1588,7 +1588,7 @@ unsigned long getRegisterIndex( const std::wstring &name )
 
     hres = g_dbgMgr->registers->GetIndexByNameWide( name.c_str(), &index );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugRegisters2::GetIndexByNameWide", hres ); 
+        throw CPUException(L"invalid register name " + name );
 
     return index;
 }
@@ -1606,7 +1606,7 @@ CPURegType getRegisterType( unsigned long index )
     hres = g_dbgMgr->registers->GetValue( static_cast<ULONG>(index), &dbgvalue );
 
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+        throw CPUException(L"failed to get value of the register");
 
     switch ( dbgvalue.Type )
     {
@@ -1650,6 +1650,9 @@ size_t getRegisterSize(unsigned long index)
 
     DEBUG_VALUE  dbgvalue = {};
     hres = g_dbgMgr->registers->GetValue(index,&dbgvalue);
+
+    if ( FAILED(hres) )
+        throw CPUException(L"failed to get value of the register");
 
     switch ( dbgvalue.Type )
     {
@@ -1700,7 +1703,7 @@ void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
     hres = g_dbgMgr->registers->GetValue(index, &dbgvalue );
 
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+        throw CPUException(L"failed to get value of the register");
 
     switch ( dbgvalue.Type )
     {
@@ -1781,7 +1784,7 @@ void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
 
     hres = g_dbgMgr->registers->GetValue(index, &dbgvalue );
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+        throw CPUException(L"failed to get value of the register");
 
     switch ( dbgvalue.Type )
     {
@@ -1848,7 +1851,7 @@ void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
 
     hres = g_dbgMgr->registers->SetValue(index, &dbgvalue);
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::SetValue", hres ); 
+        throw CPUException(L"failed to set value of the register");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1860,7 +1863,7 @@ unsigned long long loadMSR(unsigned long msrIndex )
 
     hres = g_dbgMgr->dataspace->ReadMsr( msrIndex, &value );
     if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugDataSpaces::ReadMsr", hres );
+         throw CPUException( L"failed to read MSR");
 
     return value;
 }
@@ -1873,7 +1876,7 @@ void setMSR(unsigned long msrIndex, unsigned long long value )
 
     hres = g_dbgMgr->dataspace->WriteMsr(msrIndex, value);
     if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugDataSpaces::WriteMsr", hres );
+        throw CPUException( L"failed to write MSR");
 }
 ///////////////////////////////////////////////////////////////////////////////
 
