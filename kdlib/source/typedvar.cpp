@@ -61,7 +61,6 @@ std::wstring getSymbolName( kdlib::SymbolPtr& symbol )
 
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end noname namespace
@@ -512,6 +511,18 @@ TypedVarPtr TypedVarImp::castTo(const TypeInfoPtr &typeInfo)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypedVarImp::getLocation()
+{
+    if (m_varData->getStorageType() == kdlib::RegisterVar)
+        return std::wstring(L"@") + m_varData->getRegisterName();
+
+    std::wstringstream  sstr;
+    sstr << L"0x" << std::hex << m_varData->getAddress();
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 NumVariant TypedVarBase::getValue() const
 {
     if ( m_typeInfo->getName() == L"Char" )
@@ -565,7 +576,7 @@ std::wstring TypedVarBase::str()
 {
     std::wstringstream  sstr;
 
-    sstr << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
+    sstr << m_typeInfo->getName() << L" at " << getLocation();
     sstr << " Value: ";
     try
     {
@@ -833,7 +844,7 @@ std::wstring TypedVarUdt::str()
 {
     std::wstringstream  sstr;
 
-    sstr << L"struct/class: " << m_typeInfo->getName() << " at 0x" << std::hex << m_varData->getAddress() << std::endl;
+    sstr << L"struct/class: " << m_typeInfo->getName() << L" at " << getLocation() << std::endl;
     
     for ( size_t i = 0; i < m_typeInfo->getElementCount(); ++i )
     {
@@ -919,7 +930,7 @@ std::wstring TypedVarPointer::str()
 {
     std::wstringstream   sstr;
 
-    sstr << L"Ptr " << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
+    sstr << L"Ptr " << m_typeInfo->getName() << L" at " << getLocation();
     sstr << L" Value: " <<  printValue();
 
     return sstr.str();
@@ -973,7 +984,7 @@ std::wstring TypedVarArray::str()
 {
     std::wstringstream   sstr;
 
-    sstr << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
+    sstr << m_typeInfo->getName() << L" at " << getLocation();
 
     return sstr.str();
 }
@@ -1033,7 +1044,7 @@ std::wstring TypedVarEnum::str()
 {
     std::wstringstream       sstr;
 
-    sstr << L"enum: " << m_typeInfo->getName() << L" at 0x" << std::hex << m_varData->getAddress();
+    sstr << L"enum: " << m_typeInfo->getName() << L" at " << getLocation();
     sstr << L" Value: " << printValue();
 
     return sstr.str();

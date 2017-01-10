@@ -162,6 +162,8 @@ protected:
         throw TypeException( L" is not a function");
     }
 
+    std::wstring getLocation();
+
 protected:
 
     TypedVarImp( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
@@ -190,11 +192,10 @@ public:
     std::wstring printValue() const;
 
 protected:
-    
+
     virtual NumVariant getValue() const;
 
     virtual std::wstring str();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
