@@ -446,5 +446,33 @@ TEST_F(TypedVarTest, CallVirtualMethodVirtualInherit)
     EXPECT_EQ( g_virtChild.virtChildMethod(), loadTypedVar( L"g_virtChild" )->getMethod(L"virtChildMethod")->call({}) );
 }
 
+TEST_F(TypedVarTest, RegTypedVar)
+{
+    kdlib::CPUContextAutoRestore  m_contextRestore;
+
+    ASSERT_NO_THROW( setRegisterByName(L"eax", 100) );
+
+    TypedVarPtr   regVar;
+    ASSERT_NO_THROW(regVar = loadTypedVar(L"Int4B", getRegisterAccessor(L"eax")));
+
+    EXPECT_EQ(100, *regVar);
+    EXPECT_NE(L"", regVar->str() );
+}
+
+TEST_F(TypedVarTest, CallFunctionRegTypedVar)
+{
+    kdlib::CPUContextAutoRestore  m_contextRestore;
+
+    ASSERT_NO_THROW( setRegisterByName(L"eax", 100) );
+
+    TypedVarPtr   regVar;
+    ASSERT_NO_THROW(regVar = loadTypedVar(L"Int4B", getRegisterAccessor(L"eax")));
+
+    EXPECT_EQ(100, *regVar);
+    EXPECT_NE(L"", regVar->str() );
+
+    EXPECT_EQ( 100 + 5, loadTypedVar(L"CdeclFuncLong")->call( {regVar} ) );
+}
+
 
 
