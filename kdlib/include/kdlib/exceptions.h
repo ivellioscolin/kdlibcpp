@@ -118,6 +118,17 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////
 
+class CallException : public DbgWideException
+{
+public:
+
+    CallException( const std::wstring  &desc ) :
+        DbgWideException( desc )
+        {}
+};
+
+/////////////////////////////////////////////////////////////////////////////////
+
 
 class IndexException : public DbgException
 {

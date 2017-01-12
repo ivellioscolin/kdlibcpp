@@ -5,6 +5,8 @@
 
 #include "test/testfunc.h"
 
+#include <exception>
+
 
 void
 __cdecl
@@ -166,5 +168,17 @@ void __fastcall PureCFastcallFunc( int a, float b )
 void VariadicFunc(int, ...)
 {
 }
+
+void FuncAccessViolation()
+{
+    size_t  ptr = 0;
+    *reinterpret_cast<int*>(ptr) = 10;
+}
+
+void FuncStdException()
+{
+    throw std::exception("exception");
+}
+
 
 

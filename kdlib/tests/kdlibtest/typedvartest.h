@@ -476,6 +476,12 @@ TEST_F(TypedVarTest, CallFunctionRegTypedVar)
     EXPECT_EQ( 100 + 5, loadTypedVar(L"CdeclFuncLong")->call( {regVar} ) );
 }
 
+TEST_F(TypedVarTest, DISABLED_CallFunctionException)
+{
+    EXPECT_THROW( loadTypedVar(L"FuncAccessViolation")->call({}), CallException );
+    EXPECT_THROW( loadTypedVar(L"FuncStdException")->call({}), CallException );
+}
+
 TEST_F(TypedVarTest, Str)
 {
     std::wstring  str;
