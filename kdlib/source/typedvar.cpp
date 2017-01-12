@@ -1086,8 +1086,12 @@ std::wstring TypedVarEnum::printValue() const
 ///////////////////////////////////////////////////////////////////////////////
 
 std::wstring TypedVarFunction::str()
-{
-    return m_typeInfo->getName();
+{ 
+    std::wstringstream  sstr;
+
+    sstr << L"Function: " << m_typeInfo->getName() << " at " << std::hex << L"0x" << getAddress() << std::endl;
+    
+    return sstr.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

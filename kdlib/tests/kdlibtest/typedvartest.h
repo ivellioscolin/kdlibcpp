@@ -4,8 +4,10 @@
 
 #include "kdlib/typedvar.h"
 #include "kdlib/exceptions.h"
+#include "kdlib/cpucontext.h"
 
 #include "test/testvars.h"
+
 
 using namespace kdlib;
 
@@ -474,5 +476,13 @@ TEST_F(TypedVarTest, CallFunctionRegTypedVar)
     EXPECT_EQ( 100 + 5, loadTypedVar(L"CdeclFuncLong")->call( {regVar} ) );
 }
 
+TEST_F(TypedVarTest, Str)
+{
+    std::wstring  str;
+    EXPECT_NO_THROW( str = loadTypedVar(L"ulonglongVar")->str() );
+    EXPECT_NO_THROW( str = loadTypedVar(L"g_classChild")->str() );
+    EXPECT_NO_THROW( str = loadTypedVar(L"CdeclFuncLong")->str() );
+    EXPECT_NO_THROW( str = loadTypedVar(L"g_classChild")->getMethod( L"childMethod")->str() );
+}
 
 

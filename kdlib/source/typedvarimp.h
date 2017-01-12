@@ -378,6 +378,18 @@ public:
         return m_typeInfo->getElementCount();
     }
 
+    virtual MEMOFFSET_64 getDebugStart() const  {
+        return 0;
+    }
+
+    virtual MEMOFFSET_64 getDebugEnd() const  {
+        return 0;
+    }
+
+    virtual size_t getSize() const  {
+        return 0;
+    }
+
     virtual std::wstring str();
 
     virtual TypedValue call(const TypedValueList& arglst);
