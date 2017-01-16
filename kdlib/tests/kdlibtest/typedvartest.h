@@ -7,6 +7,7 @@
 #include "kdlib/cpucontext.h"
 
 #include "test/testvars.h"
+#include "test/testfunc.h"
 
 
 using namespace kdlib;
@@ -479,7 +480,12 @@ TEST_F(TypedVarTest, CallFunctionRegTypedVar)
 TEST_F(TypedVarTest, DISABLED_CallFunctionException)
 {
     EXPECT_THROW( loadTypedVar(L"FuncAccessViolation")->call({}), CallException );
+
+    EXPECT_THROW( FuncStdException(), std::exception );
     EXPECT_THROW( loadTypedVar(L"FuncStdException")->call({}), CallException );
+
+    EXPECT_EQ( 3*100, FuncWithTry(100) );
+    EXPECT_EQ( 3*100, loadTypedVar(L"FuncWithTry")->call({100}) );
 }
 
 TEST_F(TypedVarTest, Str)

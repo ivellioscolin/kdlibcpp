@@ -71,5 +71,6 @@ extern FuncTestClass FuncReturnClass();
 
 void FuncAccessViolation();
 void FuncStdException();
+int FuncWithTry(int a);
 
 

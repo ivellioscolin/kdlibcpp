@@ -180,5 +180,18 @@ void FuncStdException()
     throw std::exception("exception");
 }
 
+int FuncWithTry(int a)
+{
+    try {
+        FuncStdException();
+    } 
+    catch(std::exception& )
+    {
+        return a*3;
+    }
+
+    return a*4;
+}
+
 
 

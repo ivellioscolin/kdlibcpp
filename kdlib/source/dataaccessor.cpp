@@ -20,13 +20,6 @@ DataAccessorPtr  getEmptyAccessor()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr getVariantAccessor(const NumVariant& var)
-{
-    return DataAccessorPtr(new VariantAccessor(var));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 DataAccessorPtr  getRegisterAccessor(const std::wstring& registerName)
 {
     return DataAccessorPtr(new RegisterAccessor(registerName));
@@ -44,6 +37,12 @@ DataAccessorPtr getCacheAccessor(size_t bufferSize)
 DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer)
 {
     return DataAccessorPtr(new CacheAccessor(buffer) );
+}
+///////////////////////////////////////////////////////////////////////////////
+
+DataAccessorPtr getCacheAccessor(const NumVariant& var)
+{
+    return DataAccessorPtr(new CacheAccessor(var));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

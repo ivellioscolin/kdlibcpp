@@ -593,6 +593,58 @@ public:
         m_buffer(size)
     {}
 
+    CacheAccessor(const NumVariant& var)
+    {
+        if ( var.isChar() )
+        {
+            setValue(var.asChar(),0);
+        }
+        else if ( var.isUChar() )
+        {
+            setValue(var.asUChar(), 0);
+        }
+        else if ( var.isShort() )
+        {
+            setValue(var.asShort(), 0);
+        }
+        else if ( var.isUShort(), 0)
+        {
+            setValue(var.asUShort(), 0);
+        }
+        else if ( var.isLong() )
+        {
+            setValue(var.asLong(), 0);
+        }
+        else if ( var.isULong() )
+        {
+            setValue(var.asULong(), 0);
+        }
+        else if ( var.isLongLong() )
+        {
+            setValue(var.asLongLong(), 0);
+        }
+        else if ( var.isULongLong() )
+        {
+            setValue(var.asULongLong(), 0);
+        }
+        else if ( var.isInt() )
+        {
+            setValue(var.asInt(), 0);
+        }
+        else if ( var.isUInt() )
+        {
+            setValue(var.asUInt(), 0);
+        }
+        else if ( var.isFloat() )
+        {
+            setValue(var.asFloat(), 0);
+        }
+        else if ( var.isDouble() )
+        {
+            setValue(var.asDouble(), 0);
+        }
+    }
+
 private:
 
     virtual size_t getLength() const
@@ -829,7 +881,7 @@ private:
     }
 
     template <typename T>
-    void setValue(T& value, size_t pos)
+    void setValue(T value, size_t pos)
     {
         if ( pos >= m_buffer.size() / sizeof(T) )
             throw DbgException("cache accessor range error");
@@ -860,65 +912,65 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class VariantAccessor : public EmptyAccessor
-{
-public:
-    VariantAccessor(const NumVariant& var) :
-        m_variant(var)
-        {}
-
-    virtual MEMOFFSET_64 getAddress() const
-    {
-        return ~0;
-    }
-
-    virtual unsigned char readByte(size_t pos = 0) const
-    {
-        return m_variant.asUChar();
-    }
-
-    virtual void writeByte(unsigned char value, size_t pos=0)
-    {
-    }
-
-    virtual char readSignByte(size_t pos = 0) const
-    {
-        return m_variant.asChar();
-    }
-
-    virtual unsigned short readWord(size_t pos = 0) const
-    {
-        return m_variant.asUShort();
-    }
-
-    virtual short readSignWord(size_t pos = 0) const
-    {
-        return m_variant.asShort();
-    }
-
-    virtual unsigned long readDWord(size_t pos = 0) const
-    {
-        return m_variant.asULong();
-    }
-
-    virtual long readSignDWord(size_t pos = 0) const
-    {
-        return m_variant.asLong();
-    }
-
-    virtual unsigned long long readQWord(size_t pos = 0) const
-    {
-        return m_variant.asULongLong();
-    }
-
-    virtual long long readSignQWord(size_t pos = 0) const
-    {
-        return m_variant.asLongLong();
-    }
-
-private:
-    NumVariant m_variant;
-};
+//class VariantAccessor : public EmptyAccessor
+//{
+//public:
+//    VariantAccessor(const NumVariant& var) :
+//        m_variant(var)
+//        {}
+//
+//    virtual MEMOFFSET_64 getAddress() const
+//    {
+//        return ~0;
+//    }
+//
+//    virtual unsigned char readByte(size_t pos = 0) const
+//    {
+//        return m_variant.asUChar();
+//    }
+//
+//    virtual void writeByte(unsigned char value, size_t pos=0)
+//    {
+//    }
+//
+//    virtual char readSignByte(size_t pos = 0) const
+//    {
+//        return m_variant.asChar();
+//    }
+//
+//    virtual unsigned short readWord(size_t pos = 0) const
+//    {
+//        return m_variant.asUShort();
+//    }
+//
+//    virtual short readSignWord(size_t pos = 0) const
+//    {
+//        return m_variant.asShort();
+//    }
+//
+//    virtual unsigned long readDWord(size_t pos = 0) const
+//    {
+//        return m_variant.asULong();
+//    }
+//
+//    virtual long readSignDWord(size_t pos = 0) const
+//    {
+//        return m_variant.asLong();
+//    }
+//
+//    virtual unsigned long long readQWord(size_t pos = 0) const
+//    {
+//        return m_variant.asULongLong();
+//    }
+//
+//    virtual long long readSignQWord(size_t pos = 0) const
+//    {
+//        return m_variant.asLongLong();
+//    }
+//
+//private:
+//    NumVariant m_variant;
+//};
 
 ///////////////////////////////////////////////////////////////////////////////
 

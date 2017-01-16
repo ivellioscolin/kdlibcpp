@@ -87,12 +87,12 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr  getEmptyAccessor();
+DataAccessorPtr getEmptyAccessor();
 DataAccessorPtr getMemoryAccessor( MEMOFFSET_64  offset, size_t length);
 DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer);
 DataAccessorPtr getCacheAccessor(size_t bufferSize);
-//DataAccessorPtr getVariantAccessor(const NumVariant& var);
-DataAccessorPtr  getRegisterAccessor(const std::wstring& registerName);
+DataAccessorPtr getCacheAccessor(const NumVariant& var);
+DataAccessorPtr getRegisterAccessor(const std::wstring& registerName);
 
 
 ///////////////////////////////////////////////////////////////////////////////
