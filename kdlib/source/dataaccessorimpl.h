@@ -239,6 +239,11 @@ private:
     {
         throw DbgException("data accessor no data");
     }
+
+    virtual std::wstring getLocationAsStr() const
+    {
+        throw DbgException("data accessor no data");
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -571,6 +576,12 @@ private:
         return MemoryVar;
     }
 
+    virtual std::wstring getLocationAsStr() const
+    {
+        std::wstringstream  sstr;
+        sstr << L"0x" << std::hex << m_begin;
+        return sstr.str();
+    }
 
 private:
 
@@ -585,63 +596,67 @@ class CacheAccessor : public EmptyAccessor
 {
 public:
 
-    CacheAccessor(const std::vector<char>& buffer) :
-        m_buffer(buffer)
+    CacheAccessor(const std::vector<char>& buffer, const std::wstring& location):
+        m_buffer(buffer),
+        m_location(location.empty() ?  L"cached data" : location)
+    {}
+    
+    CacheAccessor(size_t size, const std::wstring& location):
+        m_buffer(size),
+        m_location(location.empty() ?  L"cached data" : location)
     {}
 
-    CacheAccessor(size_t size):
-        m_buffer(size)
-    {}
-
-    CacheAccessor(const NumVariant& var)
+    CacheAccessor(const NumVariant& var, const std::wstring&  location) 
     {
+        m_location = location.empty() ?  L"cached data" : location;
+
         if ( var.isChar() )
         {
-            setValue(var.asChar(),0);
+            resetValue(var.asChar());
         }
         else if ( var.isUChar() )
         {
-            setValue(var.asUChar(), 0);
+            resetValue(var.asUChar());
         }
         else if ( var.isShort() )
         {
-            setValue(var.asShort(), 0);
+            resetValue(var.asShort());
         }
-        else if ( var.isUShort(), 0)
+        else if ( var.isUShort() )
         {
-            setValue(var.asUShort(), 0);
+            resetValue(var.asUShort());
         }
         else if ( var.isLong() )
         {
-            setValue(var.asLong(), 0);
+            resetValue(var.asLong());
         }
         else if ( var.isULong() )
         {
-            setValue(var.asULong(), 0);
+            resetValue(var.asULong());
         }
         else if ( var.isLongLong() )
         {
-            setValue(var.asLongLong(), 0);
+            resetValue(var.asLongLong());
         }
         else if ( var.isULongLong() )
         {
-            setValue(var.asULongLong(), 0);
+            resetValue(var.asULongLong());
         }
-        else if ( var.isInt() )
+        else if ( var.isInt())
         {
-            setValue(var.asInt(), 0);
+            resetValue(var.asInt());
         }
         else if ( var.isUInt() )
         {
-            setValue(var.asUInt(), 0);
+            resetValue(var.asUInt());
         }
         else if ( var.isFloat() )
         {
-            setValue(var.asFloat(), 0);
+            resetValue(var.asFloat());
         }
         else if ( var.isDouble() )
         {
-            setValue(var.asDouble(), 0);
+            resetValue(var.asDouble());
         }
     }
 
@@ -779,7 +794,7 @@ private:
 
     virtual void writeDWords( const std::vector<unsigned long>&  dataRange, size_t  pos=0) 
     {
-        throw DbgException("data accessor no data");
+        writeValues<unsigned long>(dataRange, pos);
     }
 
     virtual void readQWords(std::vector<unsigned long long>&  dataRange, size_t count, size_t  pos = 0) const
@@ -789,7 +804,7 @@ private:
 
     virtual void writeQWords( const std::vector<unsigned long long>&  dataRange, size_t  pos=0) 
     {
-        throw DbgException("data accessor no data");
+        writeValues<unsigned long long>(dataRange, pos);
     }
 
     virtual void readSignBytes(std::vector<char>&  dataRange, size_t count, size_t  pos = 0) const
@@ -799,7 +814,7 @@ private:
 
     virtual void writeSignBytes( const std::vector<char>&  dataRange, size_t  pos=0)
     {
-        throw DbgException("data accessor no data");
+        writeValues<char>(dataRange, pos);
     }
 
     virtual void readSignWords(std::vector<short>&  dataRange, size_t count, size_t  pos = 0) const
@@ -809,7 +824,7 @@ private:
 
     virtual void writeSignWords( const std::vector<short>&  dataRange, size_t  pos=0) 
     {
-        throw DbgException("data accessor no data");
+        writeValues<short>(dataRange, pos);
     }
 
     virtual void readSignDWords(std::vector<long>&  dataRange, size_t count, size_t  pos = 0) const
@@ -819,7 +834,7 @@ private:
 
     virtual void writeSignDWords( const std::vector<long>&  dataRange, size_t  pos=0)
     {
-        throw DbgException("data accessor no data");
+        writeValues<long>(dataRange, pos);
     }
 
     virtual void readSignQWords(std::vector<long long>&  dataRange, size_t count, size_t  pos = 0) const
@@ -829,7 +844,7 @@ private:
 
     virtual void writeSignQWords( const std::vector<long long>&  dataRange, size_t  pos=0) 
     {
-        throw DbgException("data accessor no data");
+        writeValues<long long>(dataRange, pos);
     }
 
     virtual void readFloats(std::vector<float>&  dataRange, size_t count, size_t  pos = 0) const
@@ -839,7 +854,7 @@ private:
 
     virtual void writeFloats( const std::vector<float>&  dataRange, size_t  pos=0) 
     {
-        throw DbgException("data accessor no data");
+        writeValues<float>(dataRange, pos);
     }
 
     virtual void readDoubles(std::vector<double>&  dataRange, size_t count, size_t  pos = 0) const
@@ -849,7 +864,7 @@ private:
 
     virtual void writeDoubles( const std::vector<double>&  dataRange, size_t  pos=0) 
     {
-        throw DbgException("data accessor no data");
+        writeValues<double>(dataRange, pos);
     }
 
     virtual MEMOFFSET_64 getAddress() const
@@ -867,9 +882,16 @@ private:
         throw DbgException("data accessor no data");
     }
 
+    virtual std::wstring getLocationAsStr() const
+    {
+        return m_location;
+    }
+
 private:
 
     std::vector<char>  m_buffer;
+
+    std::wstring  m_location;
 
     template <typename T>
     T getValue(size_t pos) const
@@ -887,6 +909,13 @@ private:
             throw DbgException("cache accessor range error");
 
         *reinterpret_cast<T*>( &m_buffer[pos*sizeof(T)] ) = value;
+    }
+
+    template <typename T>
+    void resetValue(T value)
+    {
+        m_buffer.resize(sizeof(T));
+        *reinterpret_cast<T*>( &m_buffer[0] ) = value;
     }
 
     template <typename T>
@@ -909,68 +938,6 @@ private:
         memcpy( &m_buffer[pos*sizeof(T)], &dataRange[0], dataRange.size()*sizeof(T) );
     }
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-//class VariantAccessor : public EmptyAccessor
-//{
-//public:
-//    VariantAccessor(const NumVariant& var) :
-//        m_variant(var)
-//        {}
-//
-//    virtual MEMOFFSET_64 getAddress() const
-//    {
-//        return ~0;
-//    }
-//
-//    virtual unsigned char readByte(size_t pos = 0) const
-//    {
-//        return m_variant.asUChar();
-//    }
-//
-//    virtual void writeByte(unsigned char value, size_t pos=0)
-//    {
-//    }
-//
-//    virtual char readSignByte(size_t pos = 0) const
-//    {
-//        return m_variant.asChar();
-//    }
-//
-//    virtual unsigned short readWord(size_t pos = 0) const
-//    {
-//        return m_variant.asUShort();
-//    }
-//
-//    virtual short readSignWord(size_t pos = 0) const
-//    {
-//        return m_variant.asShort();
-//    }
-//
-//    virtual unsigned long readDWord(size_t pos = 0) const
-//    {
-//        return m_variant.asULong();
-//    }
-//
-//    virtual long readSignDWord(size_t pos = 0) const
-//    {
-//        return m_variant.asLong();
-//    }
-//
-//    virtual unsigned long long readQWord(size_t pos = 0) const
-//    {
-//        return m_variant.asULongLong();
-//    }
-//
-//    virtual long long readSignQWord(size_t pos = 0) const
-//    {
-//        return m_variant.asLongLong();
-//    }
-//
-//private:
-//    NumVariant m_variant;
-//};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1197,6 +1164,12 @@ public:
     virtual void writeDoubles( const std::vector<double>&  dataRange, size_t  pos=0) 
     {
         writeValues<double>(dataRange, pos);
+    }
+
+
+    virtual std::wstring getLocationAsStr() const
+    {
+        return std::wstring(L"@") + m_regName;
     }
 
 private:

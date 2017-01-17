@@ -511,15 +511,15 @@ TypedVarPtr TypedVarImp::castTo(const TypeInfoPtr &typeInfo)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring TypedVarImp::getLocation()
-{
-    if (m_varData->getStorageType() == kdlib::RegisterVar)
-        return std::wstring(L"@") + m_varData->getRegisterName();
-
-    std::wstringstream  sstr;
-    sstr << L"0x" << std::hex << m_varData->getAddress();
-    return sstr.str();
-}
+//std::wstring TypedVarImp::getLocation()
+//{
+//    if (m_varData->getStorageType() == kdlib::RegisterVar)
+//        return std::wstring(L"@") + m_varData->getRegisterName();
+//
+//    std::wstringstream  sstr;
+//    sstr << L"0x" << std::hex << m_varData->getAddress();
+//    return sstr.str();
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -576,7 +576,7 @@ std::wstring TypedVarBase::str()
 {
     std::wstringstream  sstr;
 
-    sstr << m_typeInfo->getName() << L" at " << getLocation();
+    sstr << m_typeInfo->getName() << L" at " << m_varData->getLocationAsStr();
     sstr << " Value: ";
     try
     {
@@ -844,7 +844,7 @@ std::wstring TypedVarUdt::str()
 {
     std::wstringstream  sstr;
 
-    sstr << L"struct/class: " << m_typeInfo->getName() << L" at " << getLocation() << std::endl;
+    sstr << L"struct/class: " << m_typeInfo->getName() << L" at " <<  m_varData->getLocationAsStr() << std::endl;
     
     for ( size_t i = 0; i < m_typeInfo->getElementCount(); ++i )
     {
@@ -930,7 +930,7 @@ std::wstring TypedVarPointer::str()
 {
     std::wstringstream   sstr;
 
-    sstr << L"Ptr " << m_typeInfo->getName() << L" at " << getLocation();
+    sstr << L"Ptr " << m_typeInfo->getName() << L" at " <<  m_varData->getLocationAsStr();
     sstr << L" Value: " <<  printValue();
 
     return sstr.str();
@@ -984,7 +984,7 @@ std::wstring TypedVarArray::str()
 {
     std::wstringstream   sstr;
 
-    sstr << m_typeInfo->getName() << L" at " << getLocation();
+    sstr << m_typeInfo->getName() << L" at " <<  m_varData->getLocationAsStr();
 
     return sstr.str();
 }
@@ -1044,7 +1044,7 @@ std::wstring TypedVarEnum::str()
 {
     std::wstringstream       sstr;
 
-    sstr << L"enum: " << m_typeInfo->getName() << L" at " << getLocation();
+    sstr << L"enum: " << m_typeInfo->getName() << L" at " <<  m_varData->getLocationAsStr();
     sstr << L" Value: " << printValue();
 
     return sstr.str();
@@ -1143,7 +1143,7 @@ TypedValueList TypedVarFunction::castArgs(const TypedValueList& arglst)
 
     TypedValueList  castedArgs;
 
-    for ( int i = 0; i < m_typeInfo->getElementCount(); ++i )
+    for ( size_t i = 0; i < m_typeInfo->getElementCount(); ++i )
     {
          TypeInfoPtr  argType = m_typeInfo->getElement(i);
 
@@ -1424,6 +1424,19 @@ TypedValue TypedVarFunction::callX64(const TypedValueList& args)
     setInstructionOffset( getAddress() );
 
     targetStepOut();
+
+    if ( getLastEventType() == EventTypeException ) 
+    {
+        ExceptionInfo  excInfo = getLastException();
+
+        std::wstringstream sstr;
+        sstr << L"Exception occured during call function" << std::endl;
+        sstr << L"   Exception address: 0x" << std::hex << excInfo.exceptionAddress << std::endl;
+        sstr << L"   Exception code: 0x" << std::hex << excInfo.exceptionCode << std::endl;
+        sstr << L"   Exception record: 0x" << std::hex << excInfo.exceptionRecord << std::endl;
+
+        throw CallException( sstr.str() );
+    }
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 

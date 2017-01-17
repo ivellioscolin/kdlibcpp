@@ -80,6 +80,8 @@ public:
     virtual void readDoubles( std::vector<double>&  dataRange, size_t count, size_t  pos=0) const = 0;
     virtual void writeDoubles( const std::vector<double>&  dataRange, size_t  pos=0) = 0;
 
+    virtual std::wstring getLocationAsStr() const = 0;
+
     virtual MEMOFFSET_64 getAddress() const = 0;
     virtual VarStorage getStorageType() const = 0;
     virtual std::wstring getRegisterName() const = 0;
@@ -89,9 +91,9 @@ public:
 
 DataAccessorPtr getEmptyAccessor();
 DataAccessorPtr getMemoryAccessor( MEMOFFSET_64  offset, size_t length);
-DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer);
-DataAccessorPtr getCacheAccessor(size_t bufferSize);
-DataAccessorPtr getCacheAccessor(const NumVariant& var);
+DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer, const std::wstring&  location=L"");
+DataAccessorPtr getCacheAccessor(size_t bufferSize, const std::wstring&  location=L"");
+DataAccessorPtr getCacheAccessor(const NumVariant& var, const std::wstring&  location=L"");
 DataAccessorPtr getRegisterAccessor(const std::wstring& registerName);
 
 

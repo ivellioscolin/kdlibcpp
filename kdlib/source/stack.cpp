@@ -160,7 +160,7 @@ TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
             {
                 unsigned long  regId = sym->getRegisterId();
 
-                return loadTypedVar(loadType(sym), getCacheAccessor(m_cpuContext->getRegisterByIndex(regId)));
+                return loadTypedVar(loadType(sym), getCacheAccessor(m_cpuContext->getRegisterByIndex(regId), L"@" + m_cpuContext->getRegisterName(regId)));
             }
             else if (location == LocIsRegRel)
             {
@@ -293,7 +293,7 @@ TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
             {
                 unsigned long  regId = sym->getRegisterId();
 
-                return loadTypedVar(loadType(sym), getCacheAccessor(m_cpuContext->getRegisterByIndex(regId)));
+                return loadTypedVar(loadType(sym), getCacheAccessor(m_cpuContext->getRegisterByIndex(regId), L"@" + m_cpuContext->getRegisterName(regId)));
             }
             else if (location == LocIsRegRel)
             {

@@ -64,6 +64,7 @@ enum CPURegType {
 
 
 enum EventType {
+    EventTypeNoEvent,
     EventTypeBreakpoint,
     EventTypeException,
     EventTypeCreateThread,

@@ -631,16 +631,29 @@ ExecutionStatus targetStepOut()
 
     g_dbgMgr->setQuietNotiification(true);
 
-    while (Disasm().opmnemo().find(L"ret") != 0 )
+    while(true)
+    {
+        std::wstring intsr = Disasm().opmnemo();
+
+        if ( Disasm().opmnemo().find(L"ret") != std::wstring::npos)
+        {
+            targetChangeStatus(DEBUG_STATUS_STEP_INTO);
+            break;
+        }
+
         targetChangeStatus(DEBUG_STATUS_STEP_OVER);
 
-    ExecutionStatus exstatus = targetChangeStatus(DEBUG_STATUS_STEP_INTO);
- 
+        if ( getLastEventType() == EventTypeException )
+        {
+            break;
+        }
+    }
+
     g_dbgMgr->setQuietNotiification(false);
 
     g_dbgMgr->control->SetCodeLevel(codeLevel);
 
-    return exstatus;
+    return targetExecutionStatus();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2173,6 +2186,9 @@ EventType getLastEventType()
     if (S_OK != hres)
         throw DbgEngException(L"IDebugControl::GetLastEventInformation", hres);
 
+    if ( eventType == 0 )
+        return EventTypeNoEvent;
+
     switch (eventType)
     {
     case DEBUG_EVENT_BREAKPOINT:
@@ -2203,7 +2219,7 @@ EventType getLastEventType()
         return EventTypeChangeSymbolState;
     }
 
-    throw DbgException( "unknow wvwnrt type");
+    throw DbgException( "unknow event type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

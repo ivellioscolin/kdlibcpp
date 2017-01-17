@@ -462,6 +462,19 @@ TEST_F(TypedVarTest, RegTypedVar)
     EXPECT_NE(L"", regVar->str() );
 }
 
+TEST_F(TypedVarTest, VariantTypedVar)
+{
+    TypedVarPtr   var;
+    ASSERT_NO_THROW(var = loadTypedVar(L"Int4B", getCacheAccessor( NumVariant(100))));
+    EXPECT_EQ(100, *var);
+    EXPECT_FALSE(var->str().empty() );
+
+    ASSERT_NO_THROW(var = loadTypedVar(L"Float", getCacheAccessor( NumVariant(55.5f))));
+    EXPECT_FLOAT_EQ(55.5f, *var);
+    EXPECT_FALSE(var->str().empty() );
+}
+
+
 TEST_F(TypedVarTest, CallFunctionRegTypedVar)
 {
     kdlib::CPUContextAutoRestore  m_contextRestore;

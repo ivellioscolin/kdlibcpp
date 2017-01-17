@@ -161,8 +161,7 @@ protected:
     {
         throw TypeException( L" is not a function");
     }
-
-    std::wstring getLocation();
+    
 
 protected:
 

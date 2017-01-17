@@ -27,22 +27,22 @@ DataAccessorPtr  getRegisterAccessor(const std::wstring& registerName)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr getCacheAccessor(size_t bufferSize)
+DataAccessorPtr getCacheAccessor(size_t bufferSize, const std::wstring&  location)
 {
-    return DataAccessorPtr(new CacheAccessor(bufferSize) );
+    return DataAccessorPtr(new CacheAccessor(bufferSize, location) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer)
+DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer, const std::wstring&  location)
 {
-    return DataAccessorPtr(new CacheAccessor(buffer) );
+    return DataAccessorPtr(new CacheAccessor(buffer, location) );
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-DataAccessorPtr getCacheAccessor(const NumVariant& var)
+DataAccessorPtr getCacheAccessor(const NumVariant& var, const std::wstring&  location)
 {
-    return DataAccessorPtr(new CacheAccessor(var));
+    return DataAccessorPtr(new CacheAccessor(var, location));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
