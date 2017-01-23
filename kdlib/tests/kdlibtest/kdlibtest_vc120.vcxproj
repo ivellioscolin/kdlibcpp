@@ -182,6 +182,7 @@
     <ClInclude Include="moduletest.h" />
     <ClInclude Include="processtest.h" />
     <ClInclude Include="procfixture.h" />
+    <ClInclude Include="regtest_x64.h" />
     <ClInclude Include="stacktest.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targettest.h" />

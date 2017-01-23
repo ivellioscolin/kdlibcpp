@@ -10,6 +10,7 @@
 #include "kdlib/module.h"
 #include "kdlib/stack.h"
 #include "kdlib/cpucontext.h"
+#include "kdlib/breakpoint.h"
 
 #include "typedvarimp.h"
 #include "typeinfoimp.h"
@@ -1270,34 +1271,18 @@ TypedValue TypedVarFunction::callCdecl(const TypedValueList& args)
         it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
     }
 
-    pushInStack( static_cast<unsigned long>(getInstructionOffset()));
-
-    setInstructionOffset( getAddress() );
-
-    targetStepOut();
+    makeCallx86();
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 
     if (retType->isBase() )
     {
-        if ( retType->getName() == L"Float" )
+        if ( retType->getName() == L"Float" || retType->getName() == L"Double" )
         {
             NOT_IMPLEMENTED();
         }
-        else 
-        if ( retType->getName() == L"Double" )
-        {
-            NOT_IMPLEMENTED();
-        }
-        else
-        {
-            if ( retType->getSize() == 8 )
-            {
-                return getReturnReg();
-            }
 
-            return static_cast<unsigned long>(getReturnReg());
-        }
+        return castBaseArg( retType, getReturnReg() );
     }
     else if ( retType->isPointer() )
     {
@@ -1341,34 +1326,18 @@ TypedValue TypedVarFunction::callThis(const TypedValueList& args)
             it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
     }
 
-    pushInStack( static_cast<unsigned long>(getInstructionOffset()));
-
-    setInstructionOffset( getAddress() );
-
-    targetStepOut();
+    makeCallx86();
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 
     if (retType->isBase() )
     {
-        if ( retType->getName() == L"Float" )
+        if ( retType->getName() == L"Float" || retType->getName() == L"Double" )
         {
             NOT_IMPLEMENTED();
         }
-        else 
-        if ( retType->getName() == L"Double" )
-        {
-            NOT_IMPLEMENTED();
-        }
-        else
-        {
-            if ( retType->getSize() == 8 )
-            {
-                return getReturnReg();
-            }
 
-            return static_cast<unsigned long>(getReturnReg());
-        }
+        return castBaseArg( retType, getReturnReg() );
     }
     else if ( retType->isPointer() )
     {
@@ -1419,40 +1388,18 @@ TypedValue TypedVarFunction::callX64(const TypedValueList& args)
         }
     }
 
-    pushInStack( getInstructionOffset());
-
-    setInstructionOffset( getAddress() );
-
-    targetStepOut();
-
-    if ( getLastEventType() == EventTypeException ) 
-    {
-        ExceptionInfo  excInfo = getLastException();
-
-        std::wstringstream sstr;
-        sstr << L"Exception occured during call function" << std::endl;
-        sstr << L"   Exception address: 0x" << std::hex << excInfo.exceptionAddress << std::endl;
-        sstr << L"   Exception code: 0x" << std::hex << excInfo.exceptionCode << std::endl;
-        sstr << L"   Exception record: 0x" << std::hex << excInfo.exceptionRecord << std::endl;
-
-        throw CallException( sstr.str() );
-    }
+    makeCallx64();
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 
     if (retType->isBase() )
     {
-        if ( retType->getName() == L"Float" )
-        {
-            NOT_IMPLEMENTED();
-        }
-        else 
-        if ( retType->getName() == L"Double" )
+        if ( retType->getName() == L"Float" || retType->getName() == L"Double" )
         {
             NOT_IMPLEMENTED();
         }
 
-        return getReturnReg();
+        return castBaseArg( retType, getReturnReg() );
     }
     else if ( retType->isPointer() )
     {
@@ -1464,6 +1411,78 @@ TypedValue TypedVarFunction::callX64(const TypedValueList& args)
     }
 
     throw TypeException(L"unsupported return type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypedVarFunction::makeCallx86()
+{
+    MEMOFFSET_64   ip = getInstructionOffset();
+
+    ScopedBreakpoint  bp = softwareBreakPointSet(ip);
+
+    pushInStack( static_cast<unsigned long>(ip));
+
+    setInstructionOffset( getAddress() );
+
+    while( getInstructionOffset() != ip )
+    {
+        targetGo();
+
+        if ( getLastEventType() == EventTypeException )
+        {
+            ExceptionInfo  excInfo = getLastException();
+
+            if ( !excInfo.firstChance )
+            {
+
+                std::wstringstream sstr;
+                sstr << L"Exception occured during call function" << std::endl;
+                sstr << L"   Exception address: 0x" << std::hex << excInfo.exceptionAddress << std::endl;
+                sstr << L"   Exception code: 0x" << std::hex << excInfo.exceptionCode << std::endl;
+                sstr << L"   Exception record: 0x" << std::hex << excInfo.exceptionRecord << std::endl;
+
+                throw CallException( sstr.str() );
+            }
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypedVarFunction::makeCallx64()
+{
+    StackPtr  stk = getStack();
+    StackFramePtr  lastFrame = stk->getFrame(0);
+    MEMOFFSET_64   ip = lastFrame->getIP();
+
+    ScopedBreakpoint  bp = softwareBreakPointSet(ip);
+
+    pushInStack(ip);
+
+    setInstructionOffset( getAddress() );
+    
+    while( getInstructionOffset() != ip )
+    {
+        targetGo();
+
+        if ( getLastEventType() == EventTypeException )
+        {
+            ExceptionInfo  excInfo = getLastException();
+
+            if ( !excInfo.firstChance )
+            {
+
+                std::wstringstream sstr;
+                sstr << L"Exception occured during call function" << std::endl;
+                sstr << L"   Exception address: 0x" << std::hex << excInfo.exceptionAddress << std::endl;
+                sstr << L"   Exception code: 0x" << std::hex << excInfo.exceptionCode << std::endl;
+                sstr << L"   Exception record: 0x" << std::hex << excInfo.exceptionRecord << std::endl;
+
+                throw CallException( sstr.str() );
+            }
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

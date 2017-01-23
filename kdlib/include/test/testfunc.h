@@ -70,6 +70,7 @@ extern void (__cdecl*CdeclStaticMethodPtr)();
 extern FuncTestClass FuncReturnClass();
 
 void FuncAccessViolation();
+int FuncWithSeh(long long a);
 void FuncStdException();
 int FuncWithTry(int a);
 

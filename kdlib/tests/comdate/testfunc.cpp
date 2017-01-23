@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <string.h>
+#include <excpt.h>
 
 #pragma optimize("g", off)
 
@@ -173,6 +174,19 @@ void FuncAccessViolation()
 {
     size_t  ptr = 0;
     *reinterpret_cast<int*>(ptr) = 10;
+}
+
+int FuncWithSeh(long long a)
+{
+    __try {
+
+        FuncAccessViolation();
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+    }
+
+    return a/8;
 }
 
 void FuncStdException()

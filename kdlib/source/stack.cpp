@@ -440,38 +440,49 @@ bool StackFrameImpl::findStaticVar(const std::wstring& varName)
 
 SymbolPtrList  StackFrameImpl::getLocalVars()
 {
-    ModulePtr mod  = loadModule(m_ip);
-
-    MEMDISPLACEMENT displacemnt;
-    SymbolPtr symFunc = mod->getSymbolByVa( m_ip, SymTagFunction, &displacemnt );
 
     SymbolPtrList  lst;
 
-    DebugRange  debugRange = getFuncDebugRange(symFunc);
+    try {
 
-    if ( !inDebugRange(debugRange, m_ip) )
-        return lst;
+        ModulePtr mod  = loadModule(m_ip);
 
-    //find var in current scope
-    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
+        MEMDISPLACEMENT displacemnt;
+        SymbolPtr symFunc = mod->getSymbolByVa( m_ip, SymTagFunction, &displacemnt );
 
-    SymbolPtrList::iterator it;
-    for ( it = symList.begin(); it != symList.end(); it++ )
-    {
-        if ( (*it)->getDataKind() == DataIsLocal  )
-            lst.push_back( *it );
-    }
 
-    //find inners scopes
-    SymbolPtrList scopeList = symFunc->findChildren(SymTagBlock);
-    SymbolPtrList::iterator itScope = scopeList.begin();
 
-    for (; itScope != scopeList.end(); ++itScope)
-    {
-        SymbolPtrList  innerVars = getBlockLocalVars(*itScope);
+        DebugRange  debugRange = getFuncDebugRange(symFunc);
+
+        if ( !inDebugRange(debugRange, m_ip) )
+            return lst;
+
+        //find var in current scope
+        SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
+
+        SymbolPtrList::iterator it;
+        for ( it = symList.begin(); it != symList.end(); it++ )
+        {
+            if ( (*it)->getDataKind() == DataIsLocal  )
+                lst.push_back( *it );
+        }
+
+        //find inners scopes
+        SymbolPtrList scopeList = symFunc->findChildren(SymTagBlock);
+        SymbolPtrList::iterator itScope = scopeList.begin();
+
+        for (; itScope != scopeList.end(); ++itScope)
+        {
+            SymbolPtrList  innerVars = getBlockLocalVars(*itScope);
  
-        lst.insert( lst.end(), innerVars.begin(), innerVars.end() );
+            lst.insert( lst.end(), innerVars.begin(), innerVars.end() );
+        }
+
     }
+    catch(SymbolException&)
+    {
+    }
+
 
     return lst;
 }
@@ -480,23 +491,32 @@ SymbolPtrList  StackFrameImpl::getLocalVars()
 
 SymbolPtrList StackFrameImpl::getParams()
 {
-    ModulePtr mod = loadModule(m_ip);
-
-    MEMDISPLACEMENT displacemnt;
-    SymbolPtr symFunc = mod->getSymbolByVa(m_ip, SymTagFunction, &displacemnt);
-
     SymbolPtrList  lst;
 
-    // find var in current scope
-    SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
-
-    SymbolPtrList::iterator it;
-    for (it = symList.begin(); it != symList.end(); it++)
+    try 
     {
-        unsigned long dataKind = (*it)->getDataKind();
 
-        if ( dataKind == DataIsParam || dataKind == DataIsObjectPtr )
-            lst.push_back(*it);
+        ModulePtr mod = loadModule(m_ip);
+
+        MEMDISPLACEMENT displacemnt;
+        SymbolPtr symFunc = mod->getSymbolByVa(m_ip, SymTagFunction, &displacemnt);
+
+
+        // find var in current scope
+        SymbolPtrList symList = symFunc->findChildrenByRVA(SymTagData, static_cast<MEMOFFSET_32>(m_ip - mod->getBase()));
+
+        SymbolPtrList::iterator it;
+        for (it = symList.begin(); it != symList.end(); it++)
+        {
+            unsigned long dataKind = (*it)->getDataKind();
+
+            if ( dataKind == DataIsParam || dataKind == DataIsObjectPtr )
+                lst.push_back(*it);
+        }
+
+    }
+    catch(SymbolException&)
+    {
     }
 
     return lst;

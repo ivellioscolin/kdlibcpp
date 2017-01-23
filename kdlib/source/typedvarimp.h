@@ -404,6 +404,9 @@ protected:
     TypedValue callFast(const TypedValueList& arglst);
     TypedValue callThis(const TypedValueList& arglst);
     TypedValue callX64(const TypedValueList& arglst);
+
+    void makeCallx86();
+    void makeCallx64();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

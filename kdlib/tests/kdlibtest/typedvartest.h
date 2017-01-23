@@ -51,7 +51,7 @@ TEST_F( TypedVarTest, TypedVarPtr )
     TypedVarPtr     ptr;
     MEMOFFSET_64    ptrAddr = m_targetModule->getSymbolVa( L"g_structTestPtr" );
 
-    EXPECT_NO_THROW( ptr = loadTypedVar(L"g_structTestPtr") );
+    ASSERT_NO_THROW( ptr = loadTypedVar(L"g_structTestPtr") );
     EXPECT_EQ( ptrPtr( ptrAddr ), *ptr );
     EXPECT_EQ( ptrAddr, ptr->getAddress() );
 
@@ -62,7 +62,7 @@ TEST_F( TypedVarTest, TypedVarArray )
     TypedVarPtr  var;
     MEMOFFSET_64  varAddr = m_targetModule->getSymbolVa( L"g_testArray" );
 
-    EXPECT_NO_THROW( var = loadTypedVar(L"g_testArray") );
+    ASSERT_NO_THROW( var = loadTypedVar(L"g_testArray") );
     EXPECT_EQ( varAddr, *var);
     EXPECT_EQ( varAddr, var->getAddress() );
 }
@@ -71,7 +71,7 @@ TEST_F( TypedVarTest, BitFields )
 {
     TypedVarPtr  typedVar;
 
-    EXPECT_NO_THROW( typedVar = loadTypedVar(L"g_structWithBits") );
+    ASSERT_NO_THROW( typedVar = loadTypedVar(L"g_structWithBits") );
     EXPECT_EQ( g_structWithBits.m_bit0_4, *typedVar->getElement(L"m_bit0_4") );
     EXPECT_EQ( g_structWithBits.m_bit5, *typedVar->getElement(L"m_bit5") );
     EXPECT_EQ( g_structWithBits.m_bit6_8, *typedVar->getElement(L"m_bit6_8") );
@@ -490,15 +490,19 @@ TEST_F(TypedVarTest, CallFunctionRegTypedVar)
     EXPECT_EQ( 100 + 5, loadTypedVar(L"CdeclFuncLong")->call( {regVar} ) );
 }
 
-TEST_F(TypedVarTest, DISABLED_CallFunctionException)
+TEST_F(TypedVarTest, CallFunctionException)
 {
     EXPECT_THROW( loadTypedVar(L"FuncAccessViolation")->call({}), CallException );
 
+    EXPECT_EQ( FuncWithSeh(0x8000000000), loadTypedVar(L"FuncWithSeh")->call({0x8000000000}) );
+}
+
+TEST_F(TypedVarTest, DISABLED_CallFunctionStdException)
+{
     EXPECT_THROW( FuncStdException(), std::exception );
     EXPECT_THROW( loadTypedVar(L"FuncStdException")->call({}), CallException );
 
-    EXPECT_EQ( 3*100, FuncWithTry(100) );
-    EXPECT_EQ( 3*100, loadTypedVar(L"FuncWithTry")->call({100}) );
+    EXPECT_EQ(FuncWithTry(100), loadTypedVar(L"FuncWithTry")->call({100}) );
 }
 
 TEST_F(TypedVarTest, Str)

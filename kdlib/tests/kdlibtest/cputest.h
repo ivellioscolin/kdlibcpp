@@ -41,3 +41,28 @@ TEST_F( CPUContextTest, RestoreContext )
     EXPECT_EQ( reg2, getRegisterByName(L"eax") );
 }
 
+TEST_F( CPUContextTest, GetStackRegs )
+{
+    EXPECT_NO_THROW( getStackOffset() );
+    EXPECT_NO_THROW( getFrameOffset() );
+    EXPECT_NO_THROW( getInstructionOffset() );
+}
+
+TEST_F( CPUContextTest, SetStackRegs )
+{
+    MEMOFFSET_64  sp = getStackOffset();
+    ASSERT_NO_THROW( setStackOffset(sp+100) );
+    EXPECT_EQ(sp+100, getStackOffset() );
+    ASSERT_NO_THROW( setStackOffset(sp) );
+
+    MEMOFFSET_64  fp = getFrameOffset();
+    ASSERT_NO_THROW( setFrameOffset(fp+100) );
+    EXPECT_EQ(fp+100, getFrameOffset() );
+    ASSERT_NO_THROW( setFrameOffset(fp) );
+
+    MEMOFFSET_64  ip = getInstructionOffset();
+    ASSERT_NO_THROW( setInstructionOffset(ip+100) );
+    EXPECT_EQ(ip+100, getInstructionOffset() );
+    ASSERT_NO_THROW( setInstructionOffset(ip) );
+}
+

@@ -226,7 +226,7 @@ void pushInStack(const NumVariant& value)
         return;
     }
 
-    if ( value.isLong() || value.isULong() )
+    if ( value.isLong() || value.isULong() || value.isInt()  || value.isUInt() )
     {
         setDWord( stackAlloc(4), value.asULong() );
         return;
