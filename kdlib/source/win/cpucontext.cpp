@@ -286,7 +286,7 @@ CPUContextPtr loadCPUContext()
         if ( kdlib::getCPUMode() == CPU_AMD64 )
             return CPUContextPtr( new CPUContextAmd64() );
         else if ( kdlib::getCPUMode() == CPU_I386 )
-            return CPUContextPtr( new CPUContextWOW64() );
+            return CPUContextPtr( new CPUContextImpl() );
 
         throw DbgException("Unknown CPU Mode");
 
@@ -1160,28 +1160,6 @@ std::wstring  CPUContextI386::getRegisterName(unsigned long index)
     std::stringstream sstr;
     sstr << "I386 context: unsupported register index " << std::dec << index;
     throw DbgException(sstr.str());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-CPUContextWOW64::CPUContextWOW64()
-{
-    HRESULT  hres;
-
-    hres = g_dbgMgr->advanced->GetThreadContext(&m_context, sizeof(m_context) );
-    if ( FAILED(hres) )
-        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void CPUContextWOW64::restore()
-{
-    HRESULT  hres;
-
-    hres = g_dbgMgr->advanced->SetThreadContext(&m_context, sizeof(m_context) );
-    if ( FAILED(hres) )
-        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

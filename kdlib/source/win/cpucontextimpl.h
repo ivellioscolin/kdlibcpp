@@ -216,8 +216,6 @@ class CPUContextWOW64 : public CPUContext
 {
 public:
 
-    CPUContextWOW64();
-
     CPUContextWOW64(const WOW64_CONTEXT& ctx) :
         m_context(ctx)
     {}
@@ -231,7 +229,9 @@ public:
         return CPU_I386;
     }
 
-    virtual void restore();
+    virtual void restore() {
+        NOT_IMPLEMENTED();
+    }
 
 
     virtual NumVariant getRegisterByName(const std::wstring &name) {
