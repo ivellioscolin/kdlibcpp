@@ -411,7 +411,7 @@ TEST_F(KernelDumpTest, KernelTargetThread)
     EXPECT_EQ(1, currentOccured);
 }
 
-TEST_F(KernelDumpTest, TwoDump)
+TEST_F(KernelDumpTest, DISABLED_TwoDump)
 {
     loadDump();
     loadDump();

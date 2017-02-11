@@ -1,9 +1,21 @@
 #include "stdafx.h"
 #include <string.h>
+#include <excpt.h>
 
 #pragma optimize("g", off)
 
 #include "test/testfunc.h"
+
+#include <exception>
+
+
+void
+__cdecl
+CdeclVoidFunc()
+{
+    static int a = 0;
+    a++;
+}
 
 double
 static
@@ -85,13 +97,24 @@ StdcallFuncDouble(double a, double b)
     return a + b;
 }
 
-
-
 double
 __fastcall
 FastcallFunc( int a, float b )
 {
    return LocalStaticFunc(a,b);
+}
+
+
+bool
+OverloadedFunc(int a)
+{
+    return a > 10;
+}
+
+bool
+OverloadedFunc(int a, int b)
+{
+    return a < b;
 }
 
 void
@@ -146,5 +169,43 @@ void __fastcall PureCFastcallFunc( int a, float b )
 void VariadicFunc(int, ...)
 {
 }
+
+void FuncAccessViolation()
+{
+    size_t  ptr = 0;
+    *reinterpret_cast<int*>(ptr) = 10;
+}
+
+int FuncWithSeh(long long a)
+{
+    __try {
+
+        FuncAccessViolation();
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+    }
+
+    return a/8;
+}
+
+void FuncStdException()
+{
+    throw std::exception("exception");
+}
+
+int FuncWithTry(int a)
+{
+    try {
+        FuncStdException();
+    } 
+    catch(std::exception& )
+    {
+        return a*3;
+    }
+
+    return a*4;
+}
+
 
 

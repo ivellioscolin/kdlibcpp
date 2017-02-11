@@ -69,7 +69,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <NuGetPackageImportStamp>444053c8</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>56aeebd7</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -101,6 +101,9 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y  "$(ProjectDir)../../../bin/x86" "$(ProjectDir)../../../out/Win32/Debug"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -116,6 +119,9 @@
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(ProjectDir)../../../bin/x64" "$(ProjectDir)../../../out/x64/Debug"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -133,6 +139,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y  "$(ProjectDir)../../../bin/x86" "$(ProjectDir)../../../out/Win32/Release"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -150,6 +159,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y "$(ProjectDir)../../../bin/x64" "$(ProjectDir)../../../out/x64/Release"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="packages.kdlibtest_vc120.config">
@@ -160,7 +172,9 @@
     <ClInclude Include="..\..\include\test\testvars.h" />
     <ClInclude Include="basefixture.h" />
     <ClInclude Include="breakhandler.h" />
+    <ClInclude Include="clangtest.h" />
     <ClInclude Include="cputest.h" />
+    <ClInclude Include="crttest.h" />
     <ClInclude Include="disasmtest.h" />
     <ClInclude Include="eventhandlermock.h" />
     <ClInclude Include="eventhandlertest.h" />
@@ -169,6 +183,7 @@
     <ClInclude Include="moduletest.h" />
     <ClInclude Include="processtest.h" />
     <ClInclude Include="procfixture.h" />
+    <ClInclude Include="regtest_x64.h" />
     <ClInclude Include="stacktest.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targettest.h" />
@@ -204,6 +219,8 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
     <Import Project="..\..\..\packages\boost.1.57.0.0\build\native\boost.targets" Condition="Exists('..\..\..\packages\boost.1.57.0.0\build\native\boost.targets')" />
+    <Import Project="..\..\..\packages\llvm.3.9.0\build\native\llvm.targets" Condition="Exists('..\..\..\packages\llvm.3.9.0\build\native\llvm.targets')" />
+    <Import Project="..\..\..\packages\clang.3.9.0\build\native\clang.targets" Condition="Exists('..\..\..\packages\clang.3.9.0\build\native\clang.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -211,5 +228,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\..\..\packages\boost.1.57.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\boost.1.57.0.0\build\native\boost.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\llvm.3.9.0\build\native\llvm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\llvm.3.9.0\build\native\llvm.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\clang.3.9.0\build\native\clang.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\clang.3.9.0\build\native\clang.targets'))" />
   </Target>
 </Project>

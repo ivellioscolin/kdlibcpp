@@ -63,7 +63,7 @@ public:
     ScopedBreakpoint() {
     }
 
-    explicit ScopedBreakpoint(BreakpointPtr& bp) {
+    ScopedBreakpoint(BreakpointPtr& bp) {
         m_internalBp = bp;
     }
 

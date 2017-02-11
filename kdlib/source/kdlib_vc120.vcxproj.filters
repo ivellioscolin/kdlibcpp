@@ -112,6 +112,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.chrono.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.process_cpu_clocks.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.thread_clock.cpp" />
+    <ClCompile Include="clang\clang.cpp">
+      <Filter>clang</Filter>
+    </ClCompile>
+    <ClCompile Include="win\strconvert.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -224,6 +230,12 @@
     <ClInclude Include="stackimpl.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="strconvert.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="clang\clang.h">
+      <Filter>clang</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="kdlib/include">
@@ -243,6 +255,9 @@
     </Filter>
     <Filter Include="boost">
       <UniqueIdentifier>{b909802d-92bb-4755-8e59-03fe7a4ed798}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="clang">
+      <UniqueIdentifier>{322bb171-1fe3-462d-9134-28d379e73888}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

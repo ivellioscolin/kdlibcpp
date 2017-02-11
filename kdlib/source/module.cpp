@@ -8,6 +8,7 @@
 
 #include "moduleimp.h"
 #include "processmon.h"
+#include "typeinfoimp.h"
 
 namespace kdlib {
 
@@ -425,6 +426,27 @@ TypedVarPtr ModuleImp::getTypedVarByName( const std::wstring &symName )
     SymbolPtr  symVar = getSymbolScope()->getChildByName( symName );
 
     return loadTypedVar( symVar );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr ModuleImp::getTypedVarWithPrototype( const std::wstring &symName, const std::wstring &prototype)
+{
+
+    SymbolPtrList  functions = getSymbolScope()->findChildren(SymTagFunction);
+
+    for ( SymbolPtrList::iterator  it = functions.begin(); it != functions.end(); ++it )
+    {
+        SymbolPtr  sym = *it;
+        if ( sym->getName() == symName  )
+        {
+            TypeInfoPtr  funcType = loadType(sym->getType());
+            if ( isPrototypeMatch( funcType, prototype ) )
+                return loadTypedVar(sym);
+        }
+    }
+
+    throw TypeException(L"failed to find symbol");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

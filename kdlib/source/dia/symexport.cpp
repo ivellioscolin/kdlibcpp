@@ -120,7 +120,7 @@ class ExportSymbolBase : public Symbol
 
     virtual ULONG getLocType()
     {
-        NOT_IMPLEMENTED();
+        return LocIsStatic;
     }
     
     virtual MachineTypes getMachineType()
@@ -150,7 +150,7 @@ class ExportSymbolBase : public Symbol
 
     virtual SymTags getSymTag()
     {
-        NOT_IMPLEMENTED();
+        return SymTagPublicSymbol;
     }
 
     virtual SymbolPtr getType()
@@ -208,6 +208,11 @@ class ExportSymbolBase : public Symbol
         NOT_IMPLEMENTED();
     }
 
+    virtual bool isVirtual() 
+    {
+        NOT_IMPLEMENTED();
+    }
+
     virtual unsigned long getRegisterId()
     {
         NOT_IMPLEMENTED();
@@ -229,6 +234,16 @@ class ExportSymbolBase : public Symbol
     }
 
     virtual SymbolPtr getClassParent()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getVirtualTableShape()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual unsigned long getVirtualBaseOffset()
     {
         NOT_IMPLEMENTED();
     }

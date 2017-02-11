@@ -224,7 +224,7 @@ TEST_F( TypeInfoTest, StaticField )
     EXPECT_EQ( classChild::m_staticField,ptrSignDWord( typeInfo->getElementVa(L"m_staticField") ) );
 }
 
-TEST_F(  TypeInfoTest, StaticConstField )
+TEST_F(  TypeInfoTest, DISABLED_StaticConstField )
 {
     TypeInfoPtr  typeInfo;
     EXPECT_NO_THROW( typeInfo = loadType( L"g_classChild" ) );
@@ -318,15 +318,13 @@ TEST_F(TypeInfoTest, EnumVirtualField)
         EXPECT_NO_THROW( typeInfo->getElement(i) );
 }
 
-TEST_F(TypeInfoTest, VTBL)
+
+TEST_F(TypeInfoTest, GetVTBL)
 {
     TypeInfoPtr vtblInfo;
-    ASSERT_NO_THROW(vtblInfo = loadType(L"g_virtChild")->getElement(2)->deref());
-    EXPECT_TRUE(vtblInfo->isVtbl());
-    EXPECT_EQ(1, vtblInfo->getElementCount());
-    ASSERT_NO_THROW(vtblInfo = loadType(L"g_virtChild")->getElement(4)->deref());
-    EXPECT_TRUE(vtblInfo->isVtbl());
-    EXPECT_EQ(2, vtblInfo->getElementCount());
+    ASSERT_NO_THROW(vtblInfo = loadType(L"classBase1")->getVTBL() );
+    EXPECT_TRUE(vtblInfo->isVtbl() );
+    EXPECT_EQ(3, vtblInfo->getElementCount());
 }
 
 TEST_F( TypeInfoTest, VirtualMember )
@@ -502,3 +500,73 @@ TEST_F(TypeInfoTest, DefineFunc)
 
     EXPECT_THROW( testFunction2->getElement(2), IndexException);
 }
+
+TEST_F(TypeInfoTest, GetBaseClass)
+{
+    TypeInfoPtr  g_classChild;
+    ASSERT_NO_THROW( g_classChild = loadType(L"g_classChild") );
+
+    EXPECT_EQ( 2, g_classChild->getBaseClassesCount() );
+    EXPECT_EQ( L"classBase1", g_classChild->getBaseClass(L"classBase1")->getName() );
+    EXPECT_EQ( L"classBase2", g_classChild->getBaseClass(1)->getName() );
+
+    EXPECT_THROW( g_classChild->getBaseClass(2), IndexException);
+    EXPECT_THROW( g_classChild->getBaseClass(L"invalidBaseName"), TypeException);
+}
+
+TEST_F(TypeInfoTest, GetBaseClassOffset)
+{
+    TypeInfoPtr  g_classChild;
+    ASSERT_NO_THROW( g_classChild = loadType(L"g_classChild") );
+
+    EXPECT_EQ( 0, g_classChild->getBaseClassOffset(0) );
+    EXPECT_EQ( g_classChild->getBaseClass(0)->getSize(), g_classChild->getBaseClassOffset(1) );
+    EXPECT_THROW( g_classChild->getBaseClassOffset(2), IndexException);
+
+    EXPECT_EQ( g_classChild->getBaseClassOffset(0), g_classChild->getBaseClassOffset(L"classBase1") );
+    EXPECT_EQ( g_classChild->getBaseClassOffset(1), g_classChild->getBaseClassOffset(L"classBase2") );
+}
+
+TEST_F(TypeInfoTest, IsBaseClassVirtual)
+{
+    EXPECT_TRUE( loadType(L"virtualBase1")->isBaseClassVirtual(L"classBase1") );
+    EXPECT_FALSE( loadType(L"virtualChild")->isBaseClassVirtual(1) );
+}
+
+TEST_F(TypeInfoTest, GetMethod)
+{
+    TypeInfoPtr  g_classChild;
+
+    ASSERT_NO_THROW( g_classChild = loadType(L"g_classChild") );
+
+    EXPECT_TRUE( loadType(L"classChild::childMethod")->isFunction() );
+    EXPECT_TRUE( g_classChild->getMethod(L"childMethod")->isFunction() );
+    EXPECT_EQ( L"Int4B(__thiscall classChild::)(Int4B)", g_classChild->getMethod(L"childMethod")->getName() );
+
+    EXPECT_THROW( loadType(L"classChild::baseMethod"), SymbolException );
+    EXPECT_THROW( g_classChild->getElement(L"baseMethod"), TypeException );
+    EXPECT_THROW( g_classChild->getElement(L"NotExistMethod"), TypeException );
+}
+
+TEST_F(TypeInfoTest, GetOverloadedMethod)
+{
+    TypeInfoPtr  g_classChild;
+    ASSERT_NO_THROW( g_classChild = loadType(L"g_classChild") );
+
+    EXPECT_EQ( L"Int4B(__thiscall classChild::)(Int4B)", g_classChild->getMethod(L"overloadMethod", L"Int4B(__thiscall classChild::)(Int4B)")->getName() );
+    EXPECT_EQ( L"Int4B(__thiscall classChild::)(Int4B, Int4B)", g_classChild->getMethod(L"overloadMethod", L"Int4B(__thiscall classChild::)(Int4B, Int4B)")->getName() );
+
+    EXPECT_THROW( g_classChild->getMethod(L"overloadMethod", L"Int4B(__thiscall classChild::)(Int4B, Float)"), TypeException );
+}
+
+TEST_F(TypeInfoTest, GetVirtualMethod)
+{
+    TypeInfoPtr g_virtChild;
+    ASSERT_NO_THROW( g_virtChild = loadType( L"g_virtChild" ) );
+    EXPECT_TRUE( g_virtChild->getMethod(L"virtMethod1")->isFunction() );
+    EXPECT_TRUE( g_virtChild->getMethod(L"virtMethod1")->isVirtual() );
+    EXPECT_FALSE( g_virtChild->getMethod(L"virtualChild")->isVirtual() );
+    EXPECT_THROW( loadType(L"Int2B")->isVirtual(), TypeException );
+}
+
+

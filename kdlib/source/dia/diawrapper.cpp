@@ -738,6 +738,28 @@ bool DiaSymbol::isVirtualBaseClass()
 
 //////////////////////////////////////////////////////////////////////////////
 
+bool DiaSymbol::isVirtual()
+{
+    return !!callSymbol(get_virtual);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolPtr DiaSymbol::getVirtualTableShape()
+{
+    DiaSymbolPtr diaSymbol(callSymbol(get_virtualTableShape));
+    return SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+unsigned long DiaSymbol::getVirtualBaseOffset()
+{
+    return callSymbol(get_virtualBaseOffset);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 SymbolPtr DiaSession::findByRva( ULONG rva, ULONG symTag, LONG* pdisplacement )
 {
     DiaSymbolPtr child;
@@ -800,6 +822,7 @@ void DiaSession::getSourceLine( ULONG64 offset, std::wstring &fileName, ULONG &l
 
     displacement = (LONG)( (LONGLONG)offset - (LONGLONG)va );
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

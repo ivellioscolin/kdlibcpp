@@ -447,6 +447,11 @@ public:
         NOT_IMPLEMENTED();
     }
 
+    virtual bool isVirtual()
+    {
+        NOT_IMPLEMENTED();
+    }
+
     virtual unsigned long getRegisterId()
     {
         NOT_IMPLEMENTED();
@@ -472,7 +477,17 @@ public:
         NOT_IMPLEMENTED();
     }
 
+    virtual SymbolPtr getVirtualTableShape()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual unsigned long getVirtualBaseOffset()
+    {
+        NOT_IMPLEMENTED();
+    }
 };
+
 
 class NoSymbolSession : public SymbolSession {
 

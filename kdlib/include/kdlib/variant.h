@@ -940,6 +940,10 @@ NumBehavior::operator bool() {
      return asChar() != 0;
 }
 
+inline 
+NumBehavior::operator void*() {
+    return reinterpret_cast<void*>(asULongLong());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

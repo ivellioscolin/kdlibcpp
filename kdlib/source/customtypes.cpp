@@ -114,7 +114,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CustomFunction : public TypeInfoFunction
+class CustomFunction : public TypeInfoFunctionPrototype
 {
 public:
      CustomFunction(const TypeInfoPtr& returnType, CallingConventionType  callconv) :

@@ -97,6 +97,8 @@ public:
 
     bool isVirtualBaseClass();
 
+    bool isVirtual();
+
     ULONG getBaseType();
 
     ULONG getBitPosition();
@@ -144,6 +146,10 @@ public:
     ULONG getVirtualBaseDispSize();
 
     void setLoadAddress( ULONGLONG baseAddress );
+
+     SymbolPtr getVirtualTableShape();
+
+    unsigned long getVirtualBaseOffset();
 
 public:
     typedef std::pair<ULONG, const wchar_t *> ValueNameEntry;

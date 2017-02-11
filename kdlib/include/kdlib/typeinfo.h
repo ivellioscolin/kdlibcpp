@@ -23,6 +23,8 @@ TypeInfoPtr defineStruct( const std::wstring &structName, size_t align = 0 );
 TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align = 0 );
 TypeInfoPtr defineFunction( const TypeInfoPtr& returnType, CallingConventionType callconv = CallConv_NearC);
 
+TypeInfoPtr compileType( const std::wstring &sourceCode, const std::wstring& typeName , const std::wstring  &options=L"");
+
 size_t getSymbolSize( const std::wstring &name );
 MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
 std::wstring findSymbol( MEMOFFSET_64 offset);
@@ -81,6 +83,24 @@ public:
     virtual bool isVirtualMember( const std::wstring &name ) = 0;
     virtual bool isVirtualMember( size_t index ) = 0;
 
+    virtual bool isVirtual() = 0;
+
+    virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") = 0;
+    virtual TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) = 0;
+    virtual TypeInfoPtr getMethod( size_t index ) = 0;
+    virtual size_t getMethodsCount() = 0;
+
+    virtual TypeInfoPtr getBaseClass( const std::wstring& className) = 0;
+    virtual TypeInfoPtr getBaseClass( size_t index ) = 0;
+    virtual size_t getBaseClassesCount() = 0;
+    virtual MEMOFFSET_REL getBaseClassOffset( const std::wstring &name ) = 0;
+    virtual MEMOFFSET_REL getBaseClassOffset( size_t index ) = 0;
+    virtual bool isBaseClassVirtual( const std::wstring &name ) = 0;
+    virtual bool isBaseClassVirtual( size_t index ) = 0;
+
+    virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
+    virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
+    
     virtual NumVariant getValue() const = 0;
 
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
@@ -97,6 +117,10 @@ public:
     // http://msdn.microsoft.com/en-us/library/hx1b6kkd.aspx
     // "Padding and Alignment of Structure Members"
     virtual size_t getAlignReq() = 0;
+
+    virtual TypeInfoPtr getVTBL() = 0;
+
+    virtual MEMOFFSET_REL getVtblOffset() = 0;
 
 protected:
 

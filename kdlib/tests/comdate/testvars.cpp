@@ -119,6 +119,7 @@ structWithArray  g_structWithArray = { { 0, 2 }, 3 };
 
 int classChild::m_staticField = 200;
 classChild  g_classChild;
+classBase2*  g_polimorphChild = static_cast<classBase2*>(&g_classChild);
 
 unionTest  g_unionTest = { 123456 };
 
@@ -161,6 +162,8 @@ listEntry  g_listHead;
 ListCreator<5> list1( g_listHead );
 
 virtualChild       g_virtChild;
+virtualBase2*      g_polimorphVirtChild1 = static_cast<virtualBase2*>(&g_virtChild);
+classBase1*        g_polimorphVirtChild2 = static_cast<classBase1*>(&g_virtChild);
 
 listEntry deadlockEntry = { &deadlockEntry, &deadlockEntry };
 
@@ -182,8 +185,11 @@ std::list<int> StdListCreator()
 
 std::list<int>  g_stdList = StdListCreator();
 
-
-
-
 void VariadicFunc(int, ...);
 volatile decltype(&VariadicFunc) g_variadicFuncPtr = &VariadicFunc;
+
+namespace testspace {
+
+testClass1  g_testClass;
+
+}

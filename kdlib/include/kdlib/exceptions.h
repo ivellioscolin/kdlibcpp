@@ -107,6 +107,28 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////////
 
+class CPUException : public DbgWideException
+{
+public:
+
+    CPUException( const std::wstring  &desc ) :
+        DbgWideException( desc )
+        {}
+};
+
+/////////////////////////////////////////////////////////////////////////////////
+
+class CallException : public DbgWideException
+{
+public:
+
+    CallException( const std::wstring  &desc ) :
+        DbgWideException( desc )
+        {}
+};
+
+/////////////////////////////////////////////////////////////////////////////////
+
 
 class IndexException : public DbgException
 {

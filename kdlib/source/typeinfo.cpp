@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 
+
 #include <boost/regex.hpp>
 
 #include "kdlib/exceptions.h"
@@ -104,11 +105,60 @@ bool getArrayExpression( std::wstring &suffix, size_t &arraySize )
     return false;
 }
 
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end nameless namespace
 
 namespace kdlib {
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring printStructType(TypeInfoPtr& structType)
+{
+    std::wstringstream  sstr;
+
+    sstr << "class/struct : " << structType->getName() << " Size: 0x" << std::hex << structType->getSize() << " (" << std::dec << structType->getSize() << ")" << std::endl;
+    
+    size_t  fieldCount = structType->getElementCount();
+
+    for ( size_t i = 0; i < fieldCount; ++i )
+    {
+        if ( structType->isStaticMember(i) )
+        {
+            sstr << L"   =" << std::right << std::setw(10) << std::setfill(L'0') << std::hex << structType->getElementVa(i);
+            sstr << L" " << std::left << std::setw(18) << std::setfill(L' ') << structType->getElementName(i) << L':';
+        }
+        else
+        {
+            if ( structType->isVirtualMember(i) )
+            {
+                sstr << L"   virtual base ";
+                sstr << L" +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << structType->getElementOffset(i);
+                sstr << L" " << structType->getElementName(i) << L':';
+            }
+            else
+            {
+                sstr << L"   +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << structType->getElementOffset(i);
+                sstr << L" " << std::left << std::setw(24) << std::setfill(L' ') << structType->getElementName(i) << L':';
+            }
+        }
+
+        sstr << L" " << std::left << structType->getElement(i)->getName();
+        sstr << std::endl;
+    }
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring printPointerType(TypeInfoPtr&  ptrType)
+{
+    return L"ptr to " + ptrType->deref()->getName();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -242,7 +292,7 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
 
         if ( symbol->getLocType() == LocIsBitField )
         {
-            ptr = TypeInfoPtr( new TypeInfoBitField(symbol) );
+            ptr = TypeInfoPtr( new TypeInfoSymbolBitField(symbol) );
             break;
         }
 
@@ -268,13 +318,13 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
        return TypeInfoPtr( new TypeInfoUdt( symbol ) );
 
     case SymTagArrayType:
-       return TypeInfoPtr( new TypeInfoArray( symbol ) );
+       return TypeInfoPtr( new TypeInfoSymbolArray( symbol ) );
 
     case SymTagPointerType:
-        return TypeInfoPtr( new TypeInfoPointer( symbol ) );
+        return TypeInfoPtr( new TypeInfoSymbolPointer( symbol ) );
 
     case SymTagVTable:
-        ptr = TypeInfoPtr( new TypeInfoPointer( symbol->getType() ) );
+        ptr = TypeInfoPtr( new TypeInfoSymbolPointer( symbol->getType() ) );
         break;
 
     case SymTagVTableShape:
@@ -286,11 +336,11 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
         break;
 
     case SymTagFunction:
-        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol->getType() ) );
+        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol ) );
         break;
 
     case SymTagFunctionType:
-        ptr = TypeInfoPtr( new TypeInfoSymbolFunction( symbol ) );
+        ptr = TypeInfoPtr( new TypeInfoSymbolFunctionPrototype( symbol ) );
         break;
 
     case SymTagTypedef:
@@ -309,6 +359,147 @@ TypeInfoPtr loadType( SymbolPtr &symbol )
     //    ptr->m_ptrSize = getTypePointerSize(typeSym);
 
     return ptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring  callingConventionAsStr(kdlib::CallingConventionType  calltype)
+{
+    using namespace kdlib;
+
+    switch (calltype)
+    {
+    case CallConv_NearC:
+        return L"__cdecl";
+        break;
+
+    case CallConv_NearFast:
+        return L"__fastcall";
+        break;
+
+    case CallConv_NearStd:
+        return  L"__stdcall";
+        break;
+
+    case CallConv_ThisCall:
+        return L"__thiscall";
+        break;
+
+    case CallConv_ClrCall:
+        return L"__clrcall";
+        break;
+
+    }
+
+    throw TypeException(L"unknown calling convention");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring  getMethodPrototype( kdlib::TypeInfoPtr&  methodType )
+{
+    using namespace kdlib;
+
+    std::wstringstream  sstr;
+
+    std::wstring  returnType = methodType->getReturnType()->getName();
+  
+    CallingConventionType ccType = methodType->getCallingConvention();
+    if (ccType == CallConv_NearC && methodType->hasThis())
+        ccType = CallConv_ThisCall;
+
+    std::wstring  callType = callingConventionAsStr(ccType);
+
+    std::wstringstream  sargs;
+
+    for ( size_t i = CallConv_ThisCall == ccType && methodType->hasThis() ? 1 : 0; i < methodType->getElementCount(); ++i )
+    {
+        if ( !sargs.str().empty() )
+           sargs << L',';
+
+        TypeInfoPtr argType = methodType->getElement(i);
+        if (argType->isNoType())
+        {
+            // Variadic function
+            sargs << "...";
+        }
+        else
+        {
+            sargs << argType->getName();
+        }
+    }
+
+    sstr << returnType << L'(' << callType << ')' << L'(' << sargs.str() << L')';
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static const boost::wregex  prototypeMatch1(L"(\\w+)\\s*\\(\\s*(\\w+)\\s*\\)\\s*\\((.*)\\)");
+static const boost::wregex  prototypeMatch2(L"(\\w+)\\s*\\(\\s*(\\w+)\\s+(\\w+)::\\s*\\)\\s*\\((.*)\\)");
+
+bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodPrototype)
+{
+    boost::wsmatch    matchResult;
+
+    std::wstring  returnType;
+    std::wstring  callConversion;
+    std::wstring  className;
+    std::wstring  args;
+
+    if ( boost::regex_match( methodPrototype, matchResult, prototypeMatch1  ) )
+    {
+        returnType = std::wstring(matchResult[1].first, matchResult[1].second);
+        callConversion = std::wstring(matchResult[2].first, matchResult[2].second);
+        args = std::wstring(matchResult[3].first, matchResult[3].second);
+    }
+    else
+    if ( boost::regex_match( methodPrototype, matchResult, prototypeMatch2  ) )
+    {
+        returnType = std::wstring(matchResult[1].first, matchResult[1].second);
+        callConversion = std::wstring(matchResult[2].first, matchResult[2].second);
+        className = std::wstring(matchResult[3].first, matchResult[3].second);
+        args= std::wstring (matchResult[4].first, matchResult[4].second);
+    }
+    else
+        return false;
+ 
+    if ( returnType != methodType->getReturnType()->getName() )
+        return false;
+
+    CallingConventionType ccType = methodType->getCallingConvention();
+    if (ccType == CallConv_NearC && methodType->hasThis())
+        ccType = CallConv_ThisCall;
+
+    if ( callConversion != callingConventionAsStr(ccType) )
+        return false;
+
+    if ( !className.empty() && className != methodType->getClassParent()->getName() )
+        return false;
+
+    args.erase( std::remove_if(args.begin(), args.end(), std::isspace), args.end());
+
+    std::wstringstream  sargs;
+
+    for ( size_t i = CallConv_ThisCall == ccType && methodType->hasThis() ? 1 : 0; i < methodType->getElementCount(); ++i )
+    {
+        if ( !sargs.str().empty() )
+            sargs << L',';
+
+        TypeInfoPtr argType = methodType->getElement(i);
+        if (argType->isNoType())
+        {
+            // Variadic function
+            sargs << "...";
+        }
+        else
+        {
+            sargs << argType->getName();
+        }
+    }
+
+    return args == sargs.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -806,6 +997,7 @@ bool TypeInfoFields::isVirtualMember( size_t index )
     return m_fields.lookup( index )->isVirtualMember();
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 size_t TypeInfoFields::getAlignReq()
@@ -855,6 +1047,223 @@ std::wstring TypeInfoUdt::str()
 TypeInfoPtr TypeInfoUdt::getClassParent()
 {
     return loadType(m_symbol->getClassParent());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr  TypeInfoUdt::getMethod( const std::wstring &name, const std::wstring&  prototype)
+{
+
+    SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
+
+    for ( SymbolPtrList::iterator  it = methods.begin(); it != methods.end(); ++it )
+    {
+        SymbolPtr  method = *it;
+
+        std::wstring  methodName = method->getName();
+
+        if ( methodName == name )
+        {
+            TypeInfoPtr  methodType = loadType(method);
+            if ( prototype.empty() || isPrototypeMatch( methodType, prototype ) )
+                return methodType;
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this method :" << name;
+    throw TypeException(sstr.str() );
+}
+
+TypeInfoPtr TypeInfoUdt::getMethod(size_t index)
+{
+    SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
+
+    if ( index >= methods.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = methods.begin();
+    std::advance(it, index);
+    return loadType(*it);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoUdt::getMethodsCount()
+{
+     SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
+     return methods.size();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoUdt::getBaseClass( const std::wstring& className)
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+            return loadType(baseClass);
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoUdt::getBaseClass( size_t index )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    return loadType(*it);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoUdt::getBaseClassesCount()
+{
+    return m_symbol->getChildCount(SymTagBaseClass);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL TypeInfoUdt::getBaseClassOffset( const std::wstring &className )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+        {
+            return baseClass->getOffset();
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL TypeInfoUdt::getBaseClassOffset( size_t index )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    return (*it)->getOffset();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoUdt::isBaseClassVirtual( const std::wstring &className )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+        {
+            return baseClass->isVirtualBaseClass();
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoUdt::isBaseClassVirtual( size_t index )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    return (*it)->isVirtualBaseClass();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypeInfoUdt::getBaseClassVirtualDisplacement( const std::wstring &className, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  it = baseClasses.begin(); it != baseClasses.end(); ++it )
+    {
+        SymbolPtr  baseClass = *it;
+
+        std::wstring  baseClassName = baseClass->getName();
+
+        if ( baseClassName == className )
+        {
+            virtualBasePtr = baseClass->getVirtualBasePointerOffset();
+            virtualDispIndex = baseClass->getVirtualBaseDispIndex();
+            virtualDispSize = baseClass->getVirtualBaseDispSize();
+            return;
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypeInfoUdt::getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
+{
+    SymbolPtrList baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    if (index >= baseClasses.size() )
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = baseClasses.begin();
+    std::advance(it, index);
+
+    std::wstring  name = (*it)->getName();
+
+    virtualBasePtr = (*it)->getVirtualBasePointerOffset();
+    virtualDispIndex = (*it)->getVirtualBaseDispIndex();
+    virtualDispSize = (*it)->getVirtualBaseDispSize();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoUdt::getVTBL()
+{
+    return loadType( m_symbol->getVirtualTableShape() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -942,6 +1351,7 @@ void TypeInfoUdt::getFields(
 
             m_fields.push_back( fieldPtr );
         }
+
     }  
 }
 
@@ -949,11 +1359,14 @@ void TypeInfoUdt::getFields(
 
 void TypeInfoUdt::getVirtualFields()
 {
-    size_t   childCount = m_symbol->getChildCount(SymTagBaseClass);
 
-    for ( unsigned long i = 0; i < childCount; ++i )
+    SymbolPtrList  baseClasses = m_symbol->findChildren(SymTagBaseClass);
+
+    for ( SymbolPtrList::iterator  baseClass = baseClasses.begin(); baseClass != baseClasses.end(); ++baseClass)
     {
-        SymbolPtr  childSym = m_symbol->getChildByIndex( i );
+         SymbolPtr  childSym = *baseClass;
+
+         std::wstring  baseClassName = childSym->getName();
 
         if ( !childSym->isVirtualBaseClass() )
             continue;
@@ -967,7 +1380,6 @@ void TypeInfoUdt::getVirtualFields()
             childSym->getVirtualBaseDispSize() );
     }
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1016,9 +1428,8 @@ void TypeInfoEnum::getFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoSymbolFunction::TypeInfoSymbolFunction( SymbolPtr& symbol ) :
-    m_symbol(symbol),
-    m_hasThis(false)
+TypeInfoSymbolFunctionPrototype::TypeInfoSymbolFunctionPrototype( SymbolPtr& symbol ) :
+    m_symbol(symbol)
 {
     // add this
     try
@@ -1040,7 +1451,7 @@ TypeInfoSymbolFunction::TypeInfoSymbolFunction( SymbolPtr& symbol ) :
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring TypeInfoFunction::getName()
+std::wstring TypeInfoFunctionPrototype::getName()
 {
     std::pair<std::wstring, std::wstring> splittedName = splitName();
     return splittedName.first + splittedName.second;
@@ -1048,7 +1459,7 @@ std::wstring TypeInfoFunction::getName()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
+std::pair<std::wstring, std::wstring> TypeInfoFunctionPrototype::splitName()
 {
     std::pair<std::wstring, std::wstring> splittedName;
 
@@ -1057,21 +1468,8 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
     sstr << getReturnType()->getName();
     sstr << L"(";
 
-
-    TypeInfoPtr classParent = getClassParent();
-
-    //bool objectPointerTypePresent = false;
-    //try
-    //{
-    //    m_symbol->getObjectPointerType();
-    //    objectPointerTypePresent = true;
-    //}
-    //catch(const SymbolException &)
-    //{
-    //}
-
     CallingConventionType ccType = getCallingConvention();
-    if (ccType == CallConv_NearC && classParent && hasThis())
+    if (ccType == CallConv_NearC && hasThis())
         ccType = CallConv_ThisCall;
 
     switch (ccType)
@@ -1101,10 +1499,12 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
         break;
     }
 
+    TypeInfoPtr classParent = getClassParent();
     if (classParent)
     {
         sstr << L" " << classParent->getName() << "::";
     }
+
     splittedName.first = sstr.str();
 
     std::wstringstream().swap(sstr);
@@ -1145,7 +1545,7 @@ std::pair<std::wstring, std::wstring> TypeInfoFunction::splitName()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoSymbolFunction::getElement( size_t index )
+TypeInfoPtr TypeInfoSymbolFunctionPrototype::getElement( size_t index )
 {
     if ( index >= m_args.size() )
         throw IndexException( index );
@@ -1154,21 +1554,21 @@ TypeInfoPtr TypeInfoSymbolFunction::getElement( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-CallingConventionType TypeInfoSymbolFunction::getCallingConvention()
+CallingConventionType TypeInfoSymbolFunctionPrototype::getCallingConvention()
 {
     return static_cast< CallingConventionType >( m_symbol->getCallingConvention() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoSymbolFunction::getReturnType()
+TypeInfoPtr TypeInfoSymbolFunctionPrototype::getReturnType()
 {
     return loadType(m_symbol->getType());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoSymbolFunction::getClassParent()
+TypeInfoPtr TypeInfoSymbolFunctionPrototype::getClassParent()
 {
     try 
     {
@@ -1182,14 +1582,13 @@ TypeInfoPtr TypeInfoSymbolFunction::getClassParent()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoBitField::TypeInfoBitField( SymbolPtr &symbol )
-    : m_symbol(symbol)
-{
-    m_bitWidth = static_cast<BITOFFSET>(symbol->getSize());
-    m_bitPos = symbol->getBitPosition();
-    m_bitType = TypeInfo::getBaseTypeInfo( symbol->getType() );
-    m_size = m_bitType->getSize();
-}
+TypeInfoSymbolBitField::TypeInfoSymbolBitField( SymbolPtr &symbol ) :
+    TypeInfoBitField(
+        TypeInfo::getBaseTypeInfo( symbol->getType() ), 
+        symbol->getBitPosition(),
+        static_cast<BITOFFSET>(symbol->getSize()) ),
+    m_symbol(symbol)
+{}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1203,7 +1602,7 @@ std::wstring TypeInfoBitField::getName()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoBitField::getClassParent()
+TypeInfoPtr TypeInfoSymbolBitField::getClassParent()
 {
     return loadType(m_symbol->getClassParent());
 }
@@ -1215,6 +1614,7 @@ size_t TypeInfoVtbl::getElementCount()
     return m_symbol->getCount();
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 size_t TypeInfoVtbl::getSize()
@@ -1224,22 +1624,29 @@ size_t TypeInfoVtbl::getSize()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoPointer::getClassParent()
-{
-    if (m_symbol)
-        return loadType(m_symbol->getClassParent());
-
-    return TypeInfoImp::getClassParent();
-}
+//TypeInfoPtr TypeInfoPointer::getClassParent()
+//{
+//    if (m_symbol)
+//        return loadType(m_symbol->getClassParent());
+//
+//    return TypeInfoImp::getClassParent();
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoArray::getClassParent()
-{
-    if (m_symbol)
-        return loadType(m_symbol->getClassParent());
+//TypeInfoPtr TypeInfoArray::getClassParent()
+//{
+//    if (m_symbol)
+//        return loadType(m_symbol->getClassParent());
+//
+//    return TypeInfoImp::getClassParent();
+//}
 
-    return TypeInfoImp::getClassParent();
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoVoid::TypeInfoVoid(size_t size)
+{
+    m_ptrSize = size != 0 ? size : ptrSize(); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -126,6 +126,16 @@ protected:
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
+    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"")
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no methods");
+    }
+    
+    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no methods");
+    }
+
     virtual unsigned long getElementReg(const std::wstring& fieldName)
     {
         NOT_IMPLEMENTED();
@@ -140,15 +150,18 @@ protected:
 
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo);
 
-    virtual NumVariant call( int numArgs, ... ) 
+    virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const
     {
-        throw TypeException( L"is not a function" );
+        std::vector<unsigned char>  buffer;
+        m_varData->readBytes(buffer, m_varData->getLength() );
+        stream->writeBytes(buffer);
     }
 
-    virtual NumVariant call(const CallArgList& arglst) 
+    virtual TypedValue call(const TypedValueList& arglst)
     {
         throw TypeException( L" is not a function");
     }
+    
 
 protected:
 
@@ -178,11 +191,10 @@ public:
     std::wstring printValue() const;
 
 protected:
-    
+
     virtual NumVariant getValue() const;
 
     virtual std::wstring str();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -221,12 +233,40 @@ protected:
         return m_typeInfo->getElementName( index );
     }
 
+    size_t getElementIndex(const std::wstring&  elementName) {
+        return m_typeInfo->getElementIndex(elementName);
+    }
+
     MEMDISPLACEMENT getVirtualBaseDisplacement( const std::wstring &fieldName );
     MEMDISPLACEMENT getVirtualBaseDisplacement( size_t index );
 
     virtual std::wstring str();
 
-   // std::wstring printFieldValue( const TypeInfoPtr& typeInfo, const TypedVarPtr& var );
+    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"");
+    
+    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    {
+        NOT_IMPLEMENTED();
+    }
+
+
+protected:
+
+    TypedVarPtr getMethodRecursive( 
+        const std::wstring& methodName,
+        const std::wstring& methodPrototype,
+        TypeInfoPtr&  baseClass,
+        MEMOFFSET_REL startOffset
+        );
+
+    TypedVarPtr getVirtualMethodRecursive( 
+        const std::wstring& methodName, 
+        const std::wstring& methodPrototype,
+        TypeInfoPtr&  baseClass,
+        MEMOFFSET_REL startOffset
+        );
+
+    
 };
 
 
@@ -337,18 +377,36 @@ public:
         return m_typeInfo->getElementCount();
     }
 
+    virtual MEMOFFSET_64 getDebugStart() const  {
+        return 0;
+    }
+
+    virtual MEMOFFSET_64 getDebugEnd() const  {
+        return 0;
+    }
+
+    virtual size_t getSize() const  {
+        return 0;
+    }
+
     virtual std::wstring str();
 
-    virtual NumVariant call( int numArgs, ... );
-
-    virtual NumVariant call( const CallArgList& arglst) ;
+    virtual TypedValue call(const TypedValueList& arglst);
 
 protected:
 
-    NumVariant callCdecl(const CallArgList& arglst);
-    NumVariant callStd(const CallArgList& arglst);
-    NumVariant callFast(const CallArgList& arglst);
-    NumVariant callX64(const CallArgList& arglst);
+    TypedValueList castArgs(const TypedValueList& arglst);
+    TypedValue castBaseArg(TypeInfoPtr&  destType, const TypedValue& arg);
+    TypedValue castPtrArg(TypeInfoPtr&  destType, const TypedValue& arg);
+
+    TypedValue callCdecl(const TypedValueList& arglst);
+    TypedValue callStd(const TypedValueList& arglst);
+    TypedValue callFast(const TypedValueList& arglst);
+    TypedValue callThis(const TypedValueList& arglst);
+    TypedValue callX64(const TypedValueList& arglst);
+
+    void makeCallx86();
+    void makeCallx64();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -371,12 +429,169 @@ public:
         return m_typeInfo->getElementCount();
     }
 
-    virtual  TypedVarPtr getElement(size_t index);
+    virtual TypedVarPtr getElement(size_t index);
 
     virtual std::wstring str(); 
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+class TypedVarVoid : public TypedVar
+{
+public:
+
+    TypedVarVoid()
+    {}
+
+    virtual std::wstring str() 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual NumVariant getValue() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    } 
+
+    virtual VarStorage getStorage() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring getRegisterName() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_64 getAddress() const 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_64 getDebugStart() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_64 getDebugEnd() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual size_t getSize() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring getName() const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypeInfoPtr getType() const;
+
+    virtual TypedVarPtr deref() 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr getElement( const std::wstring& fieldName ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr getElement( size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual MEMOFFSET_REL getElementOffset( size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual VarStorage getElementStorage(const std::wstring& fieldName)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual VarStorage getElementStorage(size_t index)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual size_t getElementCount()
+     {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring getElementName( size_t index ) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual size_t getElementIndex( const std::wstring&  elementName )
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"")
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+    
+    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual unsigned long getElementReg(const std::wstring& fieldName)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual unsigned long getElementReg(size_t index)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr castTo(const std::wstring& typeName)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual TypedValue call(const TypedValueList& arglst)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+};
+
+//////////////////////////////////////////////////////////////////////////////
 
 class SymbolFunction : public TypedVarFunction
 {
@@ -422,6 +637,38 @@ protected:
     MEMOFFSET_64 getDebugXImpl(SymTags symTag) const;
 
     SymbolPtr  m_symbol;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypedVarMethodBound : public TypedVarFunction
+{
+
+public:
+
+    TypedVarMethodBound(
+        const TypeInfoPtr& prototype,
+        const DataAccessorPtr &dataSource, 
+        const std::wstring& name, 
+        MEMOFFSET_64 thisValue);
+
+     virtual TypedValue call(const TypedValueList& arglst);
+
+private:
+
+    MEMOFFSET_64   m_this;
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypedVarMethodUnbound : public TypedVarFunction
+{
+public:
+
+    TypedVarMethodUnbound(const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name):
+       TypedVarFunction(typeInfo, dataSource, name )
+    {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

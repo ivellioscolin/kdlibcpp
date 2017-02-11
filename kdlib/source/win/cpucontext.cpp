@@ -17,7 +17,7 @@ namespace kdlib {
 
 NumVariant getRegisterByName(const std::wstring& regName)
 {
-    unsigned long index = getRegsiterIndex(regName);
+    unsigned long index = getRegisterIndex(regName);
     return getRegisterByIndex(index);
 }
 
@@ -93,7 +93,7 @@ NumVariant getRegisterByIndex(unsigned long index)
 
 void setRegisterByName(const std::wstring& regName, const NumVariant& value)
 {
-    unsigned long index = getRegsiterIndex(regName);
+    unsigned long index = getRegisterIndex(regName);
     return setRegisterByIndex(index, value);
 }
 
@@ -226,7 +226,7 @@ void pushInStack(const NumVariant& value)
         return;
     }
 
-    if ( value.isLong() || value.isULong() )
+    if ( value.isLong() || value.isULong() || value.isInt()  || value.isUInt() )
     {
         setDWord( stackAlloc(4), value.asULong() );
         return;
@@ -262,23 +262,39 @@ void popFromStack(NumVariant& value)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void CallArg::pushInStack() const
-{
-    writeBytes(stackAlloc(m_rawBuffer.size()), m_rawBuffer);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void CallArg::saveToRegister(const std::wstring& regName) const
-{
-    unsigned long   regIndex  = getRegsiterIndex(regName);
-    setRegisterValue(regIndex,const_cast<unsigned char*>(&m_rawBuffer[0]), m_rawBuffer.size() );
-}
+//void CallArg::pushInStack() const
+//{
+//    writeBytes(stackAlloc(m_rawBuffer.size()), m_rawBuffer);
+//}
+//
+/////////////////////////////////////////////////////////////////////////////////
+//
+//void CallArg::saveToRegister(const std::wstring& regName) const
+//{
+//    unsigned long   regIndex  = getRegsiterIndex(regName);
+//    setRegisterValue(regIndex,const_cast<unsigned char*>(&m_rawBuffer[0]), m_rawBuffer.size() );
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 CPUContextPtr loadCPUContext()
 {
+    switch( kdlib::getCPUType() )
+    {
+    case CPU_AMD64:
+
+        if ( kdlib::getCPUMode() == CPU_AMD64 )
+            return CPUContextPtr( new CPUContextAmd64() );
+        else if ( kdlib::getCPUMode() == CPU_I386 )
+            return CPUContextPtr( new CPUContextImpl() );
+
+        throw DbgException("Unknown CPU Mode");
+
+    case CPU_I386:
+
+        return CPUContextPtr( new CPUContextI386() ); 
+    }
+
     return CPUContextPtr( new CPUContextImpl() );
 }
 
@@ -962,6 +978,27 @@ void resetCurrentStackFrame()
         throw DbgEngException(L"IDebugSymbols::ResetScope", hres);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+CPUContextI386::CPUContextI386()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->GetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextI386::restore()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->SetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1051,80 +1088,79 @@ std::wstring  CPUContextI386::getRegisterName(unsigned long index)
     switch (index)
     {
     case CV_REG_AL:
-        return L"AL";
+        return L"al";
     case CV_REG_CL:
-        return L"CL";
+        return L"cl";
     case CV_REG_DL:
-        return L"DL";
+        return L"dl";
     case CV_REG_BL:
-        return L"BL";
+        return L"bl";
     case CV_REG_AH:
-        return L"AH";
+        return L"ah";
     case CV_REG_CH:
-        return L"CH";
+        return L"ch";
     case CV_REG_DH:
-        return L"DH";
+        return L"dh";
     case CV_REG_BH:
-        return L"BH";
+        return L"bh";
     case CV_REG_AX:
-        return L"AX";
+        return L"ax";
     case CV_REG_CX:
-        return L"CX";
+        return L"cx";
     case CV_REG_DX:
-        return L"DX";
+        return L"dx";
     case CV_REG_BX:
-        return L"BX";
+        return L"bx";
     case CV_REG_SP:
-        return L"SP";
+        return L"sp";
     case CV_REG_BP:
-        return L"BP";
+        return L"bp";
     case CV_REG_SI:
-        return L"SI";
+        return L"si";
     case CV_REG_DI:
-        return L"DI";
+        return L"di";
     case CV_REG_EAX:
-        return L"EAX";
+        return L"eax";
     case CV_REG_ECX:
-        return L"ECX";
+        return L"ecx";
     case CV_REG_EDX:
-        return L"EDX";
+        return L"edx";
     case CV_REG_EBX:
-        return L"EBX";
+        return L"ebx";
     case CV_REG_ESP:
-        return L"ESP";
+        return L"esp";
     case CV_REG_EBP:
-        return L"EBP";
+        return L"ebp";
     case CV_REG_ESI:
-        return L"ESI";
+        return L"esi";
     case CV_REG_EDI:
-        return L"EDI";
+        return L"edi";
     case CV_REG_ES:
-        return L"ES";
+        return L"es";
     case CV_REG_CS:
-        return L"CS";
+        return L"cs";
     case CV_REG_SS:
-        return L"SS";
+        return L"ss";
     case CV_REG_DS:
-        return L"DS";
+        return L"ds";
     case CV_REG_FS:
-        return L"FS";
+        return L"fs";
     case CV_REG_GS:
-        return L"GS";
+        return L"gs";
     case CV_REG_IP:
-        return L"IP";
+        return L"ip";
     case CV_REG_FLAGS:
-        return L"FLAGS";
+        return L"flags";
     case CV_REG_EIP:
-        return L"EIP";
+        return L"eip";
     case CV_REG_EFLAGS:
-        return L"EFLAGS";
+        return L"eflags";
     }
 
     std::stringstream sstr;
     sstr << "I386 context: unsupported register index " << std::dec << index;
     throw DbgException(sstr.str());
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1214,78 +1250,100 @@ std::wstring  CPUContextWOW64::getRegisterName(unsigned long index)
     switch (index)
     {
     case CV_REG_AL:
-        return L"AL";
+        return L"al";
     case CV_REG_CL:
-        return L"CL";
+        return L"cl";
     case CV_REG_DL:
-        return L"DL";
+        return L"dl";
     case CV_REG_BL:
-        return L"BL";
+        return L"bl";
     case CV_REG_AH:
-        return L"AH";
+        return L"ah";
     case CV_REG_CH:
-        return L"CH";
+        return L"ch";
     case CV_REG_DH:
-        return L"DH";
+        return L"dh";
     case CV_REG_BH:
-        return L"BH";
+        return L"bh";
     case CV_REG_AX:
-        return L"AX";
+        return L"ax";
     case CV_REG_CX:
-        return L"CX";
+        return L"cx";
     case CV_REG_DX:
-        return L"DX";
+        return L"dx";
     case CV_REG_BX:
-        return L"BX";
+        return L"bx";
     case CV_REG_SP:
-        return L"SP";
+        return L"sp";
     case CV_REG_BP:
-        return L"BP";
+        return L"bp";
     case CV_REG_SI:
-        return L"SI";
+        return L"si";
     case CV_REG_DI:
-        return L"DI";
+        return L"di";
     case CV_REG_EAX:
-        return L"EAX";
+        return L"eax";
     case CV_REG_ECX:
-        return L"ECX";
+        return L"ecx";
     case CV_REG_EDX:
-        return L"EDX";
+        return L"edx";
     case CV_REG_EBX:
-        return L"EBX";
+        return L"ebx";
     case CV_REG_ESP:
-        return L"ESP";
+        return L"esp";
     case CV_REG_EBP:
-        return L"EBP";
+        return L"ebp";
     case CV_REG_ESI:
-        return L"ESI";
+        return L"esi";
     case CV_REG_EDI:
-        return L"EDI";
+        return L"edi";
     case CV_REG_ES:
-        return L"ES";
+        return L"es";
     case CV_REG_CS:
-        return L"CS";
+        return L"cs";
     case CV_REG_SS:
-        return L"SS";
+        return L"ss";
     case CV_REG_DS:
-        return L"DS";
+        return L"ds";
     case CV_REG_FS:
-        return L"FS";
+        return L"fs";
     case CV_REG_GS:
-        return L"GS";
+        return L"gs";
     case CV_REG_IP:
-        return L"IP";
+        return L"ip";
     case CV_REG_FLAGS:
-        return L"FLAGS";
+        return L"flags";
     case CV_REG_EIP:
-        return L"EIP";
+        return L"eip";
     case CV_REG_EFLAGS:
-        return L"EFLAGS";
+        return L"eflags";
     }
 
     std::stringstream sstr;
     sstr << "I386 context: unsupported register index " << std::dec << index;
     throw DbgException(sstr.str());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+CPUContextAmd64::CPUContextAmd64()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->GetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void CPUContextAmd64::restore()
+{
+    HRESULT  hres;
+
+    hres = g_dbgMgr->advanced->SetThreadContext(&m_context, sizeof(m_context) );
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugAdvanced::GetThreadContext", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1461,157 +1519,157 @@ std::wstring CPUContextAmd64::getRegisterName(unsigned long index)
     switch (index)
     {
     case CV_AMD64_AL:
-        return L"AL";
+        return L"al";
     case CV_AMD64_CL:
-        return L"CL";
+        return L"cl";
     case CV_AMD64_DL:
-        return L"DL";
+        return L"dl";
     case CV_AMD64_BL:
-        return L"BL";
+        return L"bl";
     case CV_AMD64_AH:
-        return L"AH";
+        return L"ah";
     case CV_AMD64_CH:
-        return L"CH";
+        return L"ch";
     case CV_AMD64_DH:
-        return L"DH";
+        return L"dh";
     case CV_AMD64_BH:
-        return L"BH";
+        return L"bh";
     case CV_AMD64_AX:
-        return L"AX";
+        return L"ax";
     case CV_AMD64_CX:
-        return L"CX";
+        return L"cx";
     case CV_AMD64_DX:
-        return L"DX";
+        return L"dx";
     case CV_AMD64_BX:
-        return L"BX";
+        return L"bx";
     case CV_AMD64_SP:
-        return L"SP";
+        return L"sp";
     case CV_AMD64_BP:
-        return L"BP";
+        return L"bp";
     case CV_AMD64_SI:
-        return L"SI";
+        return L"si";
     case CV_AMD64_DI:
-        return L"DI";
+        return L"di";
     case CV_AMD64_EAX:
-        return L"EAX";
+        return L"eax";
     case CV_AMD64_ECX:
-        return L"ECX";
+        return L"ecx";
     case CV_AMD64_EDX:
-        return L"EDX";
+        return L"edx";
     case CV_AMD64_EBX:
-        return L"EBX";
+        return L"ebx";
     case CV_AMD64_ESP:
-        return L"ESP";
+        return L"esp";
     case CV_AMD64_EBP:
-        return L"EBP";
+        return L"ebp";
     case CV_AMD64_ESI:
-        return L"ESI";
+        return L"esi";
     case CV_AMD64_EDI:
-        return L"EDI";
+        return L"edi";
     case CV_AMD64_ES:
-        return L"ES";
+        return L"es";
     case CV_AMD64_CS:
-        return L"CS";
+        return L"cs";
     case CV_AMD64_SS:
-        return L"SS";
+        return L"ss";
     case CV_AMD64_DS:
-        return L"DS";
+        return L"ds";
     case CV_AMD64_FS:
-        return L"FS";
+        return L"fs";
     case CV_AMD64_GS:
-        return L"GS";
+        return L"gs";
     case CV_AMD64_FLAGS:
-        return L"EFLAGS";
+        return L"eflags";
     case CV_AMD64_RIP:
-        return L"RIP";
+        return L"rip";
     case CV_AMD64_SIL:
-        return L"SIL";
+        return L"sil";
     case CV_AMD64_DIL:
-        return L"DIL";
+        return L"dil";
     case CV_AMD64_BPL:
-        return L"BPL";
+        return L"bpl";
     case CV_AMD64_SPL:
-        return L"SPL";
+        return L"spl";
     case CV_AMD64_RAX:
-        return L"RAX";
+        return L"rax";
     case CV_AMD64_RBX:
-        return L"RBX";
+        return L"rbx";
     case  CV_AMD64_RDX:
-        return L"RDX";
+        return L"rdx";
     case CV_AMD64_RCX:
-        return L"RCX";
+        return L"rcx";
     case CV_AMD64_RSI:
-        return L"RSI";
+        return L"rsi";
     case CV_AMD64_RDI:
-        return L"RDI";
+        return L"rdi";
     case CV_AMD64_RBP:
-        return L"RBP";
+        return L"rbp";
     case CV_AMD64_RSP:
-        return L"RSP";
+        return L"rsp";
     case CV_AMD64_R8:
-        return L"R8";
+        return L"r8";
     case CV_AMD64_R9:
-        return L"R9";
+        return L"r9";
     case CV_AMD64_R10:
-        return L"R10";
+        return L"r10";
     case CV_AMD64_R11:
-        return L"R11";
+        return L"r11";
     case CV_AMD64_R12:
-        return L"R12";
+        return L"r12";
     case CV_AMD64_R13:
-        return L"R13";
+        return L"r13";
     case CV_AMD64_R14:
-        return L"R14";
+        return L"r14";
     case CV_AMD64_R15:
-        return L"R15";
+        return L"r15";
     case CV_AMD64_R8B:
-        return L"R8B";
+        return L"r8b";
     case CV_AMD64_R9B:
-        return L"R9B";
+        return L"r9b";
     case CV_AMD64_R10B:
-        return L"R10B";
+        return L"r10b";
     case CV_AMD64_R11B:
-        return L"R11B";
+        return L"r11b";
     case CV_AMD64_R12B:
-        return L"R12B";
+        return L"r12b";
     case CV_AMD64_R13B:
-        return L"R13B";
+        return L"r13b";
     case CV_AMD64_R14B:
-        return L"R14B";
+        return L"r14b";
     case CV_AMD64_R15B:
-        return L"R15B";
+        return L"r15b";
     case CV_AMD64_R8W:
-        return L"R8W";
+        return L"r8w";
     case CV_AMD64_R9W:
-        return L"R9W";
+        return L"r9w";
     case CV_AMD64_R10W:
-        return L"R10W";
+        return L"r10w";
     case CV_AMD64_R11W:
-        return L"R11W";
+        return L"r11w";
     case CV_AMD64_R12W:
-        return L"R12W";
+        return L"r12w";
     case CV_AMD64_R13W:
-        return L"R13W";
+        return L"r13w";
     case CV_AMD64_R14W:
-        return L"R14W";
+        return L"r14w";
     case CV_AMD64_R15W:
-        return L"R15W";
+        return L"r15w";
     case CV_AMD64_R8D:
-        return L"R8D";
+        return L"r8d";
     case CV_AMD64_R9D:
-        return L"R9D";
+        return L"r9d";
     case CV_AMD64_R10D:
-        return L"R10D";
+        return L"r10d";
     case CV_AMD64_R11D:
-        return L"R11D";
+        return L"r11d";
     case CV_AMD64_R12D:
-        return L"R12D";
+        return L"r12d";
     case CV_AMD64_R13D:
-        return L"R13D";
+        return L"r13d";
     case CV_AMD64_R14D:
-        return L"R14D";
+        return L"r14d";
     case CV_AMD64_R15D:
-        return L"R15D";
+        return L"r15d";
     }
 
     std::stringstream sstr;

@@ -17,6 +17,12 @@
 #include "disasmtest.h"
 #include "targettest.h"
 #include "winapitest.h"
+#include "crttest.h"
+#include "clangtest.h"
+    
+#ifdef _M_AMD64 
+#include "regtest_x64.h"
+#endif
 
 class Environment : public ::testing::Environment {
 public:

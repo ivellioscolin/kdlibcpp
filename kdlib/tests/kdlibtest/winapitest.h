@@ -64,25 +64,25 @@ TEST_F(WinApiTest, CreateFileCall)
 
     if ( CreateFile_Type->getPtrSize() == 4 )
     {
-        ASSERT_NO_THROW( fileHandle = (HANDLE)CreateFilePtr->call( 7, 
+        ASSERT_NO_THROW( fileHandle = (HANDLE)CreateFilePtr->call( { 
             (MEMOFFSET_32)fileNameBuf,
             (DWORD)GENERIC_READ|GENERIC_WRITE, 
             (DWORD)0,
             (MEMOFFSET_32)0,
             (DWORD)CREATE_ALWAYS,
             (DWORD)FILE_ATTRIBUTE_NORMAL,
-            (DWORD)0 ).asULong() );
+            (DWORD)0 } ) );
     }
     else
     {
-        ASSERT_NO_THROW( fileHandle = (HANDLE)CreateFilePtr->call( 7, 
+        ASSERT_NO_THROW( fileHandle = (HANDLE)CreateFilePtr->call( {
             (MEMOFFSET_64)fileNameBuf,
             (DWORD)GENERIC_READ|GENERIC_WRITE, 
             (DWORD)0,
             (MEMOFFSET_64)0,
             (DWORD)CREATE_ALWAYS,
             (DWORD)FILE_ATTRIBUTE_NORMAL,
-            (DWORD)0 ).asULongLong() );
+            (DWORD)0 } ) );
     }
 
     EXPECT_NE( INVALID_HANDLE_VALUE, fileHandle );

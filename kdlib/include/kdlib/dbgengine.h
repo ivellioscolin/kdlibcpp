@@ -156,9 +156,10 @@ void setStackOffset(MEMOFFSET_64 offset);
 void setFrameOffset(MEMOFFSET_64 offset);
 
 unsigned long getRegisterNumber();
-unsigned long getRegsiterIndex(const std::wstring &name );
+unsigned long getRegisterIndex(const std::wstring &name );
 CPURegType getRegisterType(unsigned long index );
 std::wstring getRegisterName(unsigned long index );
+size_t getRegisterSize(unsigned long index);
 void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize );
 void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize );
 CPUType getCPUType();

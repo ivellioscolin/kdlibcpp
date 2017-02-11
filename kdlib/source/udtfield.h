@@ -16,6 +16,24 @@ namespace kdlib {
 class TypeField;
 typedef boost::shared_ptr<TypeField>  TypeFieldPtr;
 
+class ClangException : public TypeException
+{
+public:
+
+    ClangException()
+        :  TypeException( L"clang parse error")
+        {}
+
+    ClangException( const std::wstring  &errorStr )
+        :  TypeException(errorStr)
+        {}
+
+    ClangException( const std::wstring &typeName, const std::wstring  &errorStr )
+        : TypeException(  typeName, errorStr )
+        {}
+
+};
+
 class TypeField
 {
 
@@ -49,12 +67,17 @@ public:
         return m_staticMember;
     }
 
+    bool isMethod() const 
+    {
+        return m_methodMember;
+    }
+
     MEMOFFSET_64 getStaticOffset() const
     {
-        if ( !m_staticMember )
-            throw TypeException( m_name, L"this is not a static field" );
-
-        return m_staticOffset;
+        if ( m_staticMember )
+            return m_staticOffset;
+  
+        throw TypeException( m_name, L"this is not a static field" );
     }
 
     void getVirtualDisplacement( MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
@@ -83,7 +106,8 @@ protected:
          m_virtualDispIndex( 0 ),
          m_virtualDispSize( 0 ),
          m_staticMember( false ),
-         m_virtualMember( false )
+         m_virtualMember( false ),
+         m_methodMember(false)
          {}
 
     std::wstring  m_name;
@@ -99,9 +123,8 @@ protected:
     size_t  m_virtualDispSize;
 
     bool  m_staticMember;
-
     bool  m_virtualMember;
-
+    bool  m_methodMember;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -147,6 +170,19 @@ public:
         p->m_virtualMember = true;
         return TypeFieldPtr(p);
     }
+
+    static TypeFieldPtr getVirtualMethodField(
+        const SymbolPtr& sym,
+        const std::wstring& name 
+        )
+    {
+        SymbolUdtField *p = new SymbolUdtField( sym, name );
+        p->m_methodMember = true;
+        p->m_virtualMember = true;
+        return TypeFieldPtr(p);
+    }
+
+
 
 public:
 

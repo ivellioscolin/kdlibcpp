@@ -618,14 +618,42 @@ ExecutionStatus targetStepIn()
 
 ExecutionStatus targetStepOut()
 {
+    ULONG  codeLevel;
+    HRESULT  hres;
+
+    hres = g_dbgMgr->control->GetCodeLevel(&codeLevel);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetCodeLevel", hres);
+
+    hres = g_dbgMgr->control->SetCodeLevel(DEBUG_LEVEL_ASSEMBLY);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::SetCodeLevel", hres);
+
     g_dbgMgr->setQuietNotiification(true);
 
-    while (Disasm().opmnemo().find(L"ret") != 0 )
+    while(true)
+    {
+        std::wstring intsr = Disasm().opmnemo();
+
+        if ( Disasm().opmnemo().find(L"ret") != std::wstring::npos)
+        {
+            targetChangeStatus(DEBUG_STATUS_STEP_INTO);
+            break;
+        }
+
         targetChangeStatus(DEBUG_STATUS_STEP_OVER);
+
+        if ( getLastEventType() == EventTypeException )
+        {
+            break;
+        }
+    }
 
     g_dbgMgr->setQuietNotiification(false);
 
-    return targetChangeStatus(DEBUG_STATUS_STEP_INTO);
+    g_dbgMgr->control->SetCodeLevel(codeLevel);
+
+    return targetExecutionStatus();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1473,11 +1501,11 @@ void setInstructionOffset(MEMOFFSET_64 offset)
     switch( getCPUMode() )
     {
     case CPU_I386:
-        regIndex = getRegsiterIndex(L"eip");
+        regIndex = getRegisterIndex(L"eip");
         break;
 
     case CPU_AMD64:
-        regIndex = getRegsiterIndex(L"rip");
+        regIndex = getRegisterIndex(L"rip");
         break;
 
     default:
@@ -1496,11 +1524,11 @@ void setStackOffset(MEMOFFSET_64 offset)
     switch( getCPUMode() )
     {
     case CPU_I386:
-        regIndex = getRegsiterIndex(L"esp");
+        regIndex = getRegisterIndex(L"esp");
         break;
 
     case CPU_AMD64:
-        regIndex = getRegsiterIndex(L"rsp");
+        regIndex = getRegisterIndex(L"rsp");
         break;
 
     default:
@@ -1519,11 +1547,11 @@ void setFrameOffset(MEMOFFSET_64 offset)
     switch( getCPUMode() )
     {
     case CPU_I386:
-        regIndex = getRegsiterIndex(L"ebp");
+        regIndex = getRegisterIndex(L"ebp");
         break;
 
     case CPU_AMD64:
-        regIndex = getRegsiterIndex(L"rbp");
+        regIndex = getRegisterIndex(L"rbp");
         break;
 
     default:
@@ -1566,14 +1594,14 @@ unsigned long getRegisterNumber()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long getRegsiterIndex( const std::wstring &name )
+unsigned long getRegisterIndex( const std::wstring &name )
 {
     HRESULT  hres;
     ULONG  index;
 
     hres = g_dbgMgr->registers->GetIndexByNameWide( name.c_str(), &index );
     if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugRegisters2::GetIndexByNameWide", hres ); 
+        throw CPUException(L"invalid register name " + name );
 
     return index;
 }
@@ -1591,7 +1619,7 @@ CPURegType getRegisterType( unsigned long index )
     hres = g_dbgMgr->registers->GetValue( static_cast<ULONG>(index), &dbgvalue );
 
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+        throw CPUException(L"failed to get value of the register");
 
     switch ( dbgvalue.Type )
     {
@@ -1626,6 +1654,57 @@ std::wstring getRegisterName( unsigned long index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t getRegisterSize(unsigned long index)
+{
+    HRESULT  hres;
+
+    if ( index >= getRegisterNumber() )
+        throw IndexException(index);
+
+    DEBUG_VALUE  dbgvalue = {};
+    hres = g_dbgMgr->registers->GetValue(index,&dbgvalue);
+
+    if ( FAILED(hres) )
+        throw CPUException(L"failed to get value of the register");
+
+    switch ( dbgvalue.Type )
+    {
+    case DEBUG_VALUE_INT8: 
+        return sizeof(unsigned char);
+
+    case DEBUG_VALUE_INT16: 
+        return sizeof(unsigned short);
+
+    case DEBUG_VALUE_INT32: 
+        return sizeof(unsigned long);
+
+    case DEBUG_VALUE_INT64: 
+        return sizeof(unsigned long long);
+
+    case DEBUG_VALUE_FLOAT32: 
+        return sizeof(float);
+
+    case DEBUG_VALUE_FLOAT64: 
+        return sizeof(double);
+
+    case DEBUG_VALUE_FLOAT80:
+        return sizeof(dbgvalue.F80Bytes);
+
+    case DEBUG_VALUE_FLOAT128:
+        return sizeof(dbgvalue.F128Bytes);
+
+    case DEBUG_VALUE_VECTOR64:
+        return sizeof(dbgvalue.VI64);
+
+    case DEBUG_VALUE_VECTOR128:
+        return  2*sizeof(dbgvalue.VI64);
+    }
+
+    throw DbgException( "Unknown regsiter type" ); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
 {
     HRESULT  hres;
@@ -1637,7 +1716,7 @@ void getRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
     hres = g_dbgMgr->registers->GetValue(index, &dbgvalue );
 
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+        throw CPUException(L"failed to get value of the register");
 
     switch ( dbgvalue.Type )
     {
@@ -1718,7 +1797,7 @@ void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
 
     hres = g_dbgMgr->registers->GetValue(index, &dbgvalue );
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::GetValue", hres ); 
+        throw CPUException(L"failed to get value of the register");
 
     switch ( dbgvalue.Type )
     {
@@ -1785,7 +1864,7 @@ void setRegisterValue(unsigned long index, void* buffer, size_t bufferSize )
 
     hres = g_dbgMgr->registers->SetValue(index, &dbgvalue);
     if ( FAILED(hres) )
-        throw DbgEngException( L"IDebugRegisters::SetValue", hres ); 
+        throw CPUException(L"failed to set value of the register");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1797,7 +1876,7 @@ unsigned long long loadMSR(unsigned long msrIndex )
 
     hres = g_dbgMgr->dataspace->ReadMsr( msrIndex, &value );
     if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugDataSpaces::ReadMsr", hres );
+         throw CPUException( L"failed to read MSR");
 
     return value;
 }
@@ -1810,7 +1889,7 @@ void setMSR(unsigned long msrIndex, unsigned long long value )
 
     hres = g_dbgMgr->dataspace->WriteMsr(msrIndex, value);
     if ( FAILED( hres ) )
-         throw DbgEngException( L"IDebugDataSpaces::WriteMsr", hres );
+        throw CPUException( L"failed to write MSR");
 }
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2107,6 +2186,9 @@ EventType getLastEventType()
     if (S_OK != hres)
         throw DbgEngException(L"IDebugControl::GetLastEventInformation", hres);
 
+    if ( eventType == 0 )
+        return EventTypeNoEvent;
+
     switch (eventType)
     {
     case DEBUG_EVENT_BREAKPOINT:
@@ -2137,7 +2219,7 @@ EventType getLastEventType()
         return EventTypeChangeSymbolState;
     }
 
-    throw DbgException( "unknow wvwnrt type");
+    throw DbgException( "unknow event type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -176,11 +176,24 @@ extern pstructAbstract g_structAbstract;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class classBase1 {
+class classProBase1  {
+
+public:
+
+    int proBaseMethod(long a) const { return a * 10; }
+
+    virtual int virtMethod1(float a)
+    {
+        return -10;
+    }
+
+};
+
+class classBase1 : public classProBase1 {
 public:
     int m_baseField;
-    void baseMethod() const {}
-    virtual void virtMethod1() =  0;
+    int baseMethod( long a) const { return proBaseMethod(a) + m_baseField; }
+    virtual int virtMethod1(int a) =  0;
     virtual void virtMethod2() =  0;
 
     classBase1() :
@@ -198,6 +211,18 @@ public:
         m_count( 1234 ),
         m_baseField( 100 )
         {}
+    
+    virtual int virtMethod3() {
+        return 23;
+    }
+
+    virtual int virtMethod4() {
+        return 24;
+    }
+
+    float overloadMethod(float a, float b) {
+        return a*b;
+    }
 };
 
 
@@ -215,55 +240,89 @@ public:
     int m_childField2;
     structTest m_childField3;
     enumType m_enumField;
-    void childMethod() const {}
-    virtual void virtMethod1() {}
+
+    int childMethod(int var) const{
+        baseMethod(33);
+        staticMethod(10,1);
+        return m_childField * 5;
+    }
+
+    virtual int virtMethod1(int a) { return 1;}
+    
     virtual void virtMethod2() {}
 
+    virtual int virtMethod3() {
+        return 123;
+    }
+
+    virtual int virtMethod4() {
+        return 124;
+    }
+
+    static char staticMethod( int a, int b ) { return static_cast<char>(a/b); }
+
+    void noBodyFunc(int a);
+
+    int overloadMethod(int a) {
+        return a*10;
+    }
+
+    int overloadMethod(int a, int b) {
+        return a*b;
+    }
+
     classChild() :
-        m_enumField( THREE )
+        m_enumField( THREE ),
+        m_childField(1000)
         {}
 };
 
 extern classChild  g_classChild;
+extern classBase2*  g_polimorphChild;
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 class virtualBase1 : public virtual classBase1 {
 
+public:
+
     int     m_member;
 
-public:
     virtualBase1() : m_member(123){}
 
-    virtual void virtMethod1() {}
+    virtual int virtMethod1(int a) { return a * 10; }
     virtual void virtMethod2() {}
 };
 
 
 class virtualBase2 : public virtual classBase1
 {
+public:
+
     int     m_member;
 
-public:
     virtualBase2() : m_member(345){}
 
-    virtual void virtMethod1() {}
+    virtual int virtMethod1(int a) { return a / 10; }
 };
 
 class virtualChild : public virtualBase1, public  virtualBase2
 {
+public:
+
     int     m_member;
 
-    virtual void virtMethod1() {}
+    virtual int virtMethod1(int a) { return a + 101; }
     virtual void virtMethod2() {}
-    virtual void virtMethod3() {}
+    virtual int virtChildMethod() { return 10001; }
 
-public:
     virtualChild() : m_member(678) {}
 };
 
 extern virtualChild       g_virtChild;
+extern virtualBase2*      g_polimorphVirtChild1;
+extern classBase1*        g_polimorphVirtChild2;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -290,6 +349,38 @@ extern std::wstring  g_stdWString;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace testspace {
+
+
+class testClass1 {
+
+public:
+
+    class nestedClass {
+    public:
+        nestedClass() : m_member(100500) {}
+
+        int getMember() const {
+            return m_member;
+        }
+
+    private:
+        int  m_member;
+    };
+
+
+private:
+
+    nestedClass  m_nestedMember;
+
+};
+
+extern  testClass1  g_testClass;
+
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack ( pop )
 

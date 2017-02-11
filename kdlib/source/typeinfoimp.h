@@ -19,6 +19,12 @@ inline size_t getPtrSizeBySymbol( SymbolPtr &typeSym )
     return typeSym->getSize();
 }
 
+std::wstring  getMethodPrototype( kdlib::TypeInfoPtr&  methodType );
+
+bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodPrototype);
+
+std::wstring printStructType(TypeInfoPtr& structType);
+std::wstring printPointerType(TypeInfoPtr&  ptrType);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,6 +104,10 @@ protected:
         return m_constant;
     }
 
+    virtual bool isVirtual() {
+        throw TypeException( getName(), L"type is not class method" );
+    }
+
     virtual TypeInfoPtr getElement( const std::wstring &name ) {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
@@ -162,6 +172,66 @@ protected:
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
+    virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype)  {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual TypeInfoPtr getMethod( size_t index ) {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual size_t getMethodsCount() {
+        throw TypeException( getName(), L"type has no methods" ); 
+    }
+
+    virtual TypeInfoPtr getBaseClass( const std::wstring& className) {
+        throw TypeException( getName(), L"type has no base class" ); 
+    }
+
+    virtual TypeInfoPtr getBaseClass( size_t index ) {
+        throw TypeException( getName(), L"type has no base class" ); 
+    }
+
+    virtual size_t getBaseClassesCount() {
+        throw TypeException( getName(), L"type has no base class" ); 
+    }
+
+    virtual MEMOFFSET_REL getBaseClassOffset( const std::wstring &name ) {
+        throw TypeException( getName(), L"type has no base class" ); 
+    }
+
+    virtual MEMOFFSET_REL getBaseClassOffset( size_t index ) {
+        throw TypeException( getName(), L"type has no base class" );
+    }
+
+    virtual bool isBaseClassVirtual( const std::wstring &name ) {
+        throw TypeException( getName(), L"type has no base class" );
+    }
+
+    virtual bool isBaseClassVirtual( size_t index ) {
+        throw TypeException( getName(), L"type has no base class" );
+    }
+
+    virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
+        throw TypeException( getName(), L"type is not virtual inherited" );
+    }
+
+    virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
+        throw TypeException( getName(), L"type is not virtual inherited" );
+    }
+
+    virtual bool isMethodMember( const std::wstring &name ) {
+        throw TypeException( getName(), L"type is not a struct" ); 
+    }
+
+    virtual bool isMethodMember( size_t index ) {
+        throw TypeException( getName(), L"type is not a struct" ); 
+    }
+
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
@@ -192,6 +262,15 @@ protected:
 
     virtual size_t getAlignReq() {
         throw TypeException( getName(), L"has no alignment-requirement" );
+    }
+
+    virtual TypeInfoPtr getVTBL() {
+        throw TypeException( getName(), L"has no VTBL" );
+    }
+
+    virtual MEMOFFSET_REL getVtblOffset() 
+    {
+        throw TypeException( getName(), L"type is not a virtual method" ); 
     }
 
 public:
@@ -316,6 +395,26 @@ protected:
 
     virtual TypeInfoPtr getClassParent();
 
+    virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype=L"");
+    virtual TypeInfoPtr getMethod( size_t index );
+    virtual size_t getMethodsCount();
+
+    virtual TypeInfoPtr getBaseClass( const std::wstring& className);
+    virtual TypeInfoPtr getBaseClass( size_t index );
+    virtual size_t getBaseClassesCount();
+
+    virtual MEMOFFSET_REL getBaseClassOffset( const std::wstring &name );
+    virtual MEMOFFSET_REL getBaseClassOffset( size_t index );
+
+    virtual bool isBaseClassVirtual( const std::wstring &name );
+    virtual bool isBaseClassVirtual( size_t index );
+
+    virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
+    virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
+
+    virtual TypeInfoPtr getVTBL();
+
+
 protected:
 
     SymbolPtr  m_symbol;
@@ -336,7 +435,6 @@ protected:
 
     void getVirtualFields();
 
-    
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -375,10 +473,14 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoFunction : public TypeInfoImp
+class TypeInfoFunctionPrototype : public TypeInfoImp
 {
 
 public:
+
+    TypeInfoFunctionPrototype() : 
+        m_hasThis(false)
+        {}
 
 protected:
 
@@ -405,6 +507,10 @@ protected:
         throw IndexException(index);
     }
 
+    virtual bool hasThis() {
+        return m_hasThis;
+    }
+
     virtual std::wstring getName();
 
     virtual std::pair<std::wstring, std::wstring> splitName();
@@ -413,16 +519,18 @@ protected:
 
     typedef std::vector< TypeInfoPtr > Args;
     Args m_args;
+
+    bool m_hasThis;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 
-class TypeInfoSymbolFunction : public TypeInfoFunction
+class TypeInfoSymbolFunctionPrototype : public TypeInfoFunctionPrototype
 {
 public:
 
-    TypeInfoSymbolFunction( SymbolPtr& symbol );
+    TypeInfoSymbolFunctionPrototype( SymbolPtr& symbol );
 
 protected:
 
@@ -440,10 +548,6 @@ protected:
 
     virtual TypeInfoPtr getReturnType();
 
-    virtual bool hasThis() {
-        return m_hasThis;
-    }
-
     virtual size_t getSize() {
         return m_symbol->getSize();
     }
@@ -457,7 +561,45 @@ protected:
 private:
     SymbolPtr m_symbol;
 
-    bool m_hasThis;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoSymbolFunction : public TypeInfoSymbolFunctionPrototype
+{
+public:
+
+    TypeInfoSymbolFunction(const SymbolPtr& symbol) :
+        TypeInfoSymbolFunctionPrototype(symbol->getType()),
+        m_symbol(symbol)
+    {}
+
+    virtual NumVariant getValue() const 
+    {
+        try 
+        {
+            return m_symbol->getVa();
+        }
+        catch(SymbolException&)
+        {}
+
+        throw TypeException(L"function has no body");
+    }
+
+    virtual bool isVirtual()
+    {
+        return m_symbol->isVirtual();
+    }
+
+    virtual MEMOFFSET_REL getVtblOffset() 
+    {
+        return m_symbol->getVirtualBaseOffset();
+    }
+
+private:
+
+    SymbolPtr m_symbol;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -510,8 +652,7 @@ class TypeInfoVoid: public TypeInfoImp
 {
 public:
 
-    TypeInfoVoid( size_t ptrSize )
-    {}
+    TypeInfoVoid( size_t ptrSize=0 );
 
 protected:
 
@@ -601,7 +742,11 @@ class TypeInfoBitField : public TypeInfoImp
 {
 public:
 
-    TypeInfoBitField( SymbolPtr &symbol );
+    TypeInfoBitField( TypeInfoPtr fieldType, BITOFFSET bitPos, BITOFFSET bitWidth) :
+        m_bitType(fieldType),
+        m_bitPos(bitPos),
+        m_bitWidth(bitWidth)
+        {}
 
 protected:
 
@@ -627,20 +772,32 @@ protected:
          return m_bitType;
     }
 
-    virtual TypeInfoPtr getClassParent();
-
     virtual size_t getAlignReq() {
         return getSize();
     }
 
-private:
+protected:
 
-    SymbolPtr  m_symbol;
     TypeInfoPtr  m_bitType;
     BITOFFSET  m_bitWidth;
     BITOFFSET  m_bitPos;
-    size_t  m_size;
+};
 
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoSymbolBitField : public TypeInfoBitField 
+{
+public:
+
+    TypeInfoSymbolBitField( SymbolPtr &symbol );
+
+protected:
+
+    virtual TypeInfoPtr getClassParent();
+
+private:
+
+    SymbolPtr  m_symbol;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -664,13 +821,6 @@ public:
         m_ptrSize( ptrSize )
         {}
 
-    TypeInfoPointer( SymbolPtr& symbol )
-    {
-        m_symbol = symbol;
-        m_derefType = loadType( symbol->getType() );
-        m_ptrSize = symbol->getSize();
-    }
-
     virtual TypeInfoPtr deref() {
         return m_derefType;
     }
@@ -679,7 +829,7 @@ public:
         return m_derefType->getName();
     }
 
-    virtual TypeInfoPtr getClassParent();
+    //virtual TypeInfoPtr getClassParent();
 
     virtual size_t getAlignReq() {
         return getSize();
@@ -703,12 +853,27 @@ protected:
         return m_ptrSize;
     }
 
+protected:
+
+    TypeInfoPtr  m_derefType;
+    size_t  m_ptrSize;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoSymbolPointer : public TypeInfoPointer
+{
+public:
+
+    TypeInfoSymbolPointer( SymbolPtr& symbol ) : 
+        TypeInfoPointer( loadType( symbol->getType() ), symbol->getSize() )
+    {
+        m_symbol = symbol;
+    }
 
 protected:
 
     SymbolPtr  m_symbol;
-    TypeInfoPtr  m_derefType;
-    size_t  m_ptrSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -729,19 +894,12 @@ public:
         m_ptrSize = derefType->getPtrSize();
     }
 
-    TypeInfoArray( SymbolPtr& symbol )
-    {
-        m_symbol = symbol;
-        m_derefType = loadType( symbol->getType() );
-        m_count = symbol->getCount();
-        m_ptrSize = getPtrSizeBySymbol(symbol);
-    }
 
     TypeInfoPtr getDerefType() {
         return m_derefType;
     }
 
-    virtual TypeInfoPtr getClassParent();
+   // virtual TypeInfoPtr getClassParent();
 
     virtual size_t getAlignReq() {
         return getDerefType()->getAlignReq();
@@ -774,11 +932,30 @@ protected:
 
 protected:
 
-    SymbolPtr  m_symbol;
     TypeInfoPtr  m_derefType;
     size_t  m_count;
     size_t  m_ptrSize;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoSymbolArray : public TypeInfoArray 
+{
+
+public:
+
+    TypeInfoSymbolArray( SymbolPtr& symbol ) : 
+        TypeInfoArray( loadType( symbol->getType() ), symbol->getCount() )
+    {
+        m_symbol = symbol;
+    }
+
+protected:
+
+    SymbolPtr  m_symbol;
+
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
