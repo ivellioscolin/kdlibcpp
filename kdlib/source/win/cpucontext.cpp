@@ -498,7 +498,7 @@ StackPtr getStackAmd64()
     g_dbgMgr->setQuietNotiification(false);
 
     if (S_OK != hres)
-        throw DbgEngException( L"IDebugControl::GetStackTrace", hres );
+        throw DbgEngException( L"IDebugControl::GetContextStackTrace", hres );
 
 
     std::vector<StackFramePtr>  stackFrames;
@@ -638,7 +638,7 @@ StackPtr getStackWow64()
     g_dbgMgr->setQuietNotiification(false);
 
     if (S_OK != hres)
-        throw DbgEngException(L"IDebugControl::GetStackTrace", hres);
+        throw DbgEngException(L"IDebugControl::GetContextStackTrace", hres);
 
     std::vector<StackFramePtr>  stackFrames;
 
@@ -683,7 +683,7 @@ StackPtr getStackX86()
     g_dbgMgr->setQuietNotiification(false);
 
     if (S_OK != hres)
-        throw DbgEngException(L"IDebugControl::GetStackTrace", hres);
+        throw DbgEngException(L"IDebugControl::GetContextStackTrace", hres);
 
 
     std::vector<StackFramePtr>  stackFrames;
