@@ -143,4 +143,18 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class TypeInfoProvider;
+typedef boost::shared_ptr<TypeInfoProvider>     TypeInfoProviderPtr;
+
+class TypeInfoProvider 
+{
+public:
+
+    virtual TypeInfoPtr getTypeByName(const std::wstring& name) = 0;
+};
+
+TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source, const std::wstring&  opts = L"" );
+
+///////////////////////////////////////////////////////////////////////////////
+
 }; // kdlib namespace end

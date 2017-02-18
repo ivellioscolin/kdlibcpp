@@ -158,4 +158,22 @@ protected:
 
 
 
+class TypeInfoProviderClang : public TypeInfoProvider
+{
+public:
+
+    TypeInfoProviderClang( const std::wstring&  sourceCode, const std::wstring&  compileOptions);
+
+private:
+
+    virtual TypeInfoPtr getTypeByName(const std::wstring& name);
+
+private:
+
+    ClangASTSessionPtr  m_astSession;
+
+};
+
+
+
 }

@@ -23,7 +23,6 @@ using namespace clang::tooling;
 
 namespace kdlib{
 
-
 TypeInfoPtr getTypeForClangBuiltinType(const clang::BuiltinType* builtinType)
 {
     switch( builtinType->getKind() )
@@ -161,7 +160,11 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
 
         std::string  name = decl->getNameAsString();
         if ( name.empty() )
-            name = m_recordDecl->getNameAsString() + "::<unnamed struct>";
+        {
+            std::stringstream  sstr;
+            sstr << m_recordDecl->getNameAsString() << "::<unnamed-type-" << wstrToStr(getName()) << '>';
+            name = sstr.str();
+        }
 
        return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_astSession, decl->getMostRecentDecl() ) );
     }
@@ -329,12 +332,19 @@ size_t ClangASTSession::getPtrSize()
 
 TypeInfoPtr compileType( const std::wstring& sourceCode, const std::wstring& typeName, const std::wstring& options)
 {
+    return getTypeInfoProviderFromSource(sourceCode, options)->getTypeByName(typeName);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoProviderClang::TypeInfoProviderClang( const std::wstring& sourceCode, const std::wstring& compileOptions)
+{
     std::vector< std::string > args;
 
     typedef boost::tokenizer< boost::escaped_list_separator<char> > Tokenizer;
     boost::escaped_list_separator<char> Separator( '\\', ' ', '\"' );
 
-    std::string  optionsStr = wstrToStr(options);
+    std::string  optionsStr = wstrToStr(compileOptions);
     Tokenizer tok( optionsStr, Separator );
 
     std::copy(tok.begin(), tok.end(), std::inserter(args, args.end() ) );
@@ -358,12 +368,24 @@ TypeInfoPtr compileType( const std::wstring& sourceCode, const std::wstring& typ
 
     std::unique_ptr<ASTUnit>  ast = buildASTFromCodeWithArgs(wstrToStr(sourceCode), args );
 
-    return ClangASTSession::getASTSession(ast)->getTypeInfo(typeName);
+    m_astSession = ClangASTSession::getASTSession(ast);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr TypeInfoProviderClang::getTypeByName(const std::wstring& name)
+{
+    return m_astSession->getTypeInfo(name);
+}
 
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source, const std::wstring&  opts )
+{
+    return TypeInfoProviderPtr( new TypeInfoProviderClang(source, opts) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 
 }
