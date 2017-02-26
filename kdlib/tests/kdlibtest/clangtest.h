@@ -6,7 +6,7 @@
 
 using namespace kdlib;
 
-class ClangTest : public ProcessFixture 
+class ClangTest : public ProcessFixture
 {
 public:
 
@@ -195,25 +195,25 @@ static const wchar_t test_code6[] = L" \
     #include \"../../../kdlib/include/test/testvars.h\" \
     ";
 
+
+
 TEST_F(ClangTest, Include)
 {
-    TypeInfoPtr  structFromSrc, structFromPdb;
     TypeInfoProviderPtr  typeProvider;
-    std::wstring  str1, str2;
 
     ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(test_code6) );
 
-    ASSERT_NO_THROW( structFromSrc = typeProvider->getTypeByName(L"structTest") );
-    ASSERT_NO_THROW( structFromPdb = loadType( L"structTest" ) );
-    EXPECT_NO_THROW( str1 = structFromSrc->str() );
-    EXPECT_NO_THROW( str2 = structFromPdb->str() );
-    EXPECT_TRUE( str1 == str2 );
+    for ( auto typeName :  {L"structTest", L"structWithNested", L"structWithArray", L"unionTest"} )
+    {
+        TypeInfoPtr  structFromSrc, structFromPdb;
+        std::wstring  str1, str2;
 
-    ASSERT_NO_THROW( structFromSrc = typeProvider->getTypeByName(L"structWithNested") );
-    ASSERT_NO_THROW( structFromPdb = loadType( L"structWithNested" ) );
-    EXPECT_NO_THROW( str1 = structFromSrc->str() );
-    EXPECT_NO_THROW( str2 = structFromPdb->str() );
-    EXPECT_TRUE( str1 == str2 );
+        ASSERT_NO_THROW( structFromSrc = typeProvider->getTypeByName(typeName) );
+        ASSERT_NO_THROW( structFromPdb = loadType(typeName) );
+        EXPECT_NO_THROW( str1 = structFromSrc->str() );
+        EXPECT_NO_THROW( str2 = structFromPdb->str() );
+        EXPECT_TRUE( str1 == str2 );
+    }
 }
 
 

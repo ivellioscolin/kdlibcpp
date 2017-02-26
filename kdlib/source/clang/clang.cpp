@@ -264,6 +264,19 @@ TypeInfoPtr TypeInfoClangArray::getDerefType( ClangASTSessionPtr& astSession, cl
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t TypeInfoClangArray::getElementCount(clang::ArrayType* arrayType)
+{
+    clang::ConstantArrayType*  constArray = llvm::dyn_cast<clang::ConstantArrayType> (arrayType);
+    if ( constArray )
+    {
+        return  constArray->getSize().getSExtValue();
+    }
+
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoPtr TypeInfoClangRef::deref()
 {
     return getTypeForClangType(m_astSession, m_refType->getPointeeType());

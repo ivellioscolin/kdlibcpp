@@ -119,12 +119,14 @@ class TypeInfoClangArray: public TypeInfoArray
 {
 public:
     TypeInfoClangArray(ClangASTSessionPtr& session, clang::ArrayType* arrayType) :
-        TypeInfoArray(TypeInfoClangArray::getDerefType(session, arrayType), 0)
+        TypeInfoArray(TypeInfoClangArray::getDerefType(session, arrayType), getElementCount(arrayType))
         {}
 
 protected:
 
     static TypeInfoPtr getDerefType( ClangASTSessionPtr& session, clang::ArrayType* arrayType);
+
+    size_t getElementCount(clang::ArrayType* arrayType);
 
 };
 
