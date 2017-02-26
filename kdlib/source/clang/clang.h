@@ -158,7 +158,23 @@ protected:
     clang::ReferenceType*  m_refType;
 };
 
+class TypeInfoClangFunc : public TypeInfoImp
+{
 
+protected:
+
+    virtual bool isFunction() {
+        return true;
+    }
+
+    virtual std::wstring getName() {
+        return L"function";
+    }
+
+    virtual std::wstring str() {
+        return L"function";
+    }
+};
 
 class TypeInfoProviderClang : public TypeInfoProvider
 {

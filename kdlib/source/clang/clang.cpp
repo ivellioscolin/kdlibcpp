@@ -103,6 +103,11 @@ TypeInfoPtr getTypeForClangType( ClangASTSessionPtr&  astSession, const clang::Q
         NOT_IMPLEMENTED();
     }
 
+    if ( qualType->isFunctionType() )
+    {
+        return TypeInfoPtr( new TypeInfoClangFunc() );
+    }
+
     throw TypeException(L"can not parse code");
 }
 

@@ -219,20 +219,21 @@ TEST_F(ClangTest, Include)
 
 TEST_F(ClangTest, WindowsH)
 {
-    std::wstring  src = L"#include <windef.h>\r\n";
-    std::wstring  typeName = L"tagPOINT";  
+    std::wstring  src = L"#include <windows.h>\r\n";
     std::wstring  opt = L"-I\"C:/Program Files (x86)/Windows Kits/8.1/Include/um\" \
-        -I\"C:/Program Files (x86)/Windows Kits/8.1/Include/shared\" -Wno-missing-declarations -Wno-invalid-token-paste";
+        -I\"C:/Program Files (x86)/Windows Kits/8.1/Include/shared\" -w";
 
     TypeInfoProviderPtr  typeProvider;
 
     ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(src, opt) );
 
-    TypeInfoPtr  type1;
+    for ( auto typeName :  {L"tagPOINT", L"tagWNDCLASSA"} )
+    {
+        TypeInfoPtr  type1;
+        ASSERT_NO_THROW( type1 = typeProvider->getTypeByName(typeName) );
 
-    ASSERT_NO_THROW( type1 = typeProvider->getTypeByName(typeName) );
-
-    std::wstring  desc;
-    EXPECT_NO_THROW( desc = type1->str() );
+        std::wstring  desc;
+        EXPECT_NO_THROW( desc = type1->str() );
+    }
 }
 
