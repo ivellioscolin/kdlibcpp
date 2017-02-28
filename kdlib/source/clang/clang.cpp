@@ -39,6 +39,7 @@ TypeInfoPtr getTypeForClangBuiltinType(const clang::BuiltinType* builtinType)
 
     case clang::BuiltinType::Kind::UChar:
         return loadType(L"UInt1B");
+    case clang::BuiltinType::Kind::WChar_U:
     case clang::BuiltinType::Kind::UShort:
         return loadType(L"UInt2B");
     case clang::BuiltinType::Kind::UInt:
@@ -305,7 +306,12 @@ public:
         if ( Declaration->getNameAsString() != m_typeName)
             return true;
 
-        m_typeInfo = TypeInfoPtr( new TypeInfoClangStruct(strToWStr(name), m_session, Declaration->getMostRecentDecl() ) );
+        clang::CXXRecordDecl*  decl = Declaration->getDefinition();
+
+        if ( !decl )
+            return true;
+
+        m_typeInfo = TypeInfoPtr( new TypeInfoClangStruct(strToWStr(name), m_session, decl ) );
 
         return false;
     }

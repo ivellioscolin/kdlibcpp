@@ -31,6 +31,8 @@ static const wchar_t test_code1[] = L"  \
         float  a12;              \
         double  a13;             \
         long double  a14;        \
+        wchar_t  a15;            \
+        unsigned wchar_t  a16;   \
         void*   b0;              \
         char*   b1;              \
         unsigned char   b2[10];  \
@@ -57,7 +59,7 @@ TEST_F(ClangTest, CompileStruct)
 
     EXPECT_LT( 0, compiledStruct->getSize() );
 
-    EXPECT_EQ( 22, compiledStruct->getElementCount() );
+    EXPECT_EQ( 24, compiledStruct->getElementCount() );
 
     EXPECT_EQ( L"Int4B", compiledStruct->getElement(L"a5")->getName() );
     EXPECT_EQ( L"Float", compiledStruct->getElement(L"a12")->getName() );
@@ -68,12 +70,12 @@ TEST_F(ClangTest, CompileStruct)
 
     EXPECT_TRUE( compiledStruct->isStaticMember(L"b5") );
     EXPECT_FALSE( compiledStruct->isStaticMember(L"b6") );
-    EXPECT_TRUE( compiledStruct->isStaticMember(20) );
-    EXPECT_FALSE( compiledStruct->isStaticMember(21) );
+    EXPECT_TRUE( compiledStruct->isStaticMember(22) );
+    EXPECT_FALSE( compiledStruct->isStaticMember(23) );
 
    
     EXPECT_THROW( compiledStruct->getElement(L"aa")->getName(), TypeException );
-    EXPECT_THROW( compiledStruct->getElement(23), IndexException );
+    EXPECT_THROW( compiledStruct->getElement(25), IndexException );
 
     std::wstring  desc;
     EXPECT_NO_THROW( desc = compiledStruct->str() );
@@ -99,6 +101,7 @@ static const wchar_t  test_code2[] = L"\
         struct TestStruct*  next;      \
         int  value;                    \
     };                                 \
+    struct StructNoDef;                \
     ";
 
 TEST_F(ClangTest, ForwardDecl)
@@ -113,6 +116,8 @@ TEST_F(ClangTest, ForwardDecl)
 
     std::wstring  desc;
     EXPECT_NO_THROW( desc = testStruct->getElement(L"next")->str() );
+
+    EXPECT_THROW( compileType(test_code2, L"StructNoDef"), TypeException );
 }
 
 static const wchar_t test_code3[] = L" \
@@ -223,11 +228,34 @@ TEST_F(ClangTest, WindowsH)
     std::wstring  opt = L"-I\"C:/Program Files (x86)/Windows Kits/8.1/Include/um\" \
         -I\"C:/Program Files (x86)/Windows Kits/8.1/Include/shared\" -w";
 
+
     TypeInfoProviderPtr  typeProvider;
 
     ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(src, opt) );
 
     for ( auto typeName :  {L"tagPOINT", L"tagWNDCLASSA"} )
+    {
+        TypeInfoPtr  type1;
+        ASSERT_NO_THROW( type1 = typeProvider->getTypeByName(typeName) );
+
+        std::wstring  desc;
+        EXPECT_NO_THROW( desc = type1->str() );
+    }
+}
+
+
+TEST_F(ClangTest, NtddkH)
+{
+    std::wstring  src = L"#include <ntddk.h>\r\n";
+    std::wstring  opt = L"-I\"C:/Program Files (x86)/Windows Kits/8.1/Include/km\" \
+        -I\"C:/Program Files (x86)/Windows Kits/8.1/Include/shared\" \
+        -D_AMD64_ --target=x86_64-pc-windows-msvc -w";
+
+    TypeInfoProviderPtr  typeProvider;
+
+    ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(src, opt) );
+
+    for ( auto typeName :  {L"_UNICODE_STRING", L"_IRP", L"_MDL", L"_FILE_OBJECT", L"_DEVICE_OBJECT", L"_PS_CREATE_NOTIFY_INFO"} )
     {
         TypeInfoPtr  type1;
         ASSERT_NO_THROW( type1 = typeProvider->getTypeByName(typeName) );
