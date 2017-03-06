@@ -117,7 +117,34 @@ struct structWithNested {
     struct {
 
          int m_field3;
-    } ;
+
+         struct {
+             char m_filed4;
+         };
+
+         union {
+             unsigned char m_field5;
+         };
+    };
+
+    union {
+
+        float  m_field6;
+
+    } m_unnameUnion;
+
+    union {
+
+         long  m_field7;
+
+         union {
+             short m_field8;
+         };
+
+         struct {
+             short m_field9;
+         };
+    };
 };
 
 extern structWithNested g_structWithNested;

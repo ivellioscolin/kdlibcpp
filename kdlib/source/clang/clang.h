@@ -70,7 +70,7 @@ private:
 class TypeInfoClangStruct : public TypeInfoFields
 {
 public:
-    TypeInfoClangStruct(const std::wstring & name, ClangASTSessionPtr& session, clang::CXXRecordDecl*  decl) :
+    TypeInfoClangStruct(const std::wstring & name, ClangASTSessionPtr& session, clang::RecordDecl*  decl) :
         TypeInfoFields(name),
         m_astSession(session),
         m_decl(decl)
@@ -93,11 +93,11 @@ protected:
 
     virtual void getFields();
 
-    void TypeInfoClangStruct::getRecursiveFields( clang::CXXRecordDecl* recordDecl, MEMOFFSET_32 startOffset);
+    void getRecursiveFields( clang::RecordDecl* recordDecl, MEMOFFSET_32 startOffset);
 
     ClangASTSessionPtr  m_astSession;
 
-    clang::CXXRecordDecl*  m_decl;
+    clang::RecordDecl*  m_decl;
 };
 
 

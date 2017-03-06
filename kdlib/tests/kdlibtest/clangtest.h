@@ -137,7 +137,15 @@ static const wchar_t test_code3[] = L" \
             int   c3;                  \
             int   c4;                  \
         };                             \
-        int  b4;                       \
+        union {                        \
+            long  c5;                  \
+            float  c6;                 \
+        };                             \
+        union {                        \
+            char  c7;                  \
+            short  c8;                 \
+        } b4;                          \
+        int  b5;                       \
         float;                         \
     };                                 \
     ";
@@ -150,6 +158,8 @@ TEST_F(ClangTest, Nested)
     EXPECT_EQ( L"a2", testStruct->getElement(L"b2")->getElementName(1) );
     EXPECT_EQ( L"c2", testStruct->getElement(L"b3")->getElementName(1) );
     EXPECT_EQ( L"c4", testStruct->getElementName(4) );
+    EXPECT_EQ( L"c6", testStruct->getElementName(6) );
+    EXPECT_EQ( L"c8", testStruct->getElement(L"b4")->getElementName(1) );
 
     std::wstring  desc;
     EXPECT_NO_THROW( desc = testStruct->str() );
@@ -208,7 +218,7 @@ TEST_F(ClangTest, Include)
 
     ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(test_code6) );
 
-    for ( auto typeName :  {L"structTest", L"structWithNested", L"structWithArray", L"unionTest"} )
+    for ( auto typeName : {L"structTest", L"structWithNested", L"structWithArray", L"unionTest", L"structWithBits", L"structWithSignBits"} )
     {
         TypeInfoPtr  structFromSrc, structFromPdb;
         std::wstring  str1, str2;

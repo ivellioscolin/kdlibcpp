@@ -93,15 +93,10 @@ TypeInfoPtr getTypeForClangType( ClangASTSessionPtr&  astSession, const clang::Q
         return TypeInfoPtr( new TypeInfoClangRef(astSession, refType ) );
     }
 
-    if ( qualType->isStructureOrClassType() )
+    if ( qualType->isRecordType() )
     {
-       CXXRecordDecl*  decl = qualType->getAsStructureType()->getAsCXXRecordDecl();
+       RecordDecl*  decl = llvm::dyn_cast<clang::RecordDecl>(qualType->getAsTagDecl());
        return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(decl->getNameAsString()), astSession, decl->getMostRecentDecl() ) );
-    }
-
-    if ( qualType->isUnionType() )
-    {
-        NOT_IMPLEMENTED();
     }
 
     if ( qualType->isFunctionType() )
@@ -160,9 +155,9 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
 {
     const clang::QualType qualType = m_fieldDecl->getType().getLocalUnqualifiedType().getCanonicalType();
 
-    if ( qualType->isStructureOrClassType() )
+    if ( qualType->isRecordType() )
     {
-        CXXRecordDecl*  decl = qualType->getAsStructureType()->getAsCXXRecordDecl();
+        RecordDecl*  decl = llvm::dyn_cast<clang::RecordDecl>(qualType->getAsTagDecl());
 
         std::string  name = decl->getNameAsString();
         if ( name.empty() )
@@ -172,7 +167,7 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
             name = sstr.str();
         }
 
-       return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_astSession, decl->getMostRecentDecl() ) );
+       return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_astSession, decl->getDefinition() ) );
     }
 
     clang::FieldDecl *fieldDecl = llvm::dyn_cast<clang::FieldDecl>(m_fieldDecl);
@@ -186,7 +181,9 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
 
             const ASTRecordLayout  &typeLayout = fieldDecl->getASTContext().getASTRecordLayout(m_recordDecl);
 
-            size_t  bitOffset = typeLayout.getFieldOffset(fieldDecl->getFieldIndex()) % 8;
+            size_t  bitOffset = typeLayout.getFieldOffset(fieldDecl->getFieldIndex());
+            
+            bitOffset %= bitType->getSize() * 8;
 
             return TypeInfoPtr( new TypeInfoBitField(bitType, bitOffset, bitWidth) );
         }
@@ -194,6 +191,7 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
 
     return getTypeForClangType(m_astSession, qualType);
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -204,7 +202,7 @@ void TypeInfoClangStruct::getFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void TypeInfoClangStruct::getRecursiveFields( clang::CXXRecordDecl* recordDecl, MEMOFFSET_32 startOffset)
+void TypeInfoClangStruct::getRecursiveFields( clang::RecordDecl* recordDecl, MEMOFFSET_32 startOffset)
 {
     const ASTRecordLayout  &typeLayout = recordDecl->getASTContext().getASTRecordLayout(recordDecl);
 
@@ -223,10 +221,10 @@ void TypeInfoClangStruct::getRecursiveFields( clang::CXXRecordDecl* recordDecl, 
             if ( name.empty() )
             {
                 const clang::QualType qualType = fieldDecl->getType().getLocalUnqualifiedType().getCanonicalType();
-                if ( qualType->isStructureOrClassType() )
+                if ( qualType->isRecordType() )
                 {
                     MEMOFFSET_32  fieldOffset = typeLayout.getFieldOffset(fieldDecl->getFieldIndex()) / 8;
-                    getRecursiveFields( qualType->getAsCXXRecordDecl(), fieldOffset );
+                    getRecursiveFields( llvm::dyn_cast<clang::RecordDecl>(qualType->getAsTagDecl()), startOffset + fieldOffset );
                 }
             }
             else
@@ -244,7 +242,6 @@ void TypeInfoClangStruct::getRecursiveFields( clang::CXXRecordDecl* recordDecl, 
         }
     }
 }
-    
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -253,6 +250,7 @@ size_t TypeInfoClangStruct::getSize()
     const ASTRecordLayout  &typeLayout = m_decl->getASTContext().getASTRecordLayout(m_decl);
     return typeLayout.getSize().getQuantity();
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
