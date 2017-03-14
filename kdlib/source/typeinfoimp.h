@@ -25,6 +25,7 @@ bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodProtot
 
 std::wstring printStructType(TypeInfoPtr& structType);
 std::wstring printPointerType(TypeInfoPtr&  ptrType);
+std::wstring printEnumType(TypeInfoPtr& enumType);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -511,6 +512,18 @@ protected:
         return m_hasThis;
     }
 
+    virtual CallingConventionType getCallingConvention() {
+        return m_callconv;
+    }
+
+    virtual TypeInfoPtr getReturnType() {
+        return m_returnType;
+    }
+
+    virtual TypeInfoPtr getClassParent() {
+        return TypeInfoPtr();
+    }
+
     virtual std::wstring getName();
 
     virtual std::pair<std::wstring, std::wstring> splitName();
@@ -519,6 +532,10 @@ protected:
 
     typedef std::vector< TypeInfoPtr > Args;
     Args m_args;
+
+    TypeInfoPtr  m_returnType;
+
+    CallingConventionType  m_callconv;
 
     bool m_hasThis;
 };
@@ -537,16 +554,6 @@ protected:
     virtual size_t getPtrSize() {
         return getPtrSizeBySymbol( m_symbol );
     }
-
-    virtual size_t getElementCount() {
-        return m_args.size();
-    }
-
-    virtual TypeInfoPtr getElement( size_t index );
-
-    virtual CallingConventionType getCallingConvention();
-
-    virtual TypeInfoPtr getReturnType();
 
     virtual size_t getSize() {
         return m_symbol->getSize();

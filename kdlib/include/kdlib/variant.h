@@ -350,6 +350,27 @@ public:
         throw NumVariantError();
     }
 
+    size_t getSize() const
+    {
+        switch ( m_numType )
+        {
+        case charT: return sizeof(char);
+        case shortT: return sizeof(short);
+        case longT: return sizeof(long);
+        case intT: return sizeof(int);
+        case ucharT: return sizeof(unsigned char);
+        case ushortT: return sizeof(unsigned short);
+        case ulongT: return sizeof(unsigned long);
+        case uintT: return sizeof(unsigned int);
+        case longlongT: return sizeof(long long);
+        case ulonglongT: return sizeof(unsigned long long);
+        case floatT: return sizeof(float);
+        case doubleT: return sizeof(double);
+        }
+
+        throw NumVariantError();
+    }
+
     bool isChar() const {
         return m_numType == charT;
     }

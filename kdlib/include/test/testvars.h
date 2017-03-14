@@ -158,6 +158,10 @@ enum enumType {
 
 extern enumType g_constEnumThree;
 
+struct structWithEnum {
+    enumType  digit;
+};
+
 struct structWithBits {
     unsigned long m_bit0_4  : 5;
     unsigned long m_bit5    : 1;

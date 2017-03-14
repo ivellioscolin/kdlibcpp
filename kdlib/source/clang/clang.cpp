@@ -27,39 +27,39 @@ TypeInfoPtr getTypeForClangBuiltinType(const clang::BuiltinType* builtinType)
 {
     switch( builtinType->getKind() )
     {
-    case clang::BuiltinType::Kind::Void:
+    case clang::BuiltinType::Void:
         return TypeInfoPtr( new TypeInfoVoid() );
 
-    case clang::BuiltinType::Kind::Bool:
+    case clang::BuiltinType::Bool:
         return loadType(L"Bool");
-    case clang::BuiltinType::Kind::Char_S:
+    case clang::BuiltinType::Char_S:
         return loadType(L"Char");
-    case clang::BuiltinType::Kind::WChar_S:
+    case clang::BuiltinType::WChar_S:
         return loadType(L"WChar");
 
-    case clang::BuiltinType::Kind::UChar:
+    case clang::BuiltinType::UChar:
         return loadType(L"UInt1B");
-    case clang::BuiltinType::Kind::WChar_U:
-    case clang::BuiltinType::Kind::UShort:
+    case clang::BuiltinType::WChar_U:
+    case clang::BuiltinType::UShort:
         return loadType(L"UInt2B");
-    case clang::BuiltinType::Kind::UInt:
-    case clang::BuiltinType::Kind::ULong:
+    case clang::BuiltinType::UInt:
+    case clang::BuiltinType::ULong:
         return loadType(L"UInt4B");
-    case clang::BuiltinType::Kind::ULongLong:
+    case clang::BuiltinType::ULongLong:
         return loadType(L"UInt8B");
 
-    case clang::BuiltinType::Kind::Short:
+    case clang::BuiltinType::Short:
         return loadType(L"Int2B");
-    case clang::BuiltinType::Kind::Int:
-    case clang::BuiltinType::Kind::Long:
+    case clang::BuiltinType::Int:
+    case clang::BuiltinType::Long:
         return loadType(L"Int4B");
-    case clang::BuiltinType::Kind::LongLong:
+    case clang::BuiltinType::LongLong:
         return loadType(L"Int8B");
 
-    case clang::BuiltinType::Kind::Float:
+    case clang::BuiltinType::Float:
         return loadType(L"Float");
-    case clang::BuiltinType::Kind::Double:
-    case clang::BuiltinType::Kind::LongDouble:
+    case clang::BuiltinType::Double:
+    case clang::BuiltinType::LongDouble:
         return loadType(L"Double");
     }
 
@@ -72,24 +72,25 @@ TypeInfoPtr getTypeForClangType( ClangASTSessionPtr&  astSession, const clang::Q
 {
     if ( qualType->isBuiltinType() )
     {
-        return getTypeForClangBuiltinType(static_cast<const clang::BuiltinType*>(qualType.getTypePtr()));
+        const BuiltinType*  builtin = qualType->getAs<BuiltinType>();
+        return getTypeForClangBuiltinType(builtin);
     }
 
     if ( qualType->isPointerType() )
     {
-         clang::PointerType*  ptr = const_cast<clang::PointerType*>(static_cast<const clang::PointerType*>(qualType.getTypePtr()));
+         const PointerType*  ptr = qualType->getAs<PointerType>();
          return TypeInfoPtr( new TypeInfoClangPointer(astSession, ptr));
     }
 
     if ( qualType->isArrayType() )
     {
-        clang::ArrayType*  arrayType = const_cast<clang::ArrayType*>(static_cast<const clang::ArrayType*>(qualType.getTypePtr()));
+        const ArrayType*  arrayType = qualType->getAsArrayTypeUnsafe();
         return TypeInfoPtr( new TypeInfoClangArray(astSession, arrayType ) );
     }
 
     if ( qualType->isReferenceType() )
     {
-        clang::ReferenceType*  refType = const_cast<clang::ReferenceType*>(static_cast<const clang::ReferenceType*>(qualType.getTypePtr()));
+        const ReferenceType*  refType = qualType->getAs<ReferenceType>();
         return TypeInfoPtr( new TypeInfoClangRef(astSession, refType ) );
     }
 
@@ -99,9 +100,17 @@ TypeInfoPtr getTypeForClangType( ClangASTSessionPtr&  astSession, const clang::Q
        return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(decl->getNameAsString()), astSession, decl->getMostRecentDecl() ) );
     }
 
-    if ( qualType->isFunctionType() )
+    if ( qualType->isFunctionProtoType() )
     {
-        return TypeInfoPtr( new TypeInfoClangFunc() );
+        const FunctionProtoType*   funcType = qualType->getAs<FunctionProtoType>();
+
+        return TypeInfoPtr( new TypeInfoClangFunc(astSession, funcType) );
+    }
+
+    if ( qualType->isEnumeralType() )
+    {
+        EnumDecl*  decl = llvm::dyn_cast<EnumDecl>(qualType->getAsTagDecl());
+        return TypeInfoPtr( new TypeInfoClangEnum(astSession, decl) );
     }
 
     throw TypeException(L"can not parse code");
@@ -192,7 +201,6 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
     return getTypeForClangType(m_astSession, qualType);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void TypeInfoClangStruct::getFields()
@@ -254,27 +262,25 @@ size_t TypeInfoClangStruct::getSize()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoClangPointer::getDerefType( ClangASTSessionPtr& astSession, clang::PointerType* refType)
+TypeInfoPtr TypeInfoClangPointer::getDerefType( ClangASTSessionPtr& astSession, const clang::PointerType* refType)
 {
     return getTypeForClangType(astSession, refType->getPointeeType());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfoClangArray::getDerefType( ClangASTSessionPtr& astSession, clang::ArrayType* arrayType)
+TypeInfoPtr TypeInfoClangArray::getDerefType( ClangASTSessionPtr& astSession, const clang::ArrayType* arrayType)
 {
     return getTypeForClangType(astSession, arrayType->getElementType());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t TypeInfoClangArray::getElementCount(clang::ArrayType* arrayType)
+size_t TypeInfoClangArray::getElementCount(const clang::ArrayType* arrayType)
 {
-    clang::ConstantArrayType*  constArray = llvm::dyn_cast<clang::ConstantArrayType> (arrayType);
+    const ConstantArrayType*  constArray = llvm::dyn_cast<ConstantArrayType>(arrayType);
     if ( constArray )
-    {
         return  constArray->getSize().getSExtValue();
-    }
 
     return 0;
 }
@@ -284,6 +290,81 @@ size_t TypeInfoClangArray::getElementCount(clang::ArrayType* arrayType)
 TypeInfoPtr TypeInfoClangRef::deref()
 {
     return getTypeForClangType(m_astSession, m_refType->getPointeeType());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoClangFunc::TypeInfoClangFunc(ClangASTSessionPtr& session, const FunctionProtoType* funcProto)
+{
+    m_returnType = getTypeForClangType(session, funcProto->getReturnType());
+
+    switch ( funcProto->getCallConv() )
+    {
+    case CC_C:
+         m_callconv = CallConv_NearC;
+         break;
+
+    case CC_X86StdCall:
+        m_callconv = CallConv_NearStd;
+        break;
+
+    case CC_X86FastCall:
+        m_callconv = CallConv_NearFast;
+        break;
+
+    case CC_X86ThisCall:
+        m_callconv = CallConv_ThisCall;
+        break;
+
+    default:
+        throw TypeException(L"unsupported calling conversion");
+
+    }
+
+    for ( clang::FunctionProtoType::param_type_iterator paramIt =  funcProto->param_type_begin(); paramIt != funcProto->param_type_end(); paramIt++)
+    {
+        m_args.push_back( getTypeForClangType(session, *paramIt ) );
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeFieldPtr TypeFieldClangEnumField::getField(ClangASTSessionPtr& astSession, clang::EnumConstantDecl*  EnumDecl)
+{
+    std::string   name = EnumDecl->getNameAsString();
+
+    TypeFieldClangEnumField  *field = new TypeFieldClangEnumField(strToWStr(name));
+
+    field->m_decl = EnumDecl;
+    field->m_astSession = astSession;
+
+    return TypeFieldPtr(field);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeFieldClangEnumField::getTypeInfo()
+{
+    return makeULongConst( static_cast<unsigned long>(m_decl->getInitVal().getExtValue() ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NumVariant TypeFieldClangEnumField::getValue() const
+{
+    return NumVariant( m_decl->getInitVal().getExtValue() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypeInfoClangEnum::getFields()
+{
+    for ( clang::EnumDecl::enumerator_iterator  enumIt = m_decl->enumerator_begin(); enumIt != m_decl->enumerator_end(); ++enumIt )
+    {
+        std::string   fieldName = enumIt->getNameAsString();
+
+        m_fields.push_back( TypeFieldClangEnumField::getField(m_astSession, *enumIt) );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -299,17 +380,43 @@ public:
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
     {
-        std::string&  name = Declaration->getQualifiedNameAsString();
-
-        if ( Declaration->getNameAsString() != m_typeName)
-            return true;
-
         clang::CXXRecordDecl*  decl = Declaration->getDefinition();
 
         if ( !decl )
             return true;
 
+        std::string&  name = decl->getQualifiedNameAsString();
+
+        if ( name != m_typeName)
+            return true;
+
         m_typeInfo = TypeInfoPtr( new TypeInfoClangStruct(strToWStr(name), m_session, decl ) );
+
+        return false;
+    }
+
+    bool VisitFunctionDecl(FunctionDecl *Declaration)
+    {
+        std::string& name = Declaration->getQualifiedNameAsString();
+
+        if ( name != m_typeName)
+            return true;
+
+        const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
+
+        m_typeInfo = TypeInfoPtr( new TypeInfoClangFunc(m_session, protoType ) );
+
+        return false;
+    }
+
+    bool VisitEnumDecl (EnumDecl *Declaration)
+    {
+        std::string& name = Declaration->getQualifiedNameAsString();
+
+        if ( name != m_typeName)
+            return true;
+
+        m_typeInfo = TypeInfoPtr( new TypeInfoClangEnum(m_session, Declaration) );
 
         return false;
     }

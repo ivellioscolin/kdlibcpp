@@ -105,35 +105,35 @@ class TypeInfoClangPointer : public TypeInfoPointer
 {
 public:
 
-    TypeInfoClangPointer( ClangASTSessionPtr& session, clang::PointerType* ptrType) :
+    TypeInfoClangPointer( ClangASTSessionPtr& session, const clang::PointerType* ptrType) :
         TypeInfoPointer( TypeInfoClangPointer::getDerefType(session, ptrType), session->getPtrSize() )
         {}
 
 protected:
 
-    static TypeInfoPtr  getDerefType( ClangASTSessionPtr& session, clang::PointerType* refType);
+    static TypeInfoPtr  getDerefType( ClangASTSessionPtr& session, const clang::PointerType* refType);
 };
 
 
 class TypeInfoClangArray: public TypeInfoArray
 {
 public:
-    TypeInfoClangArray(ClangASTSessionPtr& session, clang::ArrayType* arrayType) :
+    TypeInfoClangArray(ClangASTSessionPtr& session, const clang::ArrayType* arrayType) :
         TypeInfoArray(TypeInfoClangArray::getDerefType(session, arrayType), getElementCount(arrayType))
         {}
 
 protected:
 
-    static TypeInfoPtr getDerefType( ClangASTSessionPtr& session, clang::ArrayType* arrayType);
+    static TypeInfoPtr getDerefType( ClangASTSessionPtr& session, const clang::ArrayType* arrayType);
 
-    size_t getElementCount(clang::ArrayType* arrayType);
+    size_t getElementCount(const clang::ArrayType* arrayType);
 
 };
 
 class TypeInfoClangRef : public TypeInfoImp
 {
 public:
-    TypeInfoClangRef(ClangASTSessionPtr& session, clang::ReferenceType* refType) :
+    TypeInfoClangRef(ClangASTSessionPtr& session, const clang::ReferenceType* refType) :
         m_astSession(session),
         m_refType(refType)
         {}
@@ -155,26 +155,72 @@ protected:
 
     ClangASTSessionPtr  m_astSession;
 
-    clang::ReferenceType*  m_refType;
+    const clang::ReferenceType*  m_refType;
 };
 
-class TypeInfoClangFunc : public TypeInfoImp
+class TypeInfoClangFunc : public TypeInfoFunctionPrototype
 {
 
-protected:
+public:
 
-    virtual bool isFunction() {
+    TypeInfoClangFunc(ClangASTSessionPtr& session, const clang::FunctionProtoType* funcProto);
+
+};
+
+
+
+class TypeFieldClangEnumField : public TypeField
+{
+public:
+
+    static TypeFieldPtr getField(ClangASTSessionPtr& astSession, clang::EnumConstantDecl*  EnumDecl);
+
+private:
+
+    TypeFieldClangEnumField(const std::wstring  &name) :
+        TypeField(name)
+        {}
+
+    virtual TypeInfoPtr getTypeInfo();
+
+    NumVariant getValue() const;
+
+    clang::EnumConstantDecl*   m_decl;
+  
+    ClangASTSessionPtr  m_astSession;
+};
+
+
+class TypeInfoClangEnum : public TypeInfoFields
+{
+public:
+
+     TypeInfoClangEnum(ClangASTSessionPtr& session, clang::EnumDecl* decl) :
+        TypeInfoFields(strToWStr(decl->getNameAsString())),
+        m_astSession(session),
+        m_decl(decl)
+     {}
+
+protected:
+    
+    virtual bool isEnum() {
         return true;
     }
 
-    virtual std::wstring getName() {
-        return L"function";
+    virtual std::wstring str() {
+        TypeInfoPtr  selfPtr = shared_from_this();
+        return printEnumType(selfPtr);
     }
 
-    virtual std::wstring str() {
-        return L"function";
-    }
+protected:
+
+    virtual void getFields();
+
+    ClangASTSessionPtr  m_astSession;
+
+    clang::EnumDecl*  m_decl;
 };
+
 
 class TypeInfoProviderClang : public TypeInfoProvider
 {

@@ -206,19 +206,58 @@ TEST_F(ClangTest, BitField)
     EXPECT_NO_THROW( desc = testStruct->str() );
 }
 
-static const wchar_t test_code6[] = L" \
-    #include \"../../../kdlib/include/test/testvars.h\" \
+static const wchar_t test_code6[] = L"\
+    namespace ns1 {                   \
+    namespace ns2 {                   \
+       struct Test {                  \
+           int  f1;                   \
+       };                             \
+    } }                               \
     ";
 
+TEST_F(ClangTest, Namespace)
+{
+    TypeInfoPtr  testStruct;
+    ASSERT_NO_THROW( testStruct = compileType(test_code6, L"ns1::ns2::Test") );
 
+    std::wstring  desc;
+    EXPECT_NO_THROW( desc = testStruct->str() );
+}
+
+static const wchar_t test_code7[] = L"\
+    class Test {                      \
+        long long mem1;               \
+     };                               \
+    ";
+
+TEST_F(ClangTest, SimpleClass)
+{
+    TypeInfoPtr  testClass;
+    ASSERT_NO_THROW( testClass = compileType(test_code7, L"Test") );
+
+    std::wstring  desc;
+    EXPECT_NO_THROW( desc = testClass->str() );
+}
+
+TEST_F(ClangTest, DISABLED_Function)
+{
+    const std::wstring  src = L"#include \"../../../kdlib/include/test/testfunc.h\"";
+
+    EXPECT_EQ( L"Void(__cdecl)(Int4B, Float)", compileType(src, L"CdeclFunc")->getName());
+    EXPECT_EQ( L"Void(__stdcall)(Int4B, Float)", compileType(src, L"StdcallFunc")->getName());
+}
 
 TEST_F(ClangTest, Include)
 {
+
+    const std::wstring  src = L"#include \"../../../kdlib/include/test/testvars.h\"";
+
     TypeInfoProviderPtr  typeProvider;
 
-    ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(test_code6) );
+    ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(src) );
 
-    for ( auto typeName : {L"structTest", L"structWithNested", L"structWithArray", L"unionTest", L"structWithBits", L"structWithSignBits"} )
+    for ( auto typeName : {L"structTest", L"structWithNested", L"structWithArray", L"unionTest", L"structWithBits", L"structWithSignBits",
+        /*L"testspace::testClass1",*/ L"structWithEnum", L"enumType" } )
     {
         TypeInfoPtr  structFromSrc, structFromPdb;
         std::wstring  str1, str2;
@@ -238,12 +277,11 @@ TEST_F(ClangTest, WindowsH)
     std::wstring  opt = L"-I\"C:/Program Files (x86)/Windows Kits/8.1/Include/um\" \
         -I\"C:/Program Files (x86)/Windows Kits/8.1/Include/shared\" -w";
 
-
     TypeInfoProviderPtr  typeProvider;
 
     ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(src, opt) );
 
-    for ( auto typeName :  {L"tagPOINT", L"tagWNDCLASSA"} )
+    for ( auto typeName :  {L"tagPOINT", L"tagWNDCLASSA", L"CreateFileA"} )
     {
         TypeInfoPtr  type1;
         ASSERT_NO_THROW( type1 = typeProvider->getTypeByName(typeName) );
@@ -265,7 +303,8 @@ TEST_F(ClangTest, NtddkH)
 
     ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(src, opt) );
 
-    for ( auto typeName :  {L"_UNICODE_STRING", L"_IRP", L"_MDL", L"_FILE_OBJECT", L"_DEVICE_OBJECT", L"_PS_CREATE_NOTIFY_INFO"} )
+    for ( auto typeName :  {L"_UNICODE_STRING", L"_IRP", L"_MDL", L"_FILE_OBJECT", L"_DEVICE_OBJECT", L"_PS_CREATE_NOTIFY_INFO",
+     L"ZwCreateFile"} )
     {
         TypeInfoPtr  type1;
         ASSERT_NO_THROW( type1 = typeProvider->getTypeByName(typeName) );

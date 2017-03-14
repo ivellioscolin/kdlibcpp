@@ -162,6 +162,26 @@ std::wstring printPointerType(TypeInfoPtr&  ptrType)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring printEnumType(TypeInfoPtr& enumType)
+{
+    std::wstringstream  sstr;
+
+    sstr << L"enum: " << enumType->getName() << std::endl;
+
+    size_t  fieldCount = enumType->getElementCount();
+
+    for ( size_t i = 0; i < fieldCount; ++i )
+    {
+        sstr << L"   " << enumType->getElementName(i);
+        sstr << L" = " << enumType->getElement(i)->getValue().asStr();
+        sstr << std::endl;
+    }
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 size_t getSymbolSize( const std::wstring &fullName )
 {
     if ( TypeInfo::isBaseType( fullName ) )
@@ -1447,6 +1467,8 @@ TypeInfoSymbolFunctionPrototype::TypeInfoSymbolFunctionPrototype( SymbolPtr& sym
     for ( SymbolPtrList::iterator it = lstArgs.begin(); it != lstArgs.end(); ++it)
         m_args.push_back(loadType(*it));
 
+    m_returnType = loadType(m_symbol->getType());
+    m_callconv = static_cast< CallingConventionType >( m_symbol->getCallingConvention() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1543,28 +1565,6 @@ std::pair<std::wstring, std::wstring> TypeInfoFunctionPrototype::splitName()
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-
-TypeInfoPtr TypeInfoSymbolFunctionPrototype::getElement( size_t index )
-{
-    if ( index >= m_args.size() )
-        throw IndexException( index );
-    return m_args[index];
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-CallingConventionType TypeInfoSymbolFunctionPrototype::getCallingConvention()
-{
-    return static_cast< CallingConventionType >( m_symbol->getCallingConvention() );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypeInfoPtr TypeInfoSymbolFunctionPrototype::getReturnType()
-{
-    return loadType(m_symbol->getType());
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1650,5 +1650,87 @@ TypeInfoVoid::TypeInfoVoid(size_t size)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+
+class TypeInfoBaseConst : public TypeInfoImp 
+{
+public:
+
+    template<typename T>
+    static TypeInfoPtr get(T& val) {
+        return TypeInfoPtr( new  TypeInfoBaseConst(val) );
+    }
+
+protected:
+
+    TypeInfoBaseConst(char& val) : m_val(val), m_name(L"Char") {}
+    TypeInfoBaseConst(unsigned long & val) : m_val(val), m_name(L"ULong") {}
+
+    virtual std::wstring str() {
+        return m_name;
+    }
+
+    std::wstring getName() {
+        return m_name;
+    }
+
+    virtual size_t getSize() {
+        return m_val.getSize();
+    }
+
+    virtual bool isBase() {
+        return true;
+    }
+
+    virtual bool isConstant() {
+        return true;
+    }
+
+    virtual size_t getPtrSize() {
+        return getPtrSize();
+    }
+
+    virtual size_t getAlignReq() {
+        return getSize();
+    }
+
+    virtual NumVariant getValue() const {
+        return m_val;
+    }
+protected:
+
+    NumVariant  m_val;
+    std::wstring  m_name;
+};
+
+
+TypeInfoPtr makeCharConst(char val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeULongConst(unsigned long val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+
+//TypeInfoPtr makeShortConst(short val);
+//TypeInfoPtr makeLongConst(long val);
+//TypeInfoPtr makeLongLongConst(long val);
+//TypeInfoPtr makeUCharConst(unsigned char val);
+//TypeInfoPtr makeUShortConst(unsigned short val);
+//TypeInfoPtr makeULongConst(unsigned long val);
+//TypeInfoPtr makeULongLongConst(unsigned long val);
+//TypeInfoPtr makeIntConst(int val);
+//TypeInfoPtr makeUIntConst(unsigned int val);
+//TypeInfoPtr makeFloatConst(float val);
+//TypeInfoPtr makeDoubleConst(double val);
+//TypeInfoPtr makeWCharConst(wchar_t val);
+//TypeInfoPtr makeBoolConst(bool val);
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 
 } // kdlib namespace end

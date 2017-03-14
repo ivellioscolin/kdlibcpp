@@ -157,4 +157,21 @@ TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr makeCharConst(char val);
+TypeInfoPtr makeShortConst(short val);
+TypeInfoPtr makeLongConst(long val);
+TypeInfoPtr makeLongLongConst(long val);
+TypeInfoPtr makeUCharConst(unsigned char val);
+TypeInfoPtr makeUShortConst(unsigned short val);
+TypeInfoPtr makeULongConst(unsigned long val);
+TypeInfoPtr makeULongLongConst(unsigned long val);
+TypeInfoPtr makeIntConst(int val);
+TypeInfoPtr makeUIntConst(unsigned int val);
+TypeInfoPtr makeFloatConst(float val);
+TypeInfoPtr makeDoubleConst(double val);
+TypeInfoPtr makeWCharConst(wchar_t val);
+TypeInfoPtr makeBoolConst(bool val);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }; // kdlib namespace end

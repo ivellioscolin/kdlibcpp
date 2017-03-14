@@ -117,10 +117,11 @@ private:
 class CustomFunction : public TypeInfoFunctionPrototype
 {
 public:
-     CustomFunction(const TypeInfoPtr& returnType, CallingConventionType  callconv) :
-         m_returnType(returnType),
-         m_callconv(callconv)
-        {}
+     CustomFunction(const TypeInfoPtr& returnType, CallingConventionType  callconv)
+     {
+         m_returnType = returnType;
+         m_callconv = callconv;
+     }
 
 protected:
 
@@ -142,8 +143,6 @@ protected:
         m_args.push_back(fieldType);
     }
 
-    TypeInfoPtr  m_returnType;
-    CallingConventionType  m_callconv;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
