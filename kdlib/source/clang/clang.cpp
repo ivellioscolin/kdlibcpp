@@ -97,7 +97,10 @@ TypeInfoPtr getTypeForClangType( ClangASTSessionPtr&  astSession, const clang::Q
     if ( qualType->isRecordType() )
     {
        RecordDecl*  decl = llvm::dyn_cast<clang::RecordDecl>(qualType->getAsTagDecl());
-       return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(decl->getNameAsString()), astSession, decl->getMostRecentDecl() ) );
+       if ( decl->getDefinition() )
+           return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(decl->getNameAsString()), astSession, decl->getDefinition() ) );
+       else
+           return TypeInfoPtr( new TypeInfoClangStructNoDef( strToWStr(decl->getNameAsString()), astSession, decl ) );
     }
 
     if ( qualType->isFunctionProtoType() )
@@ -203,6 +206,17 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoClangStruct::TypeInfoClangStruct(const std::wstring & name, ClangASTSessionPtr& session, clang::RecordDecl*  decl) :
+        TypeInfoFields(name),
+        m_astSession(session),
+        m_decl(decl)
+{
+    if ( decl->isInvalidDecl() )
+        throw TypeException(L"Invalid declaration");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void TypeInfoClangStruct::getFields()
 {
     getRecursiveFields( m_decl, 0 );
@@ -259,6 +273,12 @@ size_t TypeInfoClangStruct::getSize()
     return typeLayout.getSize().getQuantity();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypeInfoClangStructNoDef::str()
+{
+    return std::wstring(L"forward declaration class/struct : ") +  m_name;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -380,17 +400,15 @@ public:
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
     {
-        clang::CXXRecordDecl*  decl = Declaration->getDefinition();
-
-        if ( !decl )
-            return true;
-
-        std::string&  name = decl->getQualifiedNameAsString();
+        std::string&  name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
             return true;
 
-        m_typeInfo = TypeInfoPtr( new TypeInfoClangStruct(strToWStr(name), m_session, decl ) );
+       if ( Declaration->getDefinition() )
+            m_typeInfo = TypeInfoPtr( new TypeInfoClangStruct( strToWStr(Declaration->getNameAsString()), m_session, Declaration->getDefinition() ) );
+       else
+            m_typeInfo = TypeInfoPtr( new TypeInfoClangStructNoDef( strToWStr(Declaration->getNameAsString()), m_session, Declaration ) );
 
         return false;
     }
@@ -401,6 +419,9 @@ public:
 
         if ( name != m_typeName)
             return true;
+
+        if ( Declaration->isInvalidDecl() )
+            throw TypeException(L"Invalid declaration");
 
         const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
 

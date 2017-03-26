@@ -244,6 +244,11 @@ private:
     {
         throw DbgException("data accessor no data");
     }
+
+    DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
+    {
+        throw DbgException("data accessor no data");
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -583,6 +588,20 @@ private:
         return sstr.str();
     }
 
+    DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
+    {
+        if ( startOffset >= m_length )
+            DbgException("memory accessor range error");
+
+        if ( m_length - startOffset < length )
+            DbgException("memory accessor range error");
+
+        if ( length == 0 )
+            length = m_length - startOffset;
+
+        return getMemoryAccessor( m_begin + startOffset, length);
+    }
+
 private:
 
     MEMOFFSET_64  m_begin;
@@ -885,6 +904,20 @@ private:
     virtual std::wstring getLocationAsStr() const
     {
         return m_location;
+    }
+
+    DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
+    {
+        if ( startOffset >= m_buffer.size() )
+            throw DbgException("cache accessor range error");
+
+        if ( m_buffer.size() - startOffset < length )
+            DbgException("cache accessor range error");
+
+        if ( length == 0 )
+            length = m_buffer.size() - startOffset;
+
+        return getCacheAccessor(std::vector<char>(m_buffer.begin() + startOffset, m_buffer.begin() + startOffset + length) );
     }
 
 private:

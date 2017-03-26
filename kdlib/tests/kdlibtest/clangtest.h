@@ -101,7 +101,6 @@ static const wchar_t  test_code2[] = L"\
         struct TestStruct*  next;      \
         int  value;                    \
     };                                 \
-    struct StructNoDef;                \
     ";
 
 TEST_F(ClangTest, ForwardDecl)
@@ -116,8 +115,6 @@ TEST_F(ClangTest, ForwardDecl)
 
     std::wstring  desc;
     EXPECT_NO_THROW( desc = testStruct->getElement(L"next")->str() );
-
-    EXPECT_THROW( compileType(test_code2, L"StructNoDef"), TypeException );
 }
 
 static const wchar_t test_code3[] = L" \
@@ -239,6 +236,27 @@ TEST_F(ClangTest, SimpleClass)
     EXPECT_NO_THROW( desc = testClass->str() );
 }
 
+TEST_F(ClangTest, InvalidDef)
+{
+    EXPECT_THROW( compileType( L"struct Test { charintfloatdouble  mem1; };", L"Test")->str(), TypeException);
+//    EXPECT_THROW( compileType( L"struct Test { char mem1;", L"Test")->str(), TypeException);
+    EXPECT_THROW( compileType( L"aaaaaa func(bbbb p1);", L"func")->str(), TypeException);
+}
+
+TEST_F(ClangTest, StructNoDef)
+{
+    TypeInfoPtr  structNoDef;
+    ASSERT_NO_THROW( structNoDef = compileType(L"struct StructNoDef;", L"StructNoDef") );
+
+    EXPECT_EQ(L"StructNoDef", structNoDef->getName());
+
+    std::wstring desc;
+    EXPECT_NO_THROW(desc = structNoDef->str() );
+
+    EXPECT_THROW(structNoDef->getElementCount(), TypeException);
+    EXPECT_THROW(structNoDef->getElement(0), TypeException);
+}
+
 TEST_F(ClangTest, DISABLED_Function)
 {
     const std::wstring  src = L"#include \"../../../kdlib/include/test/testfunc.h\"";
@@ -313,4 +331,5 @@ TEST_F(ClangTest, NtddkH)
         EXPECT_NO_THROW( desc = type1->str() );
     }
 }
+
 

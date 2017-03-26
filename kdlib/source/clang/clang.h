@@ -70,11 +70,8 @@ private:
 class TypeInfoClangStruct : public TypeInfoFields
 {
 public:
-    TypeInfoClangStruct(const std::wstring & name, ClangASTSessionPtr& session, clang::RecordDecl*  decl) :
-        TypeInfoFields(name),
-        m_astSession(session),
-        m_decl(decl)
-    {}
+
+    TypeInfoClangStruct(const std::wstring & name, ClangASTSessionPtr& session, clang::RecordDecl*  decl);
 
 protected:
 
@@ -98,6 +95,91 @@ protected:
     ClangASTSessionPtr  m_astSession;
 
     clang::RecordDecl*  m_decl;
+};
+
+class TypeInfoClangStructNoDef : public TypeInfoImp
+{
+public:
+
+    TypeInfoClangStructNoDef(const std::wstring& name, ClangASTSessionPtr& session, clang::RecordDecl*  decl) :
+        m_name(name),
+        m_astSession(session),
+        m_decl(decl)
+        {}
+
+protected:
+
+    virtual bool isUserDefined() {
+        return true;
+    }
+
+    virtual std::wstring getName() {
+        return  m_name;
+    }
+
+    virtual std::wstring str();
+
+
+    virtual TypeInfoPtr getElement( const std::wstring &name ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual TypeInfoPtr getElement( size_t index ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual MEMOFFSET_REL getElementOffset( const std::wstring &name ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual MEMOFFSET_REL getElementOffset( size_t index ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual std::wstring getElementName( size_t index ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual size_t getElementIndex( const std::wstring &name ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual size_t getElementCount() {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual  MEMOFFSET_64 getElementVa( const std::wstring &name ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual  MEMOFFSET_64 getElementVa( size_t index ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual bool isStaticMember( const std::wstring &name ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual bool isStaticMember( size_t index ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual bool isVirtualMember( const std::wstring &name ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+    virtual bool isVirtualMember( size_t index ) {
+        throw TypeException(L"not complete declaration");
+    }
+
+protected:
+
+    std::wstring  m_name;
+
+    ClangASTSessionPtr  m_astSession;
+
+    clang::RecordDecl*  m_decl;
+
 };
 
 

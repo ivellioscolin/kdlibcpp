@@ -786,9 +786,6 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
     {
         MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(index);
 
-        //if ( staticOffset == 0 )
-        //   NOT_IMPLEMENTED();
-
         return  loadTypedVar( fieldType, staticOffset );
     }
 
@@ -799,7 +796,7 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
         fieldOffset += getVirtualBaseDisplacement( index );
     }
 
-    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+    return  loadTypedVar( fieldType, m_varData->copy(fieldOffset, fieldType->getSize()) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

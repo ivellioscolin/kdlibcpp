@@ -515,3 +515,21 @@ TEST_F(TypedVarTest, Str)
 }
 
 
+TEST_F(TypedVarTest, Save)
+{
+    TypedVarPtr  var;
+    ASSERT_NO_THROW( var = loadTypedVar(L"g_structTest") );
+
+    DataAccessorPtr  memCache;
+    ASSERT_NO_THROW( memCache = getCacheAccessor(var->getSize()) );
+
+    var->writeBytes(memCache);
+
+    TypedVarPtr  copyVar;
+    ASSERT_NO_THROW(copyVar = loadTypedVar(var->getType(), memCache) );
+
+    EXPECT_EQ( *var->getElement(0), *copyVar->getElement(0) );
+    EXPECT_EQ( *var->getElement(1), *copyVar->getElement(1) );
+    EXPECT_EQ( *var->getElement(2), *copyVar->getElement(2) );
+}
+

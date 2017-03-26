@@ -152,7 +152,7 @@ protected:
 
     virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const
     {
-        std::vector<unsigned char>  buffer;
+        std::vector<unsigned char>  buffer( m_varData->getLength() );
         m_varData->readBytes(buffer, m_varData->getLength() );
         stream->writeBytes(buffer);
     }

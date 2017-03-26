@@ -80,6 +80,8 @@ public:
     virtual void readDoubles( std::vector<double>&  dataRange, size_t count, size_t  pos=0) const = 0;
     virtual void writeDoubles( const std::vector<double>&  dataRange, size_t  pos=0) = 0;
 
+    virtual DataAccessorPtr copy( size_t  startOffset = 0, size_t  length = 0 ) = 0;
+
     virtual std::wstring getLocationAsStr() const = 0;
 
     virtual MEMOFFSET_64 getAddress() const = 0;
