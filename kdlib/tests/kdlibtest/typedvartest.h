@@ -46,6 +46,14 @@ TEST_F( TypedVarTest, BaseTypeVars )
     EXPECT_EQ( boolVar, *loadTypedVar(L"boolVar") );
 }
 
+
+TEST_F( TypedVarTest, BaseTypeVars2 )
+{
+    EXPECT_EQ( longVar, *loadTypedVar(L"Long", m_targetModule->getSymbolVa(L"longVar") ) );
+    EXPECT_EQ( ulongVar, *loadTypedVar(L"ULong", m_targetModule->getSymbolVa(L"ulongVar") ) );
+}
+
+
 TEST_F( TypedVarTest, TypedVarPtr )
 {
     TypedVarPtr     ptr;

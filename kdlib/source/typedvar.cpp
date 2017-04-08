@@ -532,6 +532,12 @@ NumVariant TypedVarBase::getValue() const
     if ( m_typeInfo->getName() == L"WChar" )
         return NumVariant( m_varData->readSignByte() );
 
+    if ( m_typeInfo->getName() == L"Long" )
+        return NumVariant( m_varData->readSignDWord() );
+
+    if ( m_typeInfo->getName() == L"ULong" )
+        return NumVariant( m_varData->readDWord() );
+
     if ( m_typeInfo->getName() == L"Int1B" )
         return NumVariant( m_varData->readByte() );
 
