@@ -591,10 +591,10 @@ private:
     DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
     {
         if ( startOffset >= m_length )
-            DbgException("memory accessor range error");
+            throw DbgException("memory accessor range error");
 
         if ( m_length - startOffset < length )
-            DbgException("memory accessor range error");
+            throw DbgException("memory accessor range error");
 
         if ( length == 0 )
             length = m_length - startOffset;
@@ -912,7 +912,7 @@ private:
             throw DbgException("cache accessor range error");
 
         if ( m_buffer.size() - startOffset < length )
-            DbgException("cache accessor range error");
+            throw DbgException("cache accessor range error");
 
         if ( length == 0 )
             length = m_buffer.size() - startOffset;

@@ -541,3 +541,37 @@ TEST_F(TypedVarTest, Save)
     EXPECT_EQ( *var->getElement(2), *copyVar->getElement(2) );
 }
 
+
+TEST_F(TypedVarTest, CacheDataAccess)
+{
+    TypeInfoPtr  structType;
+    ASSERT_NO_THROW( structType = loadType(L"structTest") );
+
+    std::vector<char> byteArray1( structType->getSize(), 0x55 );
+    DataAccessorPtr  dataRange1 = getCacheAccessor(byteArray1);
+    TypedVarPtr  ptr1;
+    ASSERT_NO_THROW(ptr1 = loadTypedVar(structType, dataRange1) );
+
+    EXPECT_NO_THROW(ptr1->str());
+    EXPECT_EQ(0x55555555, *ptr1->getElement(L"m_field0") );
+    EXPECT_EQ(0x55555555, *ptr1->getElement(0) );
+
+
+    TypeInfoPtr  structWithArray;
+    ASSERT_NO_THROW( structWithArray = loadType(L"structWithArray") );
+
+    std::vector<char> byteArray2( structWithArray->getSize(), 0x77 );
+    DataAccessorPtr  dataRange2 = getCacheAccessor(byteArray2);
+    TypedVarPtr  ptr2;
+    ASSERT_NO_THROW(ptr2 = loadTypedVar(structWithArray, dataRange2) );
+
+    EXPECT_EQ(0x77777777, *ptr2->getElement(L"m_arrayField")->getElement(0) );
+     
+
+    TypedVarPtr  ptr3;
+    ASSERT_NO_THROW( ptr3 = loadTypedVar(structType, getCacheAccessor( std::vector<char>(1, 'a')) ) );
+
+    EXPECT_THROW(ptr3->str(), DbgException);
+    EXPECT_THROW(*ptr3->getElement(L"m_field0"), DbgException );
+    EXPECT_THROW(*ptr3->getElement(0), DbgException);
+}

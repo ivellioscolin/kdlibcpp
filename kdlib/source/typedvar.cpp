@@ -635,7 +635,7 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
         fieldOffset += getVirtualBaseDisplacement( fieldName );
     }
 
-    return  loadTypedVar( fieldType, m_varData->getAddress() + fieldOffset );
+    return  loadTypedVar( fieldType,  m_varData->copy(fieldOffset, fieldType->getSize()) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -873,7 +873,7 @@ std::wstring TypedVarUdt::str()
                 fieldOffset += getVirtualBaseDisplacement(i);
             }
 
-            fieldVar = loadTypedVar( fieldType, getAddress() + fieldOffset );
+            fieldVar = loadTypedVar( fieldType, m_varData->copy(fieldOffset, fieldType->getSize()) );
             sstr << L"   +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << fieldOffset;
             sstr << L" " << std::left << std::setw(24) << std::setfill(L' ') << m_typeInfo->getElementName(i) << ':';
         }
@@ -884,34 +884,6 @@ std::wstring TypedVarUdt::str()
             sstr << L"   " << ::printFieldValue( fieldType, fieldVar );
         else
             sstr << L"   " << L"failed to get value";
-
-
-
-        //try {
-
-        //    if ( fieldType->isBase() )
-        //    {
-        //        sstr << L"   ";
-
-        //        if( fieldVar )
-        //            sstr << L"0x" << fieldVar->getValue().asHex() <<  L" (" << fieldVar->getValue().asStr() <<  L")";
-        //        else
-        //            sstr << L"failed to get value";
-        //    }
-        //    else if ( fieldType->isPointer() )
-        //    {
-        //        sstr << L"   ";
-
-        //        if( fieldVar )
-        //            sstr << L"0x" << fieldVar->getValue().asHex();
-        //        else
-        //            sstr << L"failed to get value";
-        //    }
-
-        //} catch( MemoryException& )
-        //{
-        //    sstr << L"Invalid memory";
-        //}
 
         sstr << std::endl;
     }
@@ -974,12 +946,15 @@ TypedVarPtr TypedVarPointer::getElement(size_t index)
 
 TypedVarPtr TypedVarArray::getElement( size_t index )
 {
-    //if ( index >= m_typeInfo->getElementCount() )
-    //    throw IndexException( index );
-
     TypeInfoPtr     elementType = m_typeInfo->getElement(0);
 
-    return loadTypedVar( elementType, m_varData->getAddress() + elementType->getSize()*index );
+    if ( m_varData->getStorageType() == MemoryVar )
+        return loadTypedVar( elementType, getMemoryAccessor(m_varData->getAddress() + elementType->getSize()*index, elementType->getSize()) );
+
+    if ( index >= m_typeInfo->getElementCount() )
+        throw IndexException( index );
+
+    return loadTypedVar( elementType,  m_varData->copy(elementType->getSize()*index, elementType->getSize()) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
