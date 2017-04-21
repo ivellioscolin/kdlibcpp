@@ -24,6 +24,11 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual void setValue(const NumVariant& value) 
+    {
+        throw TypeException( m_typeInfo->getName(), L" failed to set value");
+    }
+
     virtual VarStorage getStorage() const
     {
         return m_varData->getStorageType();
@@ -150,11 +155,11 @@ protected:
 
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo);
 
-    virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const
+    virtual void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const
     {
         std::vector<unsigned char>  buffer( m_varData->getLength() );
         m_varData->readBytes(buffer, m_varData->getLength() );
-        stream->writeBytes(buffer);
+        stream->writeBytes(buffer, pos);
     }
 
     virtual TypedValue call(const TypedValueList& arglst)
@@ -162,6 +167,15 @@ protected:
         throw TypeException( L" is not a function");
     }
     
+    virtual void setElement( const std::wstring& fieldName, const TypedValue& value) 
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
+    }
+
+    virtual void setElement( size_t index, const TypedValue& value ) 
+    {
+        throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
+    }
 
 protected:
 
@@ -194,6 +208,8 @@ protected:
 
     virtual NumVariant getValue() const;
 
+    virtual void setValue(const NumVariant& value);
+
     virtual std::wstring str();
 };
 
@@ -215,7 +231,11 @@ protected:
 
     virtual TypedVarPtr getElement( const std::wstring& fieldName );
 
+    virtual void setElement( const std::wstring& fieldName, const TypedValue& value);
+
     virtual  TypedVarPtr getElement( size_t index );
+
+    virtual void setElement( size_t index, const TypedValue& value );
 
     virtual MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) {
         return m_typeInfo->getElementOffset( fieldName );
@@ -276,7 +296,7 @@ class TypedVarPointer : public TypedVarImp
 {
 public:
 
-    TypedVarPointer( const TypeInfoPtr& typeInfo, DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
+    TypedVarPointer( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" ) :
         TypedVarImp( typeInfo, dataSource, name )
         {}
 
@@ -285,6 +305,10 @@ public:
 
     virtual NumVariant getValue() const {
         return NumVariant( getSize() == 4 ? m_varData->readDWord() : m_varData->readQWord() );
+    }
+
+    virtual void setValue(const NumVariant& value) {
+        getSize() == 4 ? m_varData->writeDWord(value.asULong()) : m_varData->writeQWord(value.asULongLong());
     }
 
     virtual TypedVarPtr deref();
@@ -336,6 +360,9 @@ public:
 
     virtual NumVariant getValue() const;
 
+    virtual void setValue(const NumVariant& value);
+
+    virtual std::wstring str();
 
     std::wstring printValue() const;
 };
@@ -396,8 +423,6 @@ public:
 protected:
 
     TypedValueList castArgs(const TypedValueList& arglst);
-    TypedValue castBaseArg(TypeInfoPtr&  destType, const TypedValue& arg);
-    TypedValue castPtrArg(TypeInfoPtr&  destType, const TypedValue& arg);
 
     TypedValue callCdecl(const TypedValueList& arglst);
     TypedValue callStd(const TypedValueList& arglst);
@@ -452,6 +477,11 @@ public:
     {
        throw TypeException(L"Not applicable for Void");
     } 
+
+    virtual void setValue(const NumVariant& value) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
 
     virtual VarStorage getStorage() const
     {
@@ -586,6 +616,16 @@ public:
     }
 
     virtual TypedValue call(const TypedValueList& arglst)
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual void setElement( const std::wstring& fieldName, const TypedValue& value) 
+    {
+       throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual void setElement( size_t index, const TypedValue& value ) 
     {
        throw TypeException(L"Not applicable for Void");
     }

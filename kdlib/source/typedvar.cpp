@@ -20,9 +20,9 @@
 
 namespace {
 
-///////////////////////////////////////////////////////////////////////////////
+using namespace kdlib;
 
-std::wstring printFieldValue( const kdlib::TypeInfoPtr& fieldType, const kdlib::TypedVarPtr& fieldVar )
+std::wstring printFieldValue( const TypeInfoPtr& fieldType, const TypedVarPtr& fieldVar )
 {
     std::wstringstream  sstr;
 
@@ -62,6 +62,89 @@ std::wstring getSymbolName( kdlib::SymbolPtr& symbol )
 
 }
 
+TypedValue castBaseArg(TypeInfoPtr& destType, const TypedValue& arg)
+{
+    if ( !arg.getType()->isBase() && !arg.getType()->isEnum() )
+        throw TypeException(L"failed to cast argument");
+
+    NumVariant  var = arg.getValue();
+
+    if (destType->getName() == L"Char")
+        return TypedValue( var.asChar() );
+
+    if (destType->getName() == L"WChar")
+        return TypedValue( var.asUShort() );
+
+    if (destType->getName() == L"Int1B")
+        return TypedValue( var.asChar() );
+
+    if (destType->getName() == L"UInt1B")
+        return TypedValue( var.asUChar() );
+
+    if (destType->getName() == L"Int2B")
+        return TypedValue( var.asShort() );
+
+    if (destType->getName() == L"UInt2B") 
+        return TypedValue( var.asUShort() );
+
+    if (destType->getName() == L"Int4B")
+        return TypedValue( var.asLong() );
+
+    if (destType->getName() == L"UInt4B")
+        return TypedValue( var.asULong() );
+
+    if (destType->getName() == L"Int8B" )
+        return TypedValue( var.asLongLong() );
+
+    if (destType->getName() == L"UInt8B" )
+        return TypedValue( var.asULongLong() );
+
+    if (destType->getName() == L"Long")
+        return TypedValue( var.asLong() );
+
+    if (destType->getName() == L"ULong")
+        return TypedValue( var.asULong() );
+
+    if (destType->getName() == L"Float")
+        return TypedValue( var.asFloat() );
+
+    if (destType->getName() == L"Double")
+        return TypedValue( var.asDouble() );
+
+    if (destType->getName() == L"Bool")
+        return TypedValue( var.asChar() );
+
+    throw TypeException(L"failed to cast argument");
+}
+
+
+TypedValue castPtrArg(TypeInfoPtr& destType, const TypedValue& arg)
+{
+
+    if ( arg.getType()->isPointer() || arg.getType()->isBase() )
+    {
+        NumVariant  var = arg.getValue();
+
+        if ( destType->getPtrSize() == 4 )
+            return TypedValue( var.asULong() );
+
+        if ( destType->getPtrSize() == 8 )
+            return TypedValue( var.asULongLong() );
+    }
+    else
+    if ( arg.getType()->isArray() )
+    {
+        if ( destType->getPtrSize() == 4 )
+            return TypedValue( static_cast<unsigned long>(arg.getAddress()) );
+
+        if ( destType->getPtrSize() == 8 )
+            return TypedValue( static_cast<unsigned long long>(arg.getAddress()) );
+    }
+
+    throw TypeException(L"failed to cast argument");
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end noname namespace
@@ -70,7 +153,7 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, DataAccessorPtr &dataSource, const std::wstring& name = L"" )
+TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" )
 {
     if ( typeInfo->isBase() )
         return TypedVarPtr( new TypedVarBase( typeInfo, dataSource, name ) );
@@ -178,7 +261,7 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSource)
+TypedVarPtr loadTypedVar( const std::wstring &typeName, const DataAccessorPtr& dataSource)
 {
     TypeInfoPtr varType = loadType( typeName );
 
@@ -187,7 +270,7 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSou
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr loadTypedVar(const TypeInfoPtr &varType, DataAccessorPtr& dataSource)
+TypedVarPtr loadTypedVar(const TypeInfoPtr &varType, const DataAccessorPtr& dataSource)
 {
     if (!varType)
         throw DbgException("type info is null");
@@ -530,7 +613,7 @@ NumVariant TypedVarBase::getValue() const
         return NumVariant( m_varData->readSignByte() );
 
     if ( m_typeInfo->getName() == L"WChar" )
-        return NumVariant( m_varData->readSignByte() );
+        return NumVariant( m_varData->readSignWord() );
 
     if ( m_typeInfo->getName() == L"Long" )
         return NumVariant( m_varData->readSignDWord() );
@@ -574,7 +657,62 @@ NumVariant TypedVarBase::getValue() const
     if ( m_typeInfo->getName() == L"Hresult" )
         return NumVariant( m_varData->readDWord() );
 
-    NOT_IMPLEMENTED();
+    throw TypeException(  m_typeInfo->getName(), L" unsupported based type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypedVarBase::setValue(const NumVariant& value)
+{
+    if ( m_typeInfo->getName() == L"Char" )
+        return m_varData->writeSignByte( value.asChar() );
+
+    if ( m_typeInfo->getName() == L"WChar" )
+        return m_varData->writeSignWord(value.asShort() );
+
+    if ( m_typeInfo->getName() == L"Long" )
+        return m_varData->writeSignDWord(value.asLong());
+
+    if ( m_typeInfo->getName() == L"ULong" )
+        return m_varData->writeDWord(value.asULong());
+
+    if ( m_typeInfo->getName() == L"Int1B" )
+        return m_varData->writeSignByte(value.asChar());
+        
+    if ( m_typeInfo->getName() == L"UInt1B" )
+        return m_varData->writeByte(value.asUChar());
+
+    if ( m_typeInfo->getName() == L"Int2B" )
+        return m_varData->writeSignWord(value.asShort());
+
+    if ( m_typeInfo->getName() == L"UInt2B" )
+        return m_varData->writeWord(value.asUShort());
+
+    if ( m_typeInfo->getName() == L"Int4B" )
+        return m_varData->writeSignDWord(value.asLong());
+
+    if ( m_typeInfo->getName() == L"UInt4B" )
+        return m_varData->writeDWord(value.asULong());
+        
+    if ( m_typeInfo->getName() == L"Int8B" )
+        return m_varData->writeSignQWord(value.asLongLong());
+
+    if ( m_typeInfo->getName() == L"UInt8B" )
+        return m_varData->writeQWord(value.asULongLong());
+
+    if ( m_typeInfo->getName() == L"Float" )
+        return m_varData->writeFloat(value.asFloat());
+
+    if ( m_typeInfo->getName() == L"Double" )
+        return m_varData->writeDouble(value.asDouble());
+
+    if ( m_typeInfo->getName() == L"Bool" )
+        return m_varData->writeByte(value.asUChar());
+
+    if ( m_typeInfo->getName() == L"Hresult" )
+        return m_varData->writeDWord(value.asULong());
+
+    throw TypeException(  m_typeInfo->getName(), L" unsupported based type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -637,7 +775,46 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 
     return  loadTypedVar( fieldType,  m_varData->copy(fieldOffset, fieldType->getSize()) );
 }
+///////////////////////////////////////////////////////////////////////////////
 
+void TypedVarUdt::setElement( const std::wstring& fieldName, const TypedValue& value)
+{
+    getElement(fieldName)->setValue(value);
+
+/*
+    TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
+
+    if ( m_typeInfo->isStaticMember(fieldName) )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
+
+    if ( m_typeInfo->isVirtualMember( fieldName ) )
+    {
+        fieldOffset += getVirtualBaseDisplacement( fieldName );
+    }
+
+    TypedValue  castedValue;
+
+    if ( fieldType->isBase() )
+    {
+        castedValue = castBaseArg(fieldType, value);
+    }
+    else 
+    if ( fieldType->isPointer() || fieldType->isArray() )
+    {
+        castedValue = castPtrArg(fieldType, value);
+    }
+    else
+    {
+        castedValue = value;
+    }
+
+    castedValue.writeBytes(m_varData, fieldOffset);
+*/
+}
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedVarPtr TypedVarUdt::getMethod( const std::wstring &methodName, const std::wstring&  prototype)
@@ -807,6 +984,47 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void TypedVarUdt::setElement( size_t index, const TypedValue& value )
+{
+    getElement(index)->setValue(value);
+
+    //TypeInfoPtr fieldType = m_typeInfo->getElement(index);
+
+    //if ( m_typeInfo->isStaticMember(index) )
+    //{
+    //    NOT_IMPLEMENTED();
+    //}
+
+    //MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(index);
+
+    //if ( m_typeInfo->isVirtualMember(index) )
+    //{
+    //    fieldOffset += getVirtualBaseDisplacement(index);
+    //}
+
+    //TypedValue  castedValue;
+
+    //if ( fieldType->isBase() )
+    //{
+
+
+    //    castedValue = castBaseArg(fieldType, value);
+    //}
+    //else 
+    //if ( fieldType->isPointer() || fieldType->isArray() )
+    //{
+    //    castedValue = castPtrArg(fieldType, value);
+    //}
+    //else
+    //{
+    //    castedValue = value;
+    //}
+
+    //castedValue.writeBytes(m_varData, fieldOffset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 MEMDISPLACEMENT TypedVarUdt::getVirtualBaseDisplacement( const std::wstring &fieldName )
 {
     MEMOFFSET_32 virtualBasePtr = 0;
@@ -972,32 +1190,57 @@ std::wstring TypedVarArray::str()
 
 NumVariant TypedVarBitField::getValue() const
 {
-    NumVariant  var = *loadTypedVar( m_typeInfo->getBitType(), m_varData->getAddress() );
+    NumVariant  var = loadTypedVar( m_typeInfo->getBitType(), m_varData)->getValue();
+    NumVariant  one = ( var ^ var ) + '\1';
 
-    var >>=  m_typeInfo->getBitOffset();
+    BITOFFSET  bitWidth = m_typeInfo->getBitWidth();
+    BITOFFSET  bitOffset = m_typeInfo->getBitOffset();
 
     if ( var.isSigned() )
     {
-        BITOFFSET width = m_typeInfo->getBitWidth();
-
-        if ( ( var & ( 1ULL << ( width -1 ) ) ) != 0 )
+        if ( ( var & ( one << ( bitOffset + bitWidth - one ) ) ) != 0 )
         {
-            var |= ~( ( 1ULL << width ) - 1 );
+            var =  ( var >> bitOffset ) | ~( ( one << bitWidth ) - one );
         }
         else
         {
-            var &= ( 1ULL << width ) - 1;
+            var = ( var >> bitOffset ) & ( ( one << bitWidth ) - one );
         }
-
-        var = var.asLongLong();
     }
     else
-    {     
-
-        var &= ( 1 << m_typeInfo->getBitWidth() ) - 1;
+    {
+        var = ( var >> bitOffset ) & ( ( one << bitWidth ) - one );
     }
 
     return var;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypedVarBitField::setValue(const NumVariant& value)
+{
+    TypedVarPtr  var = loadTypedVar( m_typeInfo->getBitType(), m_varData);
+
+    BITOFFSET  bitWidth = m_typeInfo->getBitWidth();
+    BITOFFSET  bitOffset = m_typeInfo->getBitOffset();
+    unsigned long long   bitValue = var->getValue().asULongLong();
+
+    bitValue &= ~( ( ( 1ULL << bitWidth ) - 1ULL ) << bitOffset );
+    bitValue |= ( value.asULongLong() & ( ( 1ULL <<  bitWidth ) - 1 ) ) << bitOffset;
+
+    var->setValue(bitValue);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypedVarBitField::str()
+{
+    std::wstringstream   sstr;
+
+    sstr << L"BitField " << m_typeInfo->getName() << L" at " <<  m_varData->getLocationAsStr();
+    sstr << L" Value: " <<  printValue();
+
+    return sstr.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1154,91 +1397,6 @@ TypedValueList TypedVarFunction::castArgs(const TypedValueList& arglst)
 
 /////////////////////////////////////////////////////////////////////////////
 
-TypedValue TypedVarFunction::castBaseArg(TypeInfoPtr& destType, const TypedValue& arg)
-{
-    if ( !arg.getType()->isBase() && !arg.getType()->isEnum() )
-        throw TypeException(L"failed to cast argument");
-
-    NumVariant  var = arg.getValue();
-
-    if (destType->getName() == L"Char")
-        return TypedValue( var.asChar() );
-
-    if (destType->getName() == L"WChar")
-        return TypedValue( var.asUShort() );
-
-    if (destType->getName() == L"Int1B")
-        return TypedValue( var.asChar() );
-
-    if (destType->getName() == L"UInt1B")
-        return TypedValue( var.asUChar() );
-
-    if (destType->getName() == L"Int2B")
-        return TypedValue( var.asShort() );
-
-    if (destType->getName() == L"UInt2B") 
-        return TypedValue( var.asUShort() );
-
-    if (destType->getName() == L"Int4B")
-        return TypedValue( var.asLong() );
-
-    if (destType->getName() == L"UInt4B")
-        return TypedValue( var.asULong() );
-
-    if (destType->getName() == L"Int8B" )
-        return TypedValue( var.asLongLong() );
-
-    if (destType->getName() == L"UInt8B" )
-        return TypedValue( var.asULongLong() );
-
-    if (destType->getName() == L"Long")
-        return TypedValue( var.asLong() );
-
-    if (destType->getName() == L"ULong")
-        return TypedValue( var.asULong() );
-
-    if (destType->getName() == L"Float")
-        return TypedValue( var.asFloat() );
-
-    if (destType->getName() == L"Double")
-        return TypedValue( var.asDouble() );
-
-    if (destType->getName() == L"Bool")
-        return TypedValue( var.asChar() );
-
-    throw TypeException(L"failed to cast argument");
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-TypedValue TypedVarFunction::castPtrArg(TypeInfoPtr& destType, const TypedValue& arg)
-{
-
-    if ( arg.getType()->isPointer() || arg.getType()->isBase() )
-    {
-        NumVariant  var = arg.getValue();
-
-        if ( destType->getPtrSize() == 4 )
-            return TypedValue( var.asULong() );
-
-        if ( destType->getPtrSize() == 8 )
-            return TypedValue( var.asULongLong() );
-    }
-    else
-    if ( arg.getType()->isArray() )
-    {
-        if ( destType->getPtrSize() == 4 )
-            return TypedValue( static_cast<unsigned long>(arg.getAddress()) );
-
-        if ( destType->getPtrSize() == 8 )
-            return TypedValue( static_cast<unsigned long long>(arg.getAddress()) );
-    }
-
-    throw TypeException(L"failed to cast argument");
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 TypedValue TypedVarFunction::callCdecl(const TypedValueList& args)
 {
     CPUContextAutoRestore  cpuContext;
@@ -1246,7 +1404,7 @@ TypedValue TypedVarFunction::callCdecl(const TypedValueList& args)
     for ( TypedValueList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it)
     {
         size_t  argSize = it->getSize();
-        it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
+        it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ) );
     }
 
     makeCallx86();
@@ -1299,9 +1457,9 @@ TypedValue TypedVarFunction::callThis(const TypedValueList& args)
         size_t  argSize = it->getSize();
 
         if ( it + 1 == args.rend() )
-            it->writeBytes(getRegisterAccessor(L"ecx"), argSize);
+            it->writeBytes(getRegisterAccessor(L"ecx"));
         else
-            it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
+            it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ) );
     }
 
     makeCallx86();
@@ -1344,24 +1502,24 @@ TypedValue TypedVarFunction::callX64(const TypedValueList& args)
     for ( TypedValueList::const_reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
     {
         size_t  argSize = it->getSize();
-        it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ), argSize );
+        it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ) );
 
         switch(i)
         {
         case 0:
-            it->writeBytes(getRegisterAccessor(L"rcx"), argSize);
+            it->writeBytes(getRegisterAccessor(L"rcx"));
             break;
 
         case 1:
-            it->writeBytes(getRegisterAccessor(L"rdx"), argSize);
+            it->writeBytes(getRegisterAccessor(L"rdx"));
             break;
 
         case 2:
-            it->writeBytes(getRegisterAccessor(L"r8"), argSize);
+            it->writeBytes(getRegisterAccessor(L"r8"));
             break;
 
         case 3:
-            it->writeBytes(getRegisterAccessor(L"r9"), argSize);
+            it->writeBytes(getRegisterAccessor(L"r9"));
             break;
         }
     }

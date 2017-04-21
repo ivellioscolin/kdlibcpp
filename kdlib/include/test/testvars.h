@@ -162,6 +162,8 @@ struct structWithEnum {
     enumType  digit;
 };
 
+extern structWithEnum  g_structWithEnum;
+
 struct structWithBits {
     unsigned long m_bit0_4  : 5;
     unsigned long m_bit5    : 1;

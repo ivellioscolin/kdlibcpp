@@ -78,17 +78,20 @@ TEST_F( TypedVarTest, TypedVarArray )
 TEST_F( TypedVarTest, BitFields )
 {
     TypedVarPtr  typedVar;
+    std::wstring  desc;
 
     ASSERT_NO_THROW( typedVar = loadTypedVar(L"g_structWithBits") );
     EXPECT_EQ( g_structWithBits.m_bit0_4, *typedVar->getElement(L"m_bit0_4") );
     EXPECT_EQ( g_structWithBits.m_bit5, *typedVar->getElement(L"m_bit5") );
     EXPECT_EQ( g_structWithBits.m_bit6_8, *typedVar->getElement(L"m_bit6_8") );
     EXPECT_EQ( g_structWithBits.m_bit0_60, *typedVar->getElement(L"m_bit0_60") );
+    EXPECT_NO_THROW(desc = typedVar->getElement(L"m_bit0_60")->str());
 
     EXPECT_NO_THROW( typedVar = loadTypedVar(L"g_structWithSignBits") );
     EXPECT_EQ( g_structWithSignBits.m_bit5, *typedVar->getElement(L"m_bit5") );
     EXPECT_EQ( g_structWithSignBits.m_bit6_8, *typedVar->getElement(L"m_bit6_8") );
     EXPECT_EQ( g_structWithSignBits.m_bit0_60, *typedVar->getElement(L"m_bit0_60") );
+    EXPECT_NO_THROW(desc = typedVar->getElement(L"m_bit0_60")->str());
 }
 
 TEST_F( TypedVarTest, GetAddress )
@@ -574,4 +577,49 @@ TEST_F(TypedVarTest, CacheDataAccess)
     EXPECT_THROW(ptr3->str(), DbgException);
     EXPECT_THROW(*ptr3->getElement(L"m_field0"), DbgException );
     EXPECT_THROW(*ptr3->getElement(0), DbgException);
+
+    TypedVarPtr  ptr4;
+    ASSERT_NO_THROW( ptr4 = loadTypedVar(loadType(L"g_structWithBits"), getCacheAccessor( std::vector<char>(4, '\x55') ) ) );
+    EXPECT_EQ( 0x15, *ptr4->getElement(L"m_bit0_4") );
+    EXPECT_THROW( *ptr4->getElement(L"m_bit0_60"), DbgException );
+}
+
+TEST_F(TypedVarTest, SetStructFieldByName)
+{
+    std::vector<char> byteArray( 100 );
+    DataAccessorPtr  dataRange = getCacheAccessor(byteArray);
+
+    TypedVarPtr  ptr;
+    ASSERT_NO_THROW(ptr = loadTypedVar(loadType(L"structTest"), dataRange) );
+
+    EXPECT_NO_THROW(ptr->setElement(L"m_field0", 100) );
+    EXPECT_NO_THROW(ptr->setElement(L"m_field2", 1ULL) );
+
+    EXPECT_EQ(100, *ptr->getElement(L"m_field0") );
+    EXPECT_EQ(0, *ptr->getElement(L"m_field1") );
+    EXPECT_EQ(true, *ptr->getElement(L"m_field2") );
+    EXPECT_EQ(0, *ptr->getElement(L"m_field3") );
+    
+    EXPECT_THROW( ptr->setElement(L"notExist", 100), TypeException );
+}
+
+
+TEST_F(TypedVarTest, SetStructFieldByIndex)
+{
+    std::vector<char> byteArray( 100 );
+    DataAccessorPtr  dataRange = getCacheAccessor(byteArray);
+
+    TypedVarPtr  ptr;
+    ASSERT_NO_THROW(ptr = loadTypedVar(loadType(L"structWithSignBits"), dataRange) );
+
+    EXPECT_NO_THROW(ptr->setElement(0, 0x0F) );
+    EXPECT_NO_THROW(ptr->setElement(1, 1) );
+    EXPECT_NO_THROW(ptr->setElement(2, 0x05) );
+
+    EXPECT_EQ(0x0F, *ptr->getElement(0) );
+    EXPECT_EQ(-1, *ptr->getElement(1) );
+    std::wstring ss1 = ptr->getElement(1)->str();
+    EXPECT_EQ(-3, *ptr->getElement(2) );
+    std::wstring ss2 = ptr->getElement(2)->str();
+    EXPECT_THROW( ptr->setElement(4, 100), IndexException );
 }

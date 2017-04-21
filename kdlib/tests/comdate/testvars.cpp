@@ -112,6 +112,8 @@ structWithNested::Nested g_structNested = { 300 };
 
 enumType g_constEnumThree = THREE;
 
+structWithEnum g_structWithEnum = {ONE};
+
 structWithBits g_structWithBits = { 4, 1, 5 };
 structWithSignBits g_structWithSignBits = { 4, 1, 5 }; // high bit is sign extender, so, m_bit5 = -1
 

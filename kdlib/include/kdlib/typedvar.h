@@ -37,9 +37,9 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
 
 TypedVarPtr loadTypedVar( SymbolPtr &symbol );
 
-TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSource);
+TypedVarPtr loadTypedVar( const std::wstring &typeName, const DataAccessorPtr& dataSource);
 
-TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, DataAccessorPtr& dataSource);
+TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, const DataAccessorPtr& dataSource);
 
 TypedVarPtr loadTypedVar( const std::wstring &funcName, const std::wstring &prototype);
 
@@ -82,9 +82,9 @@ class TypedVar :  public NumBehavior {
 
     friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, MEMOFFSET_64 addr );
 
-    friend TypedVarPtr loadTypedVar( const std::wstring &typeName, DataAccessorPtr& dataSource );
+    friend TypedVarPtr loadTypedVar( const std::wstring &typeName, const DataAccessorPtr& dataSource );
 
-    friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, DataAccessorPtr& dataSource );
+    friend TypedVarPtr loadTypedVar( const TypeInfoPtr &typeInfo, const     DataAccessorPtr& dataSource );
 
     friend TypedVarPtr loadTypedVar( const std::wstring &funcName, const std::wstring &prototype);
 
@@ -115,12 +115,14 @@ public:
     virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) = 0;
     virtual TypeInfoPtr getType() const = 0;
     virtual NumVariant getValue() const = 0;
+    virtual void setValue(const NumVariant& value) = 0;
     virtual TypedVarPtr deref() = 0;
     virtual TypedVarPtr castTo(const std::wstring& typeName) = 0;
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) = 0;
-    virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const = 0;
+    virtual void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const = 0;
     virtual TypedValue call(const TypedValueList& arglst) = 0;
-    //virtual TypedVarPtr getVTBL(const std::wstring& baseClass=L"") = 0;
+    virtual void setElement( const std::wstring& fieldName, const TypedValue& value) = 0;
+    virtual void setElement( size_t index, const TypedValue& value ) = 0;
 
 protected:
 
@@ -265,8 +267,8 @@ public:
         return m_value->castTo(typeInfo);
     }
 
-    void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const {
-        return m_value->writeBytes(stream, bytes);
+    void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const {
+        return m_value->writeBytes(stream, pos);
     }
 
     TypedValue call(const TypedValueList& arglst) {

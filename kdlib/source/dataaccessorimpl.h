@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/noncopyable.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "kdlib/dataaccessor.h"
 #include "kdlib/memaccess.h"
@@ -611,7 +612,329 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CacheAccessor : public EmptyAccessor
+class CopyAccessor : public EmptyAccessor
+{
+public:
+
+    CopyAccessor(const DataAccessorPtr& dataAccessor, size_t pos, size_t length) 
+    {
+        if ( dataAccessor->getLength() <= pos )
+            throw DbgException("data accessor range error");
+
+        if ( dataAccessor->getLength() - pos < length )
+            throw DbgException("data accessor range error");
+
+        m_parentAccessor = dataAccessor;
+        m_pos = pos;
+        m_length = length;
+    }
+
+private:
+
+    virtual size_t getLength() const
+    {
+        return m_length;
+    }
+
+    virtual unsigned char readByte(size_t pos = 0) const
+    {
+        return readValue<unsigned char>(pos);
+    }
+
+    virtual void writeByte(unsigned char value, size_t pos=0) 
+    {
+        writeValue(value, pos);
+    }
+
+    virtual char readSignByte(size_t pos = 0) const
+    {
+        return readValue<char>(pos);
+    }
+
+    virtual void writeSignByte(char value, size_t pos=0) 
+    {
+        writeValue(value, pos);
+    }
+
+    virtual unsigned short readWord(size_t pos = 0) const
+    {
+        return readValue<unsigned short>(pos);
+    }
+
+    virtual void writeWord(unsigned short value, size_t pos=0) 
+    {
+        writeValue(value, pos);
+    }
+
+    virtual short readSignWord(size_t pos = 0) const
+    {
+        return readValue<short>(pos);
+    }
+
+    virtual void writeSignWord(short value, size_t pos=0)
+    {
+        writeValue(value, pos);
+    }
+
+    virtual unsigned long readDWord(size_t pos = 0) const
+    {
+        return readValue<unsigned long>(pos);
+    }
+
+    virtual void writeDWord(unsigned long value, size_t pos)
+    {
+        writeValue(value, pos);
+    }
+
+    virtual long readSignDWord(size_t pos = 0) const
+    {
+        return readValue<long>(pos);
+    }
+
+    virtual void writeSignDWord(long value, size_t pos=0) 
+    {
+        writeValue(value, pos);
+    }
+
+    virtual unsigned long long readQWord(size_t pos = 0) const
+    {
+        return readValue<unsigned long long>(pos);
+    }
+
+    virtual void writeQWord(unsigned long long value, size_t pos=0) 
+    {
+        writeValue(value, pos);
+    }
+
+    virtual long long readSignQWord(size_t pos = 0) const
+    {
+        return readValue<long long>(pos);
+    }
+
+    virtual void writeSignQWord(long long value, size_t pos=0) 
+    {
+        writeValue(value, pos);
+    }
+
+    virtual float readFloat(size_t pos = 0) const
+    {
+        return readValue<float>(pos);
+    }
+
+    virtual void writeFloat(float value, size_t pos=0)
+    {
+        writeValue(value, pos);
+    }
+
+    virtual double readDouble(size_t pos = 0) const
+    {
+        return readValue<double>(pos);
+    }
+
+    virtual void writeDouble(double value, size_t pos=0) 
+    {
+        writeValue(value, pos);
+    }
+
+    virtual void readBytes(std::vector<unsigned char>& dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeBytes( const std::vector<unsigned char>&  dataRange, size_t pos=0)
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readWords(std::vector<unsigned short>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeWords( const std::vector<unsigned short>&  dataRange, size_t pos=0)
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readDWords(std::vector<unsigned long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeDWords( const std::vector<unsigned long>&  dataRange, size_t  pos=0) 
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readQWords(std::vector<unsigned long long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeQWords( const std::vector<unsigned long long>&  dataRange, size_t  pos=0) 
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readSignBytes(std::vector<char>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeSignBytes( const std::vector<char>&  dataRange, size_t  pos=0)
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readSignWords(std::vector<short>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeSignWords( const std::vector<short>&  dataRange, size_t  pos=0) 
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readSignDWords(std::vector<long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeSignDWords( const std::vector<long>&  dataRange, size_t  pos=0)
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readSignQWords(std::vector<long long>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeSignQWords( const std::vector<long long>&  dataRange, size_t  pos=0) 
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readFloats(std::vector<float>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeFloats( const std::vector<float>&  dataRange, size_t  pos=0) 
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual void readDoubles(std::vector<double>&  dataRange, size_t count, size_t  pos = 0) const
+    {
+        readValues(dataRange, count, pos);
+    }
+
+    virtual void writeDoubles( const std::vector<double>&  dataRange, size_t  pos=0) 
+    {
+        writeValues(dataRange, pos);
+    }
+
+    virtual MEMOFFSET_64 getAddress() const
+    {
+        return m_parentAccessor->getAddress();
+    }
+
+    virtual VarStorage getStorageType() const
+    {
+        return m_parentAccessor->getStorageType();
+    }
+
+    virtual std::wstring getRegisterName() const
+    {
+        return m_parentAccessor->getRegisterName();
+    }
+
+    virtual std::wstring getLocationAsStr() const
+    {
+        return m_parentAccessor->getLocationAsStr();
+    }
+
+    DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
+    {
+        if ( startOffset >= m_length )
+            throw DbgException("data accessor range error");
+
+        if ( m_length - startOffset < length )
+            throw DbgException("data accessor range error");
+
+        if ( length == 0 )
+            length = m_length - startOffset;
+
+        return DataAccessorPtr( new CopyAccessor( m_parentAccessor, m_pos + startOffset, length) );
+    }
+
+private:
+
+    template <typename T>
+    T readValue(size_t pos) const
+    {
+        if ( pos >= m_length / sizeof(T) )
+            throw DbgException("data accessor range error");
+
+        std::vector<unsigned char>  buffer(sizeof(T));
+
+        m_parentAccessor->readBytes(buffer, sizeof(T), m_pos + pos * sizeof(T));
+
+        return *reinterpret_cast<T*>(&buffer[0]);
+    }
+
+    template <typename T>
+    void writeValue(T value, size_t pos)
+    {
+        if ( pos >= m_length / sizeof(T) )
+            throw DbgException("data accessor range error");
+
+        std::vector<unsigned char>  buffer(sizeof(T));
+
+        *reinterpret_cast<T*>(&buffer[0]) = value;
+
+        m_parentAccessor->writeBytes(buffer, m_pos + pos * sizeof(T));
+    }
+
+    template <typename T>
+    void readValues(std::vector<T>& dataRange, size_t count, size_t pos) const
+    {
+        if ( count > m_length / sizeof(T)  - pos)
+            throw DbgException("data accessor range error");
+
+        std::vector<unsigned char>  buffer(sizeof(T)*count);
+
+        m_parentAccessor->readBytes(buffer, count, m_pos+pos*sizeof(T));
+
+        dataRange = std::vector<T>(
+            reinterpret_cast<const T*>(&buffer[0]), 
+            reinterpret_cast<const T*>(&buffer[count]) );
+    }
+
+    template <typename T>
+    void writeValues( const std::vector<T>&  dataRange, size_t pos) 
+    {
+        if ( dataRange.size() > m_length / sizeof(double) - pos )
+            throw DbgException("data accessor range error");
+
+        std::vector<unsigned char> buffer(
+            reinterpret_cast<const unsigned char*>(&dataRange[0]),
+            reinterpret_cast<const unsigned char*>(&dataRange[dataRange.size()]) );
+
+        m_parentAccessor->writeBytes(buffer, m_pos+pos*sizeof(T));
+    }
+
+
+    DataAccessorPtr  m_parentAccessor;
+    size_t  m_pos;
+    size_t  m_length;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class CacheAccessor : public EmptyAccessor, public boost::enable_shared_from_this<CacheAccessor>
 {
 public:
 
@@ -908,16 +1231,7 @@ private:
 
     DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
     {
-        if ( startOffset >= m_buffer.size() )
-            throw DbgException("cache accessor range error");
-
-        if ( m_buffer.size() - startOffset < length )
-            throw DbgException("cache accessor range error");
-
-        if ( length == 0 )
-            length = m_buffer.size() - startOffset;
-
-        return getCacheAccessor(std::vector<char>(m_buffer.begin() + startOffset, m_buffer.begin() + startOffset + length) );
+        return DataAccessorPtr( new CopyAccessor( shared_from_this(), startOffset, length) );
     }
 
 private:
