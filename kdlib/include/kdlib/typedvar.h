@@ -279,6 +279,11 @@ private:
     TypedVarPtr  m_value;
 };
 
+inline 
+NumBehavior::operator TypedValue() {
+    return TypedValue( getValue() );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end kdlib namespace
