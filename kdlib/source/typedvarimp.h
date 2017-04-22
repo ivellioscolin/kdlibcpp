@@ -340,6 +340,10 @@ public:
         return NumVariant(m_varData->getAddress() );
     }
 
+    virtual void setElement( size_t index, const TypedValue& value ) {
+        getElement(index)->setValue(value);
+    }
+
     virtual size_t getElementCount() {
         return m_typeInfo->getElementCount();
     }
@@ -379,7 +383,6 @@ public:
     virtual NumVariant getValue() const {
         return NumVariant( m_varData->readDWord() );
     }
-
 
     virtual std::wstring str();
 
