@@ -511,9 +511,9 @@ TypeInfoProviderClang::TypeInfoProviderClang( const std::wstring& sourceCode, co
     if ( it == args.end() )
     {
         if ( getCPUMode() == CPU_AMD64 )
-            args.push_back(" --target=i686-pc-windows-msvc");
-        if ( getCPUMode() == CPU_I386 )
-            args.push_back(" --target=x86_64-pc-windows-msvc");
+            args.push_back("--target=x86_64-pc-windows-msvc");
+        else if ( getCPUMode() == CPU_I386 )
+            args.push_back("--target=i686-pc-windows-msvc");
     }
 
     std::unique_ptr<ASTUnit>  ast = buildASTFromCodeWithArgs(wstrToStr(sourceCode), args );

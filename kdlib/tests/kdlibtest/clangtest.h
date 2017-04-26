@@ -82,17 +82,20 @@ TEST_F(ClangTest, CompileStruct)
 }
 
 
-
 TEST_F(ClangTest, CompileOption)
 {
-    TypeInfoPtr  compiledStruct1, compiledStruct2;
+    const size_t  defaultPtrSize = sizeof(void*);
+
+    TypeInfoPtr  compiledStruct1, compiledStruct2, compiledStruct3;
 
     ASSERT_NO_THROW( compiledStruct1 = compileType(test_code1, L"TestStruct", L"--target=i686-pc-windows-msvc -w") );
     ASSERT_NO_THROW( compiledStruct2 = compileType(test_code1, L"TestStruct", L"--target=x86_64-pc-windows-msvc -w") );
+    ASSERT_NO_THROW( compiledStruct3 = compileType(test_code1, L"TestStruct") );
 
     EXPECT_TRUE( compiledStruct1->getSize() < compiledStruct2->getSize() );
     EXPECT_EQ( 4, compiledStruct1->getElement(L"b1")->getSize());
     EXPECT_EQ( 8, compiledStruct2->getElement(L"b1")->getSize());
+    EXPECT_EQ( defaultPtrSize, compiledStruct3->getElement(L"b1")->getSize());
 }
 
 static const wchar_t  test_code2[] = L"\
