@@ -243,6 +243,8 @@ TypedVarPtr loadTypedVar( const std::wstring &varName )
 
 TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
 {
+    offset = addr64(offset);
+
     TypeInfoPtr varType = loadType( typeName );
 
     return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()) );
@@ -252,6 +254,8 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
 
 TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
 {
+    offset = addr64(offset);
+
     if ( !varType )
         throw DbgException( "type info is null");
 
@@ -321,6 +325,8 @@ TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName,
 {
     std::wstring     moduleName;
     std::wstring     symName;
+
+    offset = addr64(offset);
 
     splitSymName( typeName, moduleName, symName );
 
@@ -415,6 +421,8 @@ TypedVarList loadTypedVarArray( MEMOFFSET_64 offset, const std::wstring &typeNam
 {
     std::wstring     moduleName;
     std::wstring     symName;
+
+    offset = addr64(offset);
 
     splitSymName( typeName, moduleName, symName );
 

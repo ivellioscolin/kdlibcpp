@@ -3,6 +3,7 @@
 #include "stdafx.h"
 
 #include "kdlib/dbgengine.h"
+#include "kdlib/memaccess.h"
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
 
@@ -136,6 +137,8 @@ MEMOFFSET_64 getModuleOffsetByIndex(unsigned long index)
 
 std::wstring getModuleName( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
+
     HRESULT  hres;
 
     std::vector<wchar_t>  moduleName(0x100);
@@ -158,6 +161,8 @@ std::wstring getModuleName( MEMOFFSET_64 baseOffset )
 
 std::wstring getModuleImageName( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
+
     HRESULT  hres;
     
     std::vector<wchar_t>  moduleName(0x100);
@@ -180,6 +185,7 @@ std::wstring getModuleImageName( MEMOFFSET_64 baseOffset )
 
 MEMOFFSET_32 getModuleSize( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
     return ModuleParameters(baseOffset).Size;
 }
 
@@ -187,6 +193,7 @@ MEMOFFSET_32 getModuleSize( MEMOFFSET_64 baseOffset )
 
 unsigned long getModuleTimeStamp( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
     return ModuleParameters(baseOffset).TimeDateStamp;
 }
 
@@ -194,6 +201,7 @@ unsigned long getModuleTimeStamp( MEMOFFSET_64 baseOffset )
 
 unsigned long getModuleCheckSum( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
     return ModuleParameters(baseOffset).Checksum;
 }
 
@@ -201,6 +209,7 @@ unsigned long getModuleCheckSum( MEMOFFSET_64 baseOffset )
 
 bool isModuleUnloaded( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
     return !!(ModuleParameters(baseOffset).Flags & DEBUG_MODULE_UNLOADED);
 }
 
@@ -208,6 +217,7 @@ bool isModuleUnloaded( MEMOFFSET_64 baseOffset )
 
 bool isModuleUserMode( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
     return !!(ModuleParameters(baseOffset).Flags & DEBUG_MODULE_USER_MODE);
 }
 
@@ -215,6 +225,8 @@ bool isModuleUserMode( MEMOFFSET_64 baseOffset )
 
 std::wstring getModuleSymbolFileName( MEMOFFSET_64 baseOffset )
 {
+    baseOffset = addr64(baseOffset);
+
     HRESULT  hres;
     IMAGEHLP_MODULEW64   moduleInfo = {};
 
@@ -265,6 +277,8 @@ std::wstring getModuleSymbolFileName( MEMOFFSET_64 baseOffset )
 
 std::string getModuleVersionInfo( MEMOFFSET_64 baseOffset, const std::string &value )
 {
+    baseOffset = addr64(baseOffset);
+
     struct LANGANDCODEPAGE {
         WORD wLanguage;
         WORD wCodePage;
@@ -341,6 +355,8 @@ std::string getModuleVersionInfo( MEMOFFSET_64 baseOffset, const std::string &va
 
 void getModuleFixedFileInfo( MEMOFFSET_64 baseOffset, FixedFileInfo &fixedFileInfo )
 {
+    baseOffset = addr64(baseOffset);
+
     VS_FIXEDFILEINFO Pod;
     HRESULT hres = 
         g_dbgMgr->symbols->GetModuleVersionInformation( 

@@ -304,7 +304,7 @@ public:
 public:
 
     virtual NumVariant getValue() const {
-        return NumVariant( getSize() == 4 ? m_varData->readDWord() : m_varData->readQWord() );
+        return NumVariant( addr64(getSize() == 4 ? m_varData->readDWord() : m_varData->readQWord() ) );
     }
 
     virtual void setValue(const NumVariant& value) {

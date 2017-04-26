@@ -17,7 +17,7 @@ public:
 
     BaseBreakpointImpl(MEMOFFSET_64 offset, BreakpointCallback *callback =0) :
         m_id(BREAKPOINT_UNSET),
-        m_offset(offset),
+        m_offset(addr64(offset)),
         m_callback(callback)
         {}
 

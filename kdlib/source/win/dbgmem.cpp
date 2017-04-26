@@ -47,6 +47,8 @@ MEMOFFSET_64 addr64( MEMOFFSET_64 offset )
 
 void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr, unsigned long *readed )
 {
+    offset = addr64(offset);
+
     if ( readed )
         *readed = 0;
 
@@ -77,6 +79,8 @@ void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr,
 
 void writeMemory( MEMOFFSET_64 offset, const void* buffer, size_t length, bool phyAddr = false, unsigned long *written = 0 )
 {
+    offset = addr64(offset);
+
     if ( written )
         *written = 0;
 
@@ -101,6 +105,8 @@ void writeMemory( MEMOFFSET_64 offset, const void* buffer, size_t length, bool p
 
 bool readMemoryUnsafe( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr, unsigned long *readed  )
 {
+    offset = addr64(offset);
+
     HRESULT hres;
     if ( phyAddr == false )
     {
@@ -126,6 +132,8 @@ bool readMemoryUnsafe( MEMOFFSET_64 offset, void* buffer, size_t length, bool ph
 
 bool isVaValid( MEMOFFSET_64 offset )
 {
+    offset = addr64(offset);
+
     HRESULT     hres;
     ULONG       offsetInfo;
     
@@ -148,6 +156,8 @@ bool isVaValid( MEMOFFSET_64 offset )
 
 bool isVaRegionValid(MEMOFFSET_64 addr, size_t length)
 {
+    addr = addr64(addr);
+
     HRESULT  hres;
     ULONG64  validBase = 0;
     ULONG  validSize = 0;

@@ -10,6 +10,7 @@
 #include "kdlib/stack.h"
 #include "kdlib/disasm.h"
 #include "kdlib/cpucontext.h"
+#include "kdlib/memaccess.h"
 
 #include "win/exceptions.h"
 #include "win/dbgmgr.h"
@@ -1168,6 +1169,8 @@ void setImplicitProcess(MEMOFFSET_64 offset)
 {
     HRESULT  hres;
 
+    offset = addr64(offset);
+
     hres = g_dbgMgr->system->SetImplicitProcessDataOffset(offset);
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugSystemObjects::SetImplicitProcessDataOffset", hres );
@@ -1277,6 +1280,8 @@ THREAD_DEBUG_ID getThreadIdByOffset(MEMOFFSET_64 offset)
     HRESULT  hres;
     ULONG  id;
 
+    offset = addr64(offset);
+
     hres = g_dbgMgr->system->GetThreadIdByDataOffset( offset, &id );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetThreadIdBySystemId", hres );
@@ -1343,6 +1348,8 @@ void setCurrentThreadByOffset(MEMOFFSET_64 offset)
 void setImplicitThread(MEMOFFSET_64 offset)
 {   
     HRESULT  hres;
+
+    offset = addr64(offset);
 
     hres = g_dbgMgr->system->SetImplicitThreadDataOffset(offset);
     if ( FAILED( hres ) )
@@ -1495,6 +1502,7 @@ MEMOFFSET_64 getFrameOffset()
 
 void setInstructionOffset(MEMOFFSET_64 offset)
 {
+    offset = addr64(offset);
 
     unsigned long  regIndex;
         
@@ -1519,6 +1527,8 @@ void setInstructionOffset(MEMOFFSET_64 offset)
 
 void setStackOffset(MEMOFFSET_64 offset)
 {
+    offset = addr64(offset);
+
     unsigned long  regIndex;
         
     switch( getCPUMode() )
@@ -1542,6 +1552,8 @@ void setStackOffset(MEMOFFSET_64 offset)
 
 void setFrameOffset(MEMOFFSET_64 offset)
 {
+    offset = addr64(offset);
+
     unsigned long  regIndex;
         
     switch( getCPUMode() )
@@ -1987,6 +1999,8 @@ void disasmAssemblay( MEMOFFSET_64 offset, const std::wstring &instruction, MEMO
 {
     HRESULT     hres;
 
+    offset = addr64(offset);
+
     hres = g_dbgMgr->control->AssembleWide( offset, instruction.c_str(), &nextOffset );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::Assemble", hres );
@@ -2000,6 +2014,8 @@ void disasmDisassembly( MEMOFFSET_64 offset, std::wstring &instruction, MEMOFFSE
     wchar_t     buffer[0x100];
     ULONG       disasmSize = 0;
     ULONG64     endOffset = 0;
+
+    offset = addr64(offset);
     
     hres = 
         g_dbgMgr->control->DisassembleWide(
@@ -2026,6 +2042,8 @@ MEMOFFSET_64 getNearInstruction( MEMOFFSET_64 offset, LONG delta )
 {
     HRESULT  hres;
     ULONG64  nearOffset;
+
+    offset = addr64(offset);
 
     hres = g_dbgMgr->control->GetNearInstruction( offset, delta, &nearOffset );
     if ( FAILED( hres ) )
@@ -2377,6 +2395,8 @@ void getNearSyntheticSymbols( MEMOFFSET_64 offset, std::vector< SyntheticSymbol 
 {
     HRESULT hres;
 
+    offset = addr64(offset);
+
     unsigned long count;
     hres = g_dbgMgr->symbols->GetNearNameByOffsetWide(offset, 0, nullptr, 0, &count, nullptr);
     if ( FAILED(hres) )
@@ -2481,6 +2501,8 @@ std::wstring loadSourceFileFromSrcSrv(MEMOFFSET_64 offset, const std::wstring& f
 
     ULONG  tokenSize;
 
+    offset = addr64(offset);
+
     hres =
         g_dbgMgr->advanced->GetSourceFileInformationWide(
             DEBUG_SRCFILE_SYMBOL_TOKEN,
@@ -2553,6 +2575,8 @@ std::wstring loadSourceFileFromSrcSrv(MEMOFFSET_64 offset, const std::wstring& f
 
 kdlib::SyntheticSymbol addSyntheticSymbol( kdlib::MEMOFFSET_64 offset, unsigned long size, const std::wstring &name )
 {
+    offset = addr64(offset);
+
     DEBUG_MODULE_AND_ID moduleAndId;
     HRESULT hres = 
         g_dbgMgr->symbols->AddSyntheticSymbolWide(

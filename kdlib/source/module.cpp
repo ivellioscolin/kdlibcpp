@@ -519,6 +519,8 @@ std::wstring ModuleImp::getSourceFile( MEMOFFSET_64 offset )
     unsigned long  lineno;
     long  displacement;
 
+    offset = addr64(offset);
+
     getSourceLine( offset, fileName, lineno, displacement );
 
     return fileName;
@@ -587,6 +589,7 @@ void ModuleImp::getFileVersion(unsigned long& majorVersion, unsigned long& minor
 void ModuleImp::findSymSessionSymbol(MEMOFFSET_64 offset, std::wstring &name, MEMDISPLACEMENT &displacement)
 {
     displacement = 0;
+    offset = addr64(offset);
     try
     {
         while ( name.empty() )
@@ -642,6 +645,8 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 
 std::wstring getSourceFile( MEMOFFSET_64 offset )
 {
+    offset = addr64(offset);
+
     if ( offset == 0 )
         offset = getInstructionOffset();
 
@@ -654,6 +659,8 @@ std::wstring getSourceFile( MEMOFFSET_64 offset )
 
 std::wstring getSourceFileFromSrcSrv(MEMOFFSET_64 offset)
 {
+    offset = addr64(offset);
+
     if ( offset == 0 )
         offset = getInstructionOffset();
 
@@ -666,6 +673,8 @@ std::wstring getSourceFileFromSrcSrv(MEMOFFSET_64 offset)
 
 void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displacement, MEMOFFSET_64 offset )
 {
+    offset = addr64(offset);
+
     if ( offset == 0 )
         offset = getInstructionOffset();
 
