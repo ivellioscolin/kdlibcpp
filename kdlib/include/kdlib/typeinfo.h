@@ -151,20 +151,22 @@ class TypeInfoProvider
 public:
 
     virtual TypeInfoPtr getTypeByName(const std::wstring& name) = 0;
+
 };
 
 TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source, const std::wstring&  opts = L"" );
+TypeInfoProviderPtr  getTypeInfoProviderFromPdb( const std::wstring&  pdbFile, MEMOFFSET_64  loadBase = 0 );
 
 ///////////////////////////////////////////////////////////////////////////////
 
 TypeInfoPtr makeCharConst(char val);
 TypeInfoPtr makeShortConst(short val);
 TypeInfoPtr makeLongConst(long val);
-TypeInfoPtr makeLongLongConst(long val);
+TypeInfoPtr makeLongLongConst(long long val);
 TypeInfoPtr makeUCharConst(unsigned char val);
 TypeInfoPtr makeUShortConst(unsigned short val);
 TypeInfoPtr makeULongConst(unsigned long val);
-TypeInfoPtr makeULongLongConst(unsigned long val);
+TypeInfoPtr makeULongLongConst(unsigned long long val);
 TypeInfoPtr makeIntConst(int val);
 TypeInfoPtr makeUIntConst(unsigned int val);
 TypeInfoPtr makeFloatConst(float val);

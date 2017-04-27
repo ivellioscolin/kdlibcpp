@@ -963,6 +963,23 @@ protected:
 
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoSymbolProvider  : public TypeInfoProvider
+{
+public:
+
+    TypeInfoSymbolProvider(const std::wstring&  pdbFile, MEMOFFSET_64  loadBase);
+
+private:
+
+    virtual TypeInfoPtr getTypeByName(const std::wstring& name);
+
+private:
+
+    SymbolSessionPtr  m_symbolSession;
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

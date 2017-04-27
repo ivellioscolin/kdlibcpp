@@ -1663,8 +1663,20 @@ public:
 
 protected:
 
-    TypeInfoBaseConst(char& val) : m_val(val), m_name(L"Char") {}
-    TypeInfoBaseConst(unsigned long & val) : m_val(val), m_name(L"ULong") {}
+    explicit TypeInfoBaseConst(char& val) : m_val(val), m_name(L"Int1B") {}
+    explicit TypeInfoBaseConst(short& val) : m_val(val), m_name(L"Int2B"){}
+    explicit TypeInfoBaseConst(long & val) : m_val(val), m_name(L"Int4B") {}
+    explicit TypeInfoBaseConst(long long & val) : m_val(val), m_name(L"Int8B") {}
+    explicit TypeInfoBaseConst(unsigned char & val) : m_val(val), m_name(L"UInt1B") {}
+    explicit TypeInfoBaseConst(unsigned short & val) : m_val(val), m_name(L"UInt2B") {}
+    explicit TypeInfoBaseConst(unsigned long & val) : m_val(val), m_name(L"UInt4B") {}
+    explicit TypeInfoBaseConst(unsigned long long & val) : m_val(val), m_name(L"UInt8B") {}
+    explicit TypeInfoBaseConst(int & val) : m_val(val), m_name(L"Int") {}
+    explicit TypeInfoBaseConst(unsigned int & val) : m_val(val), m_name(L"UInt") {}
+    explicit TypeInfoBaseConst(float & val) : m_val(val), m_name(L"Float") {}
+    explicit TypeInfoBaseConst(double & val) : m_val(val), m_name(L"Double") {}
+    explicit TypeInfoBaseConst(wchar_t & val) : m_val(val), m_name(L"WChar") {}
+    explicit TypeInfoBaseConst(bool & val) : m_val(val), m_name(L"Bool") {}
 
     virtual std::wstring str() {
         return m_name;
@@ -1709,28 +1721,92 @@ TypeInfoPtr makeCharConst(char val)
     return TypeInfoBaseConst::get(val);
 }
 
+TypeInfoPtr makeShortConst(short val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeLongConst(long val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeLongLongConst(long long val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeUCharConst(unsigned char val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeUShortConst(unsigned short val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
 TypeInfoPtr makeULongConst(unsigned long val)
 {
     return TypeInfoBaseConst::get(val);
 }
 
+TypeInfoPtr makeULongLongConst(unsigned long long val)
+{
+    return TypeInfoBaseConst::get(val);
+}
 
-//TypeInfoPtr makeShortConst(short val);
-//TypeInfoPtr makeLongConst(long val);
-//TypeInfoPtr makeLongLongConst(long val);
-//TypeInfoPtr makeUCharConst(unsigned char val);
-//TypeInfoPtr makeUShortConst(unsigned short val);
-//TypeInfoPtr makeULongConst(unsigned long val);
-//TypeInfoPtr makeULongLongConst(unsigned long val);
-//TypeInfoPtr makeIntConst(int val);
-//TypeInfoPtr makeUIntConst(unsigned int val);
-//TypeInfoPtr makeFloatConst(float val);
-//TypeInfoPtr makeDoubleConst(double val);
-//TypeInfoPtr makeWCharConst(wchar_t val);
-//TypeInfoPtr makeBoolConst(bool val);
+TypeInfoPtr makeIntConst(int val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeUIntConst(unsigned int val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeFloatConst(float val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeDoubleConst(double val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeWCharConst(wchar_t val)
+{
+    return TypeInfoBaseConst::get(val);
+}
+
+TypeInfoPtr makeBoolConst(bool val)
+{
+    return TypeInfoBaseConst::get(val);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoProviderPtr  getTypeInfoProviderFromPdb( const std::wstring&  pdbFile, MEMOFFSET_64  loadBase )
+{
+    return TypeInfoProviderPtr( new TypeInfoSymbolProvider(pdbFile, loadBase) );
+}
 
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoSymbolProvider::TypeInfoSymbolProvider(const std::wstring&  pdbFile, MEMOFFSET_64  loadBase)
+{
+    m_symbolSession = loadSymbolFile(pdbFile, loadBase);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoSymbolProvider::getTypeByName(const std::wstring& name)
+{
+   return loadType( m_symbolSession->getSymbolScope(), name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

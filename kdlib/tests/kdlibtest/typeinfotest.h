@@ -569,4 +569,15 @@ TEST_F(TypeInfoTest, GetVirtualMethod)
     EXPECT_THROW( loadType(L"Int2B")->isVirtual(), TypeException );
 }
 
+TEST_F(TypeInfoTest, GetTypeProviderFromPdb)
+{
+    TypeInfoProviderPtr  typeInfoProvider;
+    ASSERT_NO_THROW( typeInfoProvider = getTypeInfoProviderFromPdb( m_targetModule->getSymFile() ) );
+
+    TypeInfoPtr  structType;
+    ASSERT_NO_THROW( structType = typeInfoProvider->getTypeByName(L"structTest") );
+
+    EXPECT_EQ( L"structTest", structType->getName() );
+}
+
 
