@@ -75,3 +75,38 @@ void FuncStdException();
 int FuncWithTry(int a);
 
 
+template<typename T>
+struct complexval {
+    T  re;
+    T  im;
+};
+
+typedef complexval<short>      shortcomplex;
+typedef complexval<int>        intcomplex;
+typedef complexval<long long>  longcomplex;
+
+template <typename T>
+inline bool operator==(const complexval<T>& a, const complexval<T>& b) {
+    return a.re == b.re && a.im == b.im;
+}
+
+template<typename T>
+complexval<T> __cdecl FuncWithStructCdecl( complexval<T> a )
+{
+    return { a.im, a.re };
+}
+
+template<typename T>
+complexval<T> __stdcall FuncWithStructStd( complexval<T> a )
+{
+    return { 2 * a.re, 2 * a.im };
+}
+
+template<typename T>
+complexval<T> __fastcall FuncWithStructFast( complexval<T> a )
+{
+    return { 2 * a.re, 2 * a.im };
+}
+
+
+

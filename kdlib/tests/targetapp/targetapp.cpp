@@ -25,6 +25,18 @@ void __cdecl sleepThread(void*);
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+    FuncWithStructCdecl(shortcomplex{0,0});
+    FuncWithStructStd(shortcomplex{0,0});
+    FuncWithStructFast(shortcomplex{0,0});
+
+    FuncWithStructCdecl(intcomplex{0,0});
+    FuncWithStructStd(intcomplex{0,0});
+    FuncWithStructFast(intcomplex{0,0});
+
+    FuncWithStructCdecl(longcomplex{0,0});
+    FuncWithStructStd(longcomplex{0,0});
+    FuncWithStructFast(longcomplex{0,0});
+
     g_classChild.childMethod(10);
     g_classChild.overloadMethod(10);
     g_classChild.overloadMethod(10,20);

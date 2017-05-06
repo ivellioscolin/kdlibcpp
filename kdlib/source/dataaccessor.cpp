@@ -38,6 +38,15 @@ DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer, const std::wst
 {
     return DataAccessorPtr(new CacheAccessor(buffer, location) );
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+DataAccessorPtr getCacheAccessor(const void* rawBuffer, size_t bufferSize, const std::wstring&  location)
+{
+    std::vector<char>  buffer( reinterpret_cast<const char*>(rawBuffer), reinterpret_cast<const char*>(rawBuffer) + bufferSize);
+    return getCacheAccessor(buffer, location);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 DataAccessorPtr getCacheAccessor(const NumVariant& var, const std::wstring&  location)

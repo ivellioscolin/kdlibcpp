@@ -117,8 +117,8 @@ public:
     virtual NumVariant getValue() const = 0;
     virtual void setValue(const NumVariant& value) = 0;
     virtual TypedVarPtr deref() = 0;
-    virtual TypedVarPtr castTo(const std::wstring& typeName) = 0;
-    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) = 0;
+    virtual TypedVarPtr castTo(const std::wstring& typeName) const = 0;
+    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const = 0;
     virtual void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const = 0;
     virtual TypedValue call(const TypedValueList& arglst) = 0;
     virtual void setElement( const std::wstring& fieldName, const TypedValue& value) = 0;
@@ -160,6 +160,20 @@ public:
     TypedValue( double var ) : m_value( loadDoubleVar(var) ) {}
     TypedValue( wchar_t var ) : m_value( loadWCharVar(var) ) {}
     TypedValue( bool var ) : m_value( loadBoolVar(var) ) {}
+
+    template<typename T>
+    operator T() {
+        if ( sizeof(T) < getSize() )
+            throw TypeException( L"cannot cast TypedValue");
+
+        DataAccessorPtr dataRange = getCacheAccessor(sizeof(T) );
+        m_value->writeBytes(dataRange);
+
+        std::vector<unsigned char>  buf(sizeof(T));
+        dataRange->readBytes(buf, sizeof(T));
+
+        return *reinterpret_cast<T*>(&buf.front());
+    }
 
 public:
 
@@ -259,11 +273,11 @@ public:
         return m_value->deref();
     }
 
-    TypedVarPtr castTo(const std::wstring& typeName) {
+    TypedVarPtr castTo(const std::wstring& typeName) const {
         return m_value->castTo(typeName);
     }
 
-    TypedVarPtr castTo(const TypeInfoPtr &typeInfo) {
+    TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const {
         return m_value->castTo(typeInfo);
     }
 
@@ -283,6 +297,7 @@ inline
 NumBehavior::operator TypedValue() {
     return TypedValue( getValue() );
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

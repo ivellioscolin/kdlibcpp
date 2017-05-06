@@ -151,14 +151,14 @@ protected:
         NOT_IMPLEMENTED();
     }
 
-    virtual TypedVarPtr castTo(const std::wstring& typeName);
+    virtual TypedVarPtr castTo(const std::wstring& typeName) const;
 
-    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo);
+    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const;
 
     virtual void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const
     {
-        std::vector<unsigned char>  buffer( m_varData->getLength() );
-        m_varData->readBytes(buffer, m_varData->getLength() );
+        std::vector<unsigned char>  buffer( getSize() );
+        m_varData->readBytes(buffer, getSize() );
         stream->writeBytes(buffer, pos);
     }
 
@@ -427,11 +427,11 @@ protected:
 
     TypedValueList castArgs(const TypedValueList& arglst);
 
-    TypedValue callCdecl(const TypedValueList& arglst);
-    TypedValue callStd(const TypedValueList& arglst);
-    TypedValue callFast(const TypedValueList& arglst);
-    TypedValue callThis(const TypedValueList& arglst);
-    TypedValue callX64(const TypedValueList& arglst);
+    TypedValue callCdecl(TypedValueList& arglst);
+    TypedValue callStd(TypedValueList& arglst);
+    TypedValue callFast(TypedValueList& arglst);
+    TypedValue callThis(TypedValueList& arglst);
+    TypedValue callX64(TypedValueList& arglst);
 
     void makeCallx86();
     void makeCallx64();
@@ -603,12 +603,12 @@ public:
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedVarPtr castTo(const std::wstring& typeName)
+    virtual TypedVarPtr castTo(const std::wstring& typeName) const
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo)
+    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const
     {
        throw TypeException(L"Not applicable for Void");
     }

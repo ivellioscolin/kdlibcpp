@@ -516,6 +516,36 @@ TEST_F(TypedVarTest, DISABLED_CallFunctionStdException)
     EXPECT_EQ(FuncWithTry(100), loadTypedVar(L"FuncWithTry")->call({100}) );
 }
 
+TEST_F(TypedVarTest, CallFunctionWithStruct)
+{
+    TypedVarPtr  shortparam;
+    ASSERT_NO_THROW( shortparam = loadTypedVar(L"complexval<short>", getCacheAccessor( shortcomplex{100,200} ) ) );
+    EXPECT_EQ( 100, *shortparam->getElement(L"re") );
+    EXPECT_EQ( 200, *shortparam->getElement(L"im") );
+
+    TypedVarPtr  intparam;
+    ASSERT_NO_THROW( intparam = loadTypedVar(L"complexval<int>", getCacheAccessor( intcomplex{100,200} ) ) );
+    EXPECT_EQ( 100, *intparam->getElement(L"re") );
+    EXPECT_EQ( 200, *intparam->getElement(L"im") );
+
+    TypedVarPtr  longparam;
+    ASSERT_NO_THROW( longparam = loadTypedVar(L"complexval<__int64>", getCacheAccessor( longcomplex{100,200} ) ) );
+    EXPECT_EQ( 100, *longparam->getElement(L"re") );
+    EXPECT_EQ( 200, *longparam->getElement(L"im") );
+
+    EXPECT_EQ( FuncWithStructCdecl( shortcomplex{100, 200} ), static_cast<shortcomplex>(loadTypedVar(L"FuncWithStructCdecl<short>")->call( { shortparam } ) ) );
+    EXPECT_EQ( FuncWithStructCdecl( intcomplex{100, 200} ), static_cast<intcomplex>(loadTypedVar(L"FuncWithStructCdecl<int>")->call( { intparam } ) ) );
+    EXPECT_EQ( FuncWithStructCdecl( longcomplex{100, 200} ), static_cast<longcomplex>(loadTypedVar(L"FuncWithStructCdecl<__int64>")->call( { longparam } ) ) );
+
+    EXPECT_EQ( FuncWithStructStd( shortcomplex{100, 200} ), static_cast<shortcomplex>(loadTypedVar(L"FuncWithStructStd<short>")->call( { shortparam } ) ) );
+    EXPECT_EQ( FuncWithStructStd( intcomplex{100, 200} ), static_cast<intcomplex>(loadTypedVar(L"FuncWithStructStd<int>")->call( { intparam } ) ) );
+    EXPECT_EQ( FuncWithStructStd( longcomplex{100, 200} ), static_cast<longcomplex>(loadTypedVar(L"FuncWithStructStd<__int64>")->call( { longparam } ) ) );
+
+    //EXPECT_EQ( FuncWithStructFast( shortcomplex{100, 200} ), static_cast<shortcomplex>(loadTypedVar(L"FuncWithStructFast<short>")->call( { shortparam } ) ) );
+    //EXPECT_EQ( FuncWithStructFast( intcomplex{100, 200} ), static_cast<intcomplex>(loadTypedVar(L"FuncWithStructFast<int>")->call( { intparam } ) ) );
+    //EXPECT_EQ( FuncWithStructFast( longcomplex{100, 200} ), static_cast<longcomplex>(loadTypedVar(L"FuncWithStructFast<__int64>")->call( { longparam } ) ) );
+}
+
 TEST_F(TypedVarTest, Str)
 {
     std::wstring  str;

@@ -93,10 +93,18 @@ public:
 
 DataAccessorPtr getEmptyAccessor();
 DataAccessorPtr getMemoryAccessor( MEMOFFSET_64  offset, size_t length);
+DataAccessorPtr getRegisterAccessor(const std::wstring& registerName);
+
 DataAccessorPtr getCacheAccessor(const std::vector<char>& buffer, const std::wstring&  location=L"");
 DataAccessorPtr getCacheAccessor(size_t bufferSize, const std::wstring&  location=L"");
+DataAccessorPtr getCacheAccessor(const void* rawBuffer, size_t bufferSize, const std::wstring&  location=L"");
 DataAccessorPtr getCacheAccessor(const NumVariant& var, const std::wstring&  location=L"");
-DataAccessorPtr getRegisterAccessor(const std::wstring& registerName);
+
+template<typename T>
+DataAccessorPtr getCacheAccessor(const T& structType, const std::wstring&  location=L"")
+{
+    return getCacheAccessor(&structType, sizeof(structType), location);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
