@@ -1484,7 +1484,81 @@ TypedValue TypedVarFunction::callStd(TypedValueList& args)
 
 TypedValue TypedVarFunction::callFast(TypedValueList& args)
 {
-    NOT_IMPLEMENTED();
+    CPUContextAutoRestore  cpuContext;
+
+    TypeInfoPtr  retType =  m_typeInfo->getReturnType();
+
+    MEMOFFSET_64   retOffset = ( !retType->isVoid() && retType->getSize() > 8 ) ? stackAlloc(retType->getSize()) : 0UL;
+
+    if ( retOffset > 0 )
+    {
+        args.insert(args.begin(), static_cast<unsigned long>(retOffset));
+    }
+
+    int i = args.size() - 1;
+    for ( TypedValueList::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
+    {
+        size_t  argSize = it->getSize();
+
+        switch(i)
+        {
+        case 0:
+            if ( it->getSize() <= 4 )
+                it->writeBytes(getRegisterAccessor(L"edx"));
+            break;
+
+        case 1:
+            if ( it->getSize() <= 4 )
+                it->writeBytes(getRegisterAccessor(L"ecx"));
+            break;
+        }
+
+        it->writeBytes( getMemoryAccessor( stackAlloc( argSize ), argSize ) );
+    }
+
+    makeCallx86();
+
+    if ( retOffset > 0 )
+    {
+        std::vector<char>  buffer(retType->getSize());
+        DataAccessorPtr  stackRange = getMemoryAccessor(retOffset, retType->getSize());
+        stackRange->readSignBytes(buffer, retType->getSize() );
+        return loadTypedVar( retType, getCacheAccessor(buffer) );
+    }
+    else
+    {
+        if (retType->isBase() )
+        {
+            if ( retType->getName() == L"Float" || retType->getName() == L"Double" )
+            {
+                NOT_IMPLEMENTED();
+            }
+
+            return castBaseArg( retType, getReturnReg() );
+        }
+        else if ( retType->isPointer() )
+        {
+            return getReturnReg();
+        }
+        else if ( retType->isVoid() )
+        {
+            return TypedVarPtr( new TypedVarVoid() );
+        }
+        else if ( retType->isUserDefined() )
+        {
+            if ( retType->getSize() <= 4 )
+            {
+                return TypedValue( TypedValue( static_cast<unsigned long>(getReturnReg() ) ).castTo(retType) );
+            }
+
+            if ( retType->getSize() <= 8 )
+            {
+                return TypedValue( TypedValue(getReturnReg()).castTo(retType) );
+            }
+        }
+    }
+
+    throw TypeException(L"unsupported return type");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
