@@ -427,11 +427,11 @@ protected:
 
     TypedValueList castArgs(const TypedValueList& arglst);
 
-    TypedValue callCdecl(TypedValueList& arglst);
-    TypedValue callStd(TypedValueList& arglst);
-    TypedValue callFast(TypedValueList& arglst);
-    TypedValue callThis(TypedValueList& arglst);
-    TypedValue callX64(TypedValueList& arglst);
+    TypedValue callCdecl(const TypedValueList& arglst);
+    TypedValue callStd(const TypedValueList& arglst);
+    TypedValue callFast(const TypedValueList& arglst);
+    TypedValue callThis(const TypedValueList& arglst);
+    TypedValue callX64(const TypedValueList& arglst);
 
     void makeCallx86();
     void makeCallx64();

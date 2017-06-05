@@ -64,10 +64,16 @@ std::wstring getSymbolName( kdlib::SymbolPtr& symbol )
 
 TypedValue castBaseArg(TypeInfoPtr& destType, const TypedValue& arg)
 {
-    if ( !arg.getType()->isBase() && !arg.getType()->isEnum() )
-        throw TypeException(L"failed to cast argument");
+    NumVariant  var;
 
-    NumVariant  var = arg.getValue();
+    if ( arg.getType()->isBase() || arg.getType()->isEnum() || arg.getType()->isPointer() )
+    {
+        var = arg.getValue();
+    }
+    else
+    {
+        throw TypeException(L"failed to cast argument");
+    }
 
     if (destType->getName() == L"Char")
         return TypedValue( var.asChar() );
@@ -131,14 +137,17 @@ TypedValue castPtrArg(TypeInfoPtr& destType, const TypedValue& arg)
         if ( destType->getPtrSize() == 8 )
             return TypedValue( var.asULongLong() );
     }
-    else
-    if ( arg.getType()->isArray() )
+    else if ( arg.getType()->isArray() )
     {
+        MEMOFFSET_64  addr = stackAlloc(arg.getSize());
+        DataAccessorPtr  dataRange = getMemoryAccessor( addr, arg.getSize() );
+        arg.writeBytes(dataRange);
+
         if ( destType->getPtrSize() == 4 )
-            return TypedValue( static_cast<unsigned long>(arg.getAddress()) );
+            return TypedValue( static_cast<unsigned long>(addr) );
 
         if ( destType->getPtrSize() == 8 )
-            return TypedValue( static_cast<unsigned long long>(arg.getAddress()) );
+            return TypedValue( static_cast<unsigned long long>(addr) );
     }
 
     throw TypeException(L"failed to cast argument");
@@ -812,40 +821,6 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
 void TypedVarUdt::setElement( const std::wstring& fieldName, const TypedValue& value)
 {
     getElement(fieldName)->setValue(value);
-
-/*
-    TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
-
-    if ( m_typeInfo->isStaticMember(fieldName) )
-    {
-        NOT_IMPLEMENTED();
-    }
-
-    MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
-
-    if ( m_typeInfo->isVirtualMember( fieldName ) )
-    {
-        fieldOffset += getVirtualBaseDisplacement( fieldName );
-    }
-
-    TypedValue  castedValue;
-
-    if ( fieldType->isBase() )
-    {
-        castedValue = castBaseArg(fieldType, value);
-    }
-    else 
-    if ( fieldType->isPointer() || fieldType->isArray() )
-    {
-        castedValue = castPtrArg(fieldType, value);
-    }
-    else
-    {
-        castedValue = value;
-    }
-
-    castedValue.writeBytes(m_varData, fieldOffset);
-*/
 }
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1321,8 +1296,6 @@ TypedValue  TypedVarFunction::call(const TypedValueList& arglst)
     if ( getAddress() == 0 )
         throw TypeException(L"function has no body");
 
-    TypedValueList  castedArgs = castArgs(arglst);
-
     switch (getCPUMode() )
     {
         case CPU_I386:
@@ -1330,16 +1303,16 @@ TypedValue  TypedVarFunction::call(const TypedValueList& arglst)
             switch( m_typeInfo->getCallingConvention() ) 
             {
                 case CallConv_NearC:
-                    return callCdecl(castedArgs);
+                    return callCdecl(arglst);
 
                 case CallConv_NearStd:
-                    return callStd(castedArgs);
+                    return callStd(arglst);
 
                 case CallConv_NearFast:
-                    return callFast(castedArgs);
+                    return callFast(arglst);
 
                 case CallConv_ThisCall:
-                    return callThis(castedArgs);
+                    return callThis(arglst);
 
                 default:
                     throw TypeException(L"unsupported calling convention");
@@ -1348,7 +1321,7 @@ TypedValue  TypedVarFunction::call(const TypedValueList& arglst)
             break;
         }
         case CPU_AMD64:
-            return callX64(castedArgs);
+            return callX64(arglst);
     }
 
     throw DbgException( "Unknown processor type" );
@@ -1402,9 +1375,11 @@ TypedValueList TypedVarFunction::castArgs(const TypedValueList& arglst)
 
 /////////////////////////////////////////////////////////////////////////////
 
-TypedValue TypedVarFunction::callCdecl(TypedValueList& args)
+TypedValue TypedVarFunction::callCdecl(const TypedValueList& arglst)
 {
     CPUContextAutoRestore  cpuContext;
+
+    TypedValueList  args = castArgs(arglst);
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 
@@ -1475,16 +1450,18 @@ TypedValue TypedVarFunction::callCdecl(TypedValueList& args)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue TypedVarFunction::callStd(TypedValueList& args)
+TypedValue TypedVarFunction::callStd(const TypedValueList& args)
 {
     return callCdecl(args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue TypedVarFunction::callFast(TypedValueList& args)
+TypedValue TypedVarFunction::callFast(const TypedValueList& arglst)
 {
     CPUContextAutoRestore  cpuContext;
+
+    TypedValueList  args = castArgs(arglst);
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 
@@ -1563,9 +1540,11 @@ TypedValue TypedVarFunction::callFast(TypedValueList& args)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue TypedVarFunction::callThis(TypedValueList& args)
+TypedValue TypedVarFunction::callThis(const TypedValueList& arglst)
 {
     CPUContextAutoRestore  cpuContext;
+
+    TypedValueList  args = castArgs(arglst);
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 
@@ -1641,9 +1620,11 @@ TypedValue TypedVarFunction::callThis(TypedValueList& args)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue TypedVarFunction::callX64(TypedValueList& args)
+TypedValue TypedVarFunction::callX64(const TypedValueList& arglst)
 {
     CPUContextAutoRestore  cpuContext;
+
+    TypedValueList  args = castArgs(arglst);
 
     TypeInfoPtr  retType =  m_typeInfo->getReturnType();
 
@@ -1789,7 +1770,7 @@ void TypedVarFunction::makeCallx64()
     pushInStack(ip);
 
     setInstructionOffset( getAddress() );
-    
+
     while( getInstructionOffset() != ip )
     {
         targetGo();
