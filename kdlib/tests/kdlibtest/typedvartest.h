@@ -653,3 +653,10 @@ TEST_F(TypedVarTest, SetStructFieldByIndex)
     std::wstring ss2 = ptr->getElement(2)->str();
     EXPECT_THROW( ptr->setElement(4, 100), IndexException );
 }
+
+
+TEST_F(TypedVarTest, CallRaw)
+{
+    EXPECT_EQ( 0x100000000ULL + 5, callRaw( getSymbolOffset(L"CdeclFuncLong" ), kdlib::CallConv_NearC, { 0x100000000ULL }  ) );
+    EXPECT_EQ( 500000/20, callRaw( getSymbolOffset(L"StdcallFuncRet" ), kdlib::CallConv_NearStd, { 20, 500000 }  ) );
+}

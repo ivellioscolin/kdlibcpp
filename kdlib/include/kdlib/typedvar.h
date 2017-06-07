@@ -298,6 +298,7 @@ NumBehavior::operator TypedValue() {
     return TypedValue( getValue() );
 }
 
+TypedValue callRaw(MEMOFFSET_64 addr, CallingConventionType callingConvention, const TypedValueList& arglst);
 
 ///////////////////////////////////////////////////////////////////////////////
 

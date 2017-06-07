@@ -2074,7 +2074,16 @@ TypedValue::TypedValue(const NumVariant& var)
     }
 }
 
-    
+///////////////////////////////////////////////////////////////////////////////
+
+TypedValue callRaw(MEMOFFSET_64 addr, CallingConventionType callConv, const TypedValueList& arglst)
+{
+    TypeInfoPtr funcType = defineFunction( loadType(L"UInt8B"), callConv);
+    for ( TypedValueList::const_iterator it = arglst.begin(); it != arglst.end(); ++it)
+        funcType->appendField(L"arg", it->getType() );
+
+    return loadTypedVar(funcType, addr)->call(arglst);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
