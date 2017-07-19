@@ -263,7 +263,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::LoadModule(
 
     try {
 
-        std::wstring  moduleName = ModuleName ? std::wstring(ModuleName) : std::wstring();
+        std::wstring  moduleName = getModuleName(BaseOffset);
 
         result = ProcessMonitor::moduleLoad( getCurrentProcessId(), BaseOffset, moduleName);
     }
@@ -284,9 +284,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::UnloadModule(
 
     try {
 
-        std::wstring  moduleName;
-
-        moduleName = getModuleName(BaseOffset);
+        std::wstring  moduleName = getModuleName(BaseOffset);
 
         result = ProcessMonitor::moduleUnload(getCurrentProcessId(), BaseOffset, moduleName);
 
