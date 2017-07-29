@@ -12,52 +12,37 @@
 
 namespace kdlib {
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ModulePtr loadModule( const std::wstring &name )
 {
-    return ModuleImp::getModule(name);
+    return loadModule( findModuleBase(name) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 ModulePtr loadModule( MEMOFFSET_64 offset )
 {
-    return ModuleImp::getModule(offset);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-ModulePtr ModuleImp::getModule( const std::wstring &name )
-{
-    return getModule( findModuleBase(name) );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-ModulePtr ModuleImp::getModule( MEMOFFSET_64 offset )
-{
    
+    MEMOFFSET_64  moduleOffset = findModuleBase( addr64(offset) );
     ModulePtr  module = ProcessMonitor::getModule(offset);
 
     if ( !module )
     {
-        module = ModulePtr( new ModuleImp(offset) );
+        if ( isModuleManaged(offset) )
+        {
+            module = loadNetModule(offset);
+        }
+        else
+        {
+            module = ModulePtr( new ModuleImp(moduleOffset) );
+        }
+
+
         ProcessMonitor::insertModule(module);
     }
 
     return module;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-ModuleImp::ModuleImp(const std::wstring &moduleName )
-{
-    m_base = findModuleBase( moduleName );
-    m_name = moduleName;
-    m_noSymbols = true;
-    fillFields();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

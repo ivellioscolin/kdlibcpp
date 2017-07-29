@@ -195,6 +195,7 @@
     <ClInclude Include="memdumpfixture.h" />
     <ClInclude Include="memorytest.h" />
     <ClInclude Include="moduletest.h" />
+    <ClInclude Include="nettest.h" />
     <ClInclude Include="processtest.h" />
     <ClInclude Include="procfixture.h" />
     <ClInclude Include="regtest_x64.h" />

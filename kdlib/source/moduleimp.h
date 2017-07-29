@@ -2,6 +2,7 @@
 #include <boost\thread\recursive_mutex.hpp>
 
 #include "kdlib\module.h"
+#include "kdlib\exceptions.h"
 
 namespace kdlib {
 
@@ -24,18 +25,225 @@ inline bool operator< ( const ModuleCacheKey &key1, const ModuleCacheKey &key2 )
     return key1.moduleBase < key2.moduleBase;
 }
 
+ModulePtr loadNetModule( MEMOFFSET_64 offset );
 
-class ModuleImp : public Module {
-
-public:
-
-    static ModulePtr getModule( const std::wstring &name );
-
-    static ModulePtr getModule( MEMOFFSET_64 offset ); 
+class ModuleBaseImp : public Module {
 
 protected:
 
-    explicit ModuleImp( const std::wstring &name );
+    virtual std::wstring  getName() 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual MEMOFFSET_64  getBase() const 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual MEMOFFSET_64  getEnd() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual size_t getSize() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual std::wstring getImageName() const
+    {
+        NOT_IMPLEMENTED();
+    }
+    
+    virtual unsigned long getCheckSum() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual unsigned long getTimeDataStamp() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isUnloaded() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isUserMode() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isSymbolLoaded() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isManaged() const
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual std::wstring getSymFile() 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void reloadSymbols()
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void resetSymbols() 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual MEMOFFSET_64 getSymbolVa( const std::wstring &symbolName )
+    {
+        NOT_IMPLEMENTED();
+    }
+    
+    virtual MEMOFFSET_32 getSymbolRva( const std::wstring &symbolName )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, MEMDISPLACEMENT* displacement = 0 )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement ) 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, MEMDISPLACEMENT* displacement = 0 )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getSymbolByName( const std::wstring &symbolName )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolPtr getSymbolScope() 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual size_t getSymbolSize( const std::wstring &symName )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypeInfoPtr getTypeByName( const std::wstring &typeName )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypedVarPtr getTypedVarByAddr( MEMOFFSET_64 offset )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypedVarPtr getTypedVarByName( const std::wstring &symName )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypedVarPtr getTypedVarByTypeName( const std::wstring &typeName, MEMOFFSET_64 addr )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypedVarPtr getTypedVarWithPrototype( const std::wstring &symName, const std::wstring &prototype)
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypedVarPtr containingRecord( MEMOFFSET_64 offset, const std::wstring &typeName, const std::wstring &fieldName ) 
+    {
+        NOT_IMPLEMENTED();
+    }
+    
+    virtual TypedVarPtr getFunctionByAddr( MEMOFFSET_64 offset )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypedVarList loadTypedVarList( MEMOFFSET_64 addr, const std::wstring &typeName, const std::wstring &fieldName )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypedVarList loadTypedVarArray( MEMOFFSET_64 addr, const std::wstring &typeName, size_t count )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual SymbolOffsetList  enumSymbols( const std::wstring  &mask = L"*" )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual TypeNameList enumTypes(const std::wstring  &mask = L"*")
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual std::wstring getSourceFile( MEMOFFSET_64 offset )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual std::wstring  getSourceFileFromSrcSrv(MEMOFFSET_64 offset)
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void getSourceLine( MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineno, long &displacement ) 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual std::string getVersionInfo( const std::string &value )
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void getFileVersion(unsigned long& majorVersion, unsigned long& minorVerion, unsigned long& revision, unsigned long& build)
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void getFixedFileInfo( FixedFileInfo &fixedFileInfo )
+    {
+        NOT_IMPLEMENTED();
+    }
+};
+
+
+
+class ModuleImp : public ModuleBaseImp {
+    
+    friend ModulePtr loadModule( MEMOFFSET_64 offset );
+
+protected:
 
     explicit ModuleImp( MEMOFFSET_64 offset );
 
@@ -75,6 +283,11 @@ protected:
 
     bool isUserMode() const {
         return m_isUserMode;
+    }
+
+    bool isManaged() const
+    {
+        return false;
     }
 
     std::wstring getSymFile();
@@ -168,6 +381,8 @@ protected:
     bool m_exportSymbols;
     bool m_noSymbols;
 };
+
+
 
 
 } // namesapce kdlib

@@ -223,6 +223,35 @@ bool isModuleUserMode( MEMOFFSET_64 baseOffset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool isModuleManaged( MEMOFFSET_64 baseOffset )
+{
+
+    ULONG  machineType;
+    HRESULT  hres = g_dbgMgr->control->GetEffectiveProcessorType(&machineType);
+
+    ULONG64  ntHeaderOffset = baseOffset + ptrDWord( baseOffset + 0x3c );
+
+    if ( machineType == IMAGE_FILE_MACHINE_I386 )
+    {
+        IMAGE_NT_HEADERS32  ntHeader;
+        readMemory( ntHeaderOffset, &ntHeader, sizeof(ntHeader) );
+
+        return ntHeader.OptionalHeader.DataDirectory[14].Size != 0;
+    }
+        
+    if ( machineType == IMAGE_FILE_MACHINE_AMD64 )
+    {
+        IMAGE_NT_HEADERS64  ntHeader;
+        readMemory( ntHeaderOffset, &ntHeader, sizeof(ntHeader) );
+
+        return ntHeader.OptionalHeader.DataDirectory[14].Size != 0;
+    }
+
+    throw DbgException("Unknown CPU type");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring getModuleSymbolFileName( MEMOFFSET_64 baseOffset )
 {
     baseOffset = addr64(baseOffset);

@@ -46,6 +46,8 @@
     <ClCompile Include="disasm.cpp" />
     <ClCompile Include="memaccess.cpp" />
     <ClCompile Include="module.cpp" />
+    <ClCompile Include="net\net.cpp" />
+    <ClCompile Include="net\netmodule.cpp" />
     <ClCompile Include="processmon.cpp" />
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -102,6 +104,9 @@
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />
     <ClInclude Include="moduleimp.h" />
+    <ClInclude Include="net\net.h" />
+    <ClInclude Include="net\netmodule.h" />
+    <ClInclude Include="net\xclrdata.h" />
     <ClInclude Include="processmon.h" />
     <ClInclude Include="stackimpl.h" />
     <ClInclude Include="stdafx.h" />

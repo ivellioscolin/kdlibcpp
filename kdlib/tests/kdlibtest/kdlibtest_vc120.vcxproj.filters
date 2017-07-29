@@ -77,6 +77,9 @@
     <ClInclude Include="clangtest.h">
       <Filter>testcases</Filter>
     </ClInclude>
+    <ClInclude Include="nettest.h">
+      <Filter>testcases</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.kdlibtest_vc120.config" />

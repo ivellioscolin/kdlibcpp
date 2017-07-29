@@ -19,6 +19,7 @@
 #include "winapitest.h"
 #include "crttest.h"
 #include "clangtest.h"
+#include "nettest.h"
     
 #ifdef _M_AMD64 
 #include "regtest_x64.h"
@@ -36,6 +37,7 @@ public:
       kdlib::uninitialize();
   }
 };
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {

@@ -45,6 +45,43 @@ protected:
     std::wstring  m_cmdLine;
 };
 
+class NetProcessFixture : public ::testing::Test 
+{
+public:
+
+    NetProcessFixture( const std::wstring &cmdline = std::wstring() ) :
+        m_cmdLine( cmdline )
+        {}
+
+protected:
+
+    const std::wstring m_processName;
+
+    virtual void SetUp() {
+        if ( m_cmdLine.empty() )
+            m_processId = kdlib::startProcess(L"managedapp.exe");
+        else
+            m_processId = kdlib::startProcess(L"managedapp.exe " + m_cmdLine );
+
+        kdlib::targetGo(); // go to work break point
+
+        m_targetModule = kdlib::loadModule( L"managedapp" );
+    }
+
+    virtual void TearDown() {
+        try {
+            kdlib::terminateProcess( m_processId );
+        } catch(kdlib::DbgException&)
+        {}
+    }
+
+    kdlib::PROCESS_DEBUG_ID m_processId;
+
+    kdlib::ModulePtr m_targetModule;
+
+    std::wstring  m_cmdLine;
+};
+
 #ifndef FIELD_OFFSET
 #define FIELD_OFFSET(type, field)    ((long)&(((type *)0)->field))
 #endif

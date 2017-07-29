@@ -54,6 +54,8 @@ public:
 
     virtual bool isSymbolLoaded() const = 0;
 
+    virtual bool isManaged() const = 0;
+
     virtual std::wstring getSymFile() = 0;
 
     virtual void reloadSymbols() = 0;

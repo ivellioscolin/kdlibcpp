@@ -118,6 +118,12 @@
     <ClCompile Include="win\strconvert.cpp">
       <Filter>win</Filter>
     </ClCompile>
+    <ClCompile Include="net\net.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\netmodule.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -236,6 +242,15 @@
     <ClInclude Include="clang\clang.h">
       <Filter>clang</Filter>
     </ClInclude>
+    <ClInclude Include="net\net.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\xclrdata.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\netmodule.h">
+      <Filter>net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="kdlib/include">
@@ -258,6 +273,9 @@
     </Filter>
     <Filter Include="clang">
       <UniqueIdentifier>{322bb171-1fe3-462d-9134-28d379e73888}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{b185a380-5b0b-43fb-b476-6040faade3fa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
