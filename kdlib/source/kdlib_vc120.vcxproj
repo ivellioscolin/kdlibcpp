@@ -46,8 +46,11 @@
     <ClCompile Include="disasm.cpp" />
     <ClCompile Include="memaccess.cpp" />
     <ClCompile Include="module.cpp" />
+    <ClCompile Include="net\metadata.cpp" />
     <ClCompile Include="net\net.cpp" />
+    <ClCompile Include="net\netheap.cpp" />
     <ClCompile Include="net\netmodule.cpp" />
+    <ClCompile Include="net\nettype.cpp" />
     <ClCompile Include="processmon.cpp" />
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -88,6 +91,7 @@
     <ClInclude Include="..\include\kdlib\disasmengine.h" />
     <ClInclude Include="..\include\kdlib\eventhandler.h" />
     <ClInclude Include="..\include\kdlib\exceptions.h" />
+    <ClInclude Include="..\include\kdlib\heap.h" />
     <ClInclude Include="..\include\kdlib\kdlib.h" />
     <ClInclude Include="..\include\kdlib\memaccess.h" />
     <ClInclude Include="..\include\kdlib\module.h" />
@@ -104,9 +108,12 @@
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />
     <ClInclude Include="moduleimp.h" />
+    <ClInclude Include="net\metadata.h" />
     <ClInclude Include="net\net.h" />
+    <ClInclude Include="net\netheap.h" />
     <ClInclude Include="net\netmodule.h" />
-    <ClInclude Include="net\xclrdata.h" />
+    <ClInclude Include="net\netobject.h" />
+    <ClInclude Include="net\nettype.h" />
     <ClInclude Include="processmon.h" />
     <ClInclude Include="stackimpl.h" />
     <ClInclude Include="stdafx.h" />

@@ -7,6 +7,7 @@
 #include "kdlib/breakpoint.h"
 #include "kdlib/stack.h"
 #include "kdlib/variant.h"
+#include "kdlib/heap.h"
 
 namespace kdlib {
 
@@ -89,6 +90,9 @@ public:
 
     virtual unsigned long getNumberBreakpoints() = 0;
     virtual BreakpointPtr getBreakpoint(unsigned long index) = 0;
+
+    virtual bool isManaged() = 0;
+    virtual TargetHeapPtr getManagedHeap() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

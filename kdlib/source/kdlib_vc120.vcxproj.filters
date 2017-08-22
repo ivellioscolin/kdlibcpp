@@ -124,6 +124,15 @@
     <ClCompile Include="net\netmodule.cpp">
       <Filter>net</Filter>
     </ClCompile>
+    <ClCompile Include="net\netheap.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\nettype.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\metadata.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -245,10 +254,22 @@
     <ClInclude Include="net\net.h">
       <Filter>net</Filter>
     </ClInclude>
-    <ClInclude Include="net\xclrdata.h">
+    <ClInclude Include="net\netmodule.h">
       <Filter>net</Filter>
     </ClInclude>
-    <ClInclude Include="net\netmodule.h">
+    <ClInclude Include="net\netobject.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\kdlib\heap.h">
+      <Filter>kdlib/include</Filter>
+    </ClInclude>
+    <ClInclude Include="net\netheap.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\nettype.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\metadata.h">
       <Filter>net</Filter>
     </ClInclude>
   </ItemGroup>

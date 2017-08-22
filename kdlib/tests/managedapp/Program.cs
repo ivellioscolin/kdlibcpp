@@ -12,8 +12,12 @@ namespace managedapp
     {
         private int Field1;
 
-        class Nested
+        public class Nested
         {
+            public Nested()
+            {
+                Field1 = 111;
+            }
             private long Field1;
         }
     }
@@ -21,9 +25,9 @@ namespace managedapp
     class Program
     {
         public static int g_int = 10;
-
         static void Main(string[] args)
         {
+            Class1.Nested obj = new Class1.Nested();
             Debugger.Break();
         }
     }

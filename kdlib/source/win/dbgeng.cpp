@@ -19,6 +19,8 @@
 #include "autoswitch.h"
 #include "moduleimp.h"
 #include "processmon.h"
+
+#include "net/net.h"
 //#include "threadctx.h"
 
 
@@ -35,6 +37,8 @@ bool initialize()
 
     ProcessMonitor::init();
 
+    ClrDebugManager::init();
+
     return true;
 }
 
@@ -48,6 +52,8 @@ bool remote_initialize( const std::wstring& remoteOptions )
     g_dbgMgr.set( new DebugManager( remoteOptions ) );
 
     ProcessMonitor::init();
+
+    ClrDebugManager::init();
 
     return true;
 }
@@ -65,6 +71,8 @@ void uninitialize()
 {
     if ( g_dbgMgr ==  0  )
          throw DbgException("pykd is not initialized");
+
+    ClrDebugManager::deinit();
 
     ProcessMonitor::deinit();
 

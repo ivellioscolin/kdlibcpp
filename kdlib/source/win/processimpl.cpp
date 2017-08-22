@@ -382,6 +382,8 @@ protected:
         if (isCurrent())
             return kdlib::getNumberBreakpoints();
 
+        ContextAutoRestore  contextRestore;
+
         switchContext();
 
         return kdlib::getNumberBreakpoints();
@@ -397,6 +399,41 @@ protected:
         switchContext();
 
         return kdlib::getBreakpointByIndex(index);
+    }
+
+    virtual bool isManaged() 
+    {
+        if (isCurrent())
+        {
+            try {
+                getModuleByName(L"clr");
+                return true;
+            }
+            catch(const DbgException&)
+            { }
+            
+            return false;
+        }
+        else
+        {
+            ContextAutoRestore  contextRestore;
+            switchContext();
+            return isManaged();
+        }
+    }
+
+    virtual TargetHeapPtr getManagedHeap() 
+    {
+        if ( isCurrent() )
+        {
+            return kdlib::getManagedHeap();
+        }
+        else
+        {
+            ContextAutoRestore  contextRestore;
+            switchContext();
+            return getManagedHeap();
+        }
     }
 
 protected:

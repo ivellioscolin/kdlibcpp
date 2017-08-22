@@ -1,23 +1,34 @@
 #pragma once
 
-#include <atlbase.h>
+#include <boost/enable_shared_from_this.hpp>
 
-#include "net.h"
+#include <atlbase.h>
+#include <CorHdr.h>
+#include <CorDebug.h>
 
 #include "moduleimp.h"
+
+#include "net/metadata.h"
 
 namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class NetModule : public ModuleImp
+class NetModule : public ModuleImp, public boost::enable_shared_from_this<NetModule>
 {
+
     friend ModulePtr loadNetModule( MEMOFFSET_64 imageBase );
 
 protected:
 
     explicit NetModule( MEMOFFSET_64 imageBase ) : ModuleImp(imageBase)
     {}
+
+    explicit NetModule(ICorDebugModule*  module) : 
+        ModuleImp(getImageBase(module)),
+        m_corDebugModule(module)
+    {}
+
 
 protected:
 
@@ -26,13 +37,17 @@ protected:
         return true;
     }
 
-    TypeNameList enumTypes(const std::wstring& mask = L"*");
+    TypeNameList NetModule::enumTypes(const std::wstring& mask);
 
 protected:
 
-    IXCLRDataModule*  get();
+    static
+    MEMOFFSET_64  getImageBase(ICorDebugModule* module);
 
-    CComPtr<IXCLRDataModule>  m_xclrDataModule;
+    void initCorDebugModule();
+
+    CComPtr<ICorDebugModule>  m_corDebugModule;
+    MetaDataProviderPtr  m_metaDataProvider;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
