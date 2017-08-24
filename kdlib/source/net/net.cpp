@@ -173,7 +173,7 @@ ICorDebugProcess* ClrDebugManagerImpl::targetProcess()
 
     auto  findIt = m_processMap.find(pid);
     if ( findIt  == m_processMap.end() )
-        return NULL;
+        findIt = m_processMap.insert(m_processMap.begin(), std::make_pair(pid,CComPtr<ICorDebugProcess>()));
 
     if (!findIt->second)
         findIt->second = getNetProcess();
