@@ -78,10 +78,10 @@ size_t  NetHeap::getCount(const std::wstring&  typeName, size_t minSize, size_t 
             if ( !typeName.empty() && !fnmatch(typeName, typeObj->getName() ))
                 continue;
 
-            if ( minSize != 0 && typeObj->getSize() < minSize )
+            if ( minSize != 0 && heapObj.size < minSize )
                 continue;
 
-            if ( maxSize != -1 && typeObj->getSize() > maxSize )
+            if ( maxSize != -1 && heapObj.size > maxSize )
                 continue;
         }
 
@@ -89,6 +89,65 @@ size_t  NetHeap::getCount(const std::wstring&  typeName, size_t minSize, size_t 
     }
 
     return elemCount;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TargetHeapEnumPtr  NetHeap::getEnum(const std::wstring&  typeName, size_t minSize, size_t maxSize) 
+{
+    return TargetHeapEnumPtr( new NetHeapEnum(typeName, minSize, maxSize) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+NetHeapEnum::NetHeapEnum(const std::wstring&  typeName, size_t minSize, size_t maxSize) :
+    m_typeMask(typeName),
+    m_minSize(minSize),
+    m_maxSize(maxSize)
+{
+    HRESULT  hres = g_netMgr->targetProcess5()->EnumerateHeap(&m_heapEnum);
+    if (FAILED(hres))
+        throw DbgException("Failed ICorDebugProcess5::EnumerateHeap");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool NetHeapEnum::Next(MEMOFFSET_64& addr, std::wstring& typeName, size_t& size)
+{
+    HRESULT  hres;
+
+    while(true)
+    {
+        COR_HEAPOBJECT   heapObj;
+        hres = m_heapEnum->Next(1, &heapObj, NULL);
+
+        if (FAILED(hres))
+            throw DbgException("Failed ICorDebugHeapEnum::Next");
+
+        if ( S_OK != hres )
+            return false;
+
+        TypeInfoPtr  typeObj = getTypeById(heapObj.type);
+
+        std::wstring  tn = typeObj->getName();
+
+        if ( !m_typeMask.empty() && !fnmatch(m_typeMask, typeObj->getName() ))
+            continue;
+
+        if ( m_minSize != 0 && heapObj.size < m_minSize )
+            continue;
+
+        if ( m_maxSize != -1 && heapObj.size > m_maxSize )
+            continue;
+
+        addr = heapObj.address;
+        typeName = tn;
+        size = heapObj.size;
+
+        return true;
+    }
+
+    throw DbgException("NetHeapEnum::Next undefined behaviour");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
