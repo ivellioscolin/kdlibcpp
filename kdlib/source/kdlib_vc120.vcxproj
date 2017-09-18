@@ -50,6 +50,7 @@
     <ClCompile Include="net\net.cpp" />
     <ClCompile Include="net\netheap.cpp" />
     <ClCompile Include="net\netmodule.cpp" />
+    <ClCompile Include="net\netobject.cpp" />
     <ClCompile Include="net\nettype.cpp" />
     <ClCompile Include="processmon.cpp" />
     <ClCompile Include="stack.cpp" />

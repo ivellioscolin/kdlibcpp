@@ -226,7 +226,6 @@ void ProcessMonitor::processAllDetach()
     g_procmon->processAllDetach();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 unsigned int ProcessMonitor::getNumberProcesses()

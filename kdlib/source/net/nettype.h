@@ -1,20 +1,24 @@
 #pragma once
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include "kdlib/typeinfo.h"
 #include "kdlib/exceptions.h"
 
 #include "net/net.h"
 #include "net/metadata.h"
 
+#include "typeinfoimp.h"
+
 namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr  getTypeById(COR_TYPEID typeId);
+TypeInfoPtr  getNetTypeById(COR_TYPEID typeId);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class NetTypeInfoBase : public TypeInfo
+class NetTypeInfoBase : public TypeInfo, public boost::enable_shared_from_this<NetTypeInfoBase>
 {
 protected:
 
@@ -257,19 +261,78 @@ protected:
     virtual MEMOFFSET_REL getVtblOffset() {
         NOT_IMPLEMENTED();
     }
+
+    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource) {
+        NOT_IMPLEMENTED();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class NetTypeClass : public NetTypeInfoBase
+class NetTypeField : public TypeField
 {
 public:
 
-    NetTypeClass(MetaDataProviderPtr& metaProvider, const std::wstring& name, mdTypeDef token) :
+    NetTypeField(const COR_FIELD&  corField, MetaDataProviderPtr& metaProvider) :
+        TypeField( metaProvider->getFieldName(corField.token)),
         m_metaProvider(metaProvider),
-        m_name(name),
-        m_token(token)
-    {}
+        m_fieldType(corField.fieldType),
+        m_token(corField.token),
+        m_typeId(corField.id)
+    {
+        m_offset = corField.offset;
+    }
+
+private:
+
+    TypeInfoPtr getTypeInfo();
+
+private:
+
+    MetaDataProviderPtr  m_metaProvider;
+
+    CorElementType  m_fieldType;
+    mdFieldDef m_token;
+    COR_TYPEID m_typeId;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+//class NetTypeFieldRef : public NetTypeInfoBase
+//{
+//public:
+//
+//    NetTypeFieldRef(const TypeInfoPtr&  derefType) :
+//        m_derefType(derefType)
+//    {}
+//
+//    virtual size_t getSize() {
+//        return ptrSize();
+//    }
+//
+//    virtual std::wstring getName() {
+//        return m_derefType->getName();
+//    }
+//
+//    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource) 
+//    {
+//        MEMOFFSET_64   addr = ptrSize() == 4 ? dataSource->readDWord() : dataSource->readQWord();
+//        size_t  size = m_derefType->getSize();
+//        
+//    }
+//
+//private:
+//
+//    TypeInfoPtr  m_derefType;
+//};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class NetTypeClass : public TypeInfoFields
+{
+public:
+
+    static NetTypeClass*  createById(COR_TYPEID typeId);
 
 public:
 
@@ -277,27 +340,72 @@ public:
         return m_name;
     }
 
+    virtual std::wstring str();
+
+    virtual size_t getSize();
+
+    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource);
+
 private:
+
+    NetTypeClass(COR_TYPEID& typeId, MetaDataProviderPtr& metaProvider, const std::wstring& name, mdTypeDef token) :
+        TypeInfoFields(name),
+        m_typeId(typeId),
+        m_metaProvider(metaProvider),
+        m_name(name),
+        m_token(token)
+    {}
+
+    virtual void getFields();
 
     MetaDataProviderPtr  m_metaProvider;
     std::wstring  m_name;
     mdTypeDef  m_token;
+    COR_TYPEID  m_typeId;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+//class NetTypeBase : public NetTypeInfoBase
+//{
+//public:
+//
+//    NetTypeBase(CorElementType  baseType) :
+//        m_baseType(baseType)
+//    {}
+//
+//private:
+//
+//    bool isBase() {
+//        return true;
+//    }
+//
+//    std::wstring getName();
+//
+//    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource)
+//    {
+//        NOT_IMPLEMENTED();
+//    }
+//
+//private:
+//
+//    CorElementType  m_baseType;
+//};
 
 ///////////////////////////////////////////////////////////////////////////////
 
 class NetTypeArray : public NetTypeInfoBase
 {
-public:
-
-    NetTypeArray(const TypeInfoPtr& derefType) :
-        m_derefType(derefType)
-        {}
 
 public:
+
+    NetTypeArray(const COR_ARRAY_LAYOUT&  arrayLayout ) :
+        m_arrayLayout(arrayLayout)
+    {}
+
 
     virtual std::wstring getName() {
-        return m_derefType->getName() + L"[]";
+        return getElementType()->getName() + L"[]";
     }
 
     virtual bool isArray() 
@@ -305,10 +413,54 @@ public:
         return true;
     }
 
+    virtual size_t getSize() 
+    {
+        return ptrSize();
+    }
+
+    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource);
 
 private:
 
-    TypeInfoPtr  m_derefType;
+    COR_ARRAY_LAYOUT  m_arrayLayout;
+
+    TypeInfoPtr getElementType();
+
+//public:
+//
+//    NetTypeArray(const TypeInfoPtr& derefType) :
+//        m_derefType(derefType)
+//        {}
+//
+//public:
+//
+//    virtual std::wstring getName() {
+//        return m_derefType->getName() + L"[]";
+//    }
+//
+//    virtual bool isArray() 
+//    {
+//        return true;
+//    }
+//
+//    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource)
+//    {
+//        NOT_IMPLEMENTED();
+//    }
+//
+//
+//private:
+//
+//    TypeInfoPtr  m_derefType;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class NetTypeString : public NetTypeInfoBase
+{
+    virtual std::wstring getName() {
+        return  L"String";
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

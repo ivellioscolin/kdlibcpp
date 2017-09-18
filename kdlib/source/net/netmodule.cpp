@@ -3,6 +3,7 @@
 
 #include "netmodule.h"
 #include "net.h"
+#include "nettype.h"
 
 #include <cor.h>
 
@@ -151,7 +152,36 @@ MEMOFFSET_64 NetModule::getImageBase(ICorDebugModule* module)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypeInfoPtr NetModule::getTypeByName( const std::wstring &typeName )
+{
+    initCorDebugModule();
+
+    NOT_IMPLEMENTED();
+
+   // return TypeInfoPtr( new NetTypeClass(m_metaDataProvider, typeName) );
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

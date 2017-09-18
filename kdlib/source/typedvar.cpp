@@ -186,34 +186,34 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" )
-{
-    if ( typeInfo->isBase() )
-        return TypedVarPtr( new TypedVarBase( typeInfo, dataSource, name ) );
-
-    if ( typeInfo->isUserDefined() )
-        return TypedVarPtr( new TypedVarUdt( typeInfo, dataSource, name ) );
-
-    if ( typeInfo->isPointer() )
-        return TypedVarPtr( new TypedVarPointer( typeInfo, dataSource, name ) );
-
-    if ( typeInfo->isArray() )
-        return TypedVarPtr( new TypedVarArray( typeInfo, dataSource, name ) );
-
-    if ( typeInfo->isBitField() )
-        return TypedVarPtr( new TypedVarBitField( typeInfo, dataSource, name ) );
-
-    if ( typeInfo->isEnum() )
-        return TypedVarPtr( new TypedVarEnum( typeInfo, dataSource, name ) );
-
-    if ( typeInfo->isFunction() )
-        return TypedVarPtr( new TypedVarFunction( typeInfo, dataSource, name ) );
-
-    if (typeInfo->isVtbl() )
-        return TypedVarPtr( new TypedVarVtbl( typeInfo, dataSource, name ) );
-
-    NOT_IMPLEMENTED();
-}
+//TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" )
+//{
+//    //if ( typeInfo->isBase() )
+//    //    return TypedVarPtr( new TypedVarBase( typeInfo, dataSource, name ) );
+//
+//    //if ( typeInfo->isUserDefined() )
+//    //    return TypedVarPtr( new TypedVarUdt( typeInfo, dataSource, name ) );
+//
+//    //if ( typeInfo->isPointer() )
+//    //    return TypedVarPtr( new TypedVarPointer( typeInfo, dataSource, name ) );
+//
+//    //if ( typeInfo->isArray() )
+//    //    return TypedVarPtr( new TypedVarArray( typeInfo, dataSource, name ) );
+//
+//    //if ( typeInfo->isBitField() )
+//    //    return TypedVarPtr( new TypedVarBitField( typeInfo, dataSource, name ) );
+//
+//    //if ( typeInfo->isEnum() )
+//    //    return TypedVarPtr( new TypedVarEnum( typeInfo, dataSource, name ) );
+//
+//    //if ( typeInfo->isFunction() )
+//    //    return TypedVarPtr( new TypedVarFunction( typeInfo, dataSource, name ) );
+//
+//    //if (typeInfo->isVtbl() )
+//    //    return TypedVarPtr( new TypedVarVtbl( typeInfo, dataSource, name ) );
+//
+//    //NOT_IMPLEMENTED();
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -230,7 +230,9 @@ TypedVarPtr loadTypedVar( SymbolPtr &symbol )
 
         TypeInfoPtr varType = loadType( symbol );
 
-        return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()), ::getSymbolName(symbol) );
+        return varType->getVar(getMemoryAccessor(offset,varType->getSize()));
+            
+           // getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()), ::getSymbolName(symbol) );
     }
 
     NOT_IMPLEMENTED();
@@ -280,7 +282,7 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, MEMOFFSET_64 offset )
 
     TypeInfoPtr varType = loadType( typeName );
 
-    return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()) );
+    return varType->getVar(getMemoryAccessor(offset,varType->getSize()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -292,7 +294,7 @@ TypedVarPtr loadTypedVar( const TypeInfoPtr &varType, MEMOFFSET_64 offset )
     if ( !varType )
         throw DbgException( "type info is null");
 
-    return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()) );
+    return varType->getVar(getMemoryAccessor(offset,varType->getSize()));
 }
 
 
@@ -302,7 +304,7 @@ TypedVarPtr loadTypedVar( const std::wstring &typeName, const DataAccessorPtr& d
 {
     TypeInfoPtr varType = loadType( typeName );
 
-    return getTypedVar( varType, dataSource );
+    return varType->getVar(dataSource);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -312,7 +314,7 @@ TypedVarPtr loadTypedVar(const TypeInfoPtr &varType, const DataAccessorPtr& data
     if (!varType)
         throw DbgException("type info is null");
 
-    return getTypedVar(varType, dataSource);
+    return varType->getVar(dataSource);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -500,7 +502,8 @@ TypedVarPtr loadCharVar( char var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(char) );
     accessor->writeSignByte(var);
-    return getTypedVar( loadType(L"Int1B"), accessor);
+    return loadType(L"Int1B")->getVar(accessor);
+   // return getTypedVar( loadType(L"Int1B"), accessor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -509,7 +512,8 @@ TypedVarPtr loadShortVar( short var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(short) );
     accessor->writeSignWord(var);
-    return getTypedVar( loadType(L"Int2B"), accessor );
+    return loadType(L"Int2B")->getVar(accessor);
+   // return getTypedVar( loadType(L"Int2B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -518,7 +522,8 @@ TypedVarPtr loadLongVar( long var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(long) );
     accessor->writeSignDWord(var);
-    return getTypedVar( loadType(L"Int4B"), accessor );
+    return loadType(L"Int4B")->getVar(accessor);
+    //return getTypedVar( loadType(L"Int4B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -527,7 +532,8 @@ TypedVarPtr loadLongLongVar( long long var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(long long) );
     accessor->writeSignQWord(var);
-    return getTypedVar( loadType(L"Int8B"), accessor );
+    return loadType(L"Int8B")->getVar(accessor);
+    //return getTypedVar( loadType(L"Int8B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -536,7 +542,8 @@ TypedVarPtr loadUCharVar( unsigned char var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned char) );
     accessor->writeByte(var);
-    return getTypedVar( loadType(L"UInt1B"), accessor );
+    return loadType(L"UInt1B")->getVar(accessor);
+    //return getTypedVar( loadType(L"UInt1B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -545,7 +552,8 @@ TypedVarPtr loadUShortVar( unsigned short var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned short) );
     accessor->writeWord(var);
-    return getTypedVar( loadType(L"UInt2B"), accessor );
+    return loadType(L"UInt2B")->getVar(accessor);
+    //return getTypedVar( loadType(L"UInt2B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,7 +562,8 @@ TypedVarPtr loadULongVar( unsigned long var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned long) );
     accessor->writeDWord(var);
-    return getTypedVar( loadType(L"UInt4B"), accessor );
+    return loadType(L"UInt4B")->getVar(accessor);
+    //return getTypedVar( loadType(L"UInt4B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -563,7 +572,8 @@ TypedVarPtr loadULongLongVar( unsigned long long var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned long long) );
     accessor->writeQWord(var);
-    return getTypedVar( loadType(L"UInt8B"), accessor );
+    return loadType(L"UInt8B")->getVar(accessor);
+    //return getTypedVar( loadType(L"UInt8B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -572,7 +582,8 @@ TypedVarPtr loadIntVar( int var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(int) );
     accessor->writeSignDWord(var);
-    return getTypedVar( loadType(L"Int4B"), accessor );
+    return loadType(L"Int4B")->getVar(accessor);
+    //return getTypedVar( loadType(L"Int4B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -581,7 +592,8 @@ TypedVarPtr loadUIntVar( unsigned int var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(unsigned int) );
     accessor->writeDWord(var);
-    return getTypedVar( loadType(L"UInt4B"), accessor );
+    return loadType(L"UInt4B")->getVar(accessor);
+    //return getTypedVar( loadType(L"UInt4B"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -590,7 +602,8 @@ TypedVarPtr loadWCharVar(wchar_t var)
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(wchar_t) );
     accessor->writeWord(var);
-    return getTypedVar( loadType(L"WChar"), accessor );
+    return loadType(L"WChar")->getVar(accessor);
+    //return getTypedVar( loadType(L"WChar"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -599,7 +612,8 @@ TypedVarPtr loadBoolVar(bool var)
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(char) );
     accessor->writeByte(var);
-    return getTypedVar( loadType(L"Bool"), accessor );
+    return loadType(L"Bool")->getVar(accessor);
+    //return getTypedVar( loadType(L"Bool"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -608,7 +622,8 @@ TypedVarPtr loadFloatVar( float var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(float) );
     accessor->writeFloat(var);
-    return getTypedVar( loadType(L"Float"), accessor );
+    return loadType(L"Float")->getVar(accessor);
+    //return getTypedVar( loadType(L"Float"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -617,7 +632,8 @@ TypedVarPtr loadDoubleVar( double var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(double) );
     accessor->writeDouble(var);
-    return getTypedVar( loadType(L"Double"), accessor );
+    return loadType(L"Double")->getVar(accessor);
+    //return getTypedVar( loadType(L"Double"), accessor );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

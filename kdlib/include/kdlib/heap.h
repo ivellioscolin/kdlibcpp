@@ -3,6 +3,7 @@
 #include <boost/smart_ptr.hpp>
 
 #include "kdlib/dbgtypedef.h"
+#include "kdlib/typedvar.h"
 
 namespace kdlib {
 
@@ -33,6 +34,8 @@ public:
 };
 
 TargetHeapPtr getManagedHeap();
+
+TypedVarPtr getManagedVar(MEMOFFSET_64 addr);
 
 ///////////////////////////////////////////////////////////////////////////////
 

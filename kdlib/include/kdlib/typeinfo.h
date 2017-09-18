@@ -7,6 +7,7 @@
 
 #include "kdlib/symengine.h"
 #include "kdlib/variant.h"
+#include "kdlib/dataaccessor.h"
 
 namespace kdlib {
 
@@ -14,6 +15,9 @@ namespace kdlib {
 
 class TypeInfo;
 typedef boost::shared_ptr<TypeInfo>     TypeInfoPtr;
+
+class TypedVar;
+typedef boost::shared_ptr<TypedVar>     TypedVarPtr;
 
 TypeInfoPtr loadType( const std::wstring &symName );
 TypeInfoPtr loadType( SymbolPtr &symbol );
@@ -121,6 +125,8 @@ public:
     virtual TypeInfoPtr getVTBL() = 0;
 
     virtual MEMOFFSET_REL getVtblOffset() = 0;
+
+    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource) = 0;
 
 protected:
 

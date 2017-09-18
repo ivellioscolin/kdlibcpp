@@ -109,7 +109,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_regex.wc_regex_traits.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_regex.wide_posix_api.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_regex.winstances.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.chrono.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.process_cpu_clocks.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.thread_clock.cpp" />
     <ClCompile Include="clang\clang.cpp">
@@ -133,6 +132,10 @@
     <ClCompile Include="net\metadata.cpp">
       <Filter>net</Filter>
     </ClCompile>
+    <ClCompile Include="net\netobject.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.chrono.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <MetaHost.h>
 #include <CorHdr.h>
 #include <CorDebug.h>
 #include <ClrData.h>
-#include <MetaHost.h>
 #include <atlbase.h>
 
 //#include "kdlib/dbgtypedef.h"

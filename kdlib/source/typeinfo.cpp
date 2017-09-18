@@ -12,6 +12,7 @@
 #include "kdlib/typeinfo.h"
 
 #include "typeinfoimp.h"
+#include "typedvarimp.h"
 #include "processmon.h"
 
 namespace {
@@ -748,6 +749,37 @@ TypeInfoPtr TypeInfoImp::ptrTo( size_t ptrSize )
 TypeInfoPtr TypeInfoImp::arrayOf( size_t size )
 {
     return TypeInfoPtr( new TypeInfoArray( shared_from_this(), size ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarPtr TypeInfoImp::getVar(const DataAccessorPtr &dataSource)
+{
+    if ( isBase() )
+        return TypedVarPtr( new TypedVarBase(shared_from_this(), dataSource) );
+
+    if ( isUserDefined() )
+        return TypedVarPtr( new TypedVarUdt( shared_from_this(), dataSource ) );
+
+    if ( isPointer() )
+        return TypedVarPtr( new TypedVarPointer( shared_from_this(), dataSource) );
+
+    if ( isArray() )
+        return TypedVarPtr( new TypedVarArray( shared_from_this(), dataSource ) );
+
+    if ( isBitField() )
+        return TypedVarPtr( new TypedVarBitField( shared_from_this(), dataSource) );
+
+    if ( isEnum() )
+        return TypedVarPtr( new TypedVarEnum( shared_from_this(), dataSource) );
+
+    if ( isFunction() )
+        return TypedVarPtr( new TypedVarFunction( shared_from_this(), dataSource) );
+
+    if ( isVtbl() )
+        return TypedVarPtr( new TypedVarVtbl( shared_from_this(), dataSource) );
+
+    NOT_IMPLEMENTED();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

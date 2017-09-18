@@ -13,8 +13,6 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypedVar;
-typedef boost::shared_ptr<TypedVar>  TypedVarPtr;
 typedef std::vector<TypedVarPtr> TypedVarList;
 
 class TypedValue;

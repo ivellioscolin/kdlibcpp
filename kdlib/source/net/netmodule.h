@@ -39,6 +39,8 @@ protected:
 
     TypeNameList NetModule::enumTypes(const std::wstring& mask);
 
+    TypeInfoPtr getTypeByName( const std::wstring &typeName );
+
 protected:
 
     static

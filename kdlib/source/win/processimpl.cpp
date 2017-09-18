@@ -432,7 +432,21 @@ protected:
         {
             ContextAutoRestore  contextRestore;
             switchContext();
-            return getManagedHeap();
+            return kdlib::getManagedHeap();
+        }
+    }
+
+    TypedVarPtr getManagedVar(MEMOFFSET_64 addr) 
+    {
+        if ( isCurrent() )
+        {
+            return kdlib::getManagedVar(addr);
+        }
+        else
+        {
+            ContextAutoRestore  contextRestore;
+            switchContext();
+            return kdlib::getManagedVar(addr);
         }
     }
 

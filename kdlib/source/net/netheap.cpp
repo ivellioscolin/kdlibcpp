@@ -71,7 +71,7 @@ size_t  NetHeap::getCount(const std::wstring&  typeName, size_t minSize, size_t 
 
         if ( !typeName.empty() || minSize != 0 || maxSize != -1 )
         {
-            TypeInfoPtr  typeObj = getTypeById(heapObj.type);
+            TypeInfoPtr  typeObj = getNetTypeById(heapObj.type);
 
             std::wstring  tn = typeObj->getName();
 
@@ -127,7 +127,7 @@ bool NetHeapEnum::Next(MEMOFFSET_64& addr, std::wstring& typeName, size_t& size)
         if ( S_OK != hres )
             return false;
 
-        TypeInfoPtr  typeObj = getTypeById(heapObj.type);
+        TypeInfoPtr  typeObj = getNetTypeById(heapObj.type);
 
         std::wstring  tn = typeObj->getName();
 

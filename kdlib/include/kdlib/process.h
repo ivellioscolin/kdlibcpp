@@ -93,6 +93,7 @@ public:
 
     virtual bool isManaged() = 0;
     virtual TargetHeapPtr getManagedHeap() = 0;
+    virtual TypedVarPtr getManagedVar(MEMOFFSET_64 addr) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -274,6 +274,8 @@ protected:
         throw TypeException( getName(), L"type is not a virtual method" ); 
     }
 
+    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource);
+
 public:
 
     void setConstant( const NumVariant& constVal )

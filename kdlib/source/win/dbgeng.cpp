@@ -215,7 +215,7 @@ PROCESS_DEBUG_ID startProcess(const std::wstring  &processName, const ProcessDeb
 
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
     if (FAILED(hres))
-        return -1;
+         throw DbgEngException(L"IDebugControl::WaitForEvent", hres );
 
     return getCurrentProcessId();
 }
@@ -233,11 +233,11 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
+    ProcessMonitor::processStop(processId, ProcessTerminate, 0);
+
     hres = g_dbgMgr->client->TerminateCurrentProcess();
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
-
-    ProcessMonitor::processStop(processId, ProcessTerminate, 0);
 
     hres = g_dbgMgr->client->DetachCurrentProcess();
     if ( FAILED( hres ) )
@@ -250,22 +250,20 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid, const ProcessDebugFlags& flags)
+PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid)
 {
     if ( !isInintilized() )
         initialize();
 
     HRESULT     hres;
 
-    setEngBreakOption(flags);
-
-    hres = g_dbgMgr->client->AttachProcess( 0, pid, 0 );
+    hres = g_dbgMgr->client->AttachProcess( 0, pid, DEBUG_ATTACH_DEFAULT );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::AttachProcess", hres );
 
     hres = g_dbgMgr->control->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
     if (FAILED(hres))
-        return -1;
+         throw DbgEngException(L"IDebugControl::WaitForEvent", hres );
 
     return getCurrentProcessId();
 }
@@ -300,12 +298,12 @@ void detachAllProcesses()
 {
     HRESULT     hres;
 
+    ProcessMonitor::processAllDetach();
+
     hres = g_dbgMgr->client->DetachProcesses();
 
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
-
-    ProcessMonitor::processAllDetach();
 
     g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
 }
@@ -316,6 +314,8 @@ void terminateAllProcesses()
 {
     HRESULT  hres;
 
+    ProcessMonitor::processAllTerminate();
+
     hres = g_dbgMgr->client->TerminateProcesses();
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::TerminateProcesses", hres );
@@ -323,8 +323,6 @@ void terminateAllProcesses()
     hres = g_dbgMgr->client->DetachProcesses();
     if ( FAILED(hres) )
         throw DbgEngException( L"IDebugClient::DetachProcesses", hres );
-
-    ProcessMonitor::processAllTerminate();
 
     g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);
 }

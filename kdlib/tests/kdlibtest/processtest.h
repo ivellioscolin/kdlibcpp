@@ -23,13 +23,15 @@ TEST_F( ProcessTest, StartProcess )
     EXPECT_EQ( 0, kdlib::getNumberProcesses() );
 }
 
-TEST_F(ProcessTest, StartProcessNoBreak)
-{
-    PROCESS_DEBUG_ID   id;
-    ASSERT_NO_THROW(id = startProcess(L"targetapp.exe", ProcessDebugDefault & ~(ProcessBreakOnStart)));
-    EXPECT_NO_THROW(terminateProcess(id));
-    EXPECT_EQ(0, kdlib::getNumberProcesses());
-}
+//TEST_F(ProcessTest, StartProcessNoBreak)
+//{
+//    PROCESS_DEBUG_ID   id;
+//    ASSERT_NO_THROW(id = startProcess(L"targetapp.exe", ProcessDebugDefault & ~(ProcessBreakOnStart)));
+//    EXPECT_EQ( DebugStatusGo, targetExecutionStatus());
+//    EXPECT_NO_THROW(targetBreak());
+//    EXPECT_NO_THROW(terminateProcess(id));
+//    EXPECT_EQ(0, kdlib::getNumberProcesses());
+//}
 
 TEST_F( ProcessTest, AttachProcess )
 {
@@ -41,15 +43,15 @@ TEST_F( ProcessTest, AttachProcess )
     EXPECT_EQ( 0, kdlib::getNumberProcesses() );
 }
 
-TEST_F(ProcessTest, AttachProcessNoBreak)
-{
-    PROCESS_ID  pid = StartTargetappWithParam(L"processtest");
-
-    PROCESS_DEBUG_ID   id;
-    ASSERT_NO_THROW(id = attachProcess(pid, false));
-    EXPECT_NO_THROW(terminateProcess(id));
-    EXPECT_EQ(0, kdlib::getNumberProcesses());
-}
+//TEST_F(ProcessTest, AttachProcessNoBreak)
+//{
+//    PROCESS_ID  pid = StartTargetappWithParam(L"processtest");
+//
+//    PROCESS_DEBUG_ID   id;
+//    ASSERT_NO_THROW(id = attachProcess(pid, ProcessDebugDefault & ~(ProcessBreakOnStart)));
+//    EXPECT_NO_THROW(terminateProcess(id));
+//    EXPECT_EQ(0, kdlib::getNumberProcesses());
+//}
 
 
 TEST_F( ProcessTest, CreateOpenDump )

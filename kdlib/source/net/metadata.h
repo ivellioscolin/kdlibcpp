@@ -19,6 +19,8 @@ typedef boost::shared_ptr<MetaDataProvider>   MetaDataProviderPtr;
 
 MetaDataProviderPtr  getMetaDataProvider(ICorDebugModule*  module);
 
+typedef std::list< std::pair< std::wstring, mdFieldDef > >  NetFieldList;
+
 class MetaDataProvider : public boost::enable_shared_from_this<MetaDataProvider>
 {
 
@@ -26,11 +28,26 @@ class MetaDataProvider : public boost::enable_shared_from_this<MetaDataProvider>
 
 public:
 
-    TypeInfoPtr  getTypeByToken(mdTypeDef typeDef);
+
+    CorElementType  getFieldElementType(mdFieldDef fieldDef);
+
+    CorElementType getFieldSZArrayElementType(mdFieldDef fieldDef);
+
+    DWORD  getFieldAttr(mdFieldDef fieldDef);
+
+    mdTypeDef getFieldClassToken(mdFieldDef fieldDef);
+
+    std::wstring  getFieldName(mdFieldDef fieldDef);
 
     TypeNameList getTypeNames(const std::wstring& mask);
 
     std::wstring getTypeNameByToken(mdTypeDef typeDef);
+
+    mdTypeDef getTypeTokenByName(const std::wstring& typeName);
+
+    void getFields(mdTypeDef typeDef, NetFieldList& fields);
+
+
 
 private:
 
