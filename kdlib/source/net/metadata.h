@@ -47,8 +47,6 @@ public:
 
     void getFields(mdTypeDef typeDef, NetFieldList& fields);
 
-
-
 private:
 
     MetaDataProvider(ICorDebugModule* module);

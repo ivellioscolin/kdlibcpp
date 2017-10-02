@@ -213,6 +213,8 @@ std::wstring MetaDataProvider::getTypeNameByToken(mdTypeDef typeDef)
     DWORD  typeDefFlags;
     mdToken  baseType;
 
+    BOOL validToken = m_metaDataImport->IsValidToken (typeDef);
+
     HRESULT  hres = m_metaDataImport->GetTypeDefProps(
         typeDef,
         &typeNameBuf.front(),
@@ -298,9 +300,6 @@ void MetaDataProvider::getFields(mdTypeDef typeDef, NetFieldList& fields)
         ULONG  fetched;
         HRESULT  hres = m_metaDataImport->EnumFields(&enumFieldDefs, typeDef, &fieldDef, 1, &fetched);
         
-        if ( FAILED(hres) )
-            throw DbgException("Failed IMetaDataImport::EnumTypeDefs");
-
         if ( hres != S_OK )
             break;
 

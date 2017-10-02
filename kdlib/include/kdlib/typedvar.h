@@ -114,6 +114,9 @@ public:
     virtual TypeInfoPtr getType() const = 0;
     virtual NumVariant getValue() const = 0;
     virtual void setValue(const NumVariant& value) = 0;
+    virtual std::wstring  getStrValue() const = 0;
+    virtual void setStrValue(const std::wstring& value) = 0;
+    virtual std::wstring printValue() const = 0;
     virtual TypedVarPtr deref() = 0;
     virtual TypedVarPtr castTo(const std::wstring& typeName) const = 0;
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const = 0;

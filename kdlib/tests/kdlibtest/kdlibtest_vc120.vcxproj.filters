@@ -5,10 +5,10 @@
     <ClCompile Include="kdlibtest.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="..\comdate\testvars.cpp">
-      <Filter>testcases\testdata</Filter>
+      <Filter>testdata</Filter>
     </ClCompile>
     <ClCompile Include="..\comdate\testfunc.cpp">
-      <Filter>testcases\testdata</Filter>
+      <Filter>testdata</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -30,7 +30,7 @@
       <Filter>testcases</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\test\testvars.h">
-      <Filter>testcases\testdata</Filter>
+      <Filter>testdata</Filter>
     </ClInclude>
     <ClInclude Include="processtest.h">
       <Filter>testcases</Filter>
@@ -92,7 +92,7 @@
     <Filter Include="testfixtures">
       <UniqueIdentifier>{f2d12c59-7d69-4aa8-baa8-dc68e1e3b881}</UniqueIdentifier>
     </Filter>
-    <Filter Include="testcases\testdata">
+    <Filter Include="testdata">
       <UniqueIdentifier>{617ec5ef-8b76-49d2-b598-1ffc78b37637}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

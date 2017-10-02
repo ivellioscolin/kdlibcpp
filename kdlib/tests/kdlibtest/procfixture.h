@@ -82,6 +82,35 @@ protected:
     std::wstring  m_cmdLine;
 };
 
+class NetDumpFixture : public ::testing::Test 
+{
+
+protected:
+
+    virtual void SetUp()
+    {
+        ASSERT_NO_THROW( kdlib::startProcess(L"managedapp.exe"));
+
+        ASSERT_NO_THROW( kdlib::targetGo(); );  // go to work break point
+
+        ASSERT_NO_THROW( kdlib::writeDump(L"managedapp.dmp", false) );
+        ASSERT_NO_THROW( kdlib::terminateProcess() );
+
+        ASSERT_NO_THROW( kdlib::loadDump(L"managedapp.dmp") );
+
+        ASSERT_NO_THROW( m_targetModule = kdlib::loadModule( L"managedapp" ) );
+    }
+
+    virtual void TearDown()
+    {
+        ASSERT_NO_THROW( kdlib::closeDump() );
+    }
+
+    kdlib::PROCESS_DEBUG_ID m_processId;
+
+    kdlib::ModulePtr m_targetModule;
+};
+
 #ifndef FIELD_OFFSET
 #define FIELD_OFFSET(type, field)    ((long)&(((type *)0)->field))
 #endif

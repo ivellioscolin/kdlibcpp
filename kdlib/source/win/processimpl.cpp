@@ -191,11 +191,19 @@ public:
         m_systemId = getCurrentSystemId();
     }
 
-    TargetProcessImpl(PROCESS_DEBUG_ID processId) 
+    TargetProcessImpl(PROCESS_DEBUG_ID processId)
     {
-        kdlib::checkProcessById(processId);
-        m_processId = processId;
-        m_systemId = getCurrentSystemId();
+        if ( processId == -1 )
+        {
+            m_processId = getCurrentProcessId();
+            m_systemId = getCurrentSystemId();
+        }
+        else
+        {
+            kdlib::checkProcessById(processId);
+            m_processId = processId;
+            m_systemId = getCurrentSystemId();
+        }
     }
 
     virtual ~TargetProcessImpl() 
@@ -499,13 +507,23 @@ public:
 
     TargetThreadImpl(THREAD_DEBUG_ID id)
     {
-        kdlib::checkThreadById(id);
-        m_threadId = id;
-        m_processId = getCurrentProcessId();
-        m_systemId = getCurrentSystemId();
+        if ( id == -1 )
+        {
+            m_threadId = getCurrentThreadId();
+            m_processId = getCurrentProcessId();
+            m_systemId = getCurrentSystemId();
+        }
+        else
+        {
+            kdlib::checkThreadById(id);
+            m_threadId = id;
+            m_processId = getCurrentProcessId();
+            m_systemId = getCurrentSystemId();
+        }
     }
 
-    TargetThreadImpl() {
+    TargetThreadImpl() 
+    {
         m_threadId = getCurrentThreadId();
         m_processId = getCurrentProcessId();
         m_systemId = getCurrentSystemId();

@@ -139,13 +139,6 @@ size_t NetTypeClass::getSize()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr NetTypeClass::getVar(const DataAccessorPtr &dataSource)
-{
-    return TypedVarPtr( new NetObjectClass(shared_from_this(), dataSource) );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void NetTypeClass::getFields()
 {
     COR_TYPE_LAYOUT  typeLayout;
@@ -280,15 +273,6 @@ TypeInfoPtr  NetTypeField::getTypeInfo()
 TypeInfoPtr NetTypeArray::getElementType()
 {
     return getNetTypeById(m_arrayLayout.componentID);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypedVarPtr NetTypeArray::getVar(const DataAccessorPtr &dataSource) 
-{
-    MEMOFFSET_64   addr = ptrSize() == 4 ? dataSource->readDWord() : dataSource->readQWord();
-        
-    return TypedVarPtr( new NetObjectArray(shared_from_this(), addr, m_arrayLayout) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -12,6 +12,7 @@
 
 namespace kdlib {
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TypeInfoPtr  getNetTypeById(COR_TYPEID typeId);
@@ -298,36 +299,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//class NetTypeFieldRef : public NetTypeInfoBase
-//{
-//public:
-//
-//    NetTypeFieldRef(const TypeInfoPtr&  derefType) :
-//        m_derefType(derefType)
-//    {}
-//
-//    virtual size_t getSize() {
-//        return ptrSize();
-//    }
-//
-//    virtual std::wstring getName() {
-//        return m_derefType->getName();
-//    }
-//
-//    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource) 
-//    {
-//        MEMOFFSET_64   addr = ptrSize() == 4 ? dataSource->readDWord() : dataSource->readQWord();
-//        size_t  size = m_derefType->getSize();
-//        
-//    }
-//
-//private:
-//
-//    TypeInfoPtr  m_derefType;
-//};
-
-///////////////////////////////////////////////////////////////////////////////
-
 class NetTypeClass : public TypeInfoFields
 {
 public:
@@ -343,8 +314,6 @@ public:
     virtual std::wstring str();
 
     virtual size_t getSize();
-
-    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource);
 
 private:
 
@@ -363,34 +332,6 @@ private:
     mdTypeDef  m_token;
     COR_TYPEID  m_typeId;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-//class NetTypeBase : public NetTypeInfoBase
-//{
-//public:
-//
-//    NetTypeBase(CorElementType  baseType) :
-//        m_baseType(baseType)
-//    {}
-//
-//private:
-//
-//    bool isBase() {
-//        return true;
-//    }
-//
-//    std::wstring getName();
-//
-//    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource)
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//private:
-//
-//    CorElementType  m_baseType;
-//};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -418,7 +359,6 @@ public:
         return ptrSize();
     }
 
-    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource);
 
 private:
 
@@ -426,32 +366,6 @@ private:
 
     TypeInfoPtr getElementType();
 
-//public:
-//
-//    NetTypeArray(const TypeInfoPtr& derefType) :
-//        m_derefType(derefType)
-//        {}
-//
-//public:
-//
-//    virtual std::wstring getName() {
-//        return m_derefType->getName() + L"[]";
-//    }
-//
-//    virtual bool isArray() 
-//    {
-//        return true;
-//    }
-//
-//    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource)
-//    {
-//        NOT_IMPLEMENTED();
-//    }
-//
-//
-//private:
-//
-//    TypeInfoPtr  m_derefType;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -8,9 +8,16 @@ using System.Diagnostics;
 namespace managedapp
 {
 
+    enum Days { Sat, Sun, Mon, Tue, Wed, Thu, Fri };
+
     class Class1
     {
         private int Field1;
+
+        public Class1()
+        {
+            Field1 = -555;
+        }
 
         public class Nested
         {
@@ -22,12 +29,26 @@ namespace managedapp
         }
     }
 
-    class TestClass
+
+    class TestClassBase
+    {
+        public long longField;
+        public int  intField;
+
+        public TestClassBase()
+        {
+            longField = 0xAABBCCDD;
+        }
+    }
+
+    class TestClass : TestClassBase
     {
         private char charField;
         private short shortField;
         private int[] intArray;
         private float[, ,] floatArray;
+        private string strField;
+        private Days daysField;
 
         public Class1 class1Field;
 
@@ -37,6 +58,9 @@ namespace managedapp
             shortField = 3456;
             intArray = new int[4] { 1, 128, -555, 8888 };
             floatArray = new float[2, 2, 2] { { { 0.1f, 0.2f }, { 0.3f, 0.4f } }, { { 0.5f, 0.6f }, { 0.7f, 0.8f } } };
+            strField = "Hello";
+            class1Field = new Class1();
+            daysField = Days.Wed;
         }
     }
 

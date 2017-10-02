@@ -2,10 +2,12 @@
 
 #include "kdlib/heap.h"
 
+#include <map>
 
 #include <atlbase.h>
 
 #include "net.h"
+#include "net/metadata.h"
 
 #include "kdlib/typedvar.h"
 #include "kdlib/exceptions.h"
@@ -129,6 +131,18 @@ protected:
         throw TypeException(L"Not applicable for managed objects");
     }
 
+    virtual std::wstring  getStrValue() const {
+        throw TypeException(L"Not applicable for managed objects");
+    }
+
+    virtual void setStrValue(const std::wstring& value) {
+        throw TypeException(L"Not applicable for managed objects");
+    }
+
+    virtual std::wstring printValue() const  {
+        throw TypeException(L"Not applicable for managed objects");
+    }
+
     virtual TypedVarPtr deref() {
         throw TypeException(L"Not applicable for managed objects");
     }
@@ -161,55 +175,130 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct FieldDesc
+{
+    std::wstring  name;
+    mdFieldDef  token;
+    CComPtr<ICorDebugClass>  debugClass;
+};
+
+typedef  std::vector< FieldDesc >  FieldsList;
+
 class NetObjectClass : public NetObject
 {
 public:
-    NetObjectClass( const TypeInfoPtr&  typeInfo, const DataAccessorPtr &dataSource ) :
-        m_typeInfo(typeInfo),
-        m_dataAccessor(dataSource)
-    {}
+
+    NetObjectClass(ICorDebugObjectValue* objectValue);
 
 public:
     
      virtual TypedVarPtr getElement( const std::wstring& fieldName );
 
+     virtual MEMOFFSET_64 getAddress() const {
+        return m_address;
+     }
+
+    virtual std::wstring printValue() const  {
+         return L"Class";
+    }
+
+     virtual std::wstring str();
+
 private:
 
-    TypeInfoPtr  m_typeInfo;
+    CComPtr<ICorDebugObjectValue>  m_objectValue;
 
-    DataAccessorPtr  m_dataAccessor;
+    CComPtr<ICorDebugType>   m_objectType;
+ 
+    std::map<std::wstring, FieldDesc>  m_fieldCache;
+
+    FieldsList  m_fields;
+
+    MetaDataProviderPtr  m_metaDataProvder;
+
+    MEMOFFSET_64  m_address;
+
+    FieldsList getFieldsByType(ICorDebugType* corType);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class NetObjectString : public NetObject
+{
+public:
+
+    NetObjectString(ICorDebugStringValue* strValue) :
+        m_strValue(strValue)
+    {}
+
+    virtual std::wstring  getStrValue() const;
+
+    virtual MEMOFFSET_64 getAddress() const;
+
+    virtual std::wstring printValue() const;
+
+private:
+
+    CComPtr<ICorDebugStringValue>  m_strValue;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 class NetObjectArray : public NetObject
 {
-public:
-    NetObjectArray(const TypeInfoPtr&  typeInfo, MEMOFFSET_64 addr, const  COR_ARRAY_LAYOUT& arrayLayout, std::vector<size_t> indices ={});
 
+public:
+
+    NetObjectArray(ICorDebugArrayValue*  arrayValue,  std::vector<ULONG32> indices ={} );
+ 
 private:
+
 
     virtual TypedVarPtr getElement( size_t index );
 
     virtual size_t getElementCount();
 
+    virtual MEMOFFSET_64 getAddress() const;
+
+    virtual std::wstring printValue() const  {
+         return L"Array";
+    }
+
 private:
 
-    TypeInfoPtr  m_typeInfo;
+    CComPtr<ICorDebugArrayValue>  m_arrayValue;
 
-    MEMOFFSET_64  m_arrayObjAddr;
+    std::vector<ULONG32>  m_indices;
 
-    DataAccessorPtr  m_dataAccessor;
+    std::vector<ULONG32>  m_dimensions;
 
-    COR_ARRAY_LAYOUT  m_arrayLayout;
+    ULONG32  m_elementCount;
+};
 
-    size_t  m_elementCount;
+///////////////////////////////////////////////////////////////////////////////
 
-    size_t  m_elementSize;
+class NetObjectEnum : public NetObject
+{
 
-    std::vector<size_t>  m_ranks;
+public:
+    NetObjectEnum(ICorDebugObjectValue*  value) :
+        m_enumValue(value)
+    {}
 
-    std::vector<size_t>  m_indices;
+private:
+
+    virtual NumVariant getValue() const;
+
+    virtual MEMOFFSET_64 getAddress() const;
+
+    virtual std::wstring printValue() const  {
+         return L"Enum";
+    }
+
+private:
+
+    CComPtr<ICorDebugObjectValue>  m_enumValue;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

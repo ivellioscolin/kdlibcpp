@@ -19,6 +19,7 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+
     virtual NumVariant getValue() const
     {
         NOT_IMPLEMENTED();
@@ -27,6 +28,21 @@ protected:
     virtual void setValue(const NumVariant& value) 
     {
         throw TypeException( m_typeInfo->getName(), L" failed to set value");
+    }
+
+    virtual std::wstring  getStrValue() const 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual void setStrValue(const std::wstring& value) 
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual std::wstring printValue() const
+    {
+        NOT_IMPLEMENTED();
     }
 
     virtual VarStorage getStorage() const
@@ -209,6 +225,7 @@ protected:
     virtual NumVariant getValue() const;
 
     virtual void setValue(const NumVariant& value);
+
 
     virtual std::wstring str();
 };
@@ -484,6 +501,21 @@ public:
     virtual void setValue(const NumVariant& value) 
     {
        throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring  getStrValue() const
+    {
+        throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual void setStrValue(const std::wstring& value) 
+    {
+        throw TypeException(L"Not applicable for Void");
+    }
+
+    virtual std::wstring printValue() const
+    {
+        throw TypeException(L"Not applicable for Void");
     }
 
     virtual VarStorage getStorage() const
