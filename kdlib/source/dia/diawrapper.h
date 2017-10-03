@@ -163,18 +163,28 @@ protected:
     ULONG getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative);
 
     bool isUndecorated(const std::wstring &undecName);
+    
+    template<typename TRet>
+    struct ReturnType {
+        typedef TRet type;
+    };
+
+    template <>
+    struct ReturnType<IDiaSymbol*>{
+        typedef CComPtr<IDiaSymbol> type;
+    };
+
 
     template <typename TRet>
-    TRet callSymbolT(
+    typename ReturnType<TRet>::type callSymbolT(
         HRESULT(STDMETHODCALLTYPE IDiaSymbol::*method)(TRet *),
         const wchar_t *methodName
-    )
+     )
     {
-        TRet retValue;
+        ReturnType<TRet>::type retValue;
         HRESULT hres = (m_symbol->*method)(&retValue);
         if (S_OK != hres)
             throw DiaException(std::wstring(L"Call IDiaSymbol::") + methodName, hres, m_symbol);
-
         return retValue;
     }
 
