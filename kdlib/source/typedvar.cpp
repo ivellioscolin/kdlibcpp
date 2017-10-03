@@ -186,34 +186,34 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" )
-//{
-//    //if ( typeInfo->isBase() )
-//    //    return TypedVarPtr( new TypedVarBase( typeInfo, dataSource, name ) );
-//
-//    //if ( typeInfo->isUserDefined() )
-//    //    return TypedVarPtr( new TypedVarUdt( typeInfo, dataSource, name ) );
-//
-//    //if ( typeInfo->isPointer() )
-//    //    return TypedVarPtr( new TypedVarPointer( typeInfo, dataSource, name ) );
-//
-//    //if ( typeInfo->isArray() )
-//    //    return TypedVarPtr( new TypedVarArray( typeInfo, dataSource, name ) );
-//
-//    //if ( typeInfo->isBitField() )
-//    //    return TypedVarPtr( new TypedVarBitField( typeInfo, dataSource, name ) );
-//
-//    //if ( typeInfo->isEnum() )
-//    //    return TypedVarPtr( new TypedVarEnum( typeInfo, dataSource, name ) );
-//
-//    //if ( typeInfo->isFunction() )
-//    //    return TypedVarPtr( new TypedVarFunction( typeInfo, dataSource, name ) );
-//
-//    //if (typeInfo->isVtbl() )
-//    //    return TypedVarPtr( new TypedVarVtbl( typeInfo, dataSource, name ) );
-//
-//    //NOT_IMPLEMENTED();
-//}
+TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name = L"" )
+{
+    if ( typeInfo->isBase() )
+        return TypedVarPtr( new TypedVarBase( typeInfo, dataSource, name ) );
+
+    if ( typeInfo->isUserDefined() )
+        return TypedVarPtr( new TypedVarUdt( typeInfo, dataSource, name ) );
+
+    if ( typeInfo->isPointer() )
+        return TypedVarPtr( new TypedVarPointer( typeInfo, dataSource, name ) );
+
+    if ( typeInfo->isArray() )
+        return TypedVarPtr( new TypedVarArray( typeInfo, dataSource, name ) );
+
+    if ( typeInfo->isBitField() )
+        return TypedVarPtr( new TypedVarBitField( typeInfo, dataSource, name ) );
+
+    if ( typeInfo->isEnum() )
+        return TypedVarPtr( new TypedVarEnum( typeInfo, dataSource, name ) );
+
+    if ( typeInfo->isFunction() )
+        return TypedVarPtr( new TypedVarFunction( typeInfo, dataSource, name ) );
+
+    if (typeInfo->isVtbl() )
+        return TypedVarPtr( new TypedVarVtbl( typeInfo, dataSource, name ) );
+
+    NOT_IMPLEMENTED();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -230,9 +230,7 @@ TypedVarPtr loadTypedVar( SymbolPtr &symbol )
 
         TypeInfoPtr varType = loadType( symbol );
 
-        return varType->getVar(getMemoryAccessor(offset,varType->getSize()));
-            
-           // getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()), ::getSymbolName(symbol) );
+        return getTypedVar( varType, getMemoryAccessor(offset,varType->getSize()), ::getSymbolName(symbol) );
     }
 
     NOT_IMPLEMENTED();
