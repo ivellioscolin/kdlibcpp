@@ -51,44 +51,7 @@ TargetHeapPtr getManagedHeap()
 
 size_t  NetHeap::getCount(const std::wstring&  typeName, size_t minSize, size_t maxSize) const
 {
-    CComPtr<ICorDebugHeapEnum>   heapEnum;
-    HRESULT  hres = g_netMgr->targetProcess5()->EnumerateHeap(&heapEnum);
-    if (FAILED(hres))
-        throw DbgException("Failed ICorDebugProcess5::EnumerateHeap");
-
-    size_t  elemCount = 0;
-
-    while(true)
-    {
-        COR_HEAPOBJECT   heapObj;
-        hres = heapEnum->Next(1, &heapObj, NULL);
-
-        if (FAILED(hres))
-            throw DbgException("Failed ICorDebugHeapEnum::Next");
-
-        if ( S_OK != hres )
-            break;
-
-        if ( !typeName.empty() || minSize != 0 || maxSize != -1 )
-        {
-            TypeInfoPtr  typeObj = getNetTypeById(heapObj.type);
-
-            std::wstring  tn = typeObj->getName();
-
-            if ( !typeName.empty() && !fnmatch(typeName, typeObj->getName() ))
-                continue;
-
-            if ( minSize != 0 && heapObj.size < minSize )
-                continue;
-
-            if ( maxSize != -1 && heapObj.size > maxSize )
-                continue;
-        }
-
-        elemCount++;
-    }
-
-    return elemCount;
+    return NetHeapEnum(typeName, minSize, maxSize).getCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,7 +75,7 @@ NetHeapEnum::NetHeapEnum(const std::wstring&  typeName, size_t minSize, size_t m
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool NetHeapEnum::Next(MEMOFFSET_64& addr, std::wstring& typeName, size_t& size)
+bool NetHeapEnum::next(MEMOFFSET_64& addr, std::wstring& typeName, size_t& size)
 {
     HRESULT  hres;
 
@@ -148,6 +111,50 @@ bool NetHeapEnum::Next(MEMOFFSET_64& addr, std::wstring& typeName, size_t& size)
     }
 
     throw DbgException("NetHeapEnum::Next undefined behaviour");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t NetHeapEnum::getCount() const
+{
+    CComPtr<ICorDebugHeapEnum>   heapEnum;
+    HRESULT  hres = g_netMgr->targetProcess5()->EnumerateHeap(&heapEnum);
+    if (FAILED(hres))
+        throw DbgException("Failed ICorDebugProcess5::EnumerateHeap");
+
+    size_t  elemCount = 0;
+
+    while(true)
+    {
+        COR_HEAPOBJECT   heapObj;
+        hres = heapEnum->Next(1, &heapObj, NULL);
+
+        if (FAILED(hres))
+            throw DbgException("Failed ICorDebugHeapEnum::Next");
+
+        if ( S_OK != hres )
+            break;
+
+        if ( !m_typeMask.empty() || m_minSize != 0 || m_maxSize != -1 )
+        {
+            TypeInfoPtr  typeObj = getNetTypeById(heapObj.type);
+
+            std::wstring  tn = typeObj->getName();
+
+            if ( !m_typeMask.empty() && !fnmatch(m_typeMask, typeObj->getName() ))
+                continue;
+
+            if ( m_minSize != 0 && heapObj.size < m_minSize )
+                continue;
+
+            if ( m_maxSize != -1 && heapObj.size > m_maxSize )
+                continue;
+        }
+
+        elemCount++;
+    }
+
+    return elemCount;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,9 +26,11 @@ public:
 
     NetHeapEnum(const std::wstring&  typeName=L"", size_t minSize = 0, size_t maxSize = -1);
 
-private:
+public:
 
-    virtual bool Next(MEMOFFSET_64& addr, std::wstring& typeName, size_t&  size);
+    virtual bool next(MEMOFFSET_64& addr, std::wstring& typeName, size_t&  typeSize);
+
+    virtual size_t getCount() const;
 
 private:
 

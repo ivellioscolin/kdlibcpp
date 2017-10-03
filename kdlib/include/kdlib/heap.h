@@ -30,7 +30,9 @@ class TargetHeapEnum
 {
 public:
 
-    virtual bool Next(MEMOFFSET_64& addr, std::wstring& typeName, size_t&  typeSize) = 0;
+    virtual bool next(MEMOFFSET_64& addr, std::wstring& typeName, size_t&  typeSize) = 0;
+
+    virtual size_t getCount() const = 0;
 };
 
 TargetHeapPtr getManagedHeap();

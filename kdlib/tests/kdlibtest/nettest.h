@@ -35,7 +35,7 @@ TEST_F(NetTest, NetHeap)
     std::wstring  typeName;
     size_t  size;
     MEMOFFSET_64  address;
-    EXPECT_TRUE( heapEnum->Next(address, typeName, size) );
+    EXPECT_TRUE( heapEnum->next(address, typeName, size) );
 }
 
 //TEST_F(NetTest, NetModuleEnumTypes)
@@ -82,7 +82,7 @@ protected:
             std::wstring  typeName;
             size_t  size;
             MEMOFFSET_64  address;
-            ASSERT_TRUE( heapEnum->Next(address, typeName, size) );
+            ASSERT_TRUE( heapEnum->next(address, typeName, size) );
             
             ASSERT_NO_THROW( m_testClassVar = TargetProcess::getCurrent()->getManagedVar(address) );
       }
