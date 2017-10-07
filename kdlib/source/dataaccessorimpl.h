@@ -589,16 +589,16 @@ private:
         return sstr.str();
     }
 
-    DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
+    DataAccessorPtr copy( size_t startOffset = 0, size_t length = -1 )
     {
-        if ( startOffset >= m_length )
+        if ( length == -1 )
+            length = m_length - startOffset;
+
+        if ( length > 0 && startOffset >= m_length )
             throw DbgException("memory accessor range error");
 
         if ( m_length - startOffset < length )
             throw DbgException("memory accessor range error");
-
-        if ( length == 0 )
-            length = m_length - startOffset;
 
         return getMemoryAccessor( m_begin + startOffset, length);
     }
@@ -856,16 +856,17 @@ private:
         return m_parentAccessor->getLocationAsStr();
     }
 
-    DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
+    DataAccessorPtr copy( size_t startOffset = 0, size_t length = -1 )
     {
-        if ( startOffset >= m_length )
+
+        if ( length == -1 )
+            length = m_length - startOffset;
+
+        if ( length > 0 && startOffset >= m_length )
             throw DbgException("data accessor range error");
 
         if ( m_length - startOffset < length )
             throw DbgException("data accessor range error");
-
-        if ( length == 0 )
-            length = m_length - startOffset;
 
         return DataAccessorPtr( new CopyAccessor( m_parentAccessor, m_pos + startOffset, length) );
     }
@@ -1229,7 +1230,7 @@ private:
         return m_location;
     }
 
-    DataAccessorPtr copy( size_t startOffset = 0, size_t length = 0 )
+    DataAccessorPtr copy( size_t startOffset = 0, size_t length = -1 )
     {
         return DataAccessorPtr( new CopyAccessor( shared_from_this(), startOffset, length) );
     }
