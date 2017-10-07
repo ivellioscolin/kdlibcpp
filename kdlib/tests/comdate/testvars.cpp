@@ -195,3 +195,17 @@ namespace testspace {
 testClass1  g_testClass;
 
 }
+
+
+testStructZeroArray  *g_testStructZeroArray;
+
+class testStructZeroArrayInter {
+public:
+    testStructZeroArrayInter() {
+        g_testStructZeroArray = reinterpret_cast<testStructZeroArray*>(new char [ sizeof(testStructZeroArray) + sizeof(unsigned long) ] );
+        g_testStructZeroArray->intFixField = 100555;
+        g_testStructZeroArray->zeroLenArray[0] = 200300;
+    }
+};
+
+testStructZeroArrayInter  g_testStructZeroArrayInter;

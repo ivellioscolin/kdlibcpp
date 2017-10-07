@@ -415,5 +415,15 @@ extern  testClass1  g_testClass;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct testStructZeroArray {
+
+    unsigned long     intFixField;
+    unsigned long     zeroLenArray[0];
+};
+
+extern  testStructZeroArray     *g_testStructZeroArray;
+
+////////////////////////////////////////////////////////////////////////////////
+
 #pragma pack ( pop )
 

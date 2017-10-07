@@ -660,3 +660,11 @@ TEST_F(TypedVarTest, CallRaw)
     EXPECT_EQ( 0x100000000ULL + 5, callRaw( getSymbolOffset(L"CdeclFuncLong" ), kdlib::CallConv_NearC, { 0x100000000ULL }  ) );
     EXPECT_EQ( 500000/20, callRaw( getSymbolOffset(L"StdcallFuncRet" ), kdlib::CallConv_NearStd, { 20, 500000 }  ) );
 }
+
+TEST_F(TypedVarTest, FieldZeroLenArray)
+{
+    EXPECT_EQ( g_testStructZeroArray->intFixField, *loadTypedVar(L"g_testStructZeroArray")->deref()->getElement(L"intFixField") );
+    EXPECT_EQ( g_testStructZeroArray->zeroLenArray[0], *loadTypedVar(L"g_testStructZeroArray")->deref()->getElement(L"zeroLenArray")->getElement(0) );
+    std::wstring  desc;
+    EXPECT_NO_THROW( desc = loadTypedVar(L"g_testStructZeroArray")->deref()->str() );
+}
