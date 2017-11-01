@@ -133,6 +133,11 @@ class ExportSymbolBase : public Symbol
         NOT_IMPLEMENTED();
     }
 
+    virtual std::wstring getScopeName()
+    {
+      NOT_IMPLEMENTED();
+    }
+
     virtual LONG getOffset()
     {
         NOT_IMPLEMENTED();

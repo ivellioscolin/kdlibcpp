@@ -177,8 +177,8 @@ std::wstring getBasicTypeName( ULONG basicType )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-DiaSymbol::DiaSymbol(__inout DiaSymbolPtr &_symbol, MachineTypes machineType )
-    : m_symbol(_symbol), m_machineType(machineType)
+DiaSymbol::DiaSymbol(DiaSymbolPtr &_symbol, DiaSymbolPtr &_scope, MachineTypes machineType)
+    : m_symbol(_symbol), m_scope(_scope), m_machineType(machineType)
 {
 }
 
@@ -193,7 +193,7 @@ SymbolPtr DiaSymbol::fromGlobalScope( IDiaSymbol *_symbol )
     if (!machineType)
         machineType = machine_I386;
 
-    return SymbolPtr( new DiaSymbol(DiaSymbolPtr(_symbol), machineType) );
+    return SymbolPtr( new DiaSymbol(DiaSymbolPtr(_symbol), DiaSymbolPtr(_symbol), machineType) );
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +226,7 @@ SymbolPtrList  DiaSymbol::findChildren(
     ULONG celt;
     while ( SUCCEEDED(symbols->Next(1, &child, &celt)) && (celt == 1) )
     {
-        SymbolPtr symbol( new DiaSymbol(child, m_machineType) );
+        SymbolPtr symbol( new DiaSymbol(child, m_scope, m_machineType) );
         child = NULL;
 
         if ( name.empty() || 
@@ -261,7 +261,7 @@ SymbolPtrList DiaSymbol::findChildrenByRVA(unsigned long symTag, unsigned long r
     ULONG celt;
     while (SUCCEEDED(symbols->Next(1, &child, &celt)) && (celt == 1))
     {
-        SymbolPtr symbol(new DiaSymbol(child, m_machineType));
+        SymbolPtr symbol(new DiaSymbol(child, m_scope, m_machineType));
         child = NULL;
 
         childList.push_back(symbol);
@@ -335,7 +335,7 @@ SymbolPtr DiaSymbol::getChildByIndex(ULONG symTag, ULONG _index )
     if (S_OK != hres)
         throw DiaException(L"Call IDiaEnumSymbols::Item", hres);
 
-    return SymbolPtr( new DiaSymbol(child, m_machineType) );
+    return SymbolPtr( new DiaSymbol(child, m_scope, m_machineType) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -366,7 +366,7 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
         if (S_OK != hres)
             throw DiaException(L"Call IDiaEnumSymbols::Item", hres);
 
-        return SymbolPtr( new DiaSymbol(child, m_machineType) );
+        return SymbolPtr( new DiaSymbol(child, m_scope, m_machineType) );
     }
 
     symbols = NULL;
@@ -389,7 +389,7 @@ SymbolPtr DiaSymbol::getChildByName(const std::wstring &name )
         ULONG celt;
         while ( SUCCEEDED(symbols->Next(1, &child, &celt)) && (celt == 1) )
         {
-            SymbolPtr symbol ( new DiaSymbol(child, m_machineType) );
+            SymbolPtr symbol ( new DiaSymbol(child, m_scope, m_machineType) );
             if (symbol->getName() == name)
                 return symbol;
 
@@ -440,7 +440,7 @@ ULONG DiaSymbol::getRegRealativeId()
 SymbolPtr DiaSymbol::getObjectPointerType()
 {
     DiaSymbolPtr diaSymbol(callSymbol(get_objectPointerType));
-    return SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+    return SymbolPtr( new DiaSymbol( diaSymbol, m_scope, m_machineType ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -455,7 +455,7 @@ ULONG DiaSymbol::getCallingConvention()
 SymbolPtr DiaSymbol::getClassParent()
 {
     DiaSymbolPtr diaSymbol(callSymbol(get_classParent));
-    return SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+    return SymbolPtr( new DiaSymbol( diaSymbol, m_scope, m_machineType ) );
 }
 
 
@@ -497,7 +497,7 @@ ULONG DiaSymbol::getIndexId()
 SymbolPtr DiaSymbol::getIndexType()
 {
     DiaSymbolPtr diaSymbol(callSymbol(get_arrayIndexType));
-    return SymbolPtr( new DiaSymbol(diaSymbol, m_machineType) );
+    return SymbolPtr( new DiaSymbol(diaSymbol, m_scope, m_machineType) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -560,6 +560,16 @@ std::wstring DiaSymbol::getName()
     return std::wstring( _bstr_t(bstrName, false) );
 }
 
+std::wstring DiaSymbol::getScopeName()
+{
+  HRESULT hres;
+  BSTR bstrName = NULL;
+  hres = m_scope->get_name(&bstrName);
+  if (S_OK == hres)
+    return std::wstring(_bstr_t(bstrName, false));
+  return L"";
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 LONG DiaSymbol::getOffset()
@@ -593,7 +603,7 @@ SymTags DiaSymbol::getSymTag()
 SymbolPtr DiaSymbol::getType()
 {
     DiaSymbolPtr diaSymbol(callSymbol(get_type));
-    return SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+    return SymbolPtr( new DiaSymbol( diaSymbol, m_scope, m_machineType ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -693,7 +703,7 @@ ULONG DiaSymbol::getVirtualBaseDispIndex()
 ULONG DiaSymbol::getVirtualBaseDispSize()
 {
     DiaSymbolPtr diaSymbol(callSymbol(get_virtualBaseTableType));
-    SymbolPtr baseTableType = SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+    SymbolPtr baseTableType = SymbolPtr( new DiaSymbol( diaSymbol, m_scope, m_machineType ) );
 
     return (ULONG)baseTableType->getType()->getSize();
 }
@@ -748,7 +758,7 @@ bool DiaSymbol::isVirtual()
 SymbolPtr DiaSymbol::getVirtualTableShape()
 {
     DiaSymbolPtr diaSymbol(callSymbol(get_virtualTableShape));
-    return SymbolPtr( new DiaSymbol( diaSymbol, m_machineType ) );
+    return SymbolPtr( new DiaSymbol( diaSymbol, m_scope, m_machineType ) );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -782,7 +792,7 @@ SymbolPtr DiaSession::findByRva( ULONG rva, ULONG symTag, LONG* pdisplacement )
     if (pdisplacement)
         *pdisplacement = displacement;
 
-    return SymbolPtr( new DiaSymbol(child, m_globalSymbol->getMachineType() ) );
+    return SymbolPtr( new DiaSymbol(child, m_globalScope, m_globalSymbol->getMachineType() ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
