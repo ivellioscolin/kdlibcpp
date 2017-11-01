@@ -207,7 +207,7 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
 ///////////////////////////////////////////////////////////////////////////////
 
 TypeInfoClangStruct::TypeInfoClangStruct(const std::wstring & name, ClangASTSessionPtr& session, clang::RecordDecl*  decl) :
-        TypeInfoFields(name),
+        TypeInfoFields(name, L""),
         m_astSession(session),
         m_decl(decl)
 {
