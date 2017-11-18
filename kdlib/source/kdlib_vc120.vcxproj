@@ -148,24 +148,28 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_DEBUG>MDd</LLVM_USE_CRT_DEBUG>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_DEBUG>MTd</LLVM_USE_CRT_DEBUG>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_DEBUG>MDd</LLVM_USE_CRT_DEBUG>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_DEBUG>MTd</LLVM_USE_CRT_DEBUG>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -173,6 +177,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_RELEASE>MD</LLVM_USE_CRT_RELEASE>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -180,6 +185,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_RELEASE>MT</LLVM_USE_CRT_RELEASE>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -187,6 +193,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_RELEASE>MD</LLVM_USE_CRT_RELEASE>	
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -194,6 +201,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
+    <LLVM_USE_CRT_RELEASE>MTd</LLVM_USE_CRT_RELEASE>	
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -408,30 +416,30 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\packages\boost.1.57.0.0\build\native\boost.targets" Condition="Exists('..\..\packages\boost.1.57.0.0\build\native\boost.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets" Condition="Exists('$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets')" />
     <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-    <Import Project="..\..\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets" Condition="Exists('..\..\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets')" />
-    <Import Project="..\..\packages\boost_system.1.57.0.0\build\native\boost_system.targets" Condition="Exists('..\..\packages\boost_system.1.57.0.0\build\native\boost_system.targets')" />
-    <Import Project="..\..\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets" Condition="Exists('..\..\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets')" />
-    <Import Project="..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets" Condition="Exists('..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets')" />
-    <Import Project="..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets" Condition="Exists('..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets')" />
-    <Import Project="..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets" Condition="Exists('..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets')" />
-    <Import Project="..\..\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets" Condition="Exists('..\..\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets')" />
-    <Import Project="..\..\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets" Condition="Exists('..\..\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets" Condition="Exists('$(SolutionDir)\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost_system.1.57.0.0\build\native\boost_system.targets" Condition="Exists('$(SolutionDir)\packages\boost_system.1.57.0.0\build\native\boost_system.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets" Condition="Exists('$(SolutionDir)\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets" Condition="Exists('$(SolutionDir)\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets" Condition="Exists('$(SolutionDir)\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets" Condition="Exists('$(SolutionDir)\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets')" />
+    <Import Project="$(SolutionDir)\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(SolutionDir)\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets')" />
+    <Import Project="$(SolutionDir)\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets" Condition="Exists('$(SolutionDir)\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\boost.1.57.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost.1.57.0.0\build\native\boost.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets'))" />
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_system.1.57.0.0\build\native\boost_system.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_system.1.57.0.0\build\native\boost_system.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets'))" />
-    <Error Condition="!Exists('..\..\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets'))" />
-    <Error Condition="!Exists('..\..\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_thread.1.57.0.0\build\native\boost_thread.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost_system.1.57.0.0\build\native\boost_system.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_system.1.57.0.0\build\native\boost_system.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_date_time.1.57.0.0\build\native\boost_date_time.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_atomic.1.57.0.0\build\native\boost_atomic.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_regex.1.57.0.0\build\native\boost_regex.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_chrono.1.57.0.0\build\native\boost_chrono.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\llvm-cmake.3.9.0.1\build\native\llvm-cmake.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\clang-cmake.3.9.0.1\build\native\clang-cmake.targets'))" />
   </Target>
 </Project>
