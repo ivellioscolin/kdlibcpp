@@ -29,9 +29,9 @@ ModulePtr loadModule( MEMOFFSET_64 offset )
 
     if ( !module )
     {
-        if ( isModuleManaged(offset) )
+        if ( isModuleManaged(moduleOffset) )
         {
-            module = loadNetModule(offset);
+            module = loadNetModule(moduleOffset);
         }
         else
         {
