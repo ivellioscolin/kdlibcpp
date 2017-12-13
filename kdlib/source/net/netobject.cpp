@@ -222,7 +222,6 @@ std::wstring NetObjectClass::str()
 
     sstr << L"Managed class: " << typeInfo->getName() << L" at " << std::hex << m_address << std::endl;
 
-
     for ( auto  field : m_fields )
     {
         CComPtr<ICorDebugValue>  fieldValue;
@@ -313,6 +312,8 @@ size_t NetObjectArray::getElementCount()
     return m_dimensions.back();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 MEMOFFSET_64 NetObjectArray::getAddress() const
 {
     MEMOFFSET_64  address;
@@ -321,6 +322,31 @@ MEMOFFSET_64 NetObjectArray::getAddress() const
         throw DbgException("Failed ICorDebugArrayValue::GetAddress");
 
     return address;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring NetObjectArray::printValue() const
+{
+    std::wstringstream sstr;
+
+    sstr << L"Array of ";
+
+    CORDB_ADDRESS  address;
+    HRESULT hres = m_arrayValue->GetAddress(&address);
+    if (FAILED(hres))
+        throw DbgException("Failed ICorDebugArrayValue::GetAddress");
+
+    COR_TYPEID  typeId;
+    hres = g_netMgr->targetProcess5()-> GetTypeID(address, &typeId);
+    if (FAILED(hres))
+        throw DbgException("Failed ICorDebugProcess5::GetTypeID");
+
+    TypeInfoPtr  arrayType = getNetTypeById(typeId);
+
+    sstr << arrayType->getName();
+
+    return sstr.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

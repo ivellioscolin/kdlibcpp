@@ -260,9 +260,7 @@ private:
 
     virtual MEMOFFSET_64 getAddress() const;
 
-    virtual std::wstring printValue() const  {
-         return L"Array";
-    }
+    virtual std::wstring printValue() const;
 
 private:
 
