@@ -250,6 +250,24 @@ std::wstring NetObjectClass::str()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring NetObjectClass::printValue() const
+{
+    std::wstringstream  sstr;
+
+    COR_TYPEID  typeId;
+    HRESULT  hres = g_netMgr->targetProcess5()->GetTypeID(m_address, &typeId);
+    if (FAILED(hres))
+        throw DbgException("Failed ICorDebugProcess5::GetTypeID");
+
+    TypeInfoPtr  typeInfo = getNetTypeById(typeId);
+
+    sstr << L"Ñlass: " << typeInfo->getName() << L" at " << std::hex << m_address << std::endl;
+
+    return sstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 NetObjectArray::NetObjectArray(ICorDebugArrayValue*  arrayValue,  std::vector<ULONG32> indices )
 {
     m_arrayValue = arrayValue;

@@ -198,9 +198,7 @@ public:
         return m_address;
      }
 
-    virtual std::wstring printValue() const  {
-         return L"Class";
-    }
+     virtual std::wstring printValue() const;
 
      virtual std::wstring str();
 
