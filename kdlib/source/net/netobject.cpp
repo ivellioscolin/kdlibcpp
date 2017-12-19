@@ -261,7 +261,7 @@ std::wstring NetObjectClass::printValue() const
 
     TypeInfoPtr  typeInfo = getNetTypeById(typeId);
 
-    sstr << L"Ñlass: " << typeInfo->getName() << L" at " << std::hex << m_address << std::endl;
+    sstr << L"Ñlass of " << typeInfo->getName() << L" at " << std::hex << m_address;
 
     return sstr.str();
 }
@@ -409,8 +409,8 @@ std::wstring NetObjectString::printValue() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-NumVariant NetObjectEnum::getValue() const {
-
+NumVariant NetObjectEnum::getValue() const
+{
     CComQIPtr<ICorDebugGenericValue>  genValue = m_enumValue;
     long long storage;
     HRESULT  hres = genValue->GetValue(&storage);
@@ -430,6 +430,21 @@ MEMOFFSET_64 NetObjectEnum::getAddress() const
         throw DbgException("Failed ICorDebugObjectValue::GetAddress");
 
     return address;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring NetObjectEnum::printValue() const
+{
+    std::wstringstream  sstr;
+
+    sstr << L"Enum value: ";
+
+    unsigned long longVal = getGenericValue<unsigned long>(m_enumValue);
+
+    sstr << std::dec << longVal << L" (0x" << std::hex << longVal << L')';
+
+    return sstr.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

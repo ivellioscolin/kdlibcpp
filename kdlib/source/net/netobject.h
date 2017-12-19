@@ -287,9 +287,7 @@ private:
 
     virtual MEMOFFSET_64 getAddress() const;
 
-    virtual std::wstring printValue() const  {
-         return L"Enum";
-    }
+    virtual std::wstring printValue() const;
 
 private:
 
