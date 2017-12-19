@@ -58,12 +58,6 @@ void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr,
     {
         offset = addr64( offset );
 
-        // workitem/10473 workaround
-        ULONG64 nextAddress;
-        hres = g_dbgMgr->dataspace->GetNextDifferentlyValidOffsetVirtual( offset, &nextAddress );
-
-        DBG_UNREFERENCED_LOCAL_VARIABLE(nextAddress);
-
         hres = g_dbgMgr->dataspace->ReadVirtual( offset, buffer, numeric_cast<ULONG>(length), readed );
     }
     else
