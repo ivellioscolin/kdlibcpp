@@ -144,3 +144,7 @@ TYPED_TEST(NetTestObj, InheritedField)
     EXPECT_EQ( 0xAABBCCDD, *m_testClassVar->getElement(L"longField") );
 }
 
+TYPED_TEST(NetTestObj, StaticField)
+{
+    EXPECT_EQ(L"staticField",  m_testClassVar->getElement(L"staticStrField")->getStrValue() );
+}

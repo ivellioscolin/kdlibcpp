@@ -49,6 +49,7 @@ namespace managedapp
         private float[, ,] floatArray;
         private string strField;
         private Days daysField;
+        private static string staticStrField = "staticField";
 
         public Class1 class1Field;
 
