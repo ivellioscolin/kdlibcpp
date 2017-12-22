@@ -203,15 +203,21 @@ TypedVarPtr NetObjectClass::getElement( const std::wstring& fieldName )
         }
     }
 
+    CComPtr<ICorDebugValue> fieldValue;
+    HRESULT  hres;
+
     if ( fieldDesc.isStatic )
     {
-        throw DbgException("Cannot get static field value");
+        hres =fieldDesc.debugClass->GetStaticFieldValue(fieldDesc.token, NULL, &fieldValue);
+        if (FAILED(hres))
+            throw DbgException("Failed ICorDebugObjectValue::GetFieldValue");
     }
-
-    CComPtr<ICorDebugValue>  fieldValue;
-    HRESULT  hres = m_objectValue->GetFieldValue( fieldDesc.debugClass, fieldDesc.token, &fieldValue );
-    if (FAILED(hres))
-        throw DbgException("Failed ICorDebugObjectValue::GetFieldValue");
+    else
+    {
+        hres = m_objectValue->GetFieldValue( fieldDesc.debugClass, fieldDesc.token, &fieldValue );
+        if (FAILED(hres))
+            throw DbgException("Failed ICorDebugObjectValue::GetFieldValue");
+    }
 
     return getElementValue(fieldValue);
 }
@@ -235,11 +241,17 @@ std::wstring NetObjectClass::str()
     {
         if ( field.isStatic )
         {
-            std::wstring  qualStr = L"static ";
-            qualStr +=field.name; 
-            sstr << L"    ---- " << std::left << std::setw(24) << std::setfill(L' ') << qualStr << L':';
-            sstr << L"   " << L"Failed to get value";
-            sstr << std::endl;
+            CComPtr<ICorDebugValue>  staticValue;
+            MEMOFFSET_64  staticAddress = 0;
+
+            if ( SUCCEEDED( field.debugClass->GetStaticFieldValue(field.token, NULL, &staticValue)  ) &&
+                SUCCEEDED(staticValue->GetAddress(&staticAddress) ) )
+            {
+                sstr << L"   =" << std::right << std::setw(10) << std::setfill(L'0') << std::hex << staticAddress;
+                sstr << L' ' << std::left << std::setw(18) << std::setfill(L' ') << field.name << ':';
+                sstr << L"   " <<  getElementValue(staticValue)->printValue();
+                sstr << std::endl;
+            }
         }
     }
 
