@@ -180,6 +180,7 @@ struct FieldDesc
     std::wstring  name;
     mdFieldDef  token;
     CComPtr<ICorDebugClass>  debugClass;
+    bool isStatic;
 };
 
 typedef  std::vector< FieldDesc >  FieldsList;

@@ -47,6 +47,8 @@ public:
 
     void getFields(mdTypeDef typeDef, NetFieldList& fields);
 
+    bool isStaticField(mdFieldDef fieldDef);
+
 private:
 
     MetaDataProvider(ICorDebugModule* module);

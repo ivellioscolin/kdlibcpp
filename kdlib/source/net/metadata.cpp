@@ -326,4 +326,32 @@ void MetaDataProvider::getFields(mdTypeDef typeDef, NetFieldList& fields)
     }
 }
 
+bool MetaDataProvider::isStaticField(mdFieldDef fieldDef)
+{
+    std::vector<wchar_t>  fieldNameBuf(0x100);
+    ULONG  fieldNameLen;
+
+    mdTypeDef  typeDef;
+
+    DWORD  fieldAttr;
+
+    HRESULT  hres = m_metaDataImport->GetFieldProps(
+        fieldDef,
+        &typeDef,
+        &fieldNameBuf.front(),
+        fieldNameBuf.size(),
+        &fieldNameLen,
+        &fieldAttr,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL);
+
+    if ( FAILED(hres) )
+        throw DbgException("Failed IMetaDataImport::GetFieldProps");
+
+    return (fieldAttr & CorFieldAttr::fdStatic) != 0;
+}
+
 }

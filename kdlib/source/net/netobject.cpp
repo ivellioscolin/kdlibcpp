@@ -164,7 +164,11 @@ FieldsList NetObjectClass::getFieldsByType(ICorDebugType* corType)
 
     for( auto field : fieldList )
     {
-        fields.push_back( { field.first, field.second, corClass } );
+        const std::wstring&  fieldName = field.first;
+        const mdFieldDef&  fieldDef = field.second;
+        bool isStatic = m_metaDataProvder->isStaticField(fieldDef);
+
+        fields.push_back( { fieldName, fieldDef, corClass, isStatic } );
     }
 
     return fields;
@@ -199,6 +203,11 @@ TypedVarPtr NetObjectClass::getElement( const std::wstring& fieldName )
         }
     }
 
+    if ( fieldDesc.isStatic )
+    {
+        throw DbgException("Cannot get static field value");
+    }
+
     CComPtr<ICorDebugValue>  fieldValue;
     HRESULT  hres = m_objectValue->GetFieldValue( fieldDesc.debugClass, fieldDesc.token, &fieldValue );
     if (FAILED(hres))
@@ -224,25 +233,40 @@ std::wstring NetObjectClass::str()
 
     for ( auto  field : m_fields )
     {
-        CComPtr<ICorDebugValue>  fieldValue;
-        MEMOFFSET_64  fieldAddress = 0;
-
-        if ( SUCCEEDED(m_objectValue->GetFieldValue( field.debugClass, field.token, &fieldValue ) ) &&
-            SUCCEEDED(fieldValue->GetAddress(&fieldAddress) ) )
+        if ( field.isStatic )
         {
-            MEMOFFSET_REL  fieldOffset = static_cast<MEMOFFSET_REL>(fieldAddress - this->getAddress());
-
-            sstr << L"   +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << fieldOffset;
-            sstr << L" " << std::left << std::setw(24) << std::setfill(L' ') << field.name << ':';
-            sstr << L"   " << getElementValue(fieldValue)->printValue();
-        }
-        else
-        {
-            sstr << L"    ----  " << std::left << std::setw(24) << std::setfill(L' ') << field.name << ':';
+            std::wstring  qualStr = L"static ";
+            qualStr +=field.name; 
+            sstr << L"    ---- " << std::left << std::setw(24) << std::setfill(L' ') << qualStr << L':';
             sstr << L"   " << L"Failed to get value";
+            sstr << std::endl;
         }
+    }
 
-        sstr << std::endl;
+    for ( auto  field : m_fields )
+    {
+        if ( !field.isStatic )
+        {
+            CComPtr<ICorDebugValue>  fieldValue;
+            MEMOFFSET_64  fieldAddress = 0;
+
+            if ( SUCCEEDED(m_objectValue->GetFieldValue( field.debugClass, field.token, &fieldValue ) ) &&
+                SUCCEEDED(fieldValue->GetAddress(&fieldAddress) ) )
+            {
+                MEMOFFSET_REL  fieldOffset = static_cast<MEMOFFSET_REL>(fieldAddress - this->getAddress());
+
+                sstr << L"   +" << std::right << std::setw(4) << std::setfill(L'0') << std::hex << fieldOffset;
+                sstr << L" " << std::left << std::setw(24) << std::setfill(L' ') << field.name << L':';
+                sstr << L"   " << getElementValue(fieldValue)->printValue();
+            }
+            else
+            {
+                sstr << L"    ---- " << std::left << std::setw(24) << std::setfill(L' ') << field.name << L':';
+                sstr << L"   " << L"Failed to get value";
+            }
+
+            sstr << std::endl;
+        }
     }
 
     return sstr.str();
