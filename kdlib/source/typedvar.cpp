@@ -1661,6 +1661,16 @@ TypedValue TypedVarFunction::callX64(const TypedValueList& arglst)
         args.insert(args.begin(), retOffset );
     }
 
+    // align arguments to 16 byte 
+    MEMOFFSET_64  stkOffset = getStackOffset();
+    stkOffset = stkOffset / 16 * 16;
+    if ( ( args.size() <= 4 ? 4 : args.size() ) % 2 != 0 )
+    {
+        //arg count: 5,7,9,...
+        stkOffset -= 8;
+    }
+    setStackOffset(stkOffset);
+
     i = args.size() - 1;
     for ( TypedValueList::reverse_iterator  it = args.rbegin(); it != args.rend(); ++it, --i)
     {
