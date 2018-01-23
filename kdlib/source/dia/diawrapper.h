@@ -55,7 +55,7 @@ private:
 
 class DiaSymbol : public Symbol {
 public:
-    DiaSymbol( DiaSymbolPtr &_symbol, MachineTypes machineType );
+    DiaSymbol( DiaSymbolPtr &_symbol, DiaSymbolPtr &_scope, MachineTypes machineType );
 
     static SymbolPtr fromGlobalScope( IDiaSymbol *_symbol );
 
@@ -74,6 +74,7 @@ public:
     size_t getSize();
 
     std::wstring getName();
+    std::wstring getScopeName();
 
     SymbolPtr getType();
 
@@ -189,6 +190,7 @@ protected:
     }
 
     DiaSymbolPtr m_symbol;
+    DiaSymbolPtr m_scope;
 
     MachineTypes m_machineType;
 };
