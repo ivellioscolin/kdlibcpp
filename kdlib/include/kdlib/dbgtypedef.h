@@ -189,6 +189,16 @@ struct LiveProcessInfo {
     std::wstring  commandLine;
 };
 
+enum DebugOptions {
+
+    InitialBreak = 0x00000020,
+    FinalBreak = 0x00000040,
+    PreferDml =  0x00040000
+};
+
+typedef unsigned long  DebugOptionsSet;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

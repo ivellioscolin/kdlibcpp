@@ -38,6 +38,9 @@ bool isKernelDebugging();
 std::wstring debugCommand(const std::wstring &command, bool suppressOutput=false);
 NumVariant evaluate( const std::wstring  &expression, bool cplusplus=false );
 
+DebugOptionsSet getDebugOptions();
+void changeDebugOptions(DebugOptionsSet &addOptions, DebugOptionsSet &removeOptions);
+
 // system properties
 size_t ptrSize();
 bool is64bitSystem();

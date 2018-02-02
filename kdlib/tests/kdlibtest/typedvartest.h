@@ -668,3 +668,17 @@ TEST_F(TypedVarTest, FieldZeroLenArray)
     std::wstring  desc;
     EXPECT_NO_THROW( desc = loadTypedVar(L"g_testStructZeroArray")->deref()->str() );
 }
+
+TEST_F(TypedVarTest, InvalidAddress)
+{
+    TypeInfoPtr  structType;
+    ASSERT_NO_THROW( structType = loadType(L"structTest") );
+
+    TypedVarPtr  var;
+    ASSERT_NO_THROW(var = loadTypedVar(structType, 0x0) );
+
+    EXPECT_EQ( structType->getSize(), var->getSize() );
+    EXPECT_EQ( 0x0, var->asULongLong() );
+    EXPECT_NO_THROW( var->str() );
+    EXPECT_NO_THROW( var->getElement(0) );
+}

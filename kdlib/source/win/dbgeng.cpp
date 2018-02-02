@@ -156,37 +156,59 @@ std::string DbgWideException::getCStrDesc( const std::wstring &desc )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void setEngBreakOption(const ProcessDebugFlags& flags)
+DebugOptionsSet getDebugOptions()
 {
     ULONG   opt;
     HRESULT hres = g_dbgMgr->control->GetEngineOptions(&opt);
     if (FAILED(hres))
         throw DbgEngException(L"IDebugControl::GetEngineOptions", hres);
 
+    return static_cast<DebugOptionsSet>(opt);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void changeDebugOptions(DebugOptionsSet &addOptions, DebugOptionsSet &removeOptions)
+{
+    HRESULT hres = g_dbgMgr->control->AddEngineOptions(static_cast<ULONG>(addOptions) );
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::AddEngineOptions", hres);
+
+    hres = g_dbgMgr->control->RemoveEngineOptions(static_cast<ULONG>(removeOptions) );
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::RemoveEngineOptions", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void setEngBreakOption(const ProcessDebugFlags& flags)
+{
+    DebugOptionsSet  addOptions = 0;
+    DebugOptionsSet  removeOptions = 0;
+
     if ((flags & ProcessBreakOnStart) != 0)
     {
-        opt |= DEBUG_ENGOPT_INITIAL_BREAK;
+        addOptions |= InitialBreak;
     }
     else
     {
-        opt &= ~DEBUG_ENGOPT_INITIAL_BREAK;
+        removeOptions |= InitialBreak;
     }
 
     if ((flags & ProcessBreakOnStop) != 0)
     {
-        opt |= DEBUG_ENGOPT_FINAL_BREAK;
+        addOptions |= FinalBreak;
     }
     else
     {
-        opt &= ~DEBUG_ENGOPT_FINAL_BREAK;
+        removeOptions |= FinalBreak;
     }
 
-    hres = g_dbgMgr->control->SetEngineOptions(opt);
-    if (FAILED(hres))
-        throw DbgEngException(L"IDebugControl::SetEngineOptions", hres);
+    changeDebugOptions(addOptions, removeOptions);
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
 
 PROCESS_DEBUG_ID startProcess(const std::wstring  &processName, const ProcessDebugFlags& flags)
 {
