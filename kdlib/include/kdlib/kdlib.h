@@ -14,4 +14,4 @@
 #include "kdlib/stack.h"
 #include "kdlib/typeinfo.h"
 #include "kdlib/typedvar.h"
-
+#include "kdlib/tagged.h"

@@ -79,6 +79,7 @@
     <ClCompile Include="win\processimpl.cpp" />
     <ClCompile Include="win\strconvert.cpp" />
     <ClCompile Include="win\sympath.cpp" />
+    <ClCompile Include="win\tagged.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\kdlib\breakpoint.h" />
@@ -100,6 +101,7 @@
     <ClInclude Include="..\include\kdlib\scope.h" />
     <ClInclude Include="..\include\kdlib\stack.h" />
     <ClInclude Include="..\include\kdlib\symengine.h" />
+    <ClInclude Include="..\include\kdlib\tagged.h" />
     <ClInclude Include="..\include\kdlib\typedvar.h" />
     <ClInclude Include="..\include\kdlib\typeinfo.h" />
     <ClInclude Include="..\include\kdlib\variant.h" />
@@ -193,7 +195,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
-    <LLVM_USE_CRT_RELEASE>MD</LLVM_USE_CRT_RELEASE>	
+    <LLVM_USE_CRT_RELEASE>MD</LLVM_USE_CRT_RELEASE>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -201,7 +203,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v120</PlatformToolset>
-    <LLVM_USE_CRT_RELEASE>MTd</LLVM_USE_CRT_RELEASE>	
+    <LLVM_USE_CRT_RELEASE>MTd</LLVM_USE_CRT_RELEASE>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

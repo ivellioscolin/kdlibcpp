@@ -31,6 +31,11 @@ public:
         {}
     }
 
+    static std::wstring getKernelDumpName()
+    {
+        return L"..\\..\\..\\kdlib\\tests\\dumps\\win8_x64_mem.cab";
+    }
+
 private:
 
     std::wstring  m_dumpName;

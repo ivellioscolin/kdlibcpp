@@ -17,12 +17,6 @@ public:
 class KernelDumpTest : public BaseFixture
 {
 public:
-
-    std::wstring getKernelDumpName()
-    {
-        return L"..\\..\\..\\kdlib\\tests\\dumps\\win8_x64_mem.cab";
-    }
-
     bool is64BitSystem() {
         return true;
     }
@@ -31,7 +25,7 @@ public:
     {
         PROCESS_DEBUG_ID  dumpId;
 
-        ASSERT_NO_THROW(dumpId = kdlib::loadDump(getKernelDumpName()));
+        ASSERT_NO_THROW(dumpId = kdlib::loadDump(MemDumpFixture::getKernelDumpName()));
 
         m_dumpIds.push_back(dumpId);
     }

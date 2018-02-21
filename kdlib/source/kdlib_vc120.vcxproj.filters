@@ -136,6 +136,9 @@
       <Filter>net</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\boost_chrono.chrono.cpp" />
+    <ClCompile Include="win\tagged.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="net\metadata.h">
       <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\kdlib\tagged.h">
+      <Filter>kdlib/include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
