@@ -20,7 +20,8 @@
 #include "crttest.h"
 #include "clangtest.h"
 #include "nettest.h"
-    
+#include "taggedtest.h"
+
 #ifdef _M_AMD64 
 #include "regtest_x64.h"
 #endif
