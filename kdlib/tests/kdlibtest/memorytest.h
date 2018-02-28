@@ -256,4 +256,19 @@ TEST_F(MemoryTest, InvalidBigRegion)
     EXPECT_THROW(loadWChars(offset, 0xF0000000), MemoryException);
 }
 
+TEST_F(MemoryTest, testPartial)
+{
+    const auto delta = sizeof(ULONGLONG) / 2;
+    const MEMOFFSET_64 offset = m_targetModule->getEnd() - delta;
 
+    EXPECT_THROW(loadBytes(offset, sizeof(ULONGLONG)), MemoryException);
+    EXPECT_THROW(ptrQWord(offset), MemoryException);
+
+    EXPECT_THROW(writeBytes(offset, std::vector<unsigned char>(sizeof(ULONGLONG))), MemoryException);
+    EXPECT_THROW(setQWord(offset, 0), MemoryException);
+
+    ULONGLONG tmp;
+    unsigned long readed = 0;
+    EXPECT_NO_THROW( readMemory(offset, &tmp, sizeof(tmp), false, &readed) );
+    EXPECT_EQ( delta, readed );
+}
