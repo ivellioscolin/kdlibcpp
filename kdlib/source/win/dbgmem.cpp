@@ -49,6 +49,7 @@ void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr,
 {
     offset = addr64(offset);
 
+    unsigned long readedLocal = 0;
     if ( readed )
         *readed = 0;
 
@@ -58,15 +59,21 @@ void readMemory( MEMOFFSET_64 offset, void* buffer, size_t length, bool phyAddr,
     {
         offset = addr64( offset );
 
-        hres = g_dbgMgr->dataspace->ReadVirtual( offset, buffer, numeric_cast<ULONG>(length), readed );
+        hres = g_dbgMgr->dataspace->ReadVirtual( offset, buffer, numeric_cast<ULONG>(length), readed ? readed : &readedLocal );
     }
     else
     {
-        hres = g_dbgMgr->dataspace->ReadPhysical( offset, buffer,  numeric_cast<ULONG>(length), readed );
+        hres = g_dbgMgr->dataspace->ReadPhysical( offset, buffer,  numeric_cast<ULONG>(length), readed ? readed : &readedLocal );
     }
 
     if ( FAILED( hres ) )
         throw MemoryException( offset, phyAddr );
+
+    if (!readed && (readedLocal < length))
+    {
+        // read less than requested, but "readed" has nowhere to return
+        throw MemoryException( offset + readedLocal, phyAddr );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
