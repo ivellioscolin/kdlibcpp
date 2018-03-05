@@ -41,6 +41,10 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual std::wstring getScopeName() {
+        throw TypeException( getName(), L"type has no scope name" );
+    }
+
     virtual std::pair<std::wstring, std::wstring> splitName() {
         return std::pair<std::wstring, std::wstring>(getName(), std::wstring());
     }
@@ -306,6 +310,7 @@ protected:
     }
 };
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class TypeInfoFields : public TypeInfoImp 
@@ -372,13 +377,30 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoUdt : public TypeInfoFields
+class SymbolFields : public TypeInfoFields
+{
+public:
+    SymbolFields(SymbolPtr &symbol) :
+         TypeInfoFields( symbol->getName() ),
+         m_symbol(symbol)
+    {}
+
+    std::wstring getScopeName() {
+        return m_symbol->getScopeName();
+    }
+
+protected:
+
+    SymbolPtr  m_symbol;
+};
+
+
+class TypeInfoUdt : public SymbolFields
 {
 public:
 
     TypeInfoUdt(SymbolPtr &symbol) :
-        TypeInfoFields( symbol->getName() ),
-        m_symbol( symbol )
+        SymbolFields( symbol )
         {}
 
 protected:
@@ -420,8 +442,6 @@ protected:
 
 protected:
 
-    SymbolPtr  m_symbol;
-
     virtual void getFields();
 
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
@@ -442,13 +462,12 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoEnum : public TypeInfoFields 
+class TypeInfoEnum : public SymbolFields 
 {
 public:
 
     TypeInfoEnum( SymbolPtr& symbol ) :
-        TypeInfoFields( symbol->getName() ),
-        m_symbol( symbol )
+        SymbolFields( symbol )
         {}
 
     virtual std::wstring str();
@@ -565,6 +584,10 @@ protected:
 
     virtual size_t getAlignReq() {
         return getPtrSize();
+    }
+
+    std::wstring getScopeName() {
+        return m_symbol->getScopeName();
     }
 
 private:
@@ -729,6 +752,10 @@ public:
         return L"VTable";
     }
 
+    std::wstring getScopeName() {
+        return m_symbol->getScopeName();
+    }
+
     virtual size_t getAlignReq() {
         return getPtrSizeBySymbol( m_symbol );
     }
@@ -804,6 +831,10 @@ protected:
 
     virtual TypeInfoPtr getClassParent();
 
+    std::wstring getScopeName() {
+        return m_symbol->getScopeName();
+    }
+
 private:
 
     SymbolPtr  m_symbol;
@@ -878,6 +909,10 @@ public:
         TypeInfoPointer( loadType( symbol->getType() ), symbol->getSize() )
     {
         m_symbol = symbol;
+    }
+
+    std::wstring getScopeName() {
+        return m_symbol->getScopeName();
     }
 
 protected:
@@ -957,6 +992,10 @@ public:
         TypeInfoArray( loadType( symbol->getType() ), symbol->getCount() )
     {
         m_symbol = symbol;
+    }
+
+    std::wstring getScopeName() {
+        return m_symbol->getScopeName();
     }
 
 protected:

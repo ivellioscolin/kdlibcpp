@@ -31,6 +31,10 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual std::wstring getScopeName() {
+        NOT_IMPLEMENTED();
+    }
+
     virtual std::pair<std::wstring, std::wstring> splitName() {
         NOT_IMPLEMENTED();
     }

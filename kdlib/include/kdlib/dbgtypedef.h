@@ -201,7 +201,7 @@ typedef unsigned long  DebugOptionsSet;
 enum BreakpointAccess {
     Read = 0x00000001,
     Write = 0x00000002,
-    Execute =  0x00000004,
+    Execute =  0x00000004
 };
 
 

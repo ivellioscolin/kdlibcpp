@@ -580,4 +580,15 @@ TEST_F(TypeInfoTest, GetTypeProviderFromPdb)
     EXPECT_EQ( L"structTest", structType->getName() );
 }
 
+TEST_F(TypeInfoTest, GetScopeName)
+{
+    EXPECT_EQ(L"targetapp", loadType(L"g_classChild")->getScopeName() );
+    EXPECT_EQ(L"targetapp", loadTypedVar(L"CdeclFuncPtr")->getType()->getScopeName() );
+    EXPECT_EQ(L"targetapp", loadType( L"g_structTestPtr" )->getScopeName() );
+
+    EXPECT_THROW(loadType(L"UInt4B")->getScopeName(), TypeException);
+    EXPECT_THROW(loadType(L"Void")->getScopeName(), TypeException);
+    EXPECT_THROW(loadType(L"Float*")->getScopeName(), TypeException);
+}
+
 
