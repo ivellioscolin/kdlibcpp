@@ -335,4 +335,32 @@ TEST_F(ClangTest, NtddkH)
     }
 }
 
+static const wchar_t test_typedef_src[] = L"\
+                                            \
+    typedef  int   int_def;                 \
+                                            \
+    typedef struct _Test {                  \
+        int  field;                         \
+        int_def  field2;                    \
+     } TestDef;                             \
+    ";
+
+TEST_F(ClangTest, Typedef)
+{
+    TypeInfoProviderPtr  typeProvider;
+
+    ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(test_typedef_src) );
+
+    TypeInfoPtr  intType;
+    ASSERT_NO_THROW( intType = typeProvider->getTypeByName(L"int_def") );
+    ASSERT_EQ(L"Int4B", intType->getName() );
+
+    TypeInfoPtr  structType;
+    ASSERT_NO_THROW( structType = typeProvider->getTypeByName(L"TestDef") );
+
+    ASSERT_EQ(L"_Test", structType->getName() );
+    ASSERT_EQ(L"Int4B", structType->getElement(L"field1")->getName() );
+    ASSERT_EQ(L"Int4B", structType->getElement(L"field2")->getName() );
+
+}
 
