@@ -340,9 +340,11 @@ static const wchar_t test_typedef_src[] = L"\
     typedef  int   int_def;                 \
                                             \
     typedef struct _Test {                  \
-        int  field;                         \
+        int      field1;                    \
         int_def  field2;                    \
      } TestDef;                             \
+                                            \
+     typedef TestDef   TEST;                \
     ";
 
 TEST_F(ClangTest, Typedef)
@@ -362,5 +364,6 @@ TEST_F(ClangTest, Typedef)
     ASSERT_EQ(L"Int4B", structType->getElement(L"field1")->getName() );
     ASSERT_EQ(L"Int4B", structType->getElement(L"field2")->getName() );
 
+    ASSERT_EQ(L"_Test", typeProvider->getTypeByName(L"TEST")->getName() );
 }
 

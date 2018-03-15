@@ -413,6 +413,20 @@ public:
         return false;
     }
 
+    bool VisitTypedefDecl(TypedefDecl  *Declaration)
+    {
+        std::string&  name = Declaration->getQualifiedNameAsString();
+
+        if ( name != m_typeName)
+            return true;
+
+        QualType  decl = Declaration->getUnderlyingType().getCanonicalType();
+
+        m_typeInfo = getTypeForClangType(m_session, decl);
+
+        return false;
+    }
+
     bool VisitFunctionDecl(FunctionDecl *Declaration)
     {
         std::string& name = Declaration->getQualifiedNameAsString();
