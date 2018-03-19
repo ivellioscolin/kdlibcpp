@@ -304,6 +304,26 @@ protected:
 };
 
 
+
+class TypeInfoProviderClangEnum  : public TypeInfoEnumerator{
+
+public:
+    virtual TypeInfoPtr Next();
+
+    TypeInfoProviderClangEnum(const std::wstring& mask, ClangASTSessionPtr ast) :
+        m_mask(wstrToStr(mask)),
+        m_astSession(ast),
+        m_pos(0)
+    {}
+
+private:
+
+    std::string  m_mask;
+    ClangASTSessionPtr  m_astSession;
+    size_t  m_pos;
+};
+
+
 class TypeInfoProviderClang : public TypeInfoProvider
 {
 public:
@@ -313,6 +333,8 @@ public:
 private:
 
     virtual TypeInfoPtr getTypeByName(const std::wstring& name);
+
+    virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask);
 
 private:
 

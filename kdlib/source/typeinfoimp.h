@@ -1014,6 +1014,10 @@ private:
 
     virtual TypeInfoPtr getTypeByName(const std::wstring& name);
 
+    virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask = L"") {
+        NOT_IMPLEMENTED();
+    }
+
 private:
 
     SymbolSessionPtr  m_symbolSession;

@@ -139,6 +139,9 @@
     <ClCompile Include="win\tagged.cpp">
       <Filter>win</Filter>
     </ClCompile>
+    <ClCompile Include="fnmatch.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -280,6 +283,9 @@
     </ClInclude>
     <ClInclude Include="..\include\kdlib\tagged.h">
       <Filter>kdlib/include</Filter>
+    </ClInclude>
+    <ClInclude Include="fnmatch.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

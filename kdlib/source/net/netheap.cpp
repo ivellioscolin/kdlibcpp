@@ -10,33 +10,7 @@
 #include "net/nettype.h"
 #include "net/metadata.h"
 
-#include <boost/regex.hpp>
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace {
-
-///////////////////////////////////////////////////////////////////////////////
-
-const boost::wregex  r1(L"\\?");
-const boost::wregex  r2(L"\\*");
-const boost::wregex  r3(L"\\.");
-
-bool fnmatch( const std::wstring& pattern, const std::wstring& str)
-{
-    std::wstring mask = pattern;
-    mask = boost::regex_replace(mask, r1, L".");
-    mask = boost::regex_replace(mask, r2, L".*");
-    mask = boost::regex_replace(mask, r3, L"\\.");
-
-    boost::wsmatch  matchResult;
-    boost::wregex  regEx(mask);
-    return boost::regex_match(str, matchResult, regEx);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}
+#include "fnmatch.h"
 
 namespace kdlib {
 
