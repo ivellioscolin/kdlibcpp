@@ -177,14 +177,14 @@ std::wstring getBasicTypeName( ULONG basicType )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-DiaSymbol::DiaSymbol(DiaSymbolPtr &_symbol, DiaSymbolPtr &_scope, MachineTypes machineType)
+DiaSymbol::DiaSymbol(DiaSymbolPtr &_symbol, const std::wstring &_scope, MachineTypes machineType)
     : m_symbol(_symbol), m_scope(_scope), m_machineType(machineType)
 {
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-SymbolPtr DiaSymbol::fromGlobalScope( IDiaSymbol *_symbol )
+SymbolPtr DiaSymbol::fromGlobalScope( IDiaSymbol *_symbol, const std::wstring& _scope )
 {
     MachineTypes machineType;
     HRESULT hres = _symbol->get_machineType( (DWORD*)&machineType);
@@ -193,7 +193,7 @@ SymbolPtr DiaSymbol::fromGlobalScope( IDiaSymbol *_symbol )
     if (!machineType)
         machineType = machine_I386;
 
-    return SymbolPtr( new DiaSymbol(DiaSymbolPtr(_symbol), DiaSymbolPtr(_symbol), machineType) );
+    return SymbolPtr(new DiaSymbol(DiaSymbolPtr(_symbol), _scope, machineType));
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -562,12 +562,7 @@ std::wstring DiaSymbol::getName()
 
 std::wstring DiaSymbol::getScopeName()
 {
-  HRESULT hres;
-  BSTR bstrName = NULL;
-  hres = m_scope->get_name(&bstrName);
-  if (S_OK == hres)
-    return std::wstring(_bstr_t(bstrName, false));
-  return L"";
+  return m_scope;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -770,6 +765,18 @@ unsigned long DiaSymbol::getVirtualBaseOffset()
 
 //////////////////////////////////////////////////////////////////////////////
 
+std::wstring DiaSession::getScopeName( IDiaSession* session )
+{
+  ULONGLONG loadBase;
+  HRESULT hres = session->get_loadAddress(&loadBase);
+  if (S_OK != hres)
+    return L"";
+
+  return getModuleName(loadBase);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 SymbolPtr DiaSession::findByRva( ULONG rva, ULONG symTag, LONG* pdisplacement )
 {
     DiaSymbolPtr child;
@@ -792,7 +799,7 @@ SymbolPtr DiaSession::findByRva( ULONG rva, ULONG symTag, LONG* pdisplacement )
     if (pdisplacement)
         *pdisplacement = displacement;
 
-    return SymbolPtr( new DiaSymbol(child, m_globalScope, m_globalSymbol->getMachineType() ) );
+    return SymbolPtr( new DiaSymbol(child, getScopeName( m_session ), m_globalSymbol->getMachineType() ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
