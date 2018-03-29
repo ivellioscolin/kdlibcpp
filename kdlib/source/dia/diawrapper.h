@@ -55,9 +55,9 @@ private:
 
 class DiaSymbol : public Symbol {
 public:
-    DiaSymbol( DiaSymbolPtr &_symbol, DiaSymbolPtr &_scope, MachineTypes machineType );
+    DiaSymbol( DiaSymbolPtr &_symbol, const std::wstring &_scope, MachineTypes machineType );
 
-    static SymbolPtr fromGlobalScope( IDiaSymbol *_symbol );
+    static SymbolPtr fromGlobalScope( IDiaSymbol *_symbol, const std::wstring &_scope );
 
     SymbolPtr getChildByName(const std::wstring &_name );
 
@@ -190,7 +190,7 @@ protected:
     }
 
     DiaSymbolPtr m_symbol;
-    DiaSymbolPtr m_scope;
+    std::wstring m_scope;
 
     MachineTypes m_machineType;
 };
@@ -203,7 +203,7 @@ public:
 
     DiaSession( IDiaSession* session, IDiaSymbol *globalScope, const std::wstring symbolFile ) :
         m_globalScope( globalScope ),
-        m_globalSymbol( DiaSymbol::fromGlobalScope( globalScope ) ),
+        m_globalSymbol( DiaSymbol::fromGlobalScope( globalScope, getScopeName( session ) ) ),
         m_session( session ),
         m_symbolFileName( symbolFile )
         {}
@@ -221,6 +221,8 @@ public:
     }
 
 private:
+
+    static std::wstring getScopeName( IDiaSession* session );
 
     ULONG findRvaByName( const std::string &name );
 
