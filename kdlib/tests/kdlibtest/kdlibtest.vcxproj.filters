@@ -85,7 +85,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.kdlibtest_vc120.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
