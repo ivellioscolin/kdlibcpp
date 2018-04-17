@@ -384,7 +384,7 @@ TEST_F(ClangTest, TypeProviderEnum)
 
     ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator(L"struct*") );
     for ( count = 0; 0 != typeEnum->Next(); ++count);
-    EXPECT_EQ(8, count);
+    EXPECT_EQ(13, count);
 }
 
 
