@@ -93,7 +93,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <OptimizeReferences>false</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
@@ -109,7 +109,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <OptimizeReferences>false</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
