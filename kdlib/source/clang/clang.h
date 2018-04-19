@@ -306,7 +306,7 @@ protected:
 
 
 
-class TypeInfoProviderClangEnum  : public TypeInfoEnumerator{
+class TypeInfoProviderClangEnum  : public TypeInfoEnumerator {
 
 public:
     

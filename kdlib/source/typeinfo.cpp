@@ -14,6 +14,7 @@
 #include "typeinfoimp.h"
 #include "typedvarimp.h"
 #include "processmon.h"
+#include "fnmatch.h"
 
 namespace {
 
@@ -1837,6 +1838,60 @@ TypeInfoSymbolProvider::TypeInfoSymbolProvider(const std::wstring&  pdbFile, MEM
 TypeInfoPtr TypeInfoSymbolProvider::getTypeByName(const std::wstring& name)
 {
    return loadType( m_symbolSession->getSymbolScope(), name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoEnumeratorPtr TypeInfoSymbolProvider::getTypeEnumerator(const std::wstring& mask)
+{
+    return TypeInfoEnumeratorPtr( new TypeInfoSymbolEnum(m_symbolSession, mask) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline
+bool isTypeTag(SymTags tag) 
+{
+    switch(tag)
+    {
+    case SymTagUDT:
+    case SymTagEnum:
+    case SymTagTypedef:
+        return true;
+    }
+
+    return false;
+}
+
+TypeInfoSymbolEnum::TypeInfoSymbolEnum(SymbolSessionPtr& symSession, const std::wstring& mask)
+{
+    m_index = 0;
+    SymbolPtr  symScope = symSession->getSymbolScope();
+    size_t  symCount = symScope->getChildCount();
+
+    for ( size_t index = 0; index < symCount; index++)
+    {
+        SymbolPtr sym = symScope->getChildByIndex(index);
+
+        if (!isTypeTag(sym->getSymTag()) )
+            continue;
+
+        std::wstring  symName = sym->getName();
+
+        if ( mask.empty() || fnmatch(mask, symName ) )
+        {
+            m_typeList.push_back( loadType(sym) );
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoSymbolEnum::Next()
+{
+    if ( m_index < m_typeList.size() )
+        return m_typeList[m_index++];
+    return TypeInfoPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

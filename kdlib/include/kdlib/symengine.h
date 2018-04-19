@@ -173,6 +173,7 @@ public:
     virtual unsigned long getBaseType() = 0;
     virtual BITOFFSET getBitPosition() = 0;
     virtual SymbolPtr getChildByIndex(unsigned long  index ) = 0;
+    virtual SymbolPtr getChildByIndex(unsigned long symTag, unsigned long  index ) = 0;
     virtual SymbolPtr getChildByName(const std::wstring &name ) = 0;
     virtual size_t getChildCount() = 0;
     virtual size_t getChildCount(unsigned long symTag ) = 0;

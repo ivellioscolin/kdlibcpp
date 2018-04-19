@@ -322,7 +322,12 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual SymbolPtr getChildByIndex(ULONG _index)
+    virtual SymbolPtr getChildByIndex(ULONG index)
+    {
+        return getChildByIndex(SymTagNull, index);
+    }
+
+    virtual SymbolPtr getChildByIndex(unsigned long symTag, unsigned long  index )
     {
         throw SymbolException(L"symbol not found");
     }
