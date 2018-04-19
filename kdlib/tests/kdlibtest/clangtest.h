@@ -367,3 +367,66 @@ TEST_F(ClangTest, Typedef)
     ASSERT_EQ(L"_Test", typeProvider->getTypeByName(L"TEST")->getName() );
 }
 
+TEST_F(ClangTest, TypeProviderEnum)
+{
+   const std::wstring  src = L"#include \"../../../kdlib/include/test/testvars.h\"";
+
+    TypeInfoProviderPtr  typeProvider;
+
+    ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromSource(src) );
+
+    TypeInfoEnumeratorPtr  typeEnum;
+    size_t  count;
+
+    ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator() );
+    for ( count = 0; 0 != typeEnum->Next(); ++count);
+    EXPECT_LT(1000, count);
+
+    ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator(L"struct*") );
+    for ( count = 0; 0 != typeEnum->Next(); ++count);
+    EXPECT_EQ(13, count);
+}
+
+
+static const wchar_t template_func_src1[] = L"\
+                                             \
+    template<typename T1, typename T2>       \
+    T1 func(T2 v) {                          \
+       return v * 10;                        \
+    }                                        \
+";
+
+
+static const wchar_t template_func_src2[] = L"\
+                                             \
+    template<typename T1, typename T2>       \
+    T1 func(T2 v) {                          \
+       return v * 10;                        \
+    }                                        \
+                                             \
+    template<>                               \
+    int func<int,int>(int v);                \
+    ";
+
+static const wchar_t template_func_src3[] = L"\
+                                             \
+    template<typename T>                     \
+    class Generic {                          \
+                                             \
+        int intMethod() {                    \
+            return 0;                        \
+        }                                    \
+                                             \
+        T  tMethod() {                       \
+            return 0;                        \
+        }                                    \
+    };                                       \
+";
+
+TEST_F(ClangTest, TemplateFunc)
+{
+    EXPECT_THROW(compileType(template_func_src1, L"func"), TypeException );
+    EXPECT_NO_THROW( compileType(template_func_src2, L"func") );
+    EXPECT_THROW( compileType(template_func_src3, L"Generic::intMethod"), TypeException );
+    EXPECT_THROW( compileType(template_func_src3, L"Generic::tMethod"), TypeException );
+}

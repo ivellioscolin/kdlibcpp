@@ -592,3 +592,22 @@ TEST_F(TypeInfoTest, GetScopeName)
 }
 
 
+TEST_F(TypeInfoTest, PdbProviderEnum)
+{
+    TypeInfoProviderPtr  typeProvider;
+
+    ASSERT_NO_THROW( typeProvider = getTypeInfoProviderFromPdb( m_targetModule->getSymFile() ) );
+
+    TypeInfoEnumeratorPtr  typeEnum;
+    size_t  count;
+
+    ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator() );
+    for ( count = 0; 0 != typeEnum->Next(); ++count);
+    EXPECT_LT(1000, count);
+
+    ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator(L"struct*") );
+    for ( count = 0; 0 != typeEnum->Next(); ++count);
+    EXPECT_EQ(12, count);
+}
+
+

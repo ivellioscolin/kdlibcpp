@@ -998,6 +998,22 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class TypeInfoSymbolEnum : public TypeInfoEnumerator {
+
+public:
+
+    TypeInfoSymbolEnum(SymbolSessionPtr& symSession, const std::wstring& mask);
+
+    virtual TypeInfoPtr Next();
+
+private:
+
+    std::vector<TypeInfoPtr>  m_typeList;
+    size_t  m_index;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 class TypeInfoSymbolProvider  : public TypeInfoProvider
 {
 public:
@@ -1007,6 +1023,8 @@ public:
 private:
 
     virtual TypeInfoPtr getTypeByName(const std::wstring& name);
+
+    virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask = L"");
 
 private:
 
