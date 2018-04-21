@@ -69,9 +69,7 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros">
-    <NuGetPackageImportStamp>9e622895</NuGetPackageImportStamp>
-  </PropertyGroup>
+  <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
@@ -233,16 +231,16 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets" Condition="Exists('$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets')" />
     <Import Project="$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
     <Import Project="$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets" Condition="Exists('$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" />
+    <Import Project="$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets" Condition="Exists('..\..\..\packages\boost.1.67.0.0\build\boost.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost.1.57.0.0\build\native\boost.targets'))" />
     <Error Condition="!Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets'))" />
     <Error Condition="!Exists('$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets'))" />
+    <Error Condition="!Exists('$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\boost.1.67.0.0\build\boost.targets'))" />
   </Target>
 </Project>
