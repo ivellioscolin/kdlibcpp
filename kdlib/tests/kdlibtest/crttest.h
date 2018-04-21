@@ -13,7 +13,7 @@ public:
     CrtTest() : ProcessFixture( L"typedvartest" ) {}
 };
 
-TEST_F(CrtTest, malloc)
+TEST_F(CrtTest, DISABLED_malloc)
 {
     kdlib::TypedVarPtr  malloc;
     kdlib::TypedVarPtr  free;

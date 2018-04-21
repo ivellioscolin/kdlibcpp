@@ -647,13 +647,13 @@ MEMOFFSET_64 StackFrameImpl::getOffset(unsigned long regRel, MEMOFFSET_REL relOf
     switch( regRel )
     {
     case rriInstructionPointer:
-        return (MEMOFFSET_64)( m_ip + relOffset );
+        return (MEMOFFSET_64)( m_cpuContext->getIP() + relOffset );
 
     case rriStackFrame:
-        return (MEMOFFSET_64)( m_fp + relOffset );
+        return (MEMOFFSET_64)( m_cpuContext->getFP() + relOffset );
 
     case rriStackPointer:
-        return (MEMOFFSET_64)( m_sp + relOffset );
+        return (MEMOFFSET_64)( m_cpuContext->getSP() + relOffset );
     }
 
     throw DbgException( "unknown relative offset" );

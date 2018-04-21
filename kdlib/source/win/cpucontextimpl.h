@@ -110,7 +110,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getIP() {
-        NOT_IMPLEMENTED();
+        return m_context.Rip;
     }
 
     virtual void setIP(MEMOFFSET_64 ip) {
@@ -118,7 +118,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getSP() {
-        NOT_IMPLEMENTED();
+        return m_context.Rsp;
     }
 
     virtual void setSP(MEMOFFSET_64 sp) {
@@ -126,7 +126,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getFP() {
-        NOT_IMPLEMENTED();
+        return m_context.Rbp;
     }
 
     virtual void setFP(MEMOFFSET_64 fp) {
@@ -182,7 +182,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getIP() {
-        NOT_IMPLEMENTED();
+        return m_context.Eip;
     }
 
     virtual void setIP(MEMOFFSET_64 ip) {
@@ -190,7 +190,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getSP() {
-        NOT_IMPLEMENTED();
+        return m_context.Esp;
     }
 
     virtual void setSP(MEMOFFSET_64 sp) {
@@ -198,7 +198,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getFP() {
-        NOT_IMPLEMENTED();
+        return m_context.Ebp;
     }
 
     virtual void setFP(MEMOFFSET_64 fp) {
@@ -255,7 +255,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getIP() {
-        NOT_IMPLEMENTED();
+        return m_context.Eip;
     }
 
     virtual void setIP(MEMOFFSET_64 ip) {
@@ -263,7 +263,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getSP() {
-        NOT_IMPLEMENTED();
+        return m_context.Esp;
     }
 
     virtual void setSP(MEMOFFSET_64 sp) {
@@ -271,7 +271,7 @@ public:
     }
 
     virtual MEMOFFSET_64 getFP() {
-        NOT_IMPLEMENTED();
+        return m_context.Ebp;
     }
 
     virtual void setFP(MEMOFFSET_64 fp) {
