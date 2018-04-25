@@ -239,12 +239,15 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|Win32'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|Win32'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
@@ -252,12 +255,15 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|x64'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|x64'">
     <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\Include\um;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -417,7 +423,7 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-  <Import Project="$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
+    <Import Project="$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
     <Import Project="$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets" Condition="Exists('$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" />
     <Import Project="$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets" Condition="Exists('$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets')" />
     <Import Project="$(SolutionDir)\packages\boost_atomic-src.1.67.0.0\build\boost_atomic-src.targets" Condition="Exists('$(SolutionDir)\packages\boost_atomic-src.1.67.0.0\build\boost_atomic-src.targets')" />
