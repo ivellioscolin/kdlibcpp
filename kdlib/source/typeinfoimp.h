@@ -348,17 +348,15 @@ protected:
 
 protected:
 
-    TypeInfoFields( const std::wstring &name, const std::wstring &scopeName ) :
+    TypeInfoFields( const std::wstring &name ) :
         m_fields( name ),
         m_name( name ),
-        m_scopeName(scopeName),
         m_fieldsGot(false)
         {}
 
     FieldCollection  m_fields;
 
     std::wstring  m_name;
-    std::wstring  m_scopeName;
 
     virtual void getFields() = 0;
 
@@ -366,7 +364,15 @@ private:
 
     bool m_fieldsGot;
 
-    void checkFields();
+    void checkFields()
+    {
+        if ( !m_fieldsGot )
+        {
+            getFields();
+            m_fieldsGot = true;
+        }
+    }
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -375,7 +381,7 @@ class SymbolFields : public TypeInfoFields
 {
 public:
     SymbolFields(SymbolPtr &symbol) :
-         TypeInfoFields( symbol->getName(), symbol->getScopeName() ),
+         TypeInfoFields( symbol->getName() ),
          m_symbol(symbol)
     {}
 

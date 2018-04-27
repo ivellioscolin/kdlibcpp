@@ -279,7 +279,7 @@ class TypeInfoClangEnum : public TypeInfoFields
 public:
 
      TypeInfoClangEnum(ClangASTSessionPtr& session, clang::EnumDecl* decl) :
-        TypeInfoFields(strToWStr(decl->getNameAsString()), L""),
+        TypeInfoFields(strToWStr(decl->getNameAsString())),
         m_astSession(session),
         m_decl(decl)
      {}

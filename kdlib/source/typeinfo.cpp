@@ -1064,31 +1064,6 @@ size_t TypeInfoFields::getAlignReq()
     return alignReq;
 }
 
-typedef std::map<std::pair<std::wstring, std::wstring>, FieldCollection> TypeInfoFieldsCache;
-static TypeInfoFieldsCache fieldsCache;
-
-void TypeInfoFields::checkFields()
-{
-  if (!m_fieldsGot)
-  {
-    if (!m_scopeName.empty())
-    {
-      TypeInfoFieldsCache::key_type cacheKey(m_scopeName, m_name);
-      TypeInfoFieldsCache::iterator fields = fieldsCache.find(cacheKey);
-      if (fields != fieldsCache.end())
-        m_fields = fields->second;
-      else
-      {
-        getFields();
-        fieldsCache.insert(std::make_pair(cacheKey, m_fields));
-      }
-    }
-    else
-      getFields();
-    m_fieldsGot = true;
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void TypeInfoUdt::getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize )
