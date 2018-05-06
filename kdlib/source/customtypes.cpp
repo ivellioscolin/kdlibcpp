@@ -14,7 +14,7 @@ class CustomBase : public TypeInfoFields {
 protected:
 
     CustomBase( const std::wstring &name, size_t align ) :
-        TypeInfoFields(name, L"")
+        TypeInfoFields(name)
         {
             m_align = align ? align : ptrSize();
             m_size = 0;

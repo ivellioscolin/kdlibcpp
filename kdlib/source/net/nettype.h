@@ -322,7 +322,7 @@ public:
 private:
 
     NetTypeClass(COR_TYPEID& typeId, MetaDataProviderPtr& metaProvider, const std::wstring& name, mdTypeDef token) :
-        TypeInfoFields(name, L""),
+        TypeInfoFields(name),
         m_typeId(typeId),
         m_metaProvider(metaProvider),
         m_name(name),
