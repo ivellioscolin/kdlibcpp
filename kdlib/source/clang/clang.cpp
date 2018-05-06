@@ -17,6 +17,7 @@
 
 #include "strconvert.h"
 #include "clang.h"
+#include "fnmatch.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -211,8 +212,8 @@ TypeInfoClangStruct::TypeInfoClangStruct(const std::wstring & name, ClangASTSess
         m_astSession(session),
         m_decl(decl)
 {
-    if ( decl->isInvalidDecl() )
-        throw TypeException(L"Invalid declaration");
+   // if ( decl->isInvalidDecl() )
+   ///     throw TypeException(L"Invalid declaration");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -389,17 +390,20 @@ void TypeInfoClangEnum::getFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StructDefVisitor : public RecursiveASTVisitor<StructDefVisitor> 
+class DeclNamedVisitor : public RecursiveASTVisitor<DeclNamedVisitor> 
 {
 public:
 
-    StructDefVisitor(ClangASTSessionPtr&  astSession, const std::string&  typeName) :
+    DeclNamedVisitor(ClangASTSessionPtr&  astSession, const std::string&  typeName) :
         m_session(astSession),
         m_typeName(typeName)
     {}
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
     {
+       if ( Declaration->isInvalidDecl() )
+            return true;
+
         std::string&  name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
@@ -415,6 +419,9 @@ public:
 
     bool VisitTypedefDecl(TypedefDecl  *Declaration)
     {
+       if ( Declaration->isInvalidDecl() )
+            return true;
+
         std::string&  name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
@@ -429,15 +436,24 @@ public:
 
     bool VisitFunctionDecl(FunctionDecl *Declaration)
     {
+       if ( Declaration->isInvalidDecl() )
+            return true;
+
+        if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind:: TK_FunctionTemplate )
+            return true;
+
+        if ( CXXRecordDecl  *parentClassDecl = llvm::dyn_cast<CXXRecordDecl>(Declaration->getDeclContext()))
+        {
+            if ( parentClassDecl->getDescribedClassTemplate() )
+                return true;
+        }
+
         std::string& name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
             return true;
 
-        if ( Declaration->isInvalidDecl() )
-            throw TypeException(L"Invalid declaration");
-
-        const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
+         const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
 
         m_typeInfo = TypeInfoPtr( new TypeInfoClangFunc(m_session, protoType ) );
 
@@ -446,6 +462,9 @@ public:
 
     bool VisitEnumDecl (EnumDecl *Declaration)
     {
+       if ( Declaration->isInvalidDecl() )
+            return true;
+
         std::string& name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
@@ -471,18 +490,271 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr ClangASTSession::getTypeInfo(const std::wstring& name)
+//class DeclNextVisitor : public RecursiveASTVisitor<DeclNextVisitor> 
+//{
+//public:
+//
+//    DeclNextVisitor(ClangASTSessionPtr&  astSession, const std::string&  mask, size_t  pos) :
+//        m_session(astSession),
+//        m_mask(mask),
+//        m_currentPos(0),
+//        m_startPos(pos)
+//    {}
+//
+//    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
+//    {
+//        try {
+//
+//            if (m_startPos > m_currentPos++ )
+//                return true;
+//
+//            if ( Declaration->isInvalidDecl() )
+//                return true;
+//
+//            CXXRecordDecl *   definition = Declaration->getDefinition();
+//
+//            if ( definition && definition->isInvalidDecl() )
+//                return true;
+//
+//            std::string  name = Declaration->getNameAsString();
+//
+//            if (m_mask.length() > 0 && !fnmatch(m_mask, name) )
+//                return true;
+//
+//            TypeInfoPtr  typeInfo;
+//
+//            if ( definition )
+//                typeInfo = TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_session, definition ) );
+//            else
+//                typeInfo = TypeInfoPtr( new TypeInfoClangStructNoDef( strToWStr(name), m_session, Declaration ) );
+//
+//            m_typeInfo = typeInfo;
+//    
+//            return false;
+//
+//        } catch(TypeException& )
+//        {}
+//
+//        return true;
+//    }
+//
+//    bool VisitFunctionDecl(FunctionDecl *Declaration)
+//    {
+//        try {
+//
+//            if (m_startPos > m_currentPos++ )
+//                return true;
+//
+//            if ( Declaration->isInvalidDecl() )
+//                return true;
+//
+//            if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind:: TK_FunctionTemplate )
+//                return true;
+//
+//            if ( CXXRecordDecl  *parentClassDecl = llvm::dyn_cast<CXXRecordDecl>(Declaration->getDeclContext()))
+//            {
+//                if ( parentClassDecl->getDescribedClassTemplate() )
+//                    return true;
+//            }
+//
+//            std::string  name = Declaration->getNameAsString();
+//
+//            if (m_mask.length() > 0 && !fnmatch(m_mask, name) )
+//                return true;
+//
+//            const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
+//
+//            TypeInfoPtr  typeInfo = TypeInfoPtr( new TypeInfoClangFunc(m_session, protoType ) );
+//
+//            m_typeInfo = typeInfo;
+//    
+//            return false;
+//
+//        } catch(TypeException& )
+//        {}
+//
+//        return true;
+//    }
+//
+//    bool VisitEnumDecl (EnumDecl *Declaration)
+//    {
+//       try {
+//
+//            if (m_startPos > m_currentPos++ )
+//                return true;
+//
+//           if ( Declaration->isInvalidDecl() )
+//                return true;
+//
+//            std::string  name = Declaration->getNameAsString();
+//
+//            if (m_mask.length() > 0 && !fnmatch(m_mask, name) )
+//                return true;
+//
+//            TypeInfoPtr  typeInfo = TypeInfoPtr( new TypeInfoClangEnum(m_session, Declaration) );
+//
+//            m_typeInfo = typeInfo;
+//    
+//            return false;
+//
+//        } catch(TypeException& )
+//        {}
+//
+//        return true;
+//    }
+//
+//    TypeInfoPtr  getTypeInfo() {
+//        return m_typeInfo;
+//    }
+//
+//    size_t currentPos() {
+//        return m_currentPos;
+//    }
+//
+//private:
+//
+//    std::string  m_mask;
+//
+//    ClangASTSessionPtr  m_session;
+//
+//    TypeInfoPtr  m_typeInfo;
+//
+//    size_t  m_currentPos;
+//    size_t  m_startPos;
+//};
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+class DeclNextVisitor : public RecursiveASTVisitor<DeclNextVisitor> 
 {
-    StructDefVisitor  visitor( shared_from_this(), wstrToStr(name) );
-    visitor.TraverseDecl( m_astUnit->getASTContext().getTranslationUnitDecl() );
 
-    TypeInfoPtr  ptr = visitor.getTypeInfo();
+public:
 
-    if (!ptr)
-        throw TypeException(L"Failed to get type from AST");
+    DeclNextVisitor(ClangASTSessionPtr& astSession, std::map<std::string, TypeInfoPtr>* typeMap) :
+        m_session(astSession),
+        m_typeMap(typeMap)
+   {}
 
-    return ptr;
-}
+    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
+    {
+        try {
+
+            CXXRecordDecl *   definition = Declaration->getDefinition();
+
+            if ( definition && definition->isInvalidDecl() )
+                return true;
+
+            std::string  name = Declaration->getQualifiedNameAsString();
+
+            TypeInfoPtr  typeInfo;
+
+            if ( definition )
+                typeInfo = TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_session, definition ) );
+            else
+                typeInfo = TypeInfoPtr( new TypeInfoClangStructNoDef( strToWStr(name), m_session, Declaration ) );
+    
+             (*m_typeMap)[name] = typeInfo;
+
+        } catch(TypeException& )
+        {}
+
+        return true;
+    }
+
+    bool VisitTypedefDecl(TypedefDecl  *Declaration)
+    {
+
+        try {
+
+           if ( Declaration->isInvalidDecl() )
+                return true;
+
+            std::string&  name = Declaration->getQualifiedNameAsString();
+
+            QualType  decl = Declaration->getUnderlyingType().getCanonicalType();
+
+            (*m_typeMap)[name] = getTypeForClangType(m_session, decl);
+
+        } catch(TypeException& )
+        {}
+
+        return true;
+    }
+
+
+    bool VisitFunctionDecl(FunctionDecl *Declaration)
+    {
+        try {
+
+            if ( Declaration->isInvalidDecl() )
+                return true;
+
+            if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind:: TK_FunctionTemplate )
+                return true;
+
+            if ( CXXRecordDecl  *parentClassDecl = llvm::dyn_cast<CXXRecordDecl>(Declaration->getDeclContext()))
+            {
+                if ( parentClassDecl->getDescribedClassTemplate() )
+                    return true;
+            }
+
+            std::string  name = Declaration->getQualifiedNameAsString();
+
+            const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
+
+            TypeInfoPtr  typeInfo = TypeInfoPtr( new TypeInfoClangFunc(m_session, protoType ) );
+
+            (*m_typeMap)[name] = typeInfo;
+
+        } catch(TypeException& )
+        {}
+
+        return true;
+    }
+
+    bool VisitEnumDecl (EnumDecl *Declaration)
+    {
+       try {
+           if ( Declaration->isInvalidDecl() )
+                return true;
+
+            std::string  name = Declaration->getQualifiedNameAsString();
+
+            TypeInfoPtr  typeInfo = TypeInfoPtr( new TypeInfoClangEnum(m_session, Declaration) );
+
+    
+            (*m_typeMap)[name] = typeInfo;
+
+        } catch(TypeException& )
+        {}
+
+        return true;
+    }
+
+private:
+
+
+    ClangASTSessionPtr  m_session;
+
+    std::map<std::string, TypeInfoPtr>  *m_typeMap;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+//TypeInfoPtr ClangASTSession::getTypeInfo(const std::wstring& name)
+//{
+//    DeclNamedVisitor  visitor( shared_from_this(), wstrToStr(name) );
+//    visitor.TraverseDecl( m_astUnit->getASTContext().getTranslationUnitDecl() );
+//
+//    TypeInfoPtr  ptr = visitor.getTypeInfo();
+//
+//    if (!ptr)
+//        throw TypeException(L"Failed to get type from AST");
+//
+//    return ptr;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -533,13 +805,55 @@ TypeInfoProviderClang::TypeInfoProviderClang( const std::wstring& sourceCode, co
     std::unique_ptr<ASTUnit>  ast = buildASTFromCodeWithArgs(wstrToStr(sourceCode), args );
 
     m_astSession = ClangASTSession::getASTSession(ast);
+
+    DeclNextVisitor   visitor(m_astSession, &m_typeCache);
+
+    visitor.TraverseDecl( m_astSession->getASTContext().getTranslationUnitDecl() );
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 TypeInfoPtr TypeInfoProviderClang::getTypeByName(const std::wstring& name)
 {
-    return m_astSession->getTypeInfo(name);
+    auto  foundType = m_typeCache.find( wstrToStr(name) );
+
+    if ( foundType == m_typeCache.end() )
+        throw TypeException(name, L"Failed to get type");
+
+    return foundType->second;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoEnumeratorPtr TypeInfoProviderClang::getTypeEnumerator(const std::wstring& mask) 
+{
+    return TypeInfoEnumeratorPtr( new TypeInfoProviderClangEnum(mask, shared_from_this()) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoProviderClangEnum::TypeInfoProviderClangEnum(const std::wstring& mask, boost::shared_ptr<TypeInfoProviderClang>& clangProvider )
+{
+    m_index = 0;
+
+    std::string  ansimask = wstrToStr(mask);
+
+    std::for_each( clangProvider->m_typeCache.begin(), clangProvider->m_typeCache.end(),
+        [&]( const std::pair<std::string, TypeInfoPtr> &it ) {
+            if (ansimask.empty() || fnmatch(ansimask, it.first) )
+                m_typeList.push_back(it.second);
+        }
+    );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoProviderClangEnum::Next()
+{
+    if ( m_index < m_typeList.size() )
+        return m_typeList[m_index++];
+    return TypeInfoPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -550,7 +864,6 @@ TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
 
 }
 

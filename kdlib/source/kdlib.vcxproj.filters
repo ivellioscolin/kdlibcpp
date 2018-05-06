@@ -140,6 +140,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\lib\native\src\win32\boost_thread-src.win32.tss_pe.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\lib\native\src\boost_thread-src.future.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\lib\native\src\boost_thread-src.tss_null.cpp" />
+    <ClCompile Include="fnmatch.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -281,6 +284,9 @@
     </ClInclude>
     <ClInclude Include="..\include\kdlib\tagged.h">
       <Filter>kdlib/include</Filter>
+    </ClInclude>
+    <ClInclude Include="fnmatch.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

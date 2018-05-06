@@ -203,7 +203,7 @@ public:
 
     DiaSession( IDiaSession* session, IDiaSymbol *globalScope, const std::wstring symbolFile ) :
         m_globalScope( globalScope ),
-        m_globalSymbol( DiaSymbol::fromGlobalScope( globalScope, getScopeName( session ) ) ),
+        m_globalSymbol( DiaSymbol::fromGlobalScope( globalScope, getScopeName( session, globalScope ) ) ),
         m_session( session ),
         m_symbolFileName( symbolFile )
         {}
@@ -222,7 +222,7 @@ public:
 
 private:
 
-    static std::wstring getScopeName( IDiaSession* session );
+    static std::wstring getScopeName( IDiaSession* session, IDiaSymbol *globalScope );
 
     ULONG findRvaByName( const std::string &name );
 

@@ -44,6 +44,7 @@
     <ClCompile Include="dia\diawrapper.cpp" />
     <ClCompile Include="dia\symexport.cpp" />
     <ClCompile Include="disasm.cpp" />
+    <ClCompile Include="fnmatch.cpp" />
     <ClCompile Include="memaccess.cpp" />
     <ClCompile Include="module.cpp" />
     <ClCompile Include="net\metadata.cpp" />
@@ -110,6 +111,7 @@
     <ClInclude Include="dataaccessorimpl.h" />
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />
+    <ClInclude Include="fnmatch.h" />
     <ClInclude Include="moduleimp.h" />
     <ClInclude Include="net\metadata.h" />
     <ClInclude Include="net\net.h" />

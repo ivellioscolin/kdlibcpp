@@ -15,6 +15,7 @@ namespace kdlib {
 class ClangASTSession;
 typedef boost::shared_ptr<ClangASTSession>  ClangASTSessionPtr;
 
+class TypeInfoProviderClang;
 
 
 class ClangASTSession : public boost::enable_shared_from_this<ClangASTSession>
@@ -25,7 +26,7 @@ public:
         return ClangASTSessionPtr( new ClangASTSession(astUnit) );
     }
 
-    TypeInfoPtr getTypeInfo(const std::wstring& name);
+    //TypeInfoPtr getTypeInfo(const std::wstring& name);
 
     clang::ASTContext&  getASTContext() {
           return m_astUnit->getASTContext();
@@ -304,8 +305,29 @@ protected:
 };
 
 
-class TypeInfoProviderClang : public TypeInfoProvider
+
+class TypeInfoProviderClangEnum  : public TypeInfoEnumerator {
+
+public:
+    
+    virtual TypeInfoPtr Next();
+
+    TypeInfoProviderClangEnum(const std::wstring& mask, boost::shared_ptr<TypeInfoProviderClang>& clangProvider );
+
+
+private:
+
+    size_t   m_index;
+
+    std::vector<TypeInfoPtr>  m_typeList;
+};
+
+
+class TypeInfoProviderClang : public TypeInfoProvider, public boost::enable_shared_from_this<TypeInfoProviderClang>
 {
+
+    friend TypeInfoProviderClangEnum;
+
 public:
 
     TypeInfoProviderClang( const std::wstring&  sourceCode, const std::wstring&  compileOptions);
@@ -314,9 +336,13 @@ private:
 
     virtual TypeInfoPtr getTypeByName(const std::wstring& name);
 
+    virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask);
+
 private:
 
     ClangASTSessionPtr  m_astSession;
+
+    std::map< std::string, TypeInfoPtr>  m_typeCache;
 
 };
 

@@ -765,14 +765,28 @@ unsigned long DiaSymbol::getVirtualBaseOffset()
 
 //////////////////////////////////////////////////////////////////////////////
 
-std::wstring DiaSession::getScopeName( IDiaSession* session )
+std::wstring DiaSession::getScopeName( IDiaSession* session, IDiaSymbol *globalScope )
 {
-  ULONGLONG loadBase;
-  HRESULT hres = session->get_loadAddress(&loadBase);
-  if (S_OK != hres)
-    return L"";
+  std::wstring scopeName;
+  // Try to get module name as scope
+  try
+  {
+    ULONGLONG loadBase;
+    HRESULT hres = session->get_loadAddress(&loadBase);
+    if (S_OK != hres)
+      return L"";
 
-  return getModuleName(loadBase);
+    scopeName = getModuleName(loadBase);
+  }
+  catch (DbgException e) // fallback to pdb name
+  {
+    HRESULT hres;
+    BSTR bstrName = NULL;
+    hres = globalScope->get_name(&bstrName);
+    if (S_OK == hres)
+      scopeName = std::wstring(_bstr_t(bstrName, false));
+  }
+  return scopeName;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -799,7 +813,7 @@ SymbolPtr DiaSession::findByRva( ULONG rva, ULONG symTag, LONG* pdisplacement )
     if (pdisplacement)
         *pdisplacement = displacement;
 
-    return SymbolPtr( new DiaSymbol(child, getScopeName( m_session ), m_globalSymbol->getMachineType() ) );
+    return SymbolPtr( new DiaSymbol(child, m_globalSymbol->getScopeName(), m_globalSymbol->getMachineType() ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

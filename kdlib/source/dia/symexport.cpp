@@ -88,6 +88,11 @@ class ExportSymbolBase : public Symbol
         NOT_IMPLEMENTED();
     }
 
+    virtual SymbolPtr getChildByIndex(unsigned long symTag, unsigned long  index )
+    {
+        NOT_IMPLEMENTED();
+    }
+
     virtual SymbolPtr getChildByName(const std::wstring &_name )
     {
         NOT_IMPLEMENTED();
