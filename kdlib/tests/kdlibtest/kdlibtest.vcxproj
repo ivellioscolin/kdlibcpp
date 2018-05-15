@@ -181,43 +181,43 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\test\testvars.h" />
     <ClInclude Include="basefixture.h" />
-    <ClInclude Include="breakhandler.h" />
-    <ClInclude Include="clangtest.h" />
-    <ClInclude Include="cputest.h" />
-    <ClInclude Include="crttest.h" />
-    <ClInclude Include="disasmtest.h" />
     <ClInclude Include="eventhandlermock.h" />
-    <ClInclude Include="eventhandlertest.h" />
     <ClInclude Include="memdumpfixture.h" />
-    <ClInclude Include="memorytest.h" />
-    <ClInclude Include="moduletest.h" />
-    <ClInclude Include="nettest.h" />
-    <ClInclude Include="processtest.h" />
     <ClInclude Include="procfixture.h" />
-    <ClInclude Include="regtest_x64.h" />
-    <ClInclude Include="stacktest.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="taggedtest.h" />
-    <ClInclude Include="targettest.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="typedvartest.h" />
-    <ClInclude Include="typeinfotest.h" />
-    <ClInclude Include="varianttest.h" />
-    <ClInclude Include="winapitest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\comdate\testfunc.cpp" />
     <ClCompile Include="..\comdate\testvars.cpp" />
+    <ClCompile Include="breakhandler.cpp" />
+    <ClCompile Include="clangtest.cpp" />
+    <ClCompile Include="cputest.cpp" />
+    <ClCompile Include="crttest.cpp" />
+    <ClCompile Include="disasmtest.cpp" />
+    <ClCompile Include="eventhandlertest.cpp" />
     <ClCompile Include="googlemock\src\gmock-all.cc">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="googletest\src\gtest-all.cc">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>     
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="kdlibtest.cpp" />
+    <ClCompile Include="memorytest.cpp" />
+    <ClCompile Include="moduletest.cpp" />
+    <ClCompile Include="nettest.cpp" />
+    <ClCompile Include="processtest.cpp" />
+    <ClCompile Include="regtest_x64.cpp" />
+    <ClCompile Include="stacktest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="taggedtest.cpp" />
+    <ClCompile Include="targettest.cpp" />
+    <ClCompile Include="typedvartest.cpp" />
+    <ClCompile Include="typeinfotest.cpp" />
+    <ClCompile Include="varianttest.cpp" />
+    <ClCompile Include="winapitest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\source\kdlib.vcxproj">

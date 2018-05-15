@@ -1,4 +1,4 @@
-#pragma once
+#include <stdafx.h>
 
 #include "procfixture.h"
 #include "kdlib/memaccess.h"
@@ -258,16 +258,16 @@ TEST_F(MemoryTest, InvalidBigRegion)
 
 TEST_F(MemoryTest, testPartial)
 {
-    const auto delta = sizeof(ULONGLONG) / 2;
+    const auto delta = sizeof(unsigned long long) / 2;
     const MEMOFFSET_64 offset = m_targetModule->getEnd() - delta;
 
-    EXPECT_THROW(loadBytes(offset, sizeof(ULONGLONG)), MemoryException);
+    EXPECT_THROW(loadBytes(offset, sizeof(unsigned long long)), MemoryException);
     EXPECT_THROW(ptrQWord(offset), MemoryException);
 
-    EXPECT_THROW(writeBytes(offset, std::vector<unsigned char>(sizeof(ULONGLONG))), MemoryException);
+    EXPECT_THROW(writeBytes(offset, std::vector<unsigned char>(sizeof(unsigned long long))), MemoryException);
     EXPECT_THROW(setQWord(offset, 0), MemoryException);
 
-    ULONGLONG tmp;
+    unsigned long long tmp;
     unsigned long readed = 0;
     EXPECT_NO_THROW( readMemory(offset, &tmp, sizeof(tmp), false, &readed) );
     EXPECT_EQ( delta, readed );

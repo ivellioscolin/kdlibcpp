@@ -1,10 +1,8 @@
-#pragma once
+#include <stdafx.h>
 
 #include "procfixture.h"
 
-#include "kdlib/typedvar.h"
-#include "kdlib/exceptions.h"
-#include "kdlib/cpucontext.h"
+#include "kdlib/kdlib.h"
 
 #include "test/testvars.h"
 #include "test/testfunc.h"

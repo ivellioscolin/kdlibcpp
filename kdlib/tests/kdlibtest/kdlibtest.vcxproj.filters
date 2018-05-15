@@ -11,78 +11,78 @@
     </ClCompile>
     <ClCompile Include="googletest\src\gtest-all.cc" />
     <ClCompile Include="googlemock\src\gmock-all.cc" />
+    <ClCompile Include="breakhandler.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="clangtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="cputest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="crttest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="disasmtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="eventhandlertest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="memorytest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="moduletest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="nettest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="processtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="regtest_x64.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="stacktest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="taggedtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="targettest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="typedvartest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="typeinfotest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="varianttest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="winapitest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="breakhandler.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="cputest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="memorytest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="moduletest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="stacktest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\test\testvars.h">
       <Filter>testdata</Filter>
-    </ClInclude>
-    <ClInclude Include="processtest.h">
-      <Filter>testcases</Filter>
     </ClInclude>
     <ClInclude Include="procfixture.h">
       <Filter>testfixtures</Filter>
     </ClInclude>
-    <ClInclude Include="varianttest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="typeinfotest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="typedvartest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
     <ClInclude Include="basefixture.h">
       <Filter>testfixtures</Filter>
-    </ClInclude>
-    <ClInclude Include="eventhandlertest.h">
-      <Filter>testcases</Filter>
     </ClInclude>
     <ClInclude Include="eventhandlermock.h">
       <Filter>testfixtures</Filter>
     </ClInclude>
-    <ClInclude Include="disasmtest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="targettest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
     <ClInclude Include="memdumpfixture.h">
       <Filter>testfixtures</Filter>
-    </ClInclude>
-    <ClInclude Include="winapitest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="crttest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="regtest_x64.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="clangtest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="nettest.h">
-      <Filter>testcases</Filter>
-    </ClInclude>
-    <ClInclude Include="taggedtest.h">
-      <Filter>testcases</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

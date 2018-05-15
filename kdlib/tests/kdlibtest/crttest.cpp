@@ -1,8 +1,8 @@
-#pragma once 
+#include <stdafx.h>
 
-#include "gtest/gtest.h"
+#include "kdlib/kdlib.h"
 
-#include "kdlib/typedvar.h"
+using namespace kdlib;
 
 #include "procfixture.h"
 

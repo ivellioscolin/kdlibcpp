@@ -1,11 +1,11 @@
-#pragma once
+#include <stdafx.h>
 
 #include <math.h>
 
 #include "procfixture.h"
+#include "eventhandlermock.h"
 
-#include "kdlib/stack.h"
-#include "kdlib/memaccess.h"
+#include "kdlib/kdlib.h"
 
 using namespace kdlib;
 

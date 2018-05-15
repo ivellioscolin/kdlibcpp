@@ -1,4 +1,4 @@
-#pragma once
+#include <stdafx.h>
 
 #include "procfixture.h"
 #include "kdlib/disasm.h"

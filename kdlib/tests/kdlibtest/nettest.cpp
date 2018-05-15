@@ -1,9 +1,9 @@
-#pragma once
+#include <stdafx.h>
 
 #include "procfixture.h"
-#include "kdlib/heap.h"
+#include "kdlib/kdlib.h"
 
-
+using namespace kdlib;
 
 class NetTest : public NetProcessFixture
 {

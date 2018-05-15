@@ -1,4 +1,6 @@
-#pragma once
+#include <stdafx.h>
+
+#ifdef _M_AMD64 
 
 #include "procfixture.h"
 
@@ -32,4 +34,4 @@ TEST_F(RegTest, RegisterAccessor)
     EXPECT_THROW(getRegisterAccessor(L"RAX"), CPUException);
 }
 
-
+#endif
