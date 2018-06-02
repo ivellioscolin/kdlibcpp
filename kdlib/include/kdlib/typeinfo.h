@@ -34,7 +34,7 @@ MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
 std::wstring findSymbol( MEMOFFSET_64 offset);
 std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 
-class TypeInfo : private boost::noncopyable {
+class TypeInfo : public NumConvertable, private boost::noncopyable {
 
     friend TypeInfoPtr loadType( const std::wstring &symName );
     friend TypeInfoPtr loadType( SymbolPtr &symbol );
@@ -42,14 +42,6 @@ class TypeInfo : private boost::noncopyable {
     friend size_t getSymbolSize( const std::wstring &name );
 
 public:
-
-    operator NumVariant() {
-        return getValue();
-    }
-
-    operator NumVariant() const {
-        return getValue();
-    }
 
     virtual std::wstring str() = 0;
 
@@ -113,8 +105,6 @@ public:
 
     virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
     virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
-    
-    virtual NumVariant getValue() const = 0;
 
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
     virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;

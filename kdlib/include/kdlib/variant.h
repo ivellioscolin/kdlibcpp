@@ -524,121 +524,6 @@ public:
     friend NumVariant operator--(NumVariant& v1, int);
     friend NumVariant operator-(const NumVariant& v1);
 
-
-/*
-    friend bool operator==(const NumVariant& v1, const NumVariant& v2)
-    {
-        return NumVariant::op<bool, equal_op >( v1, v2 );
-    }
-
-    friend bool operator!(const NumVariant& v1)
-    {
-        return NumVariant::op<bool, equal_op >( v1, NumVariant(0) );
-    }
-
-    friend bool operator<(const NumVariant& v1, const NumVariant& v2)
-    {
-        return NumVariant::op<bool, gt_op >( v1, v2 );
-    }
-
-    friend  bool operator&&(const NumVariant& v1, const NumVariant& v2)
-    {
-        return !NumVariant::op<bool, equal_op >( v1, NumVariant(0) ) &&  !NumVariant::op<bool, equal_op >( v2, NumVariant(0) );
-    }
-
-    friend  bool operator||(const NumVariant& v1, const NumVariant& v2)
-    {
-        return !NumVariant::op<bool, equal_op >( v1, NumVariant(0) ) || !NumVariant::op<bool, equal_op >( v2, NumVariant(0) );
-    }
-
-    friend NumVariant operator<<=( NumVariant& v1, const NumVariant& v2)
-    {
-        NumVariant::NumType  safeArgType = v1.m_numType;
-        v1 = NumVariant::whole_op<NumVariant, lshift_op >( v1, v2 ).cast(safeArgType);
-        return v1;
-    }
-
-    friend NumVariant operator>>=( NumVariant& v1, const NumVariant& v2)
-    {
-        NumVariant::NumType  safeArgType = v1.m_numType;
-        v1 = NumVariant::whole_op<NumVariant, rshift_op >( v1, v2 ).cast(safeArgType);
-        return v1;
-    }
-
-    friend NumVariant operator+=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::op<NumVariant, add_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator-=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::op<NumVariant, sub_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator*=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::op<NumVariant, mul_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator/=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::op<NumVariant, div_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator%=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::whole_op<NumVariant, mod_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator|=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::whole_op<NumVariant, or_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator&=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::whole_op<NumVariant, and_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator^=( NumVariant& v1, const NumVariant& v2)
-    {
-        v1 = NumVariant::whole_op<NumVariant, xor_op >( v1, v2 );
-        return v1;
-    }
-
-    friend NumVariant operator~( NumVariant& v1)
-    {
-        NumVariant  v2(~0ULL);
-        v2 = v2.cast( v1.m_numType );
-
-        return NumVariant::whole_op<NumVariant, xor_op >( v1, v2 );
-    }
-
-    friend NumVariant operator++( NumVariant& v1)
-    {
-        v1 = NumVariant::op<NumVariant, add_op >( v1, NumVariant(1) );
-        return v1;
-    }
-
-    friend NumVariant operator--( NumVariant& v1)
-    {
-        v1 = NumVariant::op<NumVariant, sub_op >( v1, NumVariant(1) );
-        return v1;
-    }
-
-    friend NumVariant operator-( NumVariant& v1)
-    {
-        return NumVariant::op<NumVariant, sub_op >( NumVariant(0), v1 );
-    }
-    */
-
     template< typename RetT, template<class> class FuncT>
     static
     RetT all_op( const NumVariant& v1, const NumVariant& v2 )
@@ -1066,139 +951,21 @@ NumVariant::operator bool() {
 }
 
 
-
-
-/*
-class NumBehavior : boost::operators<NumBehavior>, boost::left_shiftable<NumBehavior>, boost::right_shiftable<NumBehavior>
+class NumConvertable
 {
-
 public:
-
-    operator NumVariant() const {
-        return getValue();
-    }
 
     operator NumVariant() {
         return getValue();
     }
 
-    char asChar() {
-        return getValue().asChar();
+    operator NumVariant() const {
+        return getValue();
     }
 
-    unsigned char asUChar() {
-        return getValue().asUChar();
-    }
-
-    short asShort() {
-        return getValue().asShort();
-    }
-
-    unsigned short asUShort() {
-        return getValue().asUShort();
-    }
-
-    long asLong() {
-        return getValue().asLong();
-    }
-
-    unsigned long asULong() {
-        return getValue().asULong();
-    }
-
-    long long asLongLong() {
-        return getValue().asLongLong();
-    }
-
-    unsigned long long asULongLong() {
-        return getValue().asULongLong();
-    }
-
-    int asInt() {
-        return getValue().asInt();
-    }
-
-    unsigned int asUInt() {
-        return getValue().asUInt();
-    }
-
-    float asFloat() {
-        return getValue().asFloat();
-    }
-
-    double asDouble() {
-        return getValue().asDouble();
-    }
-
-    template <typename T>
-    operator T() ;
-
-protected:
-
-    virtual NumVariant getValue() const  = 0;
+    virtual NumVariant getValue() const = 0;
 
 };
-
-inline 
-NumBehavior::operator char() {
-    return asChar();
-}
-
-inline 
-NumBehavior::operator unsigned char() {
-    return asUChar();
-}
-
-inline 
-NumBehavior::operator short() {
-    return asShort();
-}
-
-inline 
-NumBehavior::operator unsigned short() {
-    return asUShort();
-}
-
-inline
-NumBehavior::operator unsigned long() {
-     return asULong();
-}
-
-inline
-NumBehavior::operator long() {
-     return asLong();
-}
-
-inline
-NumBehavior::operator unsigned long long() {
-     return asULongLong();
-}
-
-inline
-NumBehavior::operator long long() {
-     return asLongLong();
-}
-
-inline
-NumBehavior::operator float() {
-     return asFloat();
-}
-
-inline
-NumBehavior::operator double() {
-     return asDouble();
-}
-
-inline
-NumBehavior::operator bool() {
-     return asChar() != 0;
-}
-
-inline 
-NumBehavior::operator void*() {
-    return reinterpret_cast<void*>(asULongLong());
-}
-*/
 
 ///////////////////////////////////////////////////////////////////////////////
 

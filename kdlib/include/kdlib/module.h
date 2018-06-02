@@ -30,17 +30,9 @@ typedef std::list< SymbolOffset > SymbolOffsetList;
 typedef std::list< std::wstring > TypeNameList;
 
 
-class Module : private boost::noncopyable {
+class Module : public NumConvertable, private boost::noncopyable {
     
 public:
-
-    operator NumVariant() {
-        return getBase();
-    }
-
-    operator NumVariant() const {
-        return getBase();
-    }
 
     virtual std::wstring  getName() = 0;
 
