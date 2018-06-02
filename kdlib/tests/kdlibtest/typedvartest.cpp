@@ -160,6 +160,9 @@ TEST_F( TypedVarTest, GetElementName )
 TEST_F( TypedVarTest, ArithmOp )
 {
     EXPECT_EQ( ucharVar + 20, *loadTypedVar(L"ucharVar") + 20);
+    EXPECT_EQ(ushortVar * ulonglongVar, *loadTypedVar(L"ushortVar") * *loadTypedVar(L"ulonglongVar"));
+    EXPECT_FLOAT_EQ(floatVar / ulongConst, *loadTypedVar(L"floatVar") / *loadTypedVar(L"ulongConst"));
+    EXPECT_EQ(longVar % 1234, *loadTypedVar(L"longVar") % *makeLongConst(1234) );
 }
 
 TEST_F( TypedVarTest, Enum )
@@ -676,7 +679,7 @@ TEST_F(TypedVarTest, InvalidAddress)
     ASSERT_NO_THROW(var = loadTypedVar(structType, 0x0) );
 
     EXPECT_EQ( structType->getSize(), var->getSize() );
-    EXPECT_EQ( 0x0, var->asULongLong() );
+    EXPECT_EQ( 0x0, *var);
     EXPECT_NO_THROW( var->str() );
     EXPECT_NO_THROW( var->getElement(0) );
 }

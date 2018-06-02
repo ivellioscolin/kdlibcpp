@@ -117,7 +117,7 @@ struct rshift_op {
 
 
 
-class NumVariant : boost::operators<NumVariant>, boost::left_shiftable<NumVariant>, boost::right_shiftable<NumVariant>
+class NumVariant 
 {
 
 public:
@@ -491,6 +491,41 @@ public:
         m_doubleVal = val;
     }
 
+    friend bool operator==(const NumVariant& v1, const NumVariant& v2);
+    friend bool operator!=(const NumVariant& v1, const NumVariant& v2);
+    friend bool operator<(const NumVariant& v1, const NumVariant& v2);
+    friend bool operator<=(const NumVariant& v1, const NumVariant& v2);
+    friend bool operator>(const NumVariant& v1, const NumVariant& v2);
+    friend bool operator>=(const NumVariant& v1, const NumVariant& v2);
+    friend bool operator&&(const NumVariant& v1, const NumVariant& v2);
+    friend bool operator||(const NumVariant& v1, const NumVariant& v2);
+
+
+    friend NumVariant operator+(const NumVariant& v1, const NumVariant& v2);
+    friend NumVariant operator-(const NumVariant& v1, const NumVariant& v2);
+    friend NumVariant operator*(const NumVariant& v1, const NumVariant& v2);
+    friend NumVariant operator/(const NumVariant& v1, const NumVariant& v2);
+
+    friend NumVariant operator^(const NumVariant& v1, const NumVariant& v2);
+    friend NumVariant operator&(const NumVariant& v1, const NumVariant& v2);
+    friend NumVariant operator|(const NumVariant& v1, const NumVariant& v2);
+
+    friend NumVariant operator%(const NumVariant& v1, const NumVariant& v2);
+
+    friend NumVariant operator<<(const NumVariant& v1, const NumVariant& v2);
+    friend NumVariant operator>>(const NumVariant& v1, const NumVariant& v2);
+
+    friend NumVariant operator~(const NumVariant& v1);
+    friend bool operator!(const NumVariant& v1);
+
+    friend NumVariant operator++(NumVariant& v1);
+    friend NumVariant operator--(NumVariant& v1);
+    friend NumVariant operator++(NumVariant& v1, int);
+    friend NumVariant operator--(NumVariant& v1, int);
+    friend NumVariant operator-(const NumVariant& v1);
+
+
+/*
     friend bool operator==(const NumVariant& v1, const NumVariant& v2)
     {
         return NumVariant::op<bool, equal_op >( v1, v2 );
@@ -602,10 +637,11 @@ public:
     {
         return NumVariant::op<NumVariant, sub_op >( NumVariant(0), v1 );
     }
+    */
 
     template< typename RetT, template<class> class FuncT>
     static
-    RetT op( const NumVariant& v1, const NumVariant& v2 )
+    RetT all_op( const NumVariant& v1, const NumVariant& v2 )
     {
         NumVariant::NumType  t = maxType( v1, v2 );
         NumVariant v3 = v1.cast( t );
@@ -620,12 +656,12 @@ public:
             return FuncT<double>()(v3.m_doubleVal, v4.m_doubleVal);
         }
 
-        return whole_op<RetT, FuncT>( v3, v4 );
+        return int_op<RetT, FuncT>( v3, v4 );
     }
 
     template< typename RetT, template<class> class FuncT>
     static
-    RetT whole_op( const NumVariant& v1, const NumVariant& v2 )
+    RetT int_op( const NumVariant& v1, const NumVariant& v2 )
     {
         NumVariant::NumType  t = maxType( v1, v2 );
         NumVariant v3 = v1.cast( t );
@@ -670,6 +706,9 @@ public:
 
         throw NumVariantError();
     }
+
+    template <typename T>
+    operator T();
 
 private:
 
@@ -835,7 +874,201 @@ private:
 };
 
 
+inline bool operator==(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::all_op<bool, equal_op>(v1, v2);
+}
 
+inline bool operator!=(const NumVariant& v1, const NumVariant& v2)
+{
+    return !(v1 == v2);
+}
+
+inline bool operator<(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::all_op<bool, gt_op>(v1, v2);
+}
+
+inline bool operator<=(const NumVariant& v1, const NumVariant& v2)
+{
+    return !(v1 > v2);
+}
+
+inline bool operator>(const NumVariant& v1, const NumVariant& v2)
+{
+    return v2 < v1;
+}
+
+inline bool operator>=(const NumVariant& v1, const NumVariant& v2)
+{
+    return !(v1 < v2);
+}
+
+inline bool operator&&(const NumVariant& v1, const NumVariant& v2)
+{
+    return !(NumVariant::all_op<bool, equal_op >(v1, NumVariant(0)) || NumVariant::all_op<bool, equal_op >(v2, NumVariant(0)));
+}
+
+inline bool operator||(const NumVariant& v1, const NumVariant& v2)
+{
+    return !(NumVariant::all_op<bool, equal_op >(v1, NumVariant(0)) && NumVariant::all_op<bool, equal_op >(v2, NumVariant(0)));
+}
+
+inline NumVariant operator+(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::all_op<NumVariant, add_op>(v1, v2);
+}
+
+inline NumVariant operator-(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::all_op<NumVariant, sub_op>(v1, v2);
+}
+
+inline NumVariant operator*(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::all_op<NumVariant, mul_op>(v1, v2);
+}
+
+inline NumVariant operator/(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::all_op<NumVariant, div_op>(v1, v2);
+}
+
+inline NumVariant operator%(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::int_op<NumVariant, mod_op>(v1, v2);
+}
+
+inline NumVariant operator^(const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::int_op<NumVariant, xor_op >(v1, v2);
+}
+
+inline NumVariant operator& (const NumVariant& v1, const NumVariant& v2)
+{
+    return NumVariant::int_op<NumVariant, and_op >(v1, v2);
+}
+
+inline NumVariant operator| (const NumVariant& v1, const NumVariant& v2)
+{
+    return  NumVariant::int_op<NumVariant, or_op >(v1, v2);
+}
+
+inline NumVariant operator<<(const NumVariant& v1, const NumVariant& v2)
+{
+    NumVariant::NumType  safeArgType = v1.m_numType;
+    return  NumVariant::int_op<NumVariant, lshift_op >(v1, v2).cast(safeArgType);
+}
+
+inline NumVariant operator>>(const NumVariant& v1, const NumVariant& v2)
+{
+    NumVariant::NumType  safeArgType = v1.m_numType;
+    return  NumVariant::int_op<NumVariant, rshift_op >(v1, v2).cast(safeArgType);
+}
+
+inline NumVariant operator~(const NumVariant& v1)
+{
+    NumVariant  v2(~0ULL);
+    v2 = v2.cast(v1.m_numType);
+    return NumVariant::int_op<NumVariant, xor_op >(v1, v2);
+}
+
+inline bool operator!(const NumVariant& v1)
+{
+    return NumVariant::all_op<bool, equal_op >(v1, NumVariant(0));
+}
+
+inline NumVariant operator++(NumVariant& v1)
+{
+    v1 = v1 + NumVariant(1).cast(v1.m_numType);
+    return v1;
+}
+
+inline NumVariant operator--(NumVariant& v1)
+{
+    v1 = v1 - NumVariant(1).cast(v1.m_numType);
+    return v1;
+}
+
+inline NumVariant operator++(NumVariant& v1, int)
+{
+    auto t = v1;
+    v1 = v1 + NumVariant(1).cast(v1.m_numType);
+    return t;
+}
+
+inline NumVariant operator--(NumVariant& v1, int)
+{
+    auto t = v1;
+    v1 = v1 - NumVariant(1).cast(v1.m_numType);
+    return t;
+}
+
+inline NumVariant operator-(const NumVariant& v1)
+{
+    return NumVariant(0).cast(v1.m_numType) - v1;
+}
+
+
+inline
+NumVariant::operator char() {
+    return asChar();
+}
+
+inline
+NumVariant::operator unsigned char() {
+    return asUChar();
+}
+
+inline
+NumVariant::operator short() {
+    return asShort();
+}
+
+inline
+NumVariant::operator unsigned short() {
+    return asUShort();
+}
+
+inline
+NumVariant::operator unsigned long() {
+    return asULong();
+}
+
+inline
+NumVariant::operator long() {
+    return asLong();
+}
+
+inline
+NumVariant::operator unsigned long long() {
+    return asULongLong();
+}
+
+inline
+NumVariant::operator long long() {
+    return asLongLong();
+}
+
+inline
+NumVariant::operator float() {
+    return asFloat();
+}
+
+inline
+NumVariant::operator double() {
+    return asDouble();
+}
+
+inline
+NumVariant::operator bool() {
+    return asChar() != 0;
+}
+
+
+
+
+/*
 class NumBehavior : boost::operators<NumBehavior>, boost::left_shiftable<NumBehavior>, boost::right_shiftable<NumBehavior>
 {
 
@@ -965,6 +1198,7 @@ inline
 NumBehavior::operator void*() {
     return reinterpret_cast<void*>(asULongLong());
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 

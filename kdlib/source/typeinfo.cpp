@@ -260,7 +260,7 @@ TypeInfoPtr loadType( const std::wstring &typeName )
         throw TypeException(L"type name is empty");
 
     if ( TypeInfo::isBaseType( typeName ) )
-        return TypeInfo::getBaseTypeInfo( typeName, ptrSize() );
+        return TypeInfo::getBaseTypeInfo( typeName );
 
     splitSymName( typeName, moduleName, symName );
 
@@ -552,7 +552,7 @@ bool TypeInfo::isComplexType( const std::wstring &typeName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize  )
+TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize )
 {
     if ( isComplexType( typeName ) )
         return getComplexTypeInfo( typeName, SymbolPtr() );
