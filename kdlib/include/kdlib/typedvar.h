@@ -70,7 +70,7 @@ TypedVarPtr loadFloatVar( float var );
 TypedVarPtr loadDoubleVar( double var );
 TypedVarPtr loadWCharVar( wchar_t var );
 
-class TypedVar :  public NumBehavior {
+class TypedVar : private boost::noncopyable {
 
     friend TypedVarPtr loadTypedVar( const SymbolPtr &symbol );
 
@@ -87,7 +87,25 @@ class TypedVar :  public NumBehavior {
     friend TypedVarPtr loadTypedVar( const std::wstring &funcName, const std::wstring &prototype);
 
 public:
+
+    operator NumVariant() {
+        return getValue();
+    }
+
+    operator NumVariant() const {
+        return getValue();
+    }
     
+    template <typename T>
+    operator T() {
+        return static_cast<T>(getValue());
+    }
+
+    template <typename T>
+    operator T() const {
+        return static_cast<T>(getValue());
+    }
+
     virtual std::wstring str() = 0;
     virtual VarStorage getStorage() const = 0;
     virtual std::wstring  getRegisterName() const = 0;
@@ -136,9 +154,20 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypedValue : public NumBehavior
+class TypedValue 
 {
 public:
+
+    operator NumVariant() {
+        return getValue();
+    }
+
+    operator NumVariant() const {
+        return getValue();
+    }
+
+
+
     TypedValue();
 
     TypedValue(const TypedVarPtr& var) : m_value(var){}
@@ -294,12 +323,14 @@ private:
     TypedVarPtr  m_value;
 };
 
-inline 
-NumBehavior::operator TypedValue() {
-    return TypedValue( getValue() );
-}
+//inline 
+//NumBehavior::operator TypedValue() {
+//    return TypedValue( getValue() );
+//}
 
 TypedValue callRaw(MEMOFFSET_64 addr, CallingConventionType callingConvention, const TypedValueList& arglst);
+
+TypedValue evalExpr(const std::wstring& expr, const std::list< std::pair<std::wstring, TypedValue> >& scope = {});
 
 ///////////////////////////////////////////////////////////////////////////////
 

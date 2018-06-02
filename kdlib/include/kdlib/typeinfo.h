@@ -34,7 +34,7 @@ MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
 std::wstring findSymbol( MEMOFFSET_64 offset);
 std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 
-class TypeInfo : private boost::noncopyable, public NumBehavior {
+class TypeInfo : private boost::noncopyable {
 
     friend TypeInfoPtr loadType( const std::wstring &symName );
     friend TypeInfoPtr loadType( SymbolPtr &symbol );
@@ -42,6 +42,14 @@ class TypeInfo : private boost::noncopyable, public NumBehavior {
     friend size_t getSymbolSize( const std::wstring &name );
 
 public:
+
+    operator NumVariant() {
+        return getValue();
+    }
+
+    operator NumVariant() const {
+        return getValue();
+    }
 
     virtual std::wstring str() = 0;
 
@@ -135,7 +143,7 @@ protected:
     static bool isComplexType( const std::wstring &typeName );
     static TypeInfoPtr getTypeInfoFromCache(const std::wstring &typeName );
 
-    static TypeInfoPtr getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize );
+    static TypeInfoPtr getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize = 0);
     static TypeInfoPtr getBaseTypeInfo( SymbolPtr &symbolScope );
 
     static TypeInfoPtr getComplexTypeInfo( const std::wstring &typeName, SymbolPtr &symbolScope );

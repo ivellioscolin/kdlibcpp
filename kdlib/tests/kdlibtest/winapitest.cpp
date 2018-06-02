@@ -33,7 +33,7 @@ TEST_F(WinApiTest, CreateFileCall)
     kdlib::ModulePtr  kernel32;
         
     ASSERT_NO_THROW( kernel32 = loadModule(L"kernel32") );
-    ASSERT_NE( 0, kernel32->asULongLong() );
+    ASSERT_NE( 0, *kernel32 );
 
     kdlib::MEMOFFSET_64  createFileOffset;
 
