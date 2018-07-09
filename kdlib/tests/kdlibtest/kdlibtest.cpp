@@ -4,27 +4,6 @@
 #include "stdafx.h"
 #include "gmock/gmock.h"
 #include "kdlib/dbgengine.h"
-#include "eventhandlertest.h"
-#include "processtest.h"
-#include "moduletest.h"
-#include "memorytest.h"
-#include "typeinfotest.h"
-#include "typedvartest.h"
-#include "varianttest.h"
-#include "breakhandler.h"
-#include "cputest.h"
-#include "stacktest.h"
-#include "disasmtest.h"
-#include "targettest.h"
-#include "winapitest.h"
-#include "crttest.h"
-#include "clangtest.h"
-#include "nettest.h"
-#include "taggedtest.h"
-
-#ifdef _M_AMD64 
-#include "regtest_x64.h"
-#endif
 
 class Environment : public ::testing::Environment {
 public:

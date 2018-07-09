@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="kdlibtest.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="..\comdate\testvars.cpp">
+      <Filter>testdata</Filter>
+    </ClCompile>
+    <ClCompile Include="..\comdate\testfunc.cpp">
+      <Filter>testdata</Filter>
+    </ClCompile>
+    <ClCompile Include="googletest\src\gtest-all.cc" />
+    <ClCompile Include="googlemock\src\gmock-all.cc" />
+    <ClCompile Include="breakhandler.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="clangtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="cputest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="crttest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="disasmtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="eventhandlertest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="memorytest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="moduletest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="nettest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="processtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="regtest_x64.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="stacktest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="taggedtest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="targettest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="typedvartest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="typeinfotest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="varianttest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="winapitest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="..\..\include\test\testvars.h">
+      <Filter>testdata</Filter>
+    </ClInclude>
+    <ClInclude Include="procfixture.h">
+      <Filter>testfixtures</Filter>
+    </ClInclude>
+    <ClInclude Include="basefixture.h">
+      <Filter>testfixtures</Filter>
+    </ClInclude>
+    <ClInclude Include="eventhandlermock.h">
+      <Filter>testfixtures</Filter>
+    </ClInclude>
+    <ClInclude Include="memdumpfixture.h">
+      <Filter>testfixtures</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="testcases">
+      <UniqueIdentifier>{47d99921-f1bc-4f46-a291-3b1651ca1163}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="testfixtures">
+      <UniqueIdentifier>{f2d12c59-7d69-4aa8-baa8-dc68e1e3b881}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="testdata">
+      <UniqueIdentifier>{617ec5ef-8b76-49d2-b598-1ffc78b37637}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

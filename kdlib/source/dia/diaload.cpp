@@ -23,6 +23,8 @@ DEFINE_GUID(MSDIA11_CLASSGUID, 0x761d3bcd, 0x1304, 0x41d5, 0x94, 0xe8, 0xea, 0xc
 
 DEFINE_GUID(MSDIA12_CLASSGUID, 0x3bfcea48, 0x620f, 0x4b6b, 0x81, 0xf7, 0xb9, 0xaf, 0x75, 0x45, 0x4c, 0x7d);
 
+DEFINE_GUID(MSDIA14_CLASSGUID, 0xe6756135, 0x1e65, 0x4d17, 0x85, 0x76, 0x61, 0x07, 0x61, 0x39, 0x8c, 0x3c);
+
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -55,6 +57,10 @@ static SymbolSessionPtr createSession(
         if ( S_OK == hres )
             break;
 
+        hres = dataSource.CoCreateInstance(__uuidof(DiaSourceAlt), NULL, CLSCTX_INPROC_SERVER);
+        if (S_OK == hres)
+            break;
+
         hres = dataSource.CoCreateInstance(MSDIA12_CLASSGUID, NULL, CLSCTX_INPROC_SERVER);
         if (S_OK == hres)
             break;
@@ -80,6 +86,14 @@ static SymbolSessionPtr createSession(
         std::wstring  fileName(&fileNameBuffer[0], fileNameSize);
 
         size_t pos = fileName.find_last_of(L'\\');
+
+        fileName.replace(pos, fileName.length() - pos, L"\\msdia140.dll");
+
+        hres = NoRegCoCreate(fileName.c_str(), MSDIA14_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        if (S_OK == hres)
+            break;
+
+        pos = fileName.find_last_of(L'\\');
 
         fileName.replace(pos, fileName.length() - pos, L"\\msdia120.dll");
 

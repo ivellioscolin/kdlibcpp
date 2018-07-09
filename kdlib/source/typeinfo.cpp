@@ -260,7 +260,7 @@ TypeInfoPtr loadType( const std::wstring &typeName )
         throw TypeException(L"type name is empty");
 
     if ( TypeInfo::isBaseType( typeName ) )
-        return TypeInfo::getBaseTypeInfo( typeName, ptrSize() );
+        return TypeInfo::getBaseTypeInfo( typeName );
 
     splitSymName( typeName, moduleName, symName );
 
@@ -552,7 +552,7 @@ bool TypeInfo::isComplexType( const std::wstring &typeName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize  )
+TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize )
 {
     if ( isComplexType( typeName ) )
         return getComplexTypeInfo( typeName, SymbolPtr() );
@@ -644,6 +644,14 @@ TypeInfoPtr TypeInfo::getBaseTypeInfo( SymbolPtr &symbol )
     else if ( symName == L"Float" && symbol->getSize() == 8  )
     {
         symName = L"Double";
+    }
+    else if (symName == L"Char16")
+    {
+        symName = L"UInt2B";
+    }
+    else if (symName == L"Char32")
+    {
+        symName = L"UInt4B";
     }
 
     return getBaseTypeInfo( symName, getPtrSizeBySymbol(symbol) );
@@ -1868,19 +1876,19 @@ TypeInfoSymbolEnum::TypeInfoSymbolEnum(SymbolSessionPtr& symSession, const std::
     m_index = 0;
     SymbolPtr  symScope = symSession->getSymbolScope();
     size_t  symCount = symScope->getChildCount();
-
-    for ( size_t index = 0; index < symCount; index++)
+    
+    for (size_t index = 0; index < symCount; index++)
     {
         SymbolPtr sym = symScope->getChildByIndex(index);
 
-        if (!isTypeTag(sym->getSymTag()) )
+        if (!isTypeTag(sym->getSymTag()))
             continue;
 
         std::wstring  symName = sym->getName();
 
-        if ( mask.empty() || fnmatch(mask, symName ) )
+        if (mask.empty() || fnmatch(mask, symName))
         {
-            m_typeList.push_back( loadType(sym) );
+            m_typeList.push_back(loadType(sym));
         }
     }
 }

@@ -70,7 +70,7 @@ TypedVarPtr loadFloatVar( float var );
 TypedVarPtr loadDoubleVar( double var );
 TypedVarPtr loadWCharVar( wchar_t var );
 
-class TypedVar :  public NumBehavior {
+class TypedVar : public NumConvertable, private boost::noncopyable {
 
     friend TypedVarPtr loadTypedVar( const SymbolPtr &symbol );
 
@@ -88,6 +88,16 @@ class TypedVar :  public NumBehavior {
 
 public:
     
+    template <typename T>
+    operator T() {
+        return static_cast<T>(getValue());
+    }
+
+    template <typename T>
+    operator T() const {
+        return static_cast<T>(getValue());
+    }
+
     virtual std::wstring str() = 0;
     virtual VarStorage getStorage() const = 0;
     virtual std::wstring  getRegisterName() const = 0;
@@ -112,7 +122,6 @@ public:
     virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") = 0;
     virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) = 0;
     virtual TypeInfoPtr getType() const = 0;
-    virtual NumVariant getValue() const = 0;
     virtual void setValue(const NumVariant& value) = 0;
     virtual std::wstring  getStrValue() const = 0;
     virtual void setStrValue(const std::wstring& value) = 0;
@@ -136,9 +145,20 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypedValue : public NumBehavior
+class TypedValue 
 {
 public:
+
+    operator NumVariant() {
+        return getValue();
+    }
+
+    operator NumVariant() const {
+        return getValue();
+    }
+
+
+
     TypedValue();
 
     TypedValue(const TypedVarPtr& var) : m_value(var){}
@@ -294,12 +314,10 @@ private:
     TypedVarPtr  m_value;
 };
 
-inline 
-NumBehavior::operator TypedValue() {
-    return TypedValue( getValue() );
-}
 
 TypedValue callRaw(MEMOFFSET_64 addr, CallingConventionType callingConvention, const TypedValueList& arglst);
+
+TypedValue evalExpr(const std::wstring& expr, const std::list< std::pair<std::wstring, TypedValue> >& scope = {});
 
 ///////////////////////////////////////////////////////////////////////////////
 

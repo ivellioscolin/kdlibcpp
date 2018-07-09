@@ -34,7 +34,7 @@ MEMOFFSET_64 getSymbolOffset( const std::wstring &name );
 std::wstring findSymbol( MEMOFFSET_64 offset);
 std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 
-class TypeInfo : private boost::noncopyable, public NumBehavior {
+class TypeInfo : public NumConvertable, private boost::noncopyable {
 
     friend TypeInfoPtr loadType( const std::wstring &symName );
     friend TypeInfoPtr loadType( SymbolPtr &symbol );
@@ -105,8 +105,6 @@ public:
 
     virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
     virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
-    
-    virtual NumVariant getValue() const = 0;
 
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
     virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) = 0;
@@ -135,7 +133,7 @@ protected:
     static bool isComplexType( const std::wstring &typeName );
     static TypeInfoPtr getTypeInfoFromCache(const std::wstring &typeName );
 
-    static TypeInfoPtr getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize );
+    static TypeInfoPtr getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize = 0);
     static TypeInfoPtr getBaseTypeInfo( SymbolPtr &symbolScope );
 
     static TypeInfoPtr getComplexTypeInfo( const std::wstring &typeName, SymbolPtr &symbolScope );

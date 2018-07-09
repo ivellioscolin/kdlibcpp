@@ -24,7 +24,9 @@ const DiaSymbol::ValueNameEntry DiaSymbol::basicTypeName[] = {
     _DEF_BASIC_TYPE(Complex),
     _DEF_BASIC_TYPE(Bit),
     _DEF_BASIC_TYPE(BSTR),
-    _DEF_BASIC_TYPE(Hresult)
+    _DEF_BASIC_TYPE(Hresult),
+    _DEF_BASIC_TYPE(Char16),
+    _DEF_BASIC_TYPE(Char32)
 };
 #undef _DEF_BASIC_TYPE
 

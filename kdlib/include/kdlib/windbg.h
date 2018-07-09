@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <memory>
 
 #include <atlcomcli.h>
 #include <DbgEng.h>
@@ -35,7 +36,7 @@ public:
 
 private:
 
-    std::auto_ptr<T>  m_impl;
+    std::unique_ptr<T>  m_impl;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

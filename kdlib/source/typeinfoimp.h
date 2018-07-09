@@ -663,7 +663,7 @@ protected:
     }
 
     virtual size_t getPtrSize() {
-        return m_ptrSize;
+        return m_ptrSize != 0 ? m_ptrSize : kdlib::ptrSize();
     }
 
     virtual size_t getAlignReq() {

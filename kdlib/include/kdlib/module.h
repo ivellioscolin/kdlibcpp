@@ -30,7 +30,7 @@ typedef std::list< SymbolOffset > SymbolOffsetList;
 typedef std::list< std::wstring > TypeNameList;
 
 
-class Module : private boost::noncopyable, public NumBehavior {
+class Module : public NumConvertable, private boost::noncopyable {
     
 public:
 

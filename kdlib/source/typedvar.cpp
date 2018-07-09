@@ -975,7 +975,7 @@ TypedVarPtr TypedVarUdt::getVirtualMethodRecursive(
     name += methodName;
 
     MEMOFFSET_64  thisValue = m_varData->getAddress();
-    MEMOFFSET_64  methodAddr = vtbl->getElement( methodOffset / vtblType->getPtrSize() )->asULongLong();
+    MEMOFFSET_64  methodAddr = vtbl->getElement(methodOffset / vtblType->getPtrSize())->getValue().asULongLong();
 
     return TypedVarPtr( new TypedVarMethodBound(methodType, getMemoryAccessor(methodAddr, 0 ), name, thisValue ) );
 }
