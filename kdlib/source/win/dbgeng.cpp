@@ -767,8 +767,8 @@ bool is64bitSystem()
     hres = g_dbgMgr->control->GetActualProcessorType( &procType );
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::GetActualProcessorType", hres );
-        
-    return procType == IMAGE_FILE_MACHINE_AMD64;
+
+    return (procType == IMAGE_FILE_MACHINE_AMD64 || procType == IMAGE_FILE_MACHINE_ARM64);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1548,6 +1548,10 @@ void setInstructionOffset(MEMOFFSET_64 offset)
         regIndex = getRegisterIndex(L"rip");
         break;
 
+    case CPU_ARM64:
+        regIndex = getRegisterIndex(L"pc");
+        break;
+
     default:
         throw DbgException( "Unknown processor type" );
     }
@@ -1571,6 +1575,10 @@ void setStackOffset(MEMOFFSET_64 offset)
 
     case CPU_AMD64:
         regIndex = getRegisterIndex(L"rsp");
+        break;
+
+    case CPU_ARM64:
+        regIndex = getRegisterIndex(L"sp");
         break;
 
     default:
@@ -1598,6 +1606,10 @@ void setFrameOffset(MEMOFFSET_64 offset)
         regIndex = getRegisterIndex(L"rbp");
         break;
 
+    case CPU_ARM64:
+        regIndex = getRegisterIndex(L"fp");
+        break;
+
     default:
         throw DbgException( "Unknown processor type" );
     }
@@ -1617,6 +1629,9 @@ MEMOFFSET_64 getReturnReg()
 
     case CPU_AMD64:
         return static_cast<MEMOFFSET_64>(getRegisterByName(L"rax").asULongLong());
+
+    case CPU_ARM64:
+        return static_cast<MEMOFFSET_64>(getRegisterByName(L"r8").asULongLong());
     }
 
     throw DbgException( "Unknown processor type" );
@@ -1953,6 +1968,9 @@ CPUType getCPUType()
 
     case IMAGE_FILE_MACHINE_AMD64:
         return CPU_AMD64;
+
+    case IMAGE_FILE_MACHINE_ARM64:
+        return CPU_ARM64;
     }
 
     throw DbgException( "Unknown processor type" );
@@ -1976,6 +1994,9 @@ CPUType getCPUMode()
 
     case IMAGE_FILE_MACHINE_AMD64:
         return CPU_AMD64;
+
+    case IMAGE_FILE_MACHINE_ARM64:
+        return CPU_ARM64;
     }
 
     throw DbgException( "Unknown processor type" );
@@ -1996,6 +2017,10 @@ void setCPUMode(CPUType mode )
 
     case CPU_AMD64:
         processorMode = IMAGE_FILE_MACHINE_AMD64;
+        break;
+
+    case CPU_ARM64:
+        processorMode = IMAGE_FILE_MACHINE_ARM64;
         break;
 
     default:

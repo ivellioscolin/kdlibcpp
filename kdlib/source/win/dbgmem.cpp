@@ -33,6 +33,7 @@ MEMOFFSET_64 addr64( MEMOFFSET_64 offset )
             return (ULONG64)(LONG)offset;
 
     case IMAGE_FILE_MACHINE_AMD64:
+    case IMAGE_FILE_MACHINE_ARM64:
         break;
 
     default:

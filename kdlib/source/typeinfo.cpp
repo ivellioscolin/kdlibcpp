@@ -107,14 +107,30 @@ bool getArrayExpression( std::wstring &suffix, size_t &arraySize )
     return false;
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 } // end nameless namespace
 
 namespace kdlib {
 
+///////////////////////////////////////////////////////////////////////////////
+
+size_t getPointerSizeByMachine(const SymbolPtr &symbol)
+{
+    const auto machineType = symbol->getMachineType();
+    switch (machineType)
+    {
+    case machine_I386:
+        return 4;
+
+    case machine_AMD64:
+    case machine_ARM64:
+        return 8;
+
+    default:
+        throw TypeException(L"unknown machine type");
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -671,7 +687,7 @@ TypeInfoPtr TypeInfo::getComplexTypeInfo( const std::wstring &typeName, SymbolPt
 
     size_t  pointerSize;
     if ( symbolScope )
-        pointerSize = symbolScope->getMachineType() == machine_AMD64 ? 8 : 4;
+        pointerSize = getPointerSizeByMachine(symbolScope);
     else
         pointerSize = ptrSize();
 
@@ -1660,7 +1676,7 @@ size_t TypeInfoVtbl::getElementCount()
 
 size_t TypeInfoVtbl::getSize()
 {
-    return ((m_symbol->getMachineType() == machine_AMD64) ? 8 : 4) * getElementCount();
+    return getPointerSizeByMachine(m_symbol) * getElementCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

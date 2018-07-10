@@ -242,7 +242,8 @@ bool isModuleManaged( MEMOFFSET_64 baseOffset )
             return ntHeader.OptionalHeader.DataDirectory[14].Size != 0;
         }
         
-        if ( machineType == IMAGE_FILE_MACHINE_AMD64 )
+        if ( machineType == IMAGE_FILE_MACHINE_AMD64 || 
+             machineType == IMAGE_FILE_MACHINE_ARM64 )
         {
             IMAGE_NT_HEADERS64  ntHeader;
             readMemory( ntHeaderOffset, &ntHeader, sizeof(ntHeader) );

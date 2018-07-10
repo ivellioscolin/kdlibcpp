@@ -471,8 +471,9 @@ public:
     {
         switch (m_machineType)
         {
-        case IMAGE_FILE_MACHINE_I386: return machine_I386;
+        case IMAGE_FILE_MACHINE_I386:  return machine_I386;
         case IMAGE_FILE_MACHINE_AMD64: return machine_AMD64;
+        case IMAGE_FILE_MACHINE_ARM64: return machine_ARM64;
         }
 
         throw SymbolException(L"Unkonw machine type");
@@ -527,7 +528,8 @@ private:
             return;
         }
         
-        if ( m_machineType == IMAGE_FILE_MACHINE_AMD64 )
+        if ( m_machineType == IMAGE_FILE_MACHINE_AMD64 ||
+             m_machineType == IMAGE_FILE_MACHINE_ARM64 )
         {
             GetExport<IMAGE_NT_HEADERS64>( moduleBase );
             return;

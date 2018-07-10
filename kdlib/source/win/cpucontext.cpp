@@ -178,6 +178,7 @@ int alignStackPointer( int byteCount )
         break;
 
     case CPU_AMD64:
+    case CPU_ARM64:
         machineWord = 8;
         break;
 
@@ -387,6 +388,10 @@ MEMOFFSET_64 CPUContextImpl::getIP()
     {
         return addr64( getRegisterByName(L"rip").asULongLong() );
     }
+    else if ( m_cpuMode == CPU_ARM64 )
+    {
+        return addr64( getRegisterByName(L"pc").asULongLong() );
+    }
 
     throw DbgException("Unknown CPU type");
 }
@@ -402,6 +407,10 @@ void CPUContextImpl::setIP(MEMOFFSET_64 ip)
     else if ( m_cpuMode == CPU_AMD64 )
     {
         setRegisterByName(L"rip", NumVariant(ip));
+    }
+    else if ( m_cpuMode == CPU_ARM64 )
+    {
+        setRegisterByName(L"pc", NumVariant(ip));
     }
 
     assert(0);
@@ -419,6 +428,10 @@ MEMOFFSET_64 CPUContextImpl::getSP()
     {
         return addr64( getRegisterByName(L"rsp").asULongLong() );
     }
+    else if ( m_cpuMode == CPU_ARM64 )
+    {
+        return addr64( getRegisterByName(L"sp").asULongLong() );
+    }
 
     throw DbgException("Unknown CPU type");
 }
@@ -431,9 +444,13 @@ void CPUContextImpl::setSP(MEMOFFSET_64 sp)
     {
         setRegisterByName(L"esp", NumVariant(sp));
     }
-    else if ( m_cpuMode == CPU_I386 )
+    else if ( m_cpuMode == CPU_AMD64 )
     {
-        setRegisterByName(L"esp", NumVariant(sp));
+        setRegisterByName(L"rsp", NumVariant(sp));
+    }
+    else if ( m_cpuMode == CPU_ARM64 )
+    {
+        setRegisterByName(L"sp", NumVariant(sp));
     }
 
     throw DbgException("Unknown CPU type");
@@ -451,6 +468,10 @@ MEMOFFSET_64 CPUContextImpl::getFP()
     {
         return addr64( getRegisterByName(L"rbp").asULongLong() );
     }
+    else if ( m_cpuMode == CPU_ARM64 )
+    {
+        return addr64( getRegisterByName(L"fp").asULongLong() );
+    }
 
     throw DbgException("Unknown CPU type");
 }
@@ -467,8 +488,14 @@ void CPUContextImpl::setFP(MEMOFFSET_64 fp)
     {
         setRegisterByName(L"rbp", NumVariant(fp));
     }
-
-    assert(0);
+    else if (m_cpuMode == CPU_ARM64 )
+    {
+        setRegisterByName(L"fp", NumVariant(fp));
+    }
+    else
+    {
+        throw DbgException("Unknown CPU type");
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

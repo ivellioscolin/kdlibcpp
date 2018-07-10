@@ -9,12 +9,13 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+size_t getPointerSizeByMachine(const SymbolPtr &symbol);
 
 inline size_t getPtrSizeBySymbol( SymbolPtr &typeSym )
 {
     SymTags symTag = typeSym->getSymTag();
     if ( symTag != SymTagPointerType )
-        return (typeSym->getMachineType() == machine_AMD64) ? 8 : 4;
+        return getPointerSizeByMachine(typeSym);
 
     return typeSym->getSize();
 }
