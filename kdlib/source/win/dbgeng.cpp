@@ -1631,7 +1631,7 @@ MEMOFFSET_64 getReturnReg()
         return static_cast<MEMOFFSET_64>(getRegisterByName(L"rax").asULongLong());
 
     case CPU_ARM64:
-        return static_cast<MEMOFFSET_64>(getRegisterByName(L"r8").asULongLong());
+        return static_cast<MEMOFFSET_64>(getRegisterByName(L"x0").asULongLong());
     }
 
     throw DbgException( "Unknown processor type" );
