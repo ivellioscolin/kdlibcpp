@@ -191,9 +191,13 @@ struct LiveProcessInfo {
 };
 
 enum DebugOptions {
-
+    AllowNetworkPaths = 0x00000004,
+    DisallowNetworkPaths = 0x00000008,
     InitialBreak = 0x00000020,
     FinalBreak = 0x00000040,
+    FailIncompleteInformation = 0x00000200,
+    DisableModuleSymbolLoad = 0x00008000,
+    DisallowImageFileMapping = 0x00020000,
     PreferDml =  0x00040000
 };
 
