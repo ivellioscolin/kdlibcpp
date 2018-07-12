@@ -96,7 +96,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -117,7 +117,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -190,6 +190,7 @@
   <ItemGroup>
     <ClCompile Include="..\comdate\testfunc.cpp" />
     <ClCompile Include="..\comdate\testvars.cpp" />
+    <ClCompile Include="arm64dumptest.cpp" />
     <ClCompile Include="breakhandler.cpp" />
     <ClCompile Include="clangtest.cpp" />
     <ClCompile Include="cputest.cpp" />

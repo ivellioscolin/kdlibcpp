@@ -26,6 +26,7 @@ public:
         try {
             if (m_dumpId != -1)
                 kdlib::closeDump(m_dumpId);
+            m_dumpId = -1;
         } 
         catch(kdlib::DbgException&)
         {}
@@ -34,6 +35,11 @@ public:
     static std::wstring getKernelDumpName()
     {
         return L"..\\..\\..\\kdlib\\tests\\dumps\\win8_x64_mem.cab";
+    }
+
+    static std::wstring getARM64KernelDumpName()
+    {
+        return L"..\\..\\..\\kdlib\\tests\\dumps\\win10_arm64_mem.cab";
     }
 
 private:
