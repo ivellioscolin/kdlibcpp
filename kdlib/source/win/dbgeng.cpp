@@ -168,7 +168,7 @@ DebugOptionsSet getDebugOptions()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void changeDebugOptions(DebugOptionsSet &addOptions, DebugOptionsSet &removeOptions)
+void changeDebugOptions(const DebugOptionsSet &addOptions, const DebugOptionsSet &removeOptions)
 {
     HRESULT hres = g_dbgMgr->control->AddEngineOptions(static_cast<ULONG>(addOptions) );
     if (FAILED(hres))
