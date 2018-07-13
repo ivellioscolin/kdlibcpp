@@ -5,8 +5,7 @@
 #include "kdlib/typeinfo.h"
 #include "kdlib/memaccess.h"
 #include "kdlib/module.h"
-
-#include <Windows.h>
+#include "kdlib/stack.h"
 
 using namespace kdlib;
 
@@ -45,7 +44,7 @@ TEST_F(ARM64KernelMiniDump, Test)
     // MS DIA
     {
         const std::wstring symName{ L"nt!KiUpdateThreadState" };
-        EXPECT_EQ(evaluate(symName).asULongLong(), getSymbolOffset(symName));
+        EXPECT_EQ( evaluate(symName).asULongLong(), getSymbolOffset(symName) );
     }
 
     // symexport
@@ -56,5 +55,37 @@ TEST_F(ARM64KernelMiniDump, Test)
         EXPECT_TRUE( clipsp->getSymFile() == L"export symbols" );
 
         EXPECT_EQ( evaluate(L"clipsp!ClipSpInitialize").asULongLong(), clipsp->getSymbolVa(L"ClipSpInitialize") );
+    }
+
+    // stack & CPU context
+    {
+        const auto stack = getStack();
+        ASSERT_TRUE( stack.get() );
+        ASSERT_TRUE( stack->getFrameCount() >= 11 );
+
+        {
+            auto frame0 = stack->getFrame(0);
+            ASSERT_TRUE( frame0.get() );
+
+            EXPECT_EQ( std::wstring(L"KeBugCheck2"), findSymbol(frame0->getIP()) );
+
+            const auto currentContext = frame0->getCPUContext();
+            ASSERT_TRUE( currentContext.get() );
+
+            EXPECT_EQ( evaluate(L"@$ip").asULongLong(), currentContext->getIP() );
+            EXPECT_EQ( evaluate(L"@$csp").asULongLong(), currentContext->getSP() );
+            EXPECT_EQ( evaluate(L"@fp").asULongLong(), currentContext->getFP() );
+        }
+
+        {
+            auto frameWithVars = stack->getFrame(11);
+            ASSERT_TRUE( frameWithVars.get() );
+
+            EXPECT_EQ( std::wstring(L"FxRequest::CompleteInternal"), findSymbol(frameWithVars->getIP()) );
+
+            // sp-based variable
+            EXPECT_EQ( 0xffffc18eaa798940, frameWithVars->getLocalVar(L"irp")->getElement(L"m_Irp")->getValue() );
+            EXPECT_EQ( 0, frameWithVars->getTypedParam(L"Status")->getValue() );
+        }
     }
 }

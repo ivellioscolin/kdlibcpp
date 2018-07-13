@@ -286,6 +286,100 @@ typedef struct WOW64_CONTEXT {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "pshpack8.h"
+
+#define ARM64_MAX_BREAKPOINTS     8
+#define ARM64_MAX_WATCHPOINTS     2
+
+typedef union _ARM64_NT_NEON128 {
+    struct {
+        ULONGLONG Low;
+        LONGLONG High;
+    } DUMMYSTRUCTNAME;
+    double D[2];
+    float S[4];
+    WORD   H[8];
+    BYTE  B[16];
+} ARM64_NT_NEON128, *PARM64_NT_NEON128;
+
+typedef struct DECLSPEC_ALIGN(16) _CONTEXT_ARM64 {
+
+    //
+    // Control flags.
+    //
+
+    /* +0x000 */ DWORD ContextFlags;
+
+    //
+    // Integer registers
+    //
+
+    /* +0x004 */ DWORD Cpsr;       // NZVF + DAIF + CurrentEL + SPSel
+    /* +0x008 */ union {
+        struct {
+            DWORD64 X0;
+            DWORD64 X1;
+            DWORD64 X2;
+            DWORD64 X3;
+            DWORD64 X4;
+            DWORD64 X5;
+            DWORD64 X6;
+            DWORD64 X7;
+            DWORD64 X8;
+            DWORD64 X9;
+            DWORD64 X10;
+            DWORD64 X11;
+            DWORD64 X12;
+            DWORD64 X13;
+            DWORD64 X14;
+            DWORD64 X15;
+            DWORD64 X16;
+            DWORD64 X17;
+            DWORD64 X18;
+            DWORD64 X19;
+            DWORD64 X20;
+            DWORD64 X21;
+            DWORD64 X22;
+            DWORD64 X23;
+            DWORD64 X24;
+            DWORD64 X25;
+            DWORD64 X26;
+            DWORD64 X27;
+            DWORD64 X28;
+            /* +0x0f0 */        DWORD64 Fp;
+            /* +0x0f8 */        DWORD64 Lr;
+        } DUMMYSTRUCTNAME;
+        DWORD64 X[31];
+    } DUMMYUNIONNAME;
+    /* +0x100 */ DWORD64 Sp;
+    /* +0x108 */ DWORD64 Pc;
+
+    //
+    // Floating Point/NEON Registers
+    //
+
+    /* +0x110 */ ARM64_NT_NEON128 V[32];
+    /* +0x310 */ DWORD Fpcr;
+    /* +0x314 */ DWORD Fpsr;
+
+    //
+    // Debug registers
+    //
+
+    /* +0x318 */ DWORD Bcr[ARM64_MAX_BREAKPOINTS];
+    /* +0x338 */ DWORD64 Bvr[ARM64_MAX_BREAKPOINTS];
+    /* +0x378 */ DWORD Wcr[ARM64_MAX_WATCHPOINTS];
+    /* +0x380 */ DWORD64 Wvr[ARM64_MAX_WATCHPOINTS];
+
+} CONTEXT_ARM64;
+
+#include "poppack.h"
+
+static_assert(FIELD_OFFSET(CONTEXT_ARM64, Fp)  == 0x0f0, "FIELD_OFFSET(CONTEXT_ARM64, Fp)  == 0x0f0");
+static_assert(FIELD_OFFSET(CONTEXT_ARM64, Wvr) == 0x380, "FIELD_OFFSET(CONTEXT_ARM64, Wvr) == 0x380");
+
+///////////////////////////////////////////////////////////////////////////////
+
 union CONTEXT_STORAGE {
 
     CONTEXT_X86 c1;

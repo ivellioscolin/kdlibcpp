@@ -16,33 +16,28 @@ namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const struct DiaRegToRegRelativeAmd64 : DiaRegToRegRelativeBase
-{
-    typedef std::map<ULONG, ULONG> Base;
-    DiaRegToRegRelativeAmd64();
-} g_DiaRegToRegRelativeAmd64;
+namespace {
 
-DiaRegToRegRelativeAmd64::DiaRegToRegRelativeAmd64()
-{
-    (*this)[CV_AMD64_RIP] = rriInstructionPointer;
-    (*this)[CV_AMD64_RBP] = rriStackFrame;
-    (*this)[CV_AMD64_RSP] = rriStackPointer;
-}
+const DiaRegToRegRelativeBase g_DiaRegToRegRelativeAmd64 {
+    { CV_AMD64_RIP, rriInstructionPointer },
+    { CV_AMD64_RBP, rriStackFrame },
+    { CV_AMD64_RSP, rriStackPointer },
+};
 
-///////////////////////////////////////////////////////////////////////////////
+const DiaRegToRegRelativeBase g_DiaRegToRegRelativeI386 {
+    { CV_REG_EIP,       rriInstructionPointer },
+    { CV_REG_EBP,       rriStackFrame },
+    { CV_ALLREG_VFRAME, rriStackFrame },
+    { CV_REG_ESP,       rriStackPointer },
+};
 
-static const struct DiaRegToRegRelativeI386 : DiaRegToRegRelativeBase
-{
-    typedef std::map<ULONG, ULONG> Base;
-    DiaRegToRegRelativeI386();
-} g_DiaRegToRegRelativeI386;
+const DiaRegToRegRelativeBase g_DiaRegToRegRelativeArm64 {
+    { CV_ARM64_PC, rriInstructionPointer },
+    { CV_ARM64_FP, rriStackFrame },
+    { CV_ARM64_SP, rriStackPointer },
+};
 
-DiaRegToRegRelativeI386::DiaRegToRegRelativeI386()
-{
-    (*this)[CV_REG_EIP] = rriInstructionPointer;
-    (*this)[CV_REG_EBP] = (*this)[CV_ALLREG_VFRAME] = rriStackFrame;
-    (*this)[CV_REG_ESP] = rriStackPointer;
-}
+} // end nameless namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -431,6 +426,8 @@ ULONG DiaSymbol::getRegRealativeId()
         return getRegRealativeIdImpl(g_DiaRegToRegRelativeAmd64);
     case IMAGE_FILE_MACHINE_I386:
         return getRegRealativeIdImpl(g_DiaRegToRegRelativeI386);
+    case IMAGE_FILE_MACHINE_ARM64:
+        return getRegRealativeIdImpl(g_DiaRegToRegRelativeArm64);
     }
     throw DiaException(L"Unsupported machine type");
 }
