@@ -424,7 +424,7 @@ std::wstring  StackFrameImpl::getStaticVarName(unsigned long index)
 
 bool StackFrameImpl::findStaticVar(const std::wstring& varName)
 {
-    SymbolPtrList  vars = getLocalVars();
+    SymbolPtrList  vars = getStaticVars();
 
     SymbolPtrList::iterator it = vars.begin();
     for (; it != vars.end(); ++it)
