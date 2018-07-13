@@ -118,6 +118,8 @@ TEST_F( StackTest, LocalVars )
     EXPECT_THROW(frame->getLocalVar(-1), IndexException);
     EXPECT_THROW(frame->getLocalVar(3), IndexException);
     EXPECT_THROW(frame->getLocalVar(L"Notexist"), SymbolException);
+
+    EXPECT_FALSE(frame->findStaticVar(L"localChars"));
 }
 
 TEST_F(StackTest, StaticVars)
