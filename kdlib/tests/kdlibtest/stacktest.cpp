@@ -2,34 +2,90 @@
 
 #include <math.h>
 
-#include "procfixture.h"
+#include "memdumpfixture.h"
 #include "eventhandlermock.h"
 
 #include "kdlib/kdlib.h"
 
 using namespace kdlib;
 
-class StackTest : public ProcessFixture 
+enum class StackTestMode
 {
-public:
-
-    StackTest() : ProcessFixture( L"stacktest" ) {}
+    Process,
+    Wow64Dump,
 };
 
-TEST_F( StackTest, Ctor )
+class StackTest : public ::testing::TestWithParam<StackTestMode>
+{
+public:
+    StackTest()
+    {
+    }
+
+    virtual void SetUp()
+    {
+        switch (GetParam())
+        {
+        case StackTestMode::Process:
+            m_processId = kdlib::startProcess(L"targetapp.exe stacktest");
+            kdlib::targetGo(); // go to work break point
+            break;
+
+        case StackTestMode::Wow64Dump:
+            m_dumpId = kdlib::loadDump(MemDumpFixture::getWow64UserDumpName());
+            break;
+
+        default:
+            assert(false);
+        }
+    }
+
+    virtual void TearDown()
+    {
+        switch (GetParam())
+        {
+        case StackTestMode::Process:
+            try {
+                kdlib::terminateProcess(m_processId);
+            }
+            catch (const kdlib::DbgException &)
+            {
+            }
+            break;
+
+        case StackTestMode::Wow64Dump:
+            try {
+                kdlib::closeDump(m_dumpId);
+            }
+            catch (const kdlib::DbgException &)
+            {
+            }
+            break;
+
+        default:
+            assert(false);
+        }
+    }
+
+private:
+    kdlib::PROCESS_DEBUG_ID m_processId{};
+    kdlib::PROCESS_DEBUG_ID m_dumpId{};
+};
+
+TEST_P( StackTest, Ctor )
 {
     EXPECT_NO_THROW( getStack() );
-//    EXPECT_NO_THROW( getStack( loadCPUContext() ) );
+    //    EXPECT_NO_THROW( getStack( loadCPUContext() ) );
 }
 
-TEST_F( StackTest, StackLength )
+TEST_P( StackTest, StackLength )
 {
     StackPtr  stack;
     ASSERT_NO_THROW( stack = getStack() );
     EXPECT_LT( 3UL, stack->getFrameCount() );
 }
 
-//TEST_F( StackTest, GetFunction )
+//TEST_P( StackTest, GetFunction )
 //{
 //    StackFramePtr  frame;
 //    TypedVarPtr  function;
@@ -47,7 +103,7 @@ TEST_F( StackTest, StackLength )
 //    EXPECT_EQ( std::wstring(L"stackTestRun1"), findSymbol( function->getAddress() ) );
 //}
 
-TEST_F( StackTest, TypedParam )
+TEST_P( StackTest, TypedParam )
 {
     StackFramePtr  frame;
     ASSERT_NO_THROW( frame = getCurrentStackFrame() );
@@ -70,7 +126,7 @@ TEST_F( StackTest, TypedParam )
     EXPECT_EQ( 0, getStack()->getFrame(5)->getTypedParamCount() );
 }
 
-TEST_F(StackTest, FastcallParam)
+TEST_P( StackTest, FastcallParam )
 {
     StackFramePtr  frame;
     ASSERT_NO_THROW(frame = getStack()->getFrame(1) );
@@ -84,7 +140,7 @@ TEST_F(StackTest, FastcallParam)
     EXPECT_FLOAT_EQ(0.8f, param->getValue().asFloat());
 }
 
-TEST_F( StackTest, TypedParamByName )
+TEST_P( StackTest, TypedParamByName )
 {
     StackFramePtr  frame;
     ASSERT_NO_THROW( frame = getCurrentStackFrame() );
@@ -101,10 +157,10 @@ TEST_F( StackTest, TypedParamByName )
    
     EXPECT_THROW( frame->getTypedParam(L""), DbgException );
     EXPECT_THROW( frame->getTypedParam(L"notexist"), SymbolException );
-    EXPECT_THROW(frame->getTypedParam(L"THIS"), SymbolException);
+    EXPECT_THROW( frame->getTypedParam(L"THIS"), SymbolException );
 }
 
-TEST_F( StackTest, LocalVars )
+TEST_P( StackTest, LocalVars )
 {
     StackFramePtr  frame;
 
@@ -122,7 +178,7 @@ TEST_F( StackTest, LocalVars )
     EXPECT_FALSE(frame->findStaticVar(L"localChars"));
 }
 
-TEST_F(StackTest, StaticVars)
+TEST_P( StackTest, StaticVars )
 {
     StackFramePtr  frame;
     ASSERT_NO_THROW(frame = getStack()->getFrame(2));
@@ -138,7 +194,7 @@ TEST_F(StackTest, StaticVars)
     EXPECT_THROW(frame->getStaticVar(L"Notexist"), SymbolException);
 }
 
-TEST_F(StackTest, ChangeCurrentFrame)
+TEST_P( StackTest, ChangeCurrentFrame )
 {
     StackPtr  stack;
     StackFramePtr  frame1;
@@ -175,7 +231,7 @@ TEST_F(StackTest, ChangeCurrentFrame)
     EXPECT_EQ(3, getCurrentStackFrameNumber());
 }
 
-TEST_F(StackTest, ChangeScopeEvent)
+TEST_P( StackTest, ChangeScopeEvent )
 {
     EventHandlerMock  eventHandler;
 
@@ -188,4 +244,26 @@ TEST_F(StackTest, ChangeScopeEvent)
     debugCommand(L".frame 2");
 }
 
+INSTANTIATE_TEST_CASE_P(Stack, StackTest, ::testing::Values(StackTestMode::Process, StackTestMode::Wow64Dump));
 
+class Wow64StackTest : public MemDumpFixture
+{
+public:
+    Wow64StackTest() :
+        MemDumpFixture{MemDumpFixture::getWow64UserDumpName()}
+    {
+    }
+};
+
+TEST_F(Wow64StackTest, NotCurrentThread)
+{
+    ASSERT_NO_THROW(setCurrentThreadById(2));
+
+    EXPECT_EQ(std::wstring(L"NtWaitForWorkViaWorkerFactory"), findSymbol(getCurrentStackFrame()->getIP()));
+
+    StackPtr stack;
+    ASSERT_NO_THROW(stack = getStack());
+    ASSERT_TRUE(stack->getFrameCount() > 2);
+
+    EXPECT_EQ(std::wstring(L"TppWorkerThread"), findSymbol(stack->getFrame(1)->getIP()));
+}

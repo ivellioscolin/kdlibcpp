@@ -42,6 +42,11 @@ public:
         return L"..\\..\\..\\kdlib\\tests\\dumps\\win10_arm64_mem.cab";
     }
 
+    static std::wstring getWow64UserDumpName()
+    {
+        return L"..\\..\\..\\kdlib\\tests\\dumps\\targetapp_stacktest_wow64.cab";
+    }
+
 private:
 
     std::wstring  m_dumpName;

@@ -444,6 +444,9 @@ void ReadWow64Context(WOW64_CONTEXT& wow64Context)
 
 StackPtr getStackWow64()
 {
+    if (getLastEventThreadId() == getCurrentThreadId())
+        return getStackImpl<CPUContextWOW64>();
+
     HRESULT  hres;
 
     ULONG   filledFrames = 1024;
@@ -578,6 +581,9 @@ StackFramePtr getStackFrameImpl()
 
 StackFramePtr getStackFrameWow64()
 {
+    if (getLastEventThreadId() == getCurrentThreadId())
+        return getStackFrameImpl<CPUContextWOW64>();
+
     HRESULT  hres;
     DEBUG_STACK_FRAME  stackFrame = {};
     ULONG  frameNumber;
