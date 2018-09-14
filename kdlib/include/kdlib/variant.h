@@ -592,8 +592,49 @@ public:
         throw NumVariantError();
     }
 
-    template <typename T>
-    operator T();
+    explicit operator char() const {
+        return asChar();
+    }
+
+    explicit operator unsigned char() const {
+        return asUChar();
+    }
+
+    explicit operator short() const {
+        return asShort();
+    }
+
+    explicit operator unsigned short() const {
+        return asUShort();
+    }
+
+    explicit operator unsigned long() const {
+        return asULong();
+    }
+
+    explicit operator long() const {
+        return asLong();
+    }
+
+    explicit operator unsigned long long() const {
+        return asULongLong();
+    }
+
+    explicit operator long long() const {
+        return asLongLong();
+    }
+
+    explicit operator float() const {
+        return asFloat();
+    }
+
+    explicit operator double() const {
+        return asDouble();
+    }
+
+    explicit operator bool() const {
+        return asChar() != 0;
+    }
 
 private:
 
@@ -758,7 +799,6 @@ private:
     }
 };
 
-
 inline bool operator==(const NumVariant& v1, const NumVariant& v2)
 {
     return NumVariant::all_op<bool, equal_op>(v1, v2);
@@ -894,62 +934,74 @@ inline NumVariant operator-(const NumVariant& v1)
     return NumVariant(0).cast(v1.m_numType) - v1;
 }
 
+/*
 
+template<>
 inline
-NumVariant::operator char() {
+NumVariant::operator char() const {
     return asChar();
 }
 
+template<>
 inline
-NumVariant::operator unsigned char() {
+NumVariant::operator unsigned char() const {
     return asUChar();
 }
 
+template<>
 inline
-NumVariant::operator short() {
+NumVariant::operator short() const {
     return asShort();
 }
 
+template<>
 inline
-NumVariant::operator unsigned short() {
+NumVariant::operator unsigned short() const {
     return asUShort();
 }
 
+template<>
 inline
-NumVariant::operator unsigned long() {
+NumVariant::operator unsigned long() const {
     return asULong();
 }
 
+template<>
 inline
-NumVariant::operator long() {
+NumVariant::operator long() const {
     return asLong();
 }
 
+template<>
 inline
-NumVariant::operator unsigned long long() {
+NumVariant::operator unsigned long long() const {
     return asULongLong();
 }
 
+template<>
 inline
-NumVariant::operator long long() {
+NumVariant::operator long long() const{
     return asLongLong();
 }
 
+template<>
 inline
-NumVariant::operator float() {
+NumVariant::operator float() const{
     return asFloat();
 }
 
+template<>
 inline
-NumVariant::operator double() {
+NumVariant::operator double() const{
     return asDouble();
 }
 
+template<>
 inline
-NumVariant::operator bool() {
+ NumVariant::operator bool() const {
     return asChar() != 0;
 }
-
+*/
 
 class NumConvertable
 {

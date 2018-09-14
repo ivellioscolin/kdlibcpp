@@ -89,12 +89,7 @@ class TypedVar : public NumConvertable, private boost::noncopyable {
 public:
     
     template <typename T>
-    operator T() {
-        return static_cast<T>(getValue());
-    }
-
-    template <typename T>
-    operator T() const {
+    explicit operator T() const {
         return static_cast<T>(getValue());
     }
 
@@ -183,7 +178,7 @@ public:
     TypedValue( bool var ) : m_value( loadBoolVar(var) ) {}
 
     template<typename T>
-    operator T() {
+    explicit operator T() {
         if ( sizeof(T) < getSize() )
             throw TypeException( L"cannot cast TypedValue");
 

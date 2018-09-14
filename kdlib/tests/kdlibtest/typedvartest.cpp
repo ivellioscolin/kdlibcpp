@@ -161,7 +161,7 @@ TEST_F( TypedVarTest, ArithmOp )
 {
     EXPECT_EQ( ucharVar + 20, *loadTypedVar(L"ucharVar") + 20);
     EXPECT_EQ(ushortVar * ulonglongVar, *loadTypedVar(L"ushortVar") * *loadTypedVar(L"ulonglongVar"));
-    EXPECT_FLOAT_EQ(floatVar / ulongConst, *loadTypedVar(L"floatVar") / *loadTypedVar(L"ulongConst"));
+    EXPECT_FLOAT_EQ(floatVar / ulongConst, (float)(*loadTypedVar(L"floatVar") / *loadTypedVar(L"ulongConst")));
     EXPECT_EQ(longVar % 1234, *loadTypedVar(L"longVar") % *makeLongConst(1234) );
 }
 
@@ -251,37 +251,37 @@ TEST_F( TypedVarTest, FuncPtr )
 
 TEST_F( TypedVarTest, Assign )
 {
-    char a1 = *loadTypedVar(L"ulonglongVar");
+    char a1 = (char)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( char(ulonglongVar), a1 );
 
-    unsigned char a2 = *loadTypedVar(L"ulonglongVar");
+    unsigned char a2 = (unsigned char)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( unsigned char(ulonglongVar), a2 );
 
-    short a3 = *loadTypedVar(L"ulonglongVar");
+    short a3 = (short)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( short(ulonglongVar), a3 );
 
-    unsigned short a4 = *loadTypedVar(L"ulonglongVar");
+    unsigned short a4 = (unsigned short)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( unsigned short(ulonglongVar), a4 );
 
-    long a5 = *loadTypedVar(L"ulonglongVar");
+    long a5 = (long)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( long(ulonglongVar), a5 );
 
-    unsigned long a6 = *loadTypedVar(L"ulonglongVar");
+    unsigned long a6 = (unsigned long)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( unsigned long(ulonglongVar), a6 );
 
-    long long a7 = *loadTypedVar(L"ulonglongVar");
+    long long a7 = (long long)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( long long(ulonglongVar), a7 );
 
-    unsigned long long a8 = *loadTypedVar(L"ulonglongVar");
+    unsigned long long a8 = (unsigned long long)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( unsigned long long(ulonglongVar), a8 );
 
-    float a9 = *loadTypedVar(L"ulonglongVar");
+    float a9 = (float)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( float(ulonglongVar), a9 );
 
-    double a10 = *loadTypedVar(L"ulonglongVar");
+    double a10 = (double)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( double(ulonglongVar), a10 );
 
-    bool a11 = *loadTypedVar(L"ulonglongVar");
+    bool a11 = (bool)*loadTypedVar(L"ulonglongVar");
     ASSERT_EQ( ulonglongVar!=0, a11 );
 }
 
@@ -300,11 +300,11 @@ TEST_F(TypedVarTest, DISABLED_getVTBL)
 {
     TypedVarPtr  vtbl;
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
-    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtChildMethod"));
+    EXPECT_NE(std::wstring::npos, findSymbol( (MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtChildMethod"));
 
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(4)->deref());
-    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(0)).find(L"virtMethod1"));
-    EXPECT_NE(std::wstring::npos, findSymbol(*vtbl->getElement(1)).find(L"virtMethod2"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtMethod1"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(1)).find(L"virtMethod2"));
 }
 
 TEST_F(TypedVarTest, FunctionCall)
@@ -482,7 +482,7 @@ TEST_F(TypedVarTest, VariantTypedVar)
     EXPECT_FALSE(var->str().empty() );
 
     ASSERT_NO_THROW(var = loadTypedVar(L"Float", getCacheAccessor( NumVariant(55.5f))));
-    EXPECT_FLOAT_EQ(55.5f, *var);
+    EXPECT_FLOAT_EQ(55.5f, (float)*var);
     EXPECT_FALSE(var->str().empty() );
 }
 
