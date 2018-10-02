@@ -143,6 +143,10 @@
     <ClCompile Include="fnmatch.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="win\cpucontextamd64.cpp" />
+    <ClCompile Include="win\cpucontextarm.cpp" />
+    <ClCompile Include="win\cpucontextarm64.cpp" />
+    <ClCompile Include="win\cpucontexti386.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

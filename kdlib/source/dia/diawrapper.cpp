@@ -37,6 +37,12 @@ const DiaRegToRegRelativeBase g_DiaRegToRegRelativeArm64 {
     { CV_ARM64_SP, rriStackPointer },
 };
 
+const DiaRegToRegRelativeBase g_DiaRegToRegRelativeArm {
+    { CV_ARM_PC,    rriInstructionPointer },
+    { CV_ARM_R11,   rriStackFrame },
+    { CV_ARM_SP,    rriStackPointer },
+};
+
 } // end nameless namespace
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -428,6 +434,8 @@ ULONG DiaSymbol::getRegRealativeId()
         return getRegRealativeIdImpl(g_DiaRegToRegRelativeI386);
     case IMAGE_FILE_MACHINE_ARM64:
         return getRegRealativeIdImpl(g_DiaRegToRegRelativeArm64);
+    case IMAGE_FILE_MACHINE_ARMNT:
+        return getRegRealativeIdImpl(g_DiaRegToRegRelativeArm);
     }
     throw DiaException(L"Unsupported machine type");
 }

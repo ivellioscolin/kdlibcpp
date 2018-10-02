@@ -234,7 +234,8 @@ bool isModuleManaged( MEMOFFSET_64 baseOffset )
 
         ULONG64  ntHeaderOffset = baseOffset + ptrDWord( baseOffset + 0x3c );
 
-        if ( machineType == IMAGE_FILE_MACHINE_I386 )
+        if ( machineType == IMAGE_FILE_MACHINE_I386 || 
+             machineType == IMAGE_FILE_MACHINE_ARMNT )
         {
             IMAGE_NT_HEADERS32  ntHeader;
             readMemory( ntHeaderOffset, &ntHeader, sizeof(ntHeader) );

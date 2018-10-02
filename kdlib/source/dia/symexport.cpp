@@ -474,6 +474,7 @@ public:
         case IMAGE_FILE_MACHINE_I386:  return machine_I386;
         case IMAGE_FILE_MACHINE_AMD64: return machine_AMD64;
         case IMAGE_FILE_MACHINE_ARM64: return machine_ARM64;
+        case IMAGE_FILE_MACHINE_ARMNT: return machine_ARM;
         }
 
         throw SymbolException(L"Unkonw machine type");
@@ -522,7 +523,8 @@ private:
 
         m_moduleBase = moduleBase;
 
-        if ( m_machineType == IMAGE_FILE_MACHINE_I386 )
+        if ( m_machineType == IMAGE_FILE_MACHINE_I386 ||
+             m_machineType == IMAGE_FILE_MACHINE_ARMNT )
         {
             GetExport<IMAGE_NT_HEADERS32>( moduleBase );
             return;

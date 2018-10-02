@@ -74,7 +74,7 @@ TEST_F(ARM64KernelMiniDump, Test)
 
             EXPECT_EQ( evaluate(L"@$ip").asULongLong(), currentContext->getIP() );
             EXPECT_EQ( evaluate(L"@$csp").asULongLong(), currentContext->getSP() );
-            EXPECT_EQ( evaluate(L"@fp").asULongLong(), currentContext->getFP() );
+            EXPECT_EQ( evaluate(L"@$fp").asULongLong(), currentContext->getFP() );
         }
 
         {

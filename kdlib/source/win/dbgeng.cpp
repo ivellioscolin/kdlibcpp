@@ -1549,6 +1549,7 @@ void setInstructionOffset(MEMOFFSET_64 offset)
         break;
 
     case CPU_ARM64:
+    case CPU_ARM:
         regIndex = getRegisterIndex(L"pc");
         break;
 
@@ -1578,6 +1579,7 @@ void setStackOffset(MEMOFFSET_64 offset)
         break;
 
     case CPU_ARM64:
+    case CPU_ARM:
         regIndex = getRegisterIndex(L"sp");
         break;
 
@@ -1610,6 +1612,10 @@ void setFrameOffset(MEMOFFSET_64 offset)
         regIndex = getRegisterIndex(L"fp");
         break;
 
+    case CPU_ARM:
+        regIndex = getRegisterIndex(L"r11");
+        break;
+
     default:
         throw DbgException( "Unknown processor type" );
     }
@@ -1632,6 +1638,9 @@ MEMOFFSET_64 getReturnReg()
 
     case CPU_ARM64:
         return static_cast<MEMOFFSET_64>(getRegisterByName(L"x0").asULongLong());
+
+    case CPU_ARM:
+        return static_cast<MEMOFFSET_64>(static_cast<MEMOFFSET_64>(getRegisterByName(L"r0").asULong()));
     }
 
     throw DbgException( "Unknown processor type" );
@@ -1971,6 +1980,9 @@ CPUType getCPUType()
 
     case IMAGE_FILE_MACHINE_ARM64:
         return CPU_ARM64;
+
+    case IMAGE_FILE_MACHINE_ARMNT:
+        return CPU_ARM;
     }
 
     throw DbgException( "Unknown processor type" );
@@ -1997,6 +2009,9 @@ CPUType getCPUMode()
 
     case IMAGE_FILE_MACHINE_ARM64:
         return CPU_ARM64;
+
+    case IMAGE_FILE_MACHINE_ARMNT:
+        return CPU_ARM;
     }
 
     throw DbgException( "Unknown processor type" );
@@ -2021,6 +2036,10 @@ void setCPUMode(CPUType mode )
 
     case CPU_ARM64:
         processorMode = IMAGE_FILE_MACHINE_ARM64;
+        break;
+
+    case CPU_ARM:
+        processorMode = IMAGE_FILE_MACHINE_ARMNT;
         break;
 
     default:

@@ -47,7 +47,8 @@ enum CPUType {
     CPU_I386 = 0,
     CPU_AMD64 = 1,
     CPU_ARM64 = 2,
-    CPU_MAX = 3
+    CPU_ARM = 3,
+    CPU_MAX = 4
 };
 
 enum CPURegType {

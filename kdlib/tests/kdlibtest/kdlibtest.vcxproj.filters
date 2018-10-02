@@ -68,6 +68,9 @@
     <ClCompile Include="arm64dumptest.cpp">
       <Filter>testcases</Filter>
     </ClCompile>
+    <ClCompile Include="armdumptest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

@@ -72,6 +72,10 @@
     <ClCompile Include="win\autoswitch.cpp" />
     <ClCompile Include="win\breakpoint.cpp" />
     <ClCompile Include="win\cpucontext.cpp" />
+    <ClCompile Include="win\cpucontextamd64.cpp" />
+    <ClCompile Include="win\cpucontextarm.cpp" />
+    <ClCompile Include="win\cpucontextarm64.cpp" />
+    <ClCompile Include="win\cpucontexti386.cpp" />
     <ClCompile Include="win\dbgeng.cpp" />
     <ClCompile Include="win\dbgmem.cpp" />
     <ClCompile Include="win\dbgmgr.cpp" />

@@ -213,4 +213,37 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class CPUContextArm : public CPUContextImpl<CONTEXT_ARM>
+{
+    typedef CPUContextImpl<CONTEXT_ARM> Base;
+public:
+    CPUContextArm() :
+        Base{ CPU_ARM, CPU_ARM }
+    {
+    }
+
+    explicit CPUContextArm(const CONTEXT_ARM &context) :
+        Base{ CPU_ARM, CPU_ARM, &context }
+    {
+    }
+
+    virtual NumVariant getRegisterByIndex(unsigned long index);
+
+    virtual std::wstring getRegisterName(unsigned long index);
+
+    virtual MEMOFFSET_64 getIP() {
+        return m_context.Pc;
+    }
+
+    virtual MEMOFFSET_64 getSP() {
+        return m_context.Sp;
+    }
+
+    virtual MEMOFFSET_64 getFP() {
+        return m_context.R11;
+    }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // namespace kdlib

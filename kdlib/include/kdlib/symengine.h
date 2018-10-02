@@ -131,6 +131,7 @@ enum MachineTypes {
     machine_I386  = 0x014c,
     machine_AMD64 = 0x8664,
     machine_ARM64 = 0xaa64,
+    machine_ARM   = 0x01c4,
 };
 
 ////////////////////////////////////////////////////////////////////////////////

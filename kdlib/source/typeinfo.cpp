@@ -121,6 +121,7 @@ size_t getPointerSizeByMachine(const SymbolPtr &symbol)
     switch (machineType)
     {
     case machine_I386:
+    case machine_ARM:
         return 4;
 
     case machine_AMD64:

@@ -380,6 +380,76 @@ static_assert(FIELD_OFFSET(CONTEXT_ARM64, Wvr) == 0x380, "FIELD_OFFSET(CONTEXT_A
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#define ARM_MAX_BREAKPOINTS     8
+#define ARM_MAX_WATCHPOINTS     1
+
+typedef struct _ARM_NEON128 {
+    ULONGLONG Low;
+    LONGLONG High;
+} ARM_NEON128;
+
+typedef struct DECLSPEC_ALIGN(8) _CONTEXT_ARM {
+
+    //
+    // Control flags.
+    //
+
+    ULONG ContextFlags;
+
+    //
+    // Integer registers
+    //
+
+    ULONG R0;
+    ULONG R1;
+    ULONG R2;
+    ULONG R3;
+    ULONG R4;
+    ULONG R5;
+    ULONG R6;
+    ULONG R7;
+    ULONG R8;
+    ULONG R9;
+    ULONG R10;
+    ULONG R11;
+    ULONG R12;
+
+    //
+    // Control Registers
+    //
+
+    ULONG Sp;
+    ULONG Lr;
+    ULONG Pc;
+    ULONG Cpsr;
+
+    //
+    // Floating Point/NEON Registers
+    //
+
+    ULONG Fpscr;
+    ULONG Padding;
+    union {
+        ARM_NEON128 Q[16];
+        ULONGLONG D[32];
+        ULONG S[32];
+    } DUMMYUNIONNAME;
+
+    //
+    // Debug registers
+    //
+
+    ULONG Bvr[ARM_MAX_BREAKPOINTS];
+    ULONG Bcr[ARM_MAX_BREAKPOINTS];
+    ULONG Wvr[ARM_MAX_WATCHPOINTS];
+    ULONG Wcr[ARM_MAX_WATCHPOINTS];
+
+    ULONG Padding2[2];
+
+} CONTEXT_ARM;
+
+///////////////////////////////////////////////////////////////////////////////
+
 union CONTEXT_STORAGE {
 
     CONTEXT_X86 c1;

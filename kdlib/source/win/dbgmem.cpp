@@ -29,6 +29,7 @@ MEMOFFSET_64 addr64( MEMOFFSET_64 offset )
     switch( processorMode )
     {
     case IMAGE_FILE_MACHINE_I386:
+    case IMAGE_FILE_MACHINE_ARMNT:
         if ( *( (ULONG*)&offset + 1 ) == 0 )
             return (ULONG64)(LONG)offset;
 

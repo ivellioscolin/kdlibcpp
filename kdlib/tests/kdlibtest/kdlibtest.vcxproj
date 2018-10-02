@@ -191,6 +191,7 @@
     <ClCompile Include="..\comdate\testfunc.cpp" />
     <ClCompile Include="..\comdate\testvars.cpp" />
     <ClCompile Include="arm64dumptest.cpp" />
+    <ClCompile Include="armdumptest.cpp" />
     <ClCompile Include="breakhandler.cpp" />
     <ClCompile Include="clangtest.cpp" />
     <ClCompile Include="cputest.cpp" />
