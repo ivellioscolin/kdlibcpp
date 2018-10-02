@@ -548,6 +548,18 @@ TEST_F(TypeInfoTest, GetMethod)
     EXPECT_THROW( g_classChild->getElement(L"NotExistMethod"), TypeException );
 }
 
+TEST_F(TypeInfoTest, GetMethodName)
+{
+    TypeInfoPtr  typeClassChild;
+
+    ASSERT_NO_THROW(typeClassChild = loadType(L"g_classChild"));
+
+    EXPECT_EQ(L"virtMethod3", typeClassChild->getMethodName(3));
+    EXPECT_EQ(L"classChild", typeClassChild->getMethodName(10));
+
+    EXPECT_THROW(typeClassChild->getMethodName(333), IndexException);
+}
+
 TEST_F(TypeInfoTest, GetOverloadedMethod)
 {
     TypeInfoPtr  g_classChild;

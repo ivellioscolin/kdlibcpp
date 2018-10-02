@@ -190,6 +190,10 @@ protected:
         throw TypeException( getName(), L"type has no methods" ); 
     }
 
+    virtual std::wstring getMethodName(size_t index) {
+        throw TypeException(getName(), L"type has no methods");
+    }
+
     virtual size_t getMethodsCount() {
         throw TypeException( getName(), L"type has no methods" ); 
     }
@@ -424,6 +428,7 @@ protected:
     virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype=L"");
     virtual TypeInfoPtr getMethod( size_t index );
     virtual size_t getMethodsCount();
+    virtual std::wstring getMethodName(size_t index);
 
     virtual TypeInfoPtr getBaseClass( const std::wstring& className);
     virtual TypeInfoPtr getBaseClass( size_t index );

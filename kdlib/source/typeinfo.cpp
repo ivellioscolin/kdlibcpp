@@ -1167,6 +1167,21 @@ TypeInfoPtr TypeInfoUdt::getMethod(size_t index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypeInfoUdt::getMethodName(size_t index)
+{
+    SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);
+
+    if (index >= methods.size())
+        throw IndexException(index);
+
+    SymbolPtrList::iterator  it = methods.begin();
+    std::advance(it, index);
+
+    return (*it)->getName();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 size_t TypeInfoUdt::getMethodsCount()
 {
      SymbolPtrList methods = m_symbol->findChildren(SymTagFunction);

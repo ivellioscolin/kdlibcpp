@@ -183,6 +183,10 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual std::wstring getMethodName(size_t index) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual size_t getMethodsCount() {
         NOT_IMPLEMENTED();
     }
