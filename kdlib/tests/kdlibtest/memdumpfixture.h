@@ -32,24 +32,29 @@ public:
         {}
     }
 
+    static std::wstring getDumpsDirName()
+    {
+        return L"..\\..\\..\\kdlib\\tests\\dumps\\";
+    }
+
     static std::wstring getKernelDumpName()
     {
-        return L"..\\..\\..\\kdlib\\tests\\dumps\\win8_x64_mem.cab";
+        return getDumpsDirName() + L"win8_x64_mem.cab";
     }
 
     static std::wstring getARM64KernelDumpName()
     {
-        return L"..\\..\\..\\kdlib\\tests\\dumps\\win10_arm64_mem.cab";
+        return getDumpsDirName() + L"win10_arm64_mem.cab";
     }
 
     static std::wstring getARMKernelDumpName()
     {
-        return L"..\\..\\..\\kdlib\\tests\\dumps\\win10_arm_rpi3_mem.cab";
+        return getDumpsDirName() + L"win10_arm_rpi3_mem.cab";
     }
 
     static std::wstring getWow64UserDumpName()
     {
-        return L"..\\..\\..\\kdlib\\tests\\dumps\\targetapp_stacktest_wow64.cab";
+        return getDumpsDirName() + L"targetapp_stacktest_wow64.cab";
     }
 
 private:
