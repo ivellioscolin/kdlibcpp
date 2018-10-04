@@ -231,6 +231,17 @@ TEST_P( StackTest, ChangeCurrentFrame )
     EXPECT_EQ(3, getCurrentStackFrameNumber());
 }
 
+TEST_P(StackTest, SwitchTo)
+{
+    StackPtr  stack;
+
+    ASSERT_NO_THROW(stack = getStack());
+
+    stack->getFrame(3)->switchTo();
+    EXPECT_EQ(3, getCurrentStackFrameNumber());
+}
+
+
 TEST_P( StackTest, ChangeScopeEvent )
 {
     EventHandlerMock  eventHandler;

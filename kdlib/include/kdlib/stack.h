@@ -1,8 +1,7 @@
 #pragma once
 
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/noncopyable.hpp>
+
 
 #include <kdlib/dbgengine.h>
 #include <kdlib/typedvar.h>
@@ -46,6 +45,8 @@ public:
     virtual TypedVarPtr getStaticVar(const std::wstring& paramName) = 0;
     virtual std::wstring  getStaticVarName(unsigned long index) = 0;
     virtual bool findStaticVar(const std::wstring& varName) = 0;
+
+    virtual void switchTo() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,7 +69,7 @@ public:
 StackPtr getStack();
 StackFramePtr getCurrentStackFrame();
 unsigned long getCurrentStackFrameNumber();
-void setCurrentStackFrame(StackFramePtr& stackFrame);
+void setCurrentStackFrame(const StackFramePtr& stackFrame);
 void setCurrentStackFrameByIndex(unsigned long frameIndex);
 void resetCurrentStackFrame();
 

@@ -2,6 +2,8 @@
 
 #include <kdlib/stack.h>
 
+#include <boost/enable_shared_from_this.hpp>
+
 namespace kdlib {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +35,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StackFrameImpl : public StackFrame
+class StackFrameImpl : public StackFrame, public boost::enable_shared_from_this<StackFrameImpl>
 {
 public:
 
@@ -93,7 +95,12 @@ public:
     virtual TypedVarPtr getStaticVar(const std::wstring& paramName);
     virtual std::wstring  getStaticVarName(unsigned long index);
     virtual bool findStaticVar(const std::wstring& varName);
-public:
+
+    virtual void switchTo() {
+        setCurrentStackFrame(shared_from_this());
+    }
+
+private:
 
     SymbolPtrList getLocalVars();
     SymbolPtrList getParams();

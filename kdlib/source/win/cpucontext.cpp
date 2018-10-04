@@ -694,7 +694,7 @@ unsigned long getCurrentStackFrameNumber()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void setCurrentStackFrame(StackFramePtr& stackFrame)
+void setCurrentStackFrame(const StackFramePtr& stackFrame)
 {
     HRESULT  hres;
     
