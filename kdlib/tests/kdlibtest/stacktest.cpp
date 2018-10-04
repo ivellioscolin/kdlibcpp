@@ -1,7 +1,5 @@
 #include <stdafx.h>
 
-#include <math.h>
-
 #include "memdumpfixture.h"
 #include "eventhandlermock.h"
 
@@ -33,6 +31,9 @@ public:
 
         case StackTestMode::Wow64Dump:
             m_dumpId = kdlib::loadDump(MemDumpFixture::getWow64UserDumpName());
+
+            // path to targetapp.pdb
+            kdlib::appendSymbolPath(MemDumpFixture::getDumpsDirName());
             break;
 
         default:
