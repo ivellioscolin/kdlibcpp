@@ -430,3 +430,42 @@ TEST_F(ClangTest, TemplateFunc)
     EXPECT_THROW( compileType(template_func_src3, L"Generic::intMethod"), TypeException );
     EXPECT_THROW( compileType(template_func_src3, L"Generic::tMethod"), TypeException );
 }
+
+TEST_F(ClangTest, TemplateStruct)
+{
+    static const wchar_t srcCode[] =  L"\
+    template<typename T1, typename T2>      \
+    struct TestStruct {                     \
+        T1  field1;                         \
+        T2  field2;                         \
+    };                                      \
+    TestStruct<int,float>  var1;            \
+    TestStruct<char, unsigned long>  var2;  \
+    ";
+
+    TypeInfoProviderPtr  typeProvider;
+    ASSERT_NO_THROW(typeProvider = getTypeInfoProviderFromSource(srcCode));
+
+    EXPECT_EQ(L"Int4B", typeProvider->getTypeByName(L"TestStruct<int,float>")->getElement(0)->getName());
+    EXPECT_EQ(L"UInt4B", typeProvider->getTypeByName(L"TestStruct<char,unsigned long>")->getElement(1)->getName());
+    EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct"), TypeException);
+    EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct<float>"), TypeException);
+}
+
+
+TEST_F(ClangTest, TemplateValueStruct)
+{
+    static const wchar_t srcCode[] = L"\
+    template<int v1, long v2>          \
+    struct TestStruct {                \
+        int  field1;                   \
+    };                                 \
+    TestStruct<2,-3>  var1;            \
+    ";
+
+    TypeInfoProviderPtr  typeProvider;
+    ASSERT_NO_THROW(typeProvider = getTypeInfoProviderFromSource(srcCode));
+
+    EXPECT_NO_THROW(typeProvider->getTypeByName(L"TestStruct<2,-3>"));
+    EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct<2,3>"), TypeException);
+}

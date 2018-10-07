@@ -642,19 +642,65 @@ public:
 
             CXXRecordDecl *   definition = Declaration->getDefinition();
 
-            if ( definition && definition->isInvalidDecl() )
-                return true;
+            if (definition)
+            {
+                if (definition->isInvalidDecl())
+                    return true;
 
-            std::string  name = Declaration->getQualifiedNameAsString();
+                auto  templateDecl = definition->getDescribedClassTemplate();
 
-            TypeInfoPtr  typeInfo;
+                if (templateDecl)
+                {
+                    for (auto specIt = templateDecl->spec_begin(); specIt != templateDecl->spec_end(); specIt++)
+                    {
+                        auto  structSpec = *specIt;
 
-            if ( definition )
-                typeInfo = TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_session, definition ) );
+                        std::stringstream   fullNameBuilder;
+
+                        fullNameBuilder << structSpec->getQualifiedNameAsString() << "<";
+
+                        auto const& structSpecArgList = structSpec->getTemplateArgs();
+
+                        for (auto i = 0; i < structSpecArgList.size(); ++i)
+                        {
+                            if (i != 0)
+                                fullNameBuilder << ",";
+
+                            switch (structSpecArgList[i].getKind())
+                            {
+                            case  clang::TemplateArgument::ArgKind::Integral:
+                                fullNameBuilder << structSpecArgList[i].getAsIntegral().toString(10);
+                                break;
+
+                            case  clang::TemplateArgument::ArgKind::Type:
+                                fullNameBuilder << structSpecArgList[i].getAsType().getAsString();
+                                break;
+
+                            default:
+                                throw TypeException(L"unsupported template argument type");
+                            }
+                        }
+
+                        fullNameBuilder << ">";
+
+                        auto  rr = llvm::dyn_cast<CXXRecordDecl>(structSpec);
+
+                        auto typeInfo = TypeInfoPtr(new TypeInfoClangStruct(strToWStr(fullNameBuilder.str()), m_session, rr));
+
+                        (*m_typeMap)[fullNameBuilder.str()] = typeInfo;
+                    }
+                }
+                else
+                {
+                    std::string  name = Declaration->getQualifiedNameAsString();
+                    (*m_typeMap)[name] = TypeInfoPtr(new TypeInfoClangStruct(strToWStr(name), m_session, definition));
+                }
+            }
             else
-                typeInfo = TypeInfoPtr( new TypeInfoClangStructNoDef( strToWStr(name), m_session, Declaration ) );
-    
-             (*m_typeMap)[name] = typeInfo;
+            {
+                std::string  name = Declaration->getQualifiedNameAsString();
+                (*m_typeMap)[name] = TypeInfoPtr(new TypeInfoClangStructNoDef(strToWStr(name), m_session, Declaration));
+            }
 
         } catch(TypeException& )
         {}
