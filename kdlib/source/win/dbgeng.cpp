@@ -2096,7 +2096,7 @@ void disasmDisassembly( MEMOFFSET_64 offset, std::wstring &instruction, MEMOFFSE
     hres = 
         g_dbgMgr->control->DisassembleWide(
             offset,
-            DEBUG_DISASM_EFFECTIVE_ADDRESS,
+            0, //DEBUG_DISASM_EFFECTIVE_ADDRESS,
             buffer,
             sizeof(buffer)/sizeof(wchar_t),
             &disasmSize,
