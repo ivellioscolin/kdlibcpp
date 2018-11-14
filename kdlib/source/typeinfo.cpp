@@ -552,8 +552,8 @@ bool TypeInfo::isBaseType( const std::wstring &typeName )
     if ( isComplexType(name) )
     {
         name = getTypeNameFromComplex(name);
-        if ( name.empty() )
-            throw TypeException( typeName, L"invalid type name" );
+        if (name.empty())
+            return false;
     }
 
     boost::wsmatch    baseMatchResult;

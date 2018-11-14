@@ -209,3 +209,9 @@ public:
 };
 
 testStructZeroArrayInter  g_testStructZeroArrayInter;
+
+
+TemplateStruct<int>  g_template1;
+TemplateStruct<void *>  g_template2;
+TemplateStruct<TemplateStruct<bool>>  g_template3;
+TemplateStruct<TemplateStruct<int>[4]>  g_template4;

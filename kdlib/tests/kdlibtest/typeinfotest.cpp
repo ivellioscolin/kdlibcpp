@@ -622,4 +622,12 @@ TEST_F(TypeInfoTest, PdbProviderEnum)
     EXPECT_EQ(12, count);
 }
 
+TEST_F(TypeInfoTest, TemplateStruct)
+{
+    EXPECT_EQ(5, m_targetModule->enumTypes(L"TemplateStruct*").size());
+    EXPECT_EQ(L"TemplateStruct<int>", loadType(L"TemplateStruct<int>")->getName());
+    EXPECT_EQ(L"TemplateStruct<void *>", loadType(L"TemplateStruct<void *>")->getName());
+    EXPECT_EQ(L"TemplateStruct<TemplateStruct<bool> >", loadType(L"TemplateStruct<TemplateStruct<bool> >")->getName());
+    EXPECT_EQ(L"TemplateStruct<TemplateStruct<int> [4]>", loadType(L"TemplateStruct<TemplateStruct<int> [4]>")->getName());
+}
 

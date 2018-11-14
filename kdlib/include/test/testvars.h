@@ -401,7 +401,8 @@ public:
         int  m_member;
     };
 
-
+    static const long  m_constLong = 30;
+    
 private:
 
     nestedClass  m_nestedMember;
@@ -410,7 +411,7 @@ private:
 
 extern  testClass1  g_testClass;
 
-
+static const int  constInt = 789;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -422,6 +423,18 @@ struct testStructZeroArray {
 };
 
 extern  testStructZeroArray     *g_testStructZeroArray;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template<class T>
+struct TemplateStruct {
+    T  field;
+};
+
+extern TemplateStruct<int>  g_template1;
+extern TemplateStruct<void *>  g_template2;
+extern TemplateStruct<TemplateStruct<bool>>  g_template3;
+extern TemplateStruct<TemplateStruct<int>[4]>  g_template4;
 
 ////////////////////////////////////////////////////////////////////////////////
 
