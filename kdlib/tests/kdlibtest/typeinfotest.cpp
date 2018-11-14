@@ -95,9 +95,9 @@ TEST_F( TypeInfoTest, BaseTypeArray )
     EXPECT_EQ( L"Int4B[2][3]", loadType(L"intMatrix")->getName() );
     EXPECT_EQ( sizeof(intMatrix), loadType(L"intMatrix")->getSize() ); 
         
-    EXPECT_THROW( loadType( L"Int2B[1" ), TypeException );
-    EXPECT_THROW( loadType( L"Int2B[1[1]]" ), TypeException );
-    EXPECT_THROW( loadType( L"Int2B[-1]" ), TypeException );
+    EXPECT_THROW( loadType( L"Int2B[1" ), SymbolException);
+    EXPECT_THROW( loadType( L"Int2B[1[1]]" ), SymbolException);
+    EXPECT_THROW( loadType( L"Int2B[-1]" ), SymbolException);
 }
 
 TEST_F( TypeInfoTest, ComplexTypeArray )
@@ -106,7 +106,7 @@ TEST_F( TypeInfoTest, ComplexTypeArray )
     EXPECT_TRUE( loadType( L"structTest[2]")->isArray() );
     EXPECT_EQ( loadType( L"structTest")->getSize()*2*3, loadType( L"structTest[2][3]")->getSize());
 
-    EXPECT_THROW( loadType( L"structTest[2][-1]"), TypeException );
+    EXPECT_THROW( loadType( L"structTest[2][-1]"), SymbolException);
 }
 
 
@@ -123,8 +123,8 @@ TEST_F( TypeInfoTest, BaseTypePointer )
     EXPECT_EQ( ptrSize(), loadType( L"ppbigValue")->getSize() );
 
     EXPECT_EQ( L"UInt1B*", loadType( L"UInt1B(*)" )->getName() );
-    EXPECT_THROW( loadType( L"Int2B(*" ), TypeException );
-    EXPECT_THROW( loadType( L"Int2B*)" ), TypeException );
+    EXPECT_THROW( loadType( L"Int2B(*" ), SymbolException);
+    EXPECT_THROW( loadType( L"Int2B*)" ), SymbolException);
 }
 
 TEST_F( TypeInfoTest, Void )
