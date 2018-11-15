@@ -345,6 +345,8 @@ static const wchar_t test_typedef_src[] = L"\
      } TestDef;                             \
                                             \
      typedef TestDef   TEST;                \
+     typedef TestDef*  PTEST;               \
+     typedef TestDef   **PPTEST;            \
     ";
 
 TEST_F(ClangTest, Typedef)
@@ -365,6 +367,8 @@ TEST_F(ClangTest, Typedef)
     ASSERT_EQ(L"Int4B", structType->getElement(L"field2")->getName() );
 
     ASSERT_EQ(L"_Test", typeProvider->getTypeByName(L"TEST")->getName() );
+    ASSERT_EQ(L"_Test*", typeProvider->getTypeByName(L"PTEST")->getName());
+    ASSERT_EQ(L"_Test**", typeProvider->getTypeByName(L"PPTEST")->getName());
 }
 
 TEST_F(ClangTest, TypeProviderEnum)
