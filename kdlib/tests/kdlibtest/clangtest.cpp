@@ -473,3 +473,28 @@ TEST_F(ClangTest, TemplateValueStruct)
     EXPECT_NO_THROW(typeProvider->getTypeByName(L"TestStruct<2,-3>"));
     EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct<2,3>"), TypeException);
 }
+
+TEST_F(ClangTest, MultipleInheritance)
+{
+    static const wchar_t srcCode[] = L"\
+    class Base1 {                      \
+        int  field1;                   \
+    };                                 \
+    class Base2 {                      \
+        int  field2;                   \
+    };                                 \
+    class TestClass : public Base1, private Base2 {  \
+        char  field3;                  \
+    };                                 \
+    ";
+
+    TypeInfoProviderPtr  typeProvider;
+    ASSERT_NO_THROW(typeProvider = getTypeInfoProviderFromSource(srcCode));
+
+    TypeInfoPtr  typeInfo;
+    ASSERT_NO_THROW(typeInfo = typeProvider->getTypeByName(L"TestClass"));
+    EXPECT_EQ(3, typeInfo->getElementCount());
+    EXPECT_EQ(2, typeInfo->getBaseClassesCount());
+    EXPECT_EQ(1, typeInfo->getBaseClass(0)->getElementCount());
+    EXPECT_FALSE(typeInfo->getBaseClassOffset(0) == typeInfo->getBaseClassOffset(1));
+}
