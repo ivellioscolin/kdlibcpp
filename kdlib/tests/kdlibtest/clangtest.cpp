@@ -495,6 +495,10 @@ TEST_F(ClangTest, MultipleInheritance)
     ASSERT_NO_THROW(typeInfo = typeProvider->getTypeByName(L"TestClass"));
     EXPECT_EQ(3, typeInfo->getElementCount());
     EXPECT_EQ(2, typeInfo->getBaseClassesCount());
-    EXPECT_EQ(1, typeInfo->getBaseClass(0)->getElementCount());
-    EXPECT_FALSE(typeInfo->getBaseClassOffset(0) == typeInfo->getBaseClassOffset(1));
+    EXPECT_EQ(L"field1", typeInfo->getBaseClass(0)->getElementName(0));
+    EXPECT_EQ(L"field2", typeInfo->getBaseClass(L"Base2")->getElementName(0));
+    EXPECT_FALSE(typeInfo->getBaseClassOffset(0) == typeInfo->getBaseClassOffset(L"Base2"));
+
+    std::wstring  str;
+    EXPECT_NO_THROW(str = typeInfo->str());
 }

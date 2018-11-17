@@ -227,6 +227,8 @@ void TypeInfoClangStruct::getFields()
 
 void TypeInfoClangStruct::getRecursiveFields( clang::RecordDecl* recordDecl, MEMOFFSET_32 startOffset)
 {
+    getFieldFromBaseClasses(recordDecl, startOffset);
+
     const ASTRecordLayout  &typeLayout = recordDecl->getASTContext().getASTRecordLayout(recordDecl);
 
     for(clang::RecordDecl::decl_iterator  declit = recordDecl->decls_begin(); declit != recordDecl->decls_end(); declit++)
@@ -268,10 +270,117 @@ void TypeInfoClangStruct::getRecursiveFields( clang::RecordDecl* recordDecl, MEM
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void TypeInfoClangStruct::getFieldFromBaseClasses(clang::RecordDecl* recordDecl, MEMOFFSET_32 startOffset)
+{
+    const CXXRecordDecl  *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(recordDecl);
+
+    if (!classDecl)
+        return;
+        
+    for (auto baseIt : classDecl->bases())
+    {
+        auto  baseDecl = baseIt.getType()->getAsCXXRecordDecl();
+        auto  baseOffset = recordDecl->getASTContext().getASTRecordLayout(m_decl).getBaseClassOffset( baseIt.getType()->getAsCXXRecordDecl() ).getQuantity();
+
+        getRecursiveFields(baseDecl, startOffset + baseOffset);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 size_t TypeInfoClangStruct::getSize()
 {
     const ASTRecordLayout  &typeLayout = m_decl->getASTContext().getASTRecordLayout(m_decl);
     return typeLayout.getSize().getQuantity();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoClangStruct::getBaseClassesCount()
+{
+    const CXXRecordDecl  *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(m_decl);
+
+    if (!classDecl)
+        return 0;
+    
+    return std::distance(classDecl->bases_begin(), classDecl->bases_end());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoClangStruct::getBaseClass(const std::wstring& className)
+{
+    const CXXRecordDecl  *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(m_decl);
+
+    if (!classDecl)
+        throw TypeException(L"Type has no base class");
+
+    for (auto baseIt : classDecl->bases())
+    {
+        if (baseIt.getType()->getAsCXXRecordDecl()->getNameAsString() == wstrToStr(className))
+            return getTypeForClangType(m_astSession, baseIt.getType());
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoClangStruct::getBaseClass(size_t index)
+{
+    const CXXRecordDecl  *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(m_decl);
+
+    if (!classDecl)
+        throw TypeException(L"Type has no base class");
+
+    if (index >= getBaseClassesCount())
+        throw IndexException(index);
+
+    return getTypeForClangType(m_astSession, std::next(classDecl->bases_begin(), index)->getType());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL TypeInfoClangStruct::getBaseClassOffset(const std::wstring &className)
+{
+    const CXXRecordDecl  *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(m_decl);
+
+    if (!classDecl)
+        throw TypeException(L"Type has no base class");
+
+    for (auto baseIt : classDecl->bases())
+    {
+        if (baseIt.getType()->getAsCXXRecordDecl()->getNameAsString() == wstrToStr(className))
+        {
+            return m_decl->getASTContext().getASTRecordLayout(m_decl).getBaseClassOffset(
+                baseIt.getType()->getAsCXXRecordDecl()
+            ).getQuantity();
+        }
+    }
+
+    std::wstringstream  sstr;
+    sstr << getName() << " has no this base class : " << className;
+    throw TypeException(sstr.str());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_REL TypeInfoClangStruct::getBaseClassOffset(size_t index)
+{
+    const CXXRecordDecl  *classDecl = llvm::dyn_cast<clang::CXXRecordDecl>(m_decl);
+
+    if (!classDecl)
+        throw TypeException(L"Type has no base class");
+
+    if (index >= getBaseClassesCount())
+        throw IndexException(index);
+
+    return m_decl->getASTContext().getASTRecordLayout(m_decl).getBaseClassOffset(
+        std::next(classDecl->bases_begin(), index)->getType()->getAsCXXRecordDecl()
+    ).getQuantity();
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

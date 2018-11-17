@@ -85,13 +85,25 @@ protected:
         return printStructType(selfPtr);
     }
 
+    virtual size_t getBaseClassesCount();
+
+    virtual TypeInfoPtr getBaseClass(const std::wstring& className);
+    
+    virtual TypeInfoPtr getBaseClass(size_t index);
+
+    virtual MEMOFFSET_REL getBaseClassOffset(const std::wstring &name);
+
+    virtual MEMOFFSET_REL getBaseClassOffset(size_t index);
+
     virtual size_t getSize();
 
 protected:
 
     virtual void getFields();
 
-    void getRecursiveFields( clang::RecordDecl* recordDecl, MEMOFFSET_32 startOffset);
+    void getRecursiveFields(clang::RecordDecl* recordDecl, MEMOFFSET_32 startOffset);
+
+    void getFieldFromBaseClasses(clang::RecordDecl* recordDecl, MEMOFFSET_32 startOffset);
 
     ClangASTSessionPtr  m_astSession;
 
