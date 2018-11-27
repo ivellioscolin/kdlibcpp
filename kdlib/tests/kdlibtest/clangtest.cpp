@@ -450,12 +450,29 @@ TEST_F(ClangTest, TemplateStruct)
     TypeInfoProviderPtr  typeProvider;
     ASSERT_NO_THROW(typeProvider = getTypeInfoProviderFromSource(srcCode));
 
-    EXPECT_EQ(L"Int4B", typeProvider->getTypeByName(L"TestStruct<int,float>")->getElement(0)->getName());
-    EXPECT_EQ(L"UInt4B", typeProvider->getTypeByName(L"TestStruct<char,unsigned long>")->getElement(1)->getName());
+    EXPECT_EQ(L"Int4B", typeProvider->getTypeByName(L"TestStruct<int, float>")->getElement(0)->getName());
+    EXPECT_EQ(L"UInt4B", typeProvider->getTypeByName(L"TestStruct<char, unsigned long>")->getElement(1)->getName());
     EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct"), TypeException);
     EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct<float>"), TypeException);
 }
 
+TEST_F(ClangTest, TemplateNestedStruct)
+{
+    static const wchar_t srcCode[] = L"\
+    template<typename T>                    \
+    struct TestStruct {                     \
+        T   field;                          \
+    };                                      \
+    TestStruct<TestStruct<int>>  var1;      \
+    TestStruct<TestStruct<TestStruct<int>>>  var2;  \
+    ";
+
+    TypeInfoProviderPtr  typeProvider;
+    ASSERT_NO_THROW(typeProvider = getTypeInfoProviderFromSource(srcCode));
+
+    EXPECT_NO_THROW(typeProvider->getTypeByName(L"TestStruct<TestStruct<int> >"));
+    EXPECT_NO_THROW(typeProvider->getTypeByName(L"TestStruct<TestStruct<TestStruct<int> > >"));
+}
 
 TEST_F(ClangTest, TemplateValueStruct)
 {
@@ -470,8 +487,8 @@ TEST_F(ClangTest, TemplateValueStruct)
     TypeInfoProviderPtr  typeProvider;
     ASSERT_NO_THROW(typeProvider = getTypeInfoProviderFromSource(srcCode));
 
-    EXPECT_NO_THROW(typeProvider->getTypeByName(L"TestStruct<2,-3>"));
-    EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct<2,3>"), TypeException);
+    EXPECT_NO_THROW(typeProvider->getTypeByName(L"TestStruct<2, -3>"));
+    EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct<2, 3>"), TypeException);
 }
 
 TEST_F(ClangTest, MultipleInheritance)
