@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
@@ -8,6 +9,7 @@
 #include "kdlib/typeinfo.h"
 #include "kdlib/variant.h"
 #include "kdlib/dataaccessor.h"
+#include "kdlib/exceptions.h"
 
 namespace kdlib {
 
@@ -18,12 +20,11 @@ typedef std::vector<TypedVarPtr> TypedVarList;
 class TypedValue;
 typedef std::vector<TypedValue>  TypedValueList;
 
-class TypedVarScope;
-typedef boost::shared_ptr<TypedVarScope>  TypedVarScopePtr;
-
 class StackFrame;
 typedef boost::shared_ptr<StackFrame>  StackFramePtr;
 
+class Scope;
+typedef boost::shared_ptr<Scope>  ScopePtr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -89,6 +90,11 @@ class TypedVar : public NumConvertable, private boost::noncopyable {
 public:
     
     template <typename T>
+    explicit operator T() {
+        return static_cast<T>(getValue());
+    }
+
+    template <typename T>
     explicit operator T() const {
         return static_cast<T>(getValue());
     }
@@ -138,21 +144,12 @@ protected:
     {}
 };
 
+
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypedValue 
+class TypedValue  : public NumConvertable
 {
 public:
-
-    operator NumVariant() {
-        return getValue();
-    }
-
-    operator NumVariant() const {
-        return getValue();
-    }
-
-
 
     TypedValue();
 
@@ -178,17 +175,29 @@ public:
     TypedValue( bool var ) : m_value( loadBoolVar(var) ) {}
 
     template<typename T>
-    explicit operator T() {
-        if ( sizeof(T) < getSize() )
-            throw TypeException( L"cannot cast TypedValue");
+    TypedValue(T* var) : m_value(loadULongLongVar((unsigned long long)var)) {}
 
-        DataAccessorPtr dataRange = getCacheAccessor(sizeof(T) );
+    template<typename T, typename std::enable_if < !std::is_arithmetic<T>::value && std::is_trivially_copyable<T>::value, T >::type* = nullptr>
+    explicit operator T () const
+    {
+        auto name = typeid(T).name();
+
+        if ( sizeof(T) > getSize() )
+           throw TypeException( L"cannot cast TypedValue");
+
+        DataAccessorPtr dataRange = getCacheAccessor( m_value->getSize() );
         m_value->writeBytes(dataRange);
 
-        std::vector<unsigned char>  buf(sizeof(T));
-        dataRange->readBytes(buf, sizeof(T));
+        std::vector<unsigned char>  buf(m_value->getSize());
+        dataRange->readBytes(buf, m_value->getSize());
 
         return *reinterpret_cast<T*>(&buf.front());
+    }
+
+    template<typename T, typename std::enable_if < std::is_arithmetic<T>::value, T >::type* = nullptr>
+    explicit operator T() const
+    {
+        return static_cast<T>(getValue());
     }
 
 public:
@@ -310,9 +319,96 @@ private:
 };
 
 
+template<typename T>
+TypedValue makeArrayValue (const std::vector<T>& data);
+
+
+template <typename T>
+TypedValue makeValue(const std::wstring &typeName, const T& copyVar) {
+    return loadTypedVar(typeName, getCacheAccessor(copyVar));
+}
+
+template <typename T>
+TypedValue makeValue(const TypeInfoPtr &typeInfo, const T& copyVar) {
+    return loadTypedVar(typeInfo, getCacheAccessor(copyVar));
+}
+
+inline
+TypedValue makePointer(const TypeInfoPtr &typeInfo, const MEMOFFSET_64&  addr)
+{
+    return TypedValue(addr).castTo(typeInfo->ptrTo());
+}
+
+inline
+TypedValue makePointer(const std::wstring &typeName, const MEMOFFSET_64&  addr)
+{
+    return TypedValue(addr).castTo(loadType(typeName)->ptrTo());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+class Scope
+{
+public:
+
+    virtual TypedValue get(const std::wstring& varName) const = 0;
+
+    virtual bool find(const std::wstring& varName, TypedValue& value) const = 0;
+
+public:
+
+    TypedValue  operator[] (const std::wstring&  varName) {
+        return get(varName);
+    }
+};
+
+class ScopeList : public Scope
+{
+public:
+
+    ScopeList()
+    {}
+
+    explicit ScopeList(const std::list < std::pair<std::wstring, TypedValue> >& varList)
+    {
+        m_scope.insert(varList.begin(), varList.end());
+    }
+
+    virtual TypedValue get(const std::wstring& varName) const override
+    {
+        auto  var = m_scope.find(varName);
+        if (var == m_scope.end())
+            throw DbgException("scope doesn't contain varibale");
+        return var->second;
+    }
+
+    virtual bool find(const std::wstring& varName, TypedValue& value) const override
+    {
+        auto  var = m_scope.find(varName);
+        if (var == m_scope.end())
+            return false;
+        value = var->second;
+        return true;
+    }
+
+private:
+    std::map<std::wstring, TypedValue>  m_scope;
+};
+
+inline ScopePtr makeScope(const std::list < std::pair<std::wstring, TypedValue> >& varList)
+{
+   return ScopePtr(new ScopeList(varList));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedValue callRaw(MEMOFFSET_64 addr, CallingConventionType callingConvention, const TypedValueList& arglst);
 
-TypedValue evalExpr(const std::wstring& expr, const std::list< std::pair<std::wstring, TypedValue> >& scope = {});
+TypedValue evalExpr(const std::wstring& expr, const ScopePtr& scope = ScopePtr(new ScopeList()),
+    const TypeInfoProviderPtr& typeInfoProvider = getDefaultTypeInfoProvider());
+
+TypedValue evalExpr(const std::string& expr, const ScopePtr& scope = ScopePtr(new ScopeList()),
+    const TypeInfoProviderPtr& typeInfoProvider = getDefaultTypeInfoProvider());
 
 ///////////////////////////////////////////////////////////////////////////////
 

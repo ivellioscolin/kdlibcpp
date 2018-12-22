@@ -593,6 +593,44 @@ void ModuleImp::findSymSessionSymbol(MEMOFFSET_64 offset, std::wstring &name, ME
     }
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+
+ScopePtr ModuleImp::getScope()
+{
+    class ModuleScope : public Scope
+    {
+    public:
+
+        ModuleScope(const ModulePtr& mod) :
+            m_module(mod)
+        {}
+
+        virtual TypedValue get(const std::wstring& varName) const override
+        {
+            return m_module->getTypedVarByName(varName);
+        }
+
+        virtual bool find(const std::wstring& varName, TypedValue& varValue) const override
+        {
+            try {
+                varValue = m_module->getTypedVarByName(varName);
+                return true;
+            }
+            catch (DbgException&)
+            {}
+            
+            return false;
+        }
+
+    private:
+
+        ModulePtr  m_module;
+    };
+
+    return ScopePtr(new ModuleScope(shared_from_this()));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )

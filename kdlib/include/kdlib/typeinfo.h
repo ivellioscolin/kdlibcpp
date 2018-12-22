@@ -169,7 +169,9 @@ public:
 };
 
 TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source, const std::wstring&  opts = L"" );
+TypeInfoProviderPtr  getTypeInfoProviderFromSource(const std::string&  source, const std::string&  opts = "");
 TypeInfoProviderPtr  getTypeInfoProviderFromPdb( const std::wstring&  pdbFile, MEMOFFSET_64  loadBase = 0 );
+TypeInfoProviderPtr  getDefaultTypeInfoProvider();
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -187,6 +189,11 @@ TypeInfoPtr makeFloatConst(float val);
 TypeInfoPtr makeDoubleConst(double val);
 TypeInfoPtr makeWCharConst(wchar_t val);
 TypeInfoPtr makeBoolConst(bool val);
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr evalType(const std::wstring& expr, const TypeInfoProviderPtr typeInfoProvider = getDefaultTypeInfoProvider());
+TypeInfoPtr evalType(const std::string& expr, const TypeInfoProviderPtr typeInfoProvider = getDefaultTypeInfoProvider());
 
 ///////////////////////////////////////////////////////////////////////////////
 

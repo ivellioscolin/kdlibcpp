@@ -115,6 +115,8 @@ public:
     virtual void getFileVersion(unsigned long& majorVersion, unsigned long& minorVerion, unsigned long& revision, unsigned long& build) = 0;
 
     virtual void getFixedFileInfo( FixedFileInfo &fixedFileInfo ) = 0;
+
+    virtual ScopePtr getScope() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

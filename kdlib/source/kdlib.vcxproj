@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="clang\clang.cpp" />
+    <ClCompile Include="clang\evalexpr.cpp" />
     <ClCompile Include="customtypes.cpp" />
     <ClCompile Include="dataaccessor.cpp" />
     <ClCompile Include="dbgio.cpp" />
@@ -112,6 +113,10 @@
     <ClInclude Include="..\include\kdlib\variant.h" />
     <ClInclude Include="..\include\kdlib\windbg.h" />
     <ClInclude Include="clang\clang.h" />
+    <ClInclude Include="clang\evalexpr.h" />
+    <ClInclude Include="clang\exprparser.h" />
+    <ClInclude Include="clang\parser.h" />
+    <ClInclude Include="clang\typeparser.h" />
     <ClInclude Include="dataaccessorimpl.h" />
     <ClInclude Include="dia\diacallback.h" />
     <ClInclude Include="dia\diawrapper.h" />

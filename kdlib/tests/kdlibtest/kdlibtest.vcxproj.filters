@@ -65,6 +65,12 @@
     <ClCompile Include="winapitest.cpp">
       <Filter>testcases</Filter>
     </ClCompile>
+    <ClCompile Include="exprevaltest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="typeevaltest.cpp">
+	  <Filter>testcases</Filter>
+	</ClCompile>
     <ClCompile Include="arm64dumptest.cpp">
       <Filter>testcases</Filter>
     </ClCompile>

@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3F87C2B3-5A4B-46C0-8669-05225C0B7D39}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kdlib", "kdlib\source\kdlib.vcxproj", "{3E9C538F-F060-4E86-AB7D-D44439615B63}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "targetapp", "kdlib\tests\targetapp\targetapp.vcxproj", "{0E4CC688-F2F5-499F-9C07-0F2CAEE0D3EF}"
@@ -60,5 +58,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7CD254EC-CB87-4E7A-A258-0A3B94780138}
 	EndGlobalSection
 EndGlobal

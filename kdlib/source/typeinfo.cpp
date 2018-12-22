@@ -825,7 +825,7 @@ std::wstring TypeInfoReference::getName()
             do {
                 indices.push_back( typeInfo->getElementCount() );
             }
-            while( ( typeInfo = dynamic_cast<TypeInfoArray*>(typeInfo)->getDerefType().get() )->isArray() );
+            while( ( typeInfo = dynamic_cast<TypeInfoArray*>(typeInfo)->deref().get() )->isArray() );
 
             if ( !name.empty() )
             {
@@ -1864,6 +1864,13 @@ TypeInfoPtr makeBoolConst(bool val)
 TypeInfoProviderPtr  getTypeInfoProviderFromPdb( const std::wstring&  pdbFile, MEMOFFSET_64  loadBase )
 {
     return TypeInfoProviderPtr( new TypeInfoSymbolProvider(pdbFile, loadBase) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoProviderPtr  getDefaultTypeInfoProvider()
+{
+    return TypeInfoProviderPtr(new TypeInfoDefaultProvider());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

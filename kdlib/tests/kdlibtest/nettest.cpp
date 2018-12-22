@@ -115,7 +115,7 @@ TYPED_TEST(NetTestObj, HeapVarArray)
 TYPED_TEST(NetTestObj, HeapVarMultiSizeArray)
 {
     EXPECT_EQ( 2, m_testClassVar->getElement(L"floatArray")->getElementCount() );
-    EXPECT_FLOAT_EQ(0.3f, (float)*m_testClassVar->getElement(L"floatArray")->getElement(0)->getElement(1)->getElement(0) );
+    EXPECT_FLOAT_EQ(0.3f, (float) *m_testClassVar->getElement(L"floatArray")->getElement(0)->getElement(1)->getElement(0));
 }
 
 TYPED_TEST(NetTestObj, HeapVarString)

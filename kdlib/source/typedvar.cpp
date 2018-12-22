@@ -501,7 +501,6 @@ TypedVarPtr loadCharVar( char var )
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(char) );
     accessor->writeSignByte(var);
     return loadType(L"Int1B")->getVar(accessor);
-   // return getTypedVar( loadType(L"Int1B"), accessor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -677,7 +676,7 @@ NumVariant TypedVarBase::getValue() const
         return NumVariant( m_varData->readDWord() );
 
     if ( m_typeInfo->getName() == L"Int1B" )
-        return NumVariant( m_varData->readByte() );
+        return NumVariant( m_varData->readSignByte() );
 
     if ( m_typeInfo->getName() == L"UInt1B" )
         return NumVariant( m_varData->readByte() );
@@ -2111,5 +2110,86 @@ TypedValue callRaw(MEMOFFSET_64 addr, CallingConventionType callConv, const Type
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template<>
+TypedValue makeArrayValue<char>(const std::vector<char>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(char)*data.size());
+    accessor->writeSignBytes(data);
+    return loadType(L"Int1B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<unsigned char>(const std::vector<unsigned char>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(unsigned char)*data.size());
+    accessor->writeBytes(data);
+    return loadType(L"UInt1B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<short>(const std::vector<short>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(short)*data.size());
+    accessor->writeSignWords(data);
+    return loadType(L"Int2B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<unsigned short>(const std::vector<unsigned short>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(short)*data.size());
+    accessor->writeWords(data);
+    return loadType(L"UInt2B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<long>(const std::vector<long>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(long)*data.size());
+    accessor->writeSignDWords(data);
+    return loadType(L"Int4B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<unsigned long>(const std::vector<unsigned long>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(unsigned long)*data.size());
+    accessor->writeDWords(data);
+    return loadType(L"UInt4B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<long long>(const std::vector<long long>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(long long)*data.size());
+    accessor->writeSignQWords(data);
+    return loadType(L"Int8B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<unsigned long long>(const std::vector<unsigned long long>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(unsigned long long)*data.size());
+    accessor->writeQWords(data);
+    return loadType(L"UInt8B")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<float>(const std::vector<float>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(float)*data.size());
+    accessor->writeFloats(data);
+    return loadType(L"Float")->arrayOf(data.size())->getVar(accessor);
+}
+
+template<>
+TypedValue makeArrayValue<double>(const std::vector<double>&  data)
+{
+    DataAccessorPtr  accessor = getCacheAccessor(sizeof(double)*data.size());
+    accessor->writeDoubles(data);
+    return loadType(L"Double")->arrayOf(data.size())->getVar(accessor);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 } // end kdlib namesapce

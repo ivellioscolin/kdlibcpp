@@ -300,7 +300,7 @@ TEST_F(TypedVarTest, DISABLED_getVTBL)
 {
     TypedVarPtr  vtbl;
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
-    EXPECT_NE(std::wstring::npos, findSymbol( (MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtChildMethod"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtChildMethod"));
 
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(4)->deref());
     EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtMethod1"));
@@ -682,4 +682,26 @@ TEST_F(TypedVarTest, InvalidAddress)
     EXPECT_EQ( 0x0, *var);
     EXPECT_NO_THROW( var->str() );
     EXPECT_NO_THROW( var->getElement(0) );
+}
+
+
+TEST_F(TypedVarTest, MakeArrayValue)
+{
+    auto  origArray = std::vector<char>({ 0, 1, 2, 3, 4, 5 });
+    auto  arrayValue = makeArrayValue(origArray);
+
+    EXPECT_EQ(origArray.size(), arrayValue.getElementCount());
+    EXPECT_EQ(origArray[4], *arrayValue.getElement(4));
+
+    EXPECT_THROW(arrayValue.getElement(100), DbgException);
+
+    EXPECT_NO_THROW(makeArrayValue(std::vector<unsigned char>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<short>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<unsigned short>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<long>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<unsigned long>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<long long>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<unsigned long long>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<float>(10)));
+    EXPECT_NO_THROW(makeArrayValue(std::vector<double>(10)));
 }
