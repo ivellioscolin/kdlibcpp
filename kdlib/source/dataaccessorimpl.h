@@ -910,8 +910,8 @@ private:
         m_parentAccessor->readBytes(buffer, count, m_pos+pos*sizeof(T));
 
         dataRange = std::vector<T>(
-            reinterpret_cast<const T*>(&buffer[0]), 
-            reinterpret_cast<const T*>(&buffer[count]) );
+            reinterpret_cast<const T*>(&buffer.front()),
+            reinterpret_cast<const T*>(&buffer.front()) + count);
     }
 
     template <typename T>
@@ -921,8 +921,8 @@ private:
             throw DbgException("data accessor range error");
 
         std::vector<unsigned char> buffer(
-            reinterpret_cast<const unsigned char*>(&dataRange[0]),
-            reinterpret_cast<const unsigned char*>(&dataRange[dataRange.size()]) );
+            reinterpret_cast<const unsigned char*>(&dataRange.front()),
+            reinterpret_cast<const unsigned char*>(&dataRange.front() + dataRange.size()) );
 
         m_parentAccessor->writeBytes(buffer, m_pos+pos*sizeof(T));
     }

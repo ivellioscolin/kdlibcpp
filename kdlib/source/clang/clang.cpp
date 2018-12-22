@@ -614,7 +614,7 @@ public:
         try {
 
             CXXRecordDecl *   definition = Declaration->getDefinition();
-            
+
             if (definition)
             {
                 if (definition->isInvalidDecl())
@@ -629,6 +629,8 @@ public:
                         LangOptions  lo;
                         PrintingPolicy pp(lo);
                         pp.SuppressTagKeyword = true;
+                        pp.MSVCFormatting = true;
+
                         std::string name = (*specIt)->getTypeForDecl()->getCanonicalTypeInternal().getAsString(pp);
 
                         auto  rr = llvm::dyn_cast<CXXRecordDecl>(*specIt);
@@ -649,8 +651,10 @@ public:
                 (*m_typeMap)[name] = TypeInfoPtr(new TypeInfoClangStructNoDef(strToWStr(name), m_session, Declaration));
             }
 
-        } catch(TypeException& )
-        {}
+        }
+        catch (TypeException&)
+        {
+        }
 
         return true;
     }
@@ -750,15 +754,14 @@ TypeInfoPtr compileType( const std::wstring& sourceCode, const std::wstring& typ
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoProviderClang::TypeInfoProviderClang( const std::wstring& sourceCode, const std::wstring& compileOptions)
+TypeInfoProviderClang::TypeInfoProviderClang( const std::string& sourceCode, const std::string& compileOptions)
 {
     std::vector< std::string > args;
 
     typedef boost::tokenizer< boost::escaped_list_separator<char> > Tokenizer;
     boost::escaped_list_separator<char> Separator( '\\', ' ', '\"' );
 
-    std::string  optionsStr = wstrToStr(compileOptions);
-    Tokenizer tok( optionsStr, Separator );
+    Tokenizer tok(compileOptions, Separator );
 
     std::copy(tok.begin(), tok.end(), std::inserter(args, args.end() ) );
 
@@ -773,13 +776,16 @@ TypeInfoProviderClang::TypeInfoProviderClang( const std::wstring& sourceCode, co
 
     if ( it == args.end() )
     {
-        if ( getCPUMode() == CPU_AMD64 )
-            args.push_back("--target=x86_64-pc-windows-msvc");
-        else if ( getCPUMode() == CPU_I386 )
-            args.push_back("--target=i686-pc-windows-msvc");
+        if (targetExecutionStatus() != DebugStatusNoDebuggee )
+        {
+            if (getCPUMode() == CPU_AMD64)
+                args.push_back("--target=x86_64-pc-windows-msvc");
+            else if (getCPUMode() == CPU_I386)
+                args.push_back("--target=i686-pc-windows-msvc");
+        }
     }
 
-    std::unique_ptr<ASTUnit>  ast = buildASTFromCodeWithArgs(wstrToStr(sourceCode), args );
+    std::unique_ptr<ASTUnit>  ast = buildASTFromCodeWithArgs(sourceCode, args );
 
     m_astSession = ClangASTSession::getASTSession(ast);
 
@@ -837,8 +843,16 @@ TypeInfoPtr TypeInfoProviderClangEnum::Next()
 
 TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source, const std::wstring&  opts )
 {
-    return TypeInfoProviderPtr( new TypeInfoProviderClang(source, opts) );
+    return TypeInfoProviderPtr( new TypeInfoProviderClang(wstrToStr(source), wstrToStr(opts) ) );
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoProviderPtr  getTypeInfoProviderFromSource(const std::string&  source, const std::string&  opts)
+{
+    return TypeInfoProviderPtr(new TypeInfoProviderClang(source, opts));
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

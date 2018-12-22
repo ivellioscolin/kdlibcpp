@@ -198,6 +198,7 @@
     <ClCompile Include="crttest.cpp" />
     <ClCompile Include="disasmtest.cpp" />
     <ClCompile Include="eventhandlertest.cpp" />
+    <ClCompile Include="exprevaltest.cpp" />
     <ClCompile Include="googlemock\src\gmock-all.cc">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -217,6 +218,7 @@
     <ClCompile Include="taggedtest.cpp" />
     <ClCompile Include="targettest.cpp" />
     <ClCompile Include="typedvartest.cpp" />
+    <ClCompile Include="typeevaltest.cpp" />
     <ClCompile Include="typeinfotest.cpp" />
     <ClCompile Include="varianttest.cpp" />
     <ClCompile Include="winapitest.cpp" />

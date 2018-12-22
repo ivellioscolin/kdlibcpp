@@ -23,8 +23,12 @@ MEMOFFSET_64 addr64( MEMOFFSET_64 offset )
 
     ULONG   processorMode;
     hres = g_dbgMgr->control->GetActualProcessorType( &processorMode );
-    if ( FAILED( hres ) )
-        throw DbgEngException( L"IDebugControl::GetEffectiveProcessorType", hres );
+    if (FAILED(hres))
+    {
+        if (sizeof(void*) == 4 && *((ULONG*)&offset + 1) == 0)
+            return (ULONG64)(LONG)offset;
+        return offset;
+    }
 
     switch( processorMode )
     {

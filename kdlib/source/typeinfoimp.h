@@ -939,18 +939,16 @@ public:
 
         m_derefType = derefType;
         m_count = count;
-        m_ptrSize = derefType->getPtrSize();
     }
 
-
-    TypeInfoPtr getDerefType() {
+    virtual TypeInfoPtr deref() {
         return m_derefType;
     }
-
-   // virtual TypeInfoPtr getClassParent();
+    //TypeInfoPtr getDerefType() {
+    //    return m_derefType;
 
     virtual size_t getAlignReq() {
-        return getDerefType()->getAlignReq();
+        return deref()->getAlignReq();
     }
 
 protected:
@@ -973,7 +971,7 @@ protected:
     }
 
     virtual size_t getPtrSize() {
-        return m_ptrSize;
+        return m_derefType->getPtrSize();
     }
 
     TypeInfoPtr getElement( size_t index );
@@ -982,7 +980,6 @@ protected:
 
     TypeInfoPtr  m_derefType;
     size_t  m_count;
-    size_t  m_ptrSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1026,7 +1023,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoSymbolProvider  : public TypeInfoProvider
+class TypeInfoSymbolProvider : public TypeInfoProvider
 {
 public:
 
@@ -1041,6 +1038,23 @@ private:
 private:
 
     SymbolSessionPtr  m_symbolSession;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoDefaultProvider : public TypeInfoProvider
+{
+
+    TypeInfoPtr getTypeByName(const std::wstring& name) override
+    {
+        return loadType(name);
+    }
+
+    TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask = L"") override
+    {
+        throw TypeException(L"failed to enumrate types");
+    }
 };
 
 

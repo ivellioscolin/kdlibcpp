@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <list>
 
 #pragma pack( push, 4 )
 
@@ -435,6 +436,26 @@ extern TemplateStruct<int>  g_template1;
 extern TemplateStruct<void *>  g_template2;
 extern TemplateStruct<TemplateStruct<bool>>  g_template3;
 extern TemplateStruct<TemplateStruct<int>[4]>  g_template4;
+
+////////////////////////////////////////////////////////////////////////////////
+
+extern std::list<int>  g_stdIntList;
+
+template<typename T>
+struct TestStructTemplate
+{
+    T  field;
+};
+
+extern  TestStructTemplate<int>   g_testStructTemplate;
+
+template<typename T>
+class TestClassTemplate
+{
+    T  field;
+};
+
+extern  TestClassTemplate<int>   g_testClassTemplate;
 
 ////////////////////////////////////////////////////////////////////////////////
 

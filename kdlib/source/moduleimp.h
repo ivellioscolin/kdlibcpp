@@ -1,5 +1,6 @@
 
 #include <boost\thread\recursive_mutex.hpp>
+#include <boost\enable_shared_from_this.hpp>
 
 #include "kdlib\module.h"
 #include "kdlib\exceptions.h"
@@ -235,11 +236,16 @@ protected:
     {
         NOT_IMPLEMENTED();
     }
+
+    virtual ScopePtr getScope()
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 
 
-class ModuleImp : public ModuleBaseImp {
+class ModuleImp : public ModuleBaseImp, public boost::enable_shared_from_this<ModuleImp> {
     
     friend ModulePtr loadModule( MEMOFFSET_64 offset );
 
@@ -352,6 +358,8 @@ protected:
     void getFileVersion(unsigned long& majorVersion, unsigned long& minorVerion, unsigned long& revision, unsigned long& build);
 
     void getFixedFileInfo( FixedFileInfo &fixedFileInfo );
+
+    virtual ScopePtr getScope();
 
 protected:
 

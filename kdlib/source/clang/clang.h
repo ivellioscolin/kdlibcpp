@@ -342,7 +342,7 @@ class TypeInfoProviderClang : public TypeInfoProvider, public boost::enable_shar
 
 public:
 
-    TypeInfoProviderClang( const std::wstring&  sourceCode, const std::wstring&  compileOptions);
+    TypeInfoProviderClang( const std::string&  sourceCode, const std::string&  compileOptions);
 
 private:
 

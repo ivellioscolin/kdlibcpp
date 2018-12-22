@@ -143,6 +143,9 @@
     <ClCompile Include="fnmatch.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="clang\evalexpr.cpp">
+      <Filter>clang</Filter>
+    </ClCompile>
     <ClCompile Include="win\cpucontextamd64.cpp" />
     <ClCompile Include="win\cpucontextarm.cpp" />
     <ClCompile Include="win\cpucontextarm64.cpp" />
@@ -292,6 +295,18 @@
     <ClInclude Include="fnmatch.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="clang\evalexpr.h">
+      <Filter>clang</Filter>
+    </ClInclude>
+    <ClInclude Include="clang\typeparser.h">
+      <Filter>clang</Filter>
+    </ClInclude>
+    <ClInclude Include="clang\parser.h">
+      <Filter>clang</Filter>
+    </ClInclude>
+    <ClInclude Include="clang\exprparser.h">
+      <Filter>clang</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="kdlib/include">
@@ -306,9 +321,6 @@
     <Filter Include="dia">
       <UniqueIdentifier>{9cfdff98-aa2a-44de-88f2-79a833c08925}</UniqueIdentifier>
     </Filter>
-    <Filter Include="common">
-      <UniqueIdentifier>{7161a918-e1c8-4242-b320-562306844fe3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="boost">
       <UniqueIdentifier>{b909802d-92bb-4755-8e59-03fe7a4ed798}</UniqueIdentifier>
     </Filter>
@@ -317,6 +329,9 @@
     </Filter>
     <Filter Include="net">
       <UniqueIdentifier>{b185a380-5b0b-43fb-b476-6040faade3fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{7161a918-e1c8-4242-b320-562306844fe3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

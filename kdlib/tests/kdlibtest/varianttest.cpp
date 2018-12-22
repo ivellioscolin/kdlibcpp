@@ -156,8 +156,6 @@ TEST_F( VariantOperationTests, GtLt )
 
 //TEST_F( VariantOperationTests, BoolAnd )
 //{
-//    bool a = NumVariant(1) && 1;
-//
 //    EXPECT_TRUE( NumVariant(1) && 1 );
 //    EXPECT_TRUE( 1 && NumVariant(1) );
 //    EXPECT_TRUE(NumVariant(1) && NumVariant(1) );
