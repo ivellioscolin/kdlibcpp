@@ -200,6 +200,11 @@ public:
         return static_cast<T>(getValue());
     }
 
+    const TypedVarPtr& get()
+    {
+        return m_value;
+    }
+
 public:
 
     std::wstring str() {
