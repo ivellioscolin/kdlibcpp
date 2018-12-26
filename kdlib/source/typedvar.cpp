@@ -2192,4 +2192,34 @@ TypedValue makeArrayValue<double>(const std::vector<double>&  data)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class DefaultScope : public Scope
+{
+public:
+
+    virtual TypedValue get(const std::wstring& varName) const override
+    {
+        return loadTypedVar(varName);
+    }
+
+    virtual bool find(const std::wstring& varName, TypedValue& value) const override
+    {
+        try
+        {
+            value = get(varName);
+            return true;
+        }
+        catch (DbgException&)
+        {}
+
+        return false;
+    }
+};
+
+ScopePtr getDefaultScope()
+{
+    return ScopePtr(new DefaultScope());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // end kdlib namesapce

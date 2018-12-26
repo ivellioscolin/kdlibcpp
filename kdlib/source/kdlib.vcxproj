@@ -104,7 +104,6 @@
     <ClInclude Include="..\include\kdlib\memaccess.h" />
     <ClInclude Include="..\include\kdlib\module.h" />
     <ClInclude Include="..\include\kdlib\process.h" />
-    <ClInclude Include="..\include\kdlib\scope.h" />
     <ClInclude Include="..\include\kdlib\stack.h" />
     <ClInclude Include="..\include\kdlib\symengine.h" />
     <ClInclude Include="..\include\kdlib\tagged.h" />

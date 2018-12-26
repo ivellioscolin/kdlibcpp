@@ -400,14 +400,20 @@ inline ScopePtr makeScope(const std::list < std::pair<std::wstring, TypedValue> 
    return ScopePtr(new ScopeList(varList));
 }
 
+ScopePtr getDefaultScope();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedValue callRaw(MEMOFFSET_64 addr, CallingConventionType callingConvention, const TypedValueList& arglst);
 
-TypedValue evalExpr(const std::wstring& expr, const ScopePtr& scope = ScopePtr(new ScopeList()),
+TypedValue evalExpr(
+    const std::wstring& expr,
+    const ScopePtr& scope = getDefaultScope(),
     const TypeInfoProviderPtr& typeInfoProvider = getDefaultTypeInfoProvider());
 
-TypedValue evalExpr(const std::string& expr, const ScopePtr& scope = ScopePtr(new ScopeList()),
+TypedValue evalExpr(
+    const std::string& expr,
+    const ScopePtr& scope = getDefaultScope(),
     const TypeInfoProviderPtr& typeInfoProvider = getDefaultTypeInfoProvider());
 
 ///////////////////////////////////////////////////////////////////////////////
