@@ -16,7 +16,16 @@ namespace kdlib {
 
 ModulePtr loadModule( const std::wstring &name )
 {
-    return loadModule( findModuleBase(name) );
+    try {
+        return loadModule(findModuleBase(name));
+    }
+    catch(DbgException&)
+    {}
+
+    std::wstringstream  sstr;
+    sstr << L"Failed to find module '" << name << "'";
+
+    throw DbgWideException(sstr.str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +33,20 @@ ModulePtr loadModule( const std::wstring &name )
 ModulePtr loadModule( MEMOFFSET_64 offset )
 {
    
-    MEMOFFSET_64  moduleOffset = findModuleBase( addr64(offset) );
+    MEMOFFSET_64  moduleOffset = 0;
+
+    try {
+             
+        moduleOffset =  findModuleBase( addr64(offset) );
+
+    }
+    catch (DbgException&)
+    {
+        std::wstringstream  sstr;
+        sstr << L"Failed to find module by offset " << std::hex << addr64(offset);
+        throw DbgWideException(sstr.str());
+    }
+
     ModulePtr  module = ProcessMonitor::getModule(offset);
 
     if ( !module )
