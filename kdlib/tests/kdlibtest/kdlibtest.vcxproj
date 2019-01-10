@@ -215,6 +215,7 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="syntest.cpp" />
     <ClCompile Include="taggedtest.cpp" />
     <ClCompile Include="targettest.cpp" />
     <ClCompile Include="typedvartest.cpp" />

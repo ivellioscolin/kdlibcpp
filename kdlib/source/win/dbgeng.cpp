@@ -2650,7 +2650,7 @@ std::wstring loadSourceFileFromSrcSrv(MEMOFFSET_64 offset, const std::wstring& f
 
 ///////////////////////////////////////////////////////////////////////////////
 
-kdlib::SyntheticSymbol addSyntheticSymbol( kdlib::MEMOFFSET_64 offset, unsigned long size, const std::wstring &name )
+kdlib::SyntheticSymbol addSyntheticSymbol(kdlib::MEMOFFSET_64 offset, unsigned long size, const std::wstring &name)
 {
     offset = addr64(offset);
 
@@ -2665,19 +2665,42 @@ kdlib::SyntheticSymbol addSyntheticSymbol( kdlib::MEMOFFSET_64 offset, unsigned 
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::AddSyntheticSymbolWide", hres);
 
-    SyntheticSymbol syntheticSymbol = { moduleAndId.ModuleBase, moduleAndId.Id };
-    return std::move(syntheticSymbol);
+    return SyntheticSymbol{ moduleAndId.ModuleBase, moduleAndId.Id };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void removeSyntheticSymbol(const kdlib::SyntheticSymbol& syntheticSymbol)
 {
-    DEBUG_MODULE_AND_ID moduleAndId = { syntheticSymbol.moduleBase, syntheticSymbol.symbolId };
+    DEBUG_MODULE_AND_ID moduleAndId{ syntheticSymbol.moduleBase, syntheticSymbol.symbolId };
 
     HRESULT hres = g_dbgMgr->symbols->RemoveSyntheticSymbol(&moduleAndId);
     if ( FAILED(hres) )
         throw DbgEngException(L"IDebugSymbols::RemoveSyntheticSymbol", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void addSyntheticModule(MEMOFFSET_64 base, unsigned long size, const std::wstring &name, const std::wstring &path /* = std::wstring{} */)
+{
+    HRESULT hres =
+        g_dbgMgr->symbols->AddSyntheticModuleWide(
+            addr64(base),
+            size,
+            path.empty() ? name.c_str() : path.c_str(),
+            name.c_str(),
+            DEBUG_ADDSYNTHMOD_DEFAULT);
+    if ( FAILED(hres) )
+        throw DbgEngException(L"IDebugSymbols::AddSyntheticModuleWide", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void removeSyntheticModule(MEMOFFSET_64 base)
+{
+    HRESULT hres = g_dbgMgr->symbols->RemoveSyntheticModule(addr64(base));
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugSymbols::RemoveSyntheticModule", hres);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
