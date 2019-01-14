@@ -100,6 +100,37 @@ public:
 };
 
 
+class  TokenIs  : public Matcher
+{
+public:
+
+    TokenIs(const TokenKind& tokenKind) :
+        m_tokenKind(tokenKind)
+    {}
+
+    auto match(const TokenRange& matchRange)
+    {
+        auto& beg = matchRange.first;
+        auto& end = matchRange.second;
+        if (beg != end && (*beg).is(m_tokenKind))
+        {
+            return matchResult = MatchResult(std::make_pair(beg, std::next(beg, 1)));
+        }
+
+        return matchResult = MatchResult();
+    }
+
+private:
+
+    TokenKind  m_tokenKind;
+};
+
+inline
+auto token_is(const TokenKind& tokenKind)
+{
+    return TokenIs(tokenKind);
+}
+
 class BaseOpt
 {};
 

@@ -771,14 +771,8 @@ TypeInfoPtr TypeEval::getResult()
 {
     using namespace parser;
 
-    auto endIt = 
-        std::find_if(m_tokens->cbegin(), m_tokens->cend(), [this](auto& token)
-        {   
-             return token.is(this->m_endToken); 
-    });
-
     std::list<clang::Token>  tokens;
-    std::copy_if(m_tokens->cbegin(), endIt, std::back_inserter(tokens), [](auto& token){
+    std::copy_if(m_tokens->cbegin(), m_tokens->cend(), std::back_inserter(tokens), [](auto& token){
         return !token.is(clang::tok::kw_const);
     });
 
@@ -792,11 +786,11 @@ TypeInfoPtr TypeEval::getResult()
         }
     }
 
-    TypeMatcher  typeMatcher;
+    TypeMatcher typeMatcher;
 
-    auto matchResult = typeMatcher.match(std::make_pair(tokens.cbegin(), tokens.cend()));
+    auto matchResult = all_of(typeMatcher, token_is(m_endToken)).match(std::make_pair(tokens.cbegin(), tokens.cend()));
 
-    if (!matchResult.isMatched() || matchResult.end() != tokens.cend())
+    if (!matchResult.isMatched())
         throw  ExprException(L"error syntax");
 
     TypeInfoPtr  typeInfo;
@@ -826,7 +820,8 @@ TypeInfoPtr TypeEval::getResult()
         typeInfo = applyComplexModifierRecursive(typeMatcher.getComplexMather(), typeInfo);
     }  
 
-    m_tokens->erase(m_tokens->begin(), ++endIt);
+    tokens.erase(matchResult.begin(), matchResult.end());
+    *m_tokens = tokens;
 
     return typeInfo;
 }
