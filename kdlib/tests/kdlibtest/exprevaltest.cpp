@@ -215,6 +215,17 @@ TEST(ExprEval, Sizeof)
     EXPECT_THROW(evalExpr(L"sizeof int"), DbgException);
 }
 
+TEST(ExprEval, SizeofComplex)
+{
+    EXPECT_EQ(sizeof(int*[10]), evalExpr("sizeof(int*[10])"));
+    EXPECT_EQ(sizeof(int(*)[10]), evalExpr("sizeof(int(*)[10])"));
+    EXPECT_EQ(sizeof(int(&)[10]), evalExpr("sizeof(int(&)[10])"));
+    EXPECT_EQ(sizeof(int((*)[1])[10]), evalExpr("sizeof(int((*)[1])[10])"));
+
+    EXPECT_THROW(evalExpr("sizeof(int([1](*))[10])"), DbgException);
+    EXPECT_THROW(evalExpr("sizeof(int[10]&)"), DbgException);
+}
+
 TEST(ExprEval, Bool)
 {
     EXPECT_EQ(true, evalExpr(L"true"));
