@@ -69,12 +69,15 @@
       <Filter>testcases</Filter>
     </ClCompile>
     <ClCompile Include="typeevaltest.cpp">
-	  <Filter>testcases</Filter>
-	</ClCompile>
+      <Filter>testcases</Filter>
+    </ClCompile>
     <ClCompile Include="arm64dumptest.cpp">
       <Filter>testcases</Filter>
     </ClCompile>
     <ClCompile Include="armdumptest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
+    <ClCompile Include="syntest.cpp">
       <Filter>testcases</Filter>
     </ClCompile>
   </ItemGroup>

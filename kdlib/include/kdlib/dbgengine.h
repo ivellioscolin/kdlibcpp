@@ -199,6 +199,10 @@ void getSyntheticSymbolInformation(
 SyntheticSymbol addSyntheticSymbol( MEMOFFSET_64 offset, unsigned long size, const std::wstring &name );
 void removeSyntheticSymbol(const SyntheticSymbol& syntheticSymbol);
 
+// synthetic modules
+void addSyntheticModule(MEMOFFSET_64 base, unsigned long size, const std::wstring &name, const std::wstring &path = std::wstring{});
+void removeSyntheticModule(MEMOFFSET_64 base);
+
 std::wstring loadSourceFileFromSrcSrv(MEMOFFSET_64 offset, const std::wstring& fileName);
 
 // aux function
