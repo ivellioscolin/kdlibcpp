@@ -776,16 +776,6 @@ TypeInfoPtr TypeEval::getResult()
         return !token.is(clang::tok::kw_const);
     });
 
-    for (auto it = tokens.begin(); it != tokens.end(); ++it)
-    {
-        if (it->is(clang::tok::greatergreater))
-        {
-            auto &t = *it;
-            t.setKind(clang::tok::greater);
-            it = tokens.insert(it, t);
-        }
-    }
-
     TypeMatcher typeMatcher;
 
     auto matchResult = all_of(typeMatcher, token_is(m_endToken)).match(std::make_pair(tokens.cbegin(), tokens.cend()));

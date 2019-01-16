@@ -107,7 +107,7 @@ TEST(ExprEval, Bitwise)
     EXPECT_EQ(~0xFA01894B, evalExpr(L"~0xFA01894B"));
 }
 
-TEST(ExprEval, IncDec)
+TEST(ExprEval, DISABLED_IncDec)
 {
     TypedValue   a = 10;
     EXPECT_EQ(++a.getValue(), evalExpr(L"++a", makeScope({ {L"a", a} })));
@@ -229,6 +229,8 @@ TEST(ExprEval, SizeofComplex)
 TEST(ExprEval, SizeofExpr)
 {
     EXPECT_EQ(sizeof(long int) >> 2, evalExpr("sizeof(long int) >> 2"));
+    EXPECT_EQ(1 << sizeof(long int), evalExpr("1 << sizeof(long int)"));
+    EXPECT_EQ(sizeof(2 < 4), evalExpr("sizeof(2 < 4)"));
 }
 
 TEST(ExprEval, Bool)
