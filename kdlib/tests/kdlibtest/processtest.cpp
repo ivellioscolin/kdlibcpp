@@ -36,9 +36,11 @@ TEST_F( ProcessTest, StartProcess )
 TEST_F( ProcessTest, AttachProcess )
 {
     PROCESS_ID  pid = StartTargetappWithParam(L"processtest");
+    ASSERT_NE(0, pid);
 
     PROCESS_DEBUG_ID   id;
     ASSERT_NO_THROW( id = attachProcess(pid) );
+    EXPECT_EQ(DebugStatusBreak, targetExecutionStatus());
     EXPECT_NO_THROW( terminateProcess(id) );
     EXPECT_EQ( 0, kdlib::getNumberProcesses() );
 }
@@ -46,9 +48,11 @@ TEST_F( ProcessTest, AttachProcess )
 //TEST_F(ProcessTest, AttachProcessNoBreak)
 //{
 //    PROCESS_ID  pid = StartTargetappWithParam(L"processtest");
+//    ASSERT_NE(0, pid);
 //
 //    PROCESS_DEBUG_ID   id;
 //    ASSERT_NO_THROW(id = attachProcess(pid, ProcessDebugDefault & ~(ProcessBreakOnStart)));
+//    EXPECT_EQ(DebugStatusGo, targetExecutionStatus());
 //    EXPECT_NO_THROW(terminateProcess(id));
 //    EXPECT_EQ(0, kdlib::getNumberProcesses());
 //}

@@ -46,11 +46,10 @@ public:
         CloseHandle( processInfo.hProcess );
         CloseHandle( processInfo.hThread );
 
+        Sleep(100);
+
         return processInfo.dwProcessId;
     }
-
-
-
 
     virtual void TearDown() {
         try {

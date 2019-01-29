@@ -272,10 +272,12 @@ void terminateProcess( PROCESS_DEBUG_ID processId )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid)
+PROCESS_DEBUG_ID attachProcess(PROCESS_ID pid, const ProcessDebugFlags& flags)
 {
     if ( !isInintilized() )
         initialize();
+
+    setEngBreakOption(flags);
 
     HRESULT     hres;
 

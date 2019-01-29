@@ -270,7 +270,7 @@ TEST(TypeEvalTest, TemplateNumeric)
 }
 
 
-TEST(TypeEvalTest, TemplateConstRef)
+TEST(TypeEvalTest, DISABLED_TemplateConstRef)
 {
     static const char sourceCode[] = "\
     template<typename T>              \
@@ -328,7 +328,7 @@ TEST(TypeEvalTest, TemplateNamespace2)
     EXPECT_NO_THROW(evalType("testspace::TestStruct<int,testspace::TestStruct<int,int> >::field1", typeProvider));
 }
 
-TEST(TypeEvalTest, TemplateNamespace3)
+TEST(TypeEvalTest, DISABLED_TemplateNamespace3)
 {
     static const char sourceCode[] = " \
     namespace testspace {              \
