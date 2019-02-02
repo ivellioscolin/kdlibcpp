@@ -79,7 +79,7 @@ public:
     void changeSymbolPaths();
     void breakpointsChange(PROCESS_DEBUG_ID id);
     DebugCallbackResult  exceptionHit(const ExceptionInfo& excinfo);
-    void debugOutput(const std::wstring& text);
+    void debugOutput(const std::wstring& text, OutputFlag flag);
     void startInput();
     void stopInput();
 
@@ -298,9 +298,9 @@ DebugCallbackResult ProcessMonitor::exceptionHit(const ExceptionInfo& excinfo)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::debugOutput(const std::wstring& text)
+void ProcessMonitor::debugOutput(const std::wstring& text, OutputFlag flag)
 {
-    g_procmon->debugOutput(text);
+    g_procmon->debugOutput(text, flag);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -660,14 +660,14 @@ DebugCallbackResult  ProcessMonitorImpl::exceptionHit(const ExceptionInfo& excin
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::debugOutput(const std::wstring& text)
+void ProcessMonitorImpl::debugOutput(const std::wstring& text, OutputFlag flag)
 {
     boost::recursive_mutex::scoped_lock l(m_callbacksLock);
 
     EventsCallbackList::iterator  it;
     for (it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
-        (*it)->onDebugOutput(text);
+        (*it)->onDebugOutput(text, flag);
     }
 }
 

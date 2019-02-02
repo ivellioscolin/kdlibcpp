@@ -17,5 +17,8 @@ public:
     MOCK_METHOD0( onChangeSymbolPaths, void(void) );
 
     MOCK_METHOD1(onProcessStart, kdlib::DebugCallbackResult(kdlib::PROCESS_DEBUG_ID processId));
-    MOCK_METHOD3(onProcessExit, kdlib::DebugCallbackResult(kdlib::PROCESS_DEBUG_ID processid, kdlib::ProcessExitReason reason, unsigned long exitCode));
+    MOCK_METHOD3(onProcessExit, kdlib::DebugCallbackResult(kdlib::PROCESS_DEBUG_ID processid, 
+        kdlib::ProcessExitReason reason, unsigned long exitCode));
+
+    MOCK_METHOD2(onDebugOutput, void(const std::wstring& text, kdlib::OutputFlag flag));
 };
