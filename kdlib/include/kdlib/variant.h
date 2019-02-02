@@ -308,11 +308,13 @@ public:
            return sstr.str();
 
         case floatT:
-           sstr << m_floatVal;
+           sstr.precision(8);
+           sstr << std::defaultfloat << m_floatVal;
            return sstr.str();
 
         case doubleT:
-           sstr << m_doubleVal;
+           sstr.precision(16);
+           sstr << std::defaultfloat << m_doubleVal;
            return sstr.str();
         }
 
@@ -323,7 +325,7 @@ public:
 
         std::wstringstream sstr;
 
-        sstr << std::hex;
+        sstr << std::hex << std::showbase;
 
         switch ( m_numType )
         {
@@ -350,12 +352,14 @@ public:
            return sstr.str();
 
         case floatT:
-           sstr << m_floatVal;
-           return sstr.str();
+            sstr.precision(8);
+            sstr << std::hexfloat << m_floatVal;
+            return sstr.str();
 
         case doubleT:
-           sstr << m_doubleVal;
-           return sstr.str();
+            sstr.precision(8);
+            sstr << std::hexfloat << m_doubleVal;
+            return sstr.str();
         }
 
         throw NumVariantError();

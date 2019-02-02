@@ -796,7 +796,7 @@ std::wstring TypedVarBase::printValue() const
     std::wstringstream  sstr;
 
     try {
-        sstr << L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+        sstr << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
         return sstr.str();
     } catch(MemoryException& )
     {}

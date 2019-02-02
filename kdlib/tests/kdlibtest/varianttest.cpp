@@ -6,10 +6,10 @@
 
 using namespace kdlib;
 
-class VariantCtorTest : public ::testing::Test {
+class VariantTest : public ::testing::Test {
 };
 
-TEST_F( VariantCtorTest, Ctor )
+TEST_F( VariantTest, Ctor )
 {
     EXPECT_TRUE( NumVariant(0).isInt() );
     EXPECT_TRUE( NumVariant(-1LL).isLongLong() );
@@ -20,6 +20,21 @@ TEST_F( VariantCtorTest, Ctor )
     EXPECT_TRUE( NumVariant(unsigned short(29) ).isUShort() );
 }
 
+TEST_F(VariantTest, AsStr)
+{
+    EXPECT_EQ(L"-98765432", NumVariant(-98765432LL).asStr());
+    EXPECT_EQ(L"12345678", NumVariant(12345678LL).asStr());
+    EXPECT_EQ(L"-45.123402", NumVariant(-45.1234f).asStr());
+    EXPECT_EQ(L"15.0000000001", NumVariant(15.0000000001).asStr());
+}
+
+TEST_F(VariantTest, AsHex)
+{
+    EXPECT_EQ(L"0xfffffffffa1cf588", NumVariant(-98765432LL).asHex());
+    EXPECT_EQ(L"0xbc614e", NumVariant(12345678LL).asHex());
+    EXPECT_EQ(L"-0x1.68fcba00p+5", NumVariant(-45.1234f).asHex());
+    EXPECT_EQ(L"0x1.e0000000p+3", NumVariant(15.0000000001).asHex());
+}
 
 class VariantConversionTest : public ::testing::TestWithParam<unsigned long long> {
 };
@@ -245,4 +260,7 @@ TEST_F( VariantOperationTests, isInteger )
     EXPECT_FALSE( NumVariant( float(0.0f) ).isInteger() );
     EXPECT_FALSE( NumVariant( double(0) ).isInteger() );
 }
+
+
+
 
