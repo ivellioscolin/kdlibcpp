@@ -57,7 +57,7 @@ public:
     virtual void onChangeBreakpoints()
     {}
 
-    virtual void onDebugOutput(const std::wstring& text)
+    virtual void onDebugOutput(const std::wstring& text, OutputFlag flag)
     {}
 
     virtual void onStartInput()

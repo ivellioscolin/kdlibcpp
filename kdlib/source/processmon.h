@@ -32,7 +32,7 @@ public: // notification
     static void localScopeChange();
     static void changeSymbolPaths();
     static DebugCallbackResult exceptionHit(const ExceptionInfo& excinfo);
-    static void debugOutput(const std::wstring& text);
+    static void debugOutput(const std::wstring& text, OutputFlag flag);
     static void startInput();
     static void stopInput();
 

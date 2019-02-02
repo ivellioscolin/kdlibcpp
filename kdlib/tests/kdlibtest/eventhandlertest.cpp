@@ -2,6 +2,7 @@
 
 #include "basefixture.h"
 #include "eventhandlermock.h"
+#include "kdlib\dbgio.h"
 
 using namespace kdlib;
 using namespace testing;
@@ -195,4 +196,23 @@ TEST_F(EventHandlerTest, SymbolPathChange)
     EXPECT_NO_THROW(debugCommand(L".sympath+ C:\\temp"));
     EXPECT_NO_THROW(appendSymbolPath(L"C:\\temp2"));
     EXPECT_NO_THROW(setSymbolPath(L"C:\\temp2"));
+}
+
+TEST_F(EventHandlerTest, DebugOutput)
+{
+    ASSERT_NO_THROW(startProcess(L"targetapp.exe"));
+
+    NiceMock<EventHandlerMock>    eventHandler;
+
+    EXPECT_CALL(eventHandler, onDebugOutput(_,_)).WillRepeatedly(Return());  
+
+    kdlib::debugCommand(L".printf /od \"debugee\"");
+    kdlib::debugCommand(L".printf /oD \"debugee prompt\"");
+    kdlib::debugCommand(L".printf /oe \"error\"");
+    kdlib::debugCommand(L".printf /on \"normal\"");
+    kdlib::debugCommand(L".printf /op \"prompt\"");
+    kdlib::debugCommand(L".printf /oP \"prompt registers\"");
+    kdlib::debugCommand(L".printf /os \"symbols\"");
+    kdlib::debugCommand(L".printf /ov \"verbose\"");
+    kdlib::debugCommand(L".printf /ow \"warning\"");
 }

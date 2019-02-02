@@ -40,7 +40,7 @@ DebugManager::DebugManager()
     client->SetOutputCallbacksWide(this);
     client->SetInputCallbacks(this);
 
-    client->SetOutputMask(DEBUG_OUTPUT_NORMAL);
+    client->SetOutputMask(0xFFFFFFFF); // DEBUG_OUTPUT_NORMAL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -426,8 +426,7 @@ HRESULT STDMETHODCALLTYPE DebugManager::Output(
 {
     try {
 
-        if ( ( Mask & ( DEBUG_OUTPUT_NORMAL | DEBUG_OUTPUT_ERROR | DEBUG_OUTPUT_WARNING ) ) != 0 )
-            ProcessMonitor::debugOutput(std::wstring(Text));
+        ProcessMonitor::debugOutput(std::wstring(Text), OutputFlag(Mask));
 
     }
     catch (kdlib::DbgException&)

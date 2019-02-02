@@ -211,6 +211,22 @@ enum BreakpointAccess {
 };
 
 
+enum OutputFlag
+{
+    Normal = 0x00000001,
+    Error = 0x00000002,
+    Warning = 0x00000004,
+    Verbose = 0x00000008,
+    Prompt = 0x00000010,
+    PromptRegister = 0x00000020,
+    ExtensionWarning = 0x00000040,
+    Debuggee = 0x00000080,
+    DebuggeePrompt = 0x00000100,
+    Symbols = 0x00000200,
+    Status = 0x00000400,
+    All = 0x000007FF
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

@@ -328,25 +328,6 @@ TEST(TypeEvalTest, TemplateNamespace2)
     EXPECT_NO_THROW(evalType("testspace::TestStruct<int,testspace::TestStruct<int,int> >::field1", typeProvider));
 }
 
-TEST(TypeEvalTest, DISABLED_TemplateNamespace3)
-{
-    static const char sourceCode[] = " \
-    namespace testspace {              \
-    template<typename T1, typename T2> \
-    struct TestStruct {                \
-        T1     field1;                 \
-        T2     field2;                 \
-    };                                 \
-    TestStruct<int,TestStruct<int,int>>   testVal;       \
-    }                                  \
-    ";
-
-    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
-
-    EXPECT_NO_THROW(evalType("testspace::TestStruct<int,testspace::TestStruct<int,int> >", typeProvider));
-    EXPECT_NO_THROW(evalType("testspace::TestStruct<int,testspace::TestStruct<int,int>>", typeProvider));
-}
-
 TEST(TypeEvalTest, TemplateConstExpr)
 {
     static const char sourceCode[] = " \
@@ -364,4 +345,26 @@ TEST(TypeEvalTest, TemplateConstExpr)
     EXPECT_NO_THROW(evalType("TestStruct<+10>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct<!1>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct<~0xFFFFFFFF>", typeProvider));
+}
+
+TEST(TypeEvalTest, TemplateClose)
+{
+    static const char sourceCode[] = " \
+    template<typename T1, typename T2> \
+    struct TestStruct {                \
+        T1     field1;                 \
+        T2     field2;                 \
+    };                                 \
+    TestStruct<int,TestStruct<int,int>>   testVal1;  \
+    TestStruct<int,TestStruct<int, TestStruct<int,int>>>     testVal2; \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,int> >", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,int>>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int> > >", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int>>>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int>> >", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int> >>", typeProvider));
 }
