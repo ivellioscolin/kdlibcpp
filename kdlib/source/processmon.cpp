@@ -59,6 +59,9 @@ public:
     ProcessMonitorImpl() : m_bpUnique(0x80000000)
     {}
 
+    ~ProcessMonitorImpl()
+    {}
+
 public:
 
     DebugCallbackResult processStart(PROCESS_DEBUG_ID id);
@@ -114,7 +117,7 @@ private:
     EventsCallbackList          m_callbacks;
 };
 
-std::auto_ptr<ProcessMonitorImpl>  g_procmon;
+ProcessMonitorImpl*  g_procmon;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -139,14 +142,19 @@ private:
 
 void ProcessMonitor::init()
 {
-    g_procmon.reset( new ProcessMonitorImpl );
+    if (!g_procmon)
+        g_procmon = new ProcessMonitorImpl();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void ProcessMonitor::deinit()
 {
-    g_procmon.reset(0);
+    if (g_procmon)
+    {
+        delete  g_procmon;
+        g_procmon = nullptr;
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
