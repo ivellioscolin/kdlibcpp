@@ -40,7 +40,7 @@ DebugManager::DebugManager()
     client->SetOutputCallbacksWide(this);
     client->SetInputCallbacks(this);
 
-    client->SetOutputMask(0xFFFFFFFF); // DEBUG_OUTPUT_NORMAL);
+    client->SetOutputMask(DEBUG_OUTPUT_NORMAL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

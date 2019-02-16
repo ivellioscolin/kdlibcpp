@@ -227,6 +227,8 @@ enum OutputFlag
     All = 0x000007FF
 };
 
+typedef unsigned long  OutputFlagsSet;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

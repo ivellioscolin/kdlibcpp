@@ -41,6 +41,9 @@ NumVariant evaluate( const std::wstring  &expression, bool cplusplus=false );
 DebugOptionsSet getDebugOptions();
 void changeDebugOptions(const DebugOptionsSet &addOptions, const DebugOptionsSet &removeOptions);
 
+OutputFlagsSet getOutputFlags();
+void setOutputFlags(const OutputFlagsSet &flags);
+
 // system properties
 size_t ptrSize();
 bool is64bitSystem();

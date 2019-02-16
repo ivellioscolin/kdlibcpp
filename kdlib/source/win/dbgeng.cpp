@@ -181,6 +181,28 @@ void changeDebugOptions(const DebugOptionsSet &addOptions, const DebugOptionsSet
 
 ///////////////////////////////////////////////////////////////////////////////
 
+OutputFlagsSet getOutputFlags()
+{
+    OutputFlagsSet  outputFlags = 0;
+
+    HRESULT  hres = g_dbgMgr->client->GetOutputMask(&outputFlags);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugClient::GetOutputMask", hres);
+
+    return outputFlags;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setOutputFlags(const OutputFlagsSet &flags)
+{
+    HRESULT  hres = g_dbgMgr->client->SetOutputMask(flags);
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugClient::SetOutputMask", hres);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static void setEngBreakOption(const ProcessDebugFlags& flags)
 {
     DebugOptionsSet  addOptions = 0;
