@@ -54,7 +54,7 @@ public:
 
     auto  match(const TokenRange& matchRange)
     {
-        return matchResult = rep(pointersMatcher).match(matchRange);
+        return matchResult = rep(pointersMatcher, pointersMatcher).match(matchRange);
     }
 
     const auto&  getPointerMatchers() const
@@ -74,7 +74,7 @@ public:
 
     auto match(const TokenRange& matchRange)
     {
-        return matchResult = rep(all_of(Is<clang::tok::l_square>(), numericMatcher, Is<clang::tok::r_square>())).match(matchRange);
+        return matchResult = rep(all_of(Is<clang::tok::l_square>(), numericMatcher, Is<clang::tok::r_square>()), numericMatcher).match(matchRange);
     }
 
     const auto& getArrayIndices() const {
@@ -198,7 +198,7 @@ public:
         if (isStandardIntType(*matchRange.first) || isBaseTypeKeyWord(*matchRange.first))
             return MatchResult();
 
-        return matchResult = all_of(nameMatcher, opt(rep(namespacesMatchers))).match(matchRange);
+        return matchResult = all_of(nameMatcher, opt(rep(namespacesMatchers, namespacesMatchers))).match(matchRange);
     }
 
     std::string  getName() const
@@ -279,7 +279,10 @@ class TemplateArgsMatcher : public Matcher
 public:
     auto  match(const TokenRange& matchRange)
     {
-        return matchResult = all_of(argsMatchers, opt(rep(all_of(Is<clang::tok::comma>(), argsMatchers)))).match(matchRange);
+        TemplateArgMatcher  argMatcher;
+        matchResult = all_of(argMatcher, opt(rep(all_of(Is<clang::tok::comma>(), argsMatchers), argsMatchers))).match(matchRange);
+        argsMatchers.push_front(std::move(argMatcher));
+        return matchResult;
     }
 
     const auto& getArgs() const
@@ -288,7 +291,7 @@ public:
     }
 
 private:
-
+    
     ListMatcher<TemplateArgMatcher>  argsMatchers;
 };
 
@@ -319,7 +322,7 @@ public:
 
     auto  match(const TokenRange& matchRange)
     {
-        return matchResult = all_of( typeNameMatcher, opt(templateMatcher), opt(rep(fieldsMatchers))).match(matchRange);
+        return matchResult = all_of( typeNameMatcher, opt(templateMatcher), opt(rep(fieldsMatchers, fieldsMatchers))).match(matchRange);
     }
 
     const auto& getFields() const

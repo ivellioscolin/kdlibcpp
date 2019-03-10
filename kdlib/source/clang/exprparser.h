@@ -47,12 +47,13 @@ class ConstExpressionMatcher : public Matcher
 public:
     auto  match(const TokenRange& matchRange)
     {
-        auto matcher = all_of(opt(leftOps), operandMatcher);
+        auto matcher = all_of(opt(rep(leftOps, leftOps)), operandMatcher);
         matchResult = matcher.match(matchRange);
         return matchResult;
     }
 
-    const auto& getOperand() const {
+    const auto& getOperand() const
+    {
         return operandMatcher;
     }
 

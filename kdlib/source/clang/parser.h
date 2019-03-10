@@ -295,46 +295,90 @@ auto any_of(Ts&... ts)
     return AnyOf<Ts...>(ts...);
 }
 
+template <typename...> class CatcherList;
 
 template<typename T>
+class CatcherList<T>
+{
+public:
+
+    CatcherList(T& c) : catcher(c)
+    {}
+
+    void complete()
+    {
+        catcher.complete();
+    }
+
+private:
+
+    T&  catcher;
+};
+
+template<typename T, typename... Ts>
+class CatcherList<T, Ts...> : public CatcherList<Ts...>
+{
+public:
+
+    CatcherList(T& t, Ts& ... ts) : catcher(t), CatcherList<Ts...>(ts...)
+    {}
+
+    void complete() {
+        catcher.complete()
+        CatcherList<Ts...>::complete();
+    }
+
+private:
+
+    T&  catcher;
+};
+
+
+
+template <typename T, typename... Cs>
 class Rep
 {
 public:
 
-    Rep(T& m) : matcher(m)
+    Rep(T& m, Cs& ... cs) : matcher(m), catchers(cs...)
     {}
-    
+
     auto match(const TokenRange& matchRange)
     {
         auto& beg = matchRange.first;
         auto& end = matchRange.second;
         auto cur = beg;
 
-        while( cur != end )
+        while (cur != end)
         {
             auto result = matcher.match(std::make_pair(cur, end));
             if (!result.isMatched())
                 break;
 
+            catchers.complete();
+
             cur = result.end();
-        } 
+        }
 
         if (beg == cur)
-            return MatchResult();
-
+            return MatchResult();      
+        
         return MatchResult(std::make_pair(beg, cur));
     }
 
 private:
 
-    T&  matcher;
+    T&      matcher;
+    CatcherList<Cs...>  catchers;
 };
 
-template<typename T>
+
+
+template<typename... Ts>
 inline
-auto rep(T& matcher)
+auto rep(Ts & ... matchers)
 {
-    return Rep<T>(matcher);
+    return Rep<Ts...>(matchers...);
 }
 
 template<typename T>
@@ -346,30 +390,50 @@ public:
     {
         T matcher;
         auto result = matcher.match(matchRange);
-        if (result.isMatched())
-            matcherList.push_back(std::move(matcher));
+        currentMatcher = std::move(matcher);
         return result;
     }
 
-    auto begin() const {
+    auto begin() const
+    {
         return matcherList.begin();
     }
 
-    auto end() const {
+    auto end() const 
+    {
         return matcherList.end();
     }
 
-    auto rbegin() const {
+    auto rbegin() const 
+    {
         return matcherList.rbegin();
     }
 
-    auto rend() const {
+    auto rend() const 
+    {
         return matcherList.rend();
+    }
+
+    void complete()
+    {
+        if (currentMatcher.getMatchResult().isMatched())
+            matcherList.push_back(std::move(currentMatcher));
+    }
+
+    void push_front(T&& matcher)
+    {
+        matcherList.push_front(std::move(matcher));
+    }
+
+    void push_back(T&& matcher)
+    {
+        matcherList.push_back(std::move(matcher));
     }
 
 private:
 
     std::list<T>  matcherList;
+    T  currentMatcher;
 };
 
 
