@@ -15,17 +15,21 @@ namespace parser {
 class BaseTypeMatcher : public Matcher
 {
 public:
-    auto  match(const TokenRange& matchRange)
+
+    MatchResult  match(const TokenRange& matchRange)
     {
         auto& beg = matchRange.first;
         auto cur = beg;
-        for (; cur != matchRange.second; cur++)
+        for (; cur != matchRange.second; ++cur)
         {
             if (!isBaseTypeKeyWord(*cur))
                 break;
         }
+        
+        if (beg != cur)
+            return matchResult = MatchResult(std::make_pair(beg, cur));
 
-        return matchResult = MatchResult(std::make_pair(beg, cur));
+        return matchResult = MatchResult();
     }
 };
 
@@ -33,17 +37,18 @@ class StandardIntMatcher : public Matcher
 {
 public:
 
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
         auto& beg = matchRange.first;
         auto& end = matchRange.second;
 
         if (beg != end && isStandardIntType(*beg))
         {
-            matchResult = MatchResult(std::make_pair(beg, std::next(beg, 1)));
+            auto r = MatchResult(std::make_pair(beg, std::next(beg)));
+            return matchResult = r;
         }
-       
-        return matchResult;
+
+        return matchResult = MatchResult();
     }
 };
 
@@ -51,8 +56,7 @@ class PointerMatcher : public Matcher
 {
 public:
 
-
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
         return matchResult = rep(pointersMatcher, pointersMatcher).match(matchRange);
     }
@@ -72,7 +76,7 @@ class ArrayMatcher : public Matcher
 {
 public:
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
         return matchResult = rep(all_of(Is<clang::tok::l_square>(), numericMatcher, Is<clang::tok::r_square>()), numericMatcher).match(matchRange);
     }
@@ -105,7 +109,8 @@ private:
 class RefMatcher : public Matcher
 {
 public:
-    auto  match(const TokenRange& matchRange)
+
+    MatchResult  match(const TokenRange& matchRange)
     {
         return matchResult = any_of(Is<clang::tok::amp>(), Is<clang::tok::ampamp>()).match(matchRange);
     }
@@ -116,9 +121,27 @@ class ComplexMatcher : public Matcher
 
 public:
 
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
-        return matchResult = all_of(opt(pointerMatcher), opt(any_of(refMatcher, all_of(opt(nestedComplexMatcher), opt(arrayMatcher))))).match(matchRange);
+        auto matcher =  all_of(
+            opt(pointerMatcher), 
+            opt(
+                any_of(
+                    refMatcher, 
+                    all_of(
+                        opt(nestedComplexMatcher), 
+                        opt(arrayMatcher)
+                    )
+                )
+            )
+        );   
+               
+        matchResult = matcher.match(matchRange);
+
+        if (matchResult.isMatched() && (matchResult.begin() != matchResult.end() ) )
+            return matchResult;
+
+        return matchResult = MatchResult();
     }
 
     bool isPointer() const
@@ -168,9 +191,10 @@ class FieldMatcher : public Matcher
 {
 public:
 
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
-        return matchResult = all_of(Is<clang::tok::colon>(), Is<clang::tok::colon>(), name).match(matchRange);
+        auto matcher = all_of(Is<clang::tok::colon>(), Is<clang::tok::colon>(), name);
+        return matchResult = matcher.match(matchRange);
     }
 
     std::string  getName() const
@@ -190,15 +214,17 @@ class CustomNameMatcher : public Matcher
 {
 public:
 
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
         if (matchRange.first == matchRange.second)
-            return MatchResult();
+            return matchResult = MatchResult();
 
         if (isStandardIntType(*matchRange.first) || isBaseTypeKeyWord(*matchRange.first))
-            return MatchResult();
+            return matchResult = MatchResult();
 
-        return matchResult = all_of(nameMatcher, opt(rep(namespacesMatchers, namespacesMatchers))).match(matchRange);
+        auto matcher = all_of(nameMatcher, opt(rep(namespacesMatchers, namespacesMatchers)));
+
+        return matchResult = matcher.match(matchRange);
     }
 
     std::string  getName() const
@@ -225,7 +251,7 @@ class TemplateNumericArgMatcher : public Matcher
 {
 public:
 
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
         auto& beg = matchRange.first;
         auto cur = beg;
@@ -240,7 +266,10 @@ public:
             break;
         }
 
-        return matchResult = MatchResult(std::make_pair(beg, cur));
+        if ( cur != beg )
+            return matchResult = MatchResult(std::make_pair(beg, cur));
+
+        return matchResult = MatchResult();
     }
 };
 
@@ -277,10 +306,12 @@ private:
 class TemplateArgsMatcher : public Matcher
 {
 public:
-    auto  match(const TokenRange& matchRange)
+
+    MatchResult  match(const TokenRange& matchRange)
     {
         TemplateArgMatcher  argMatcher;
-        matchResult = all_of(argMatcher, opt(rep(all_of(Is<clang::tok::comma>(), argsMatchers), argsMatchers))).match(matchRange);
+        auto matcher = all_of(argMatcher, opt(rep(all_of(Is<clang::tok::comma>(), argsMatchers), argsMatchers)));
+        matchResult = matcher.match(matchRange);
         argsMatchers.push_front(std::move(argMatcher));
         return matchResult;
     }
@@ -292,15 +323,23 @@ public:
 
 private:
     
+
     ListMatcher<TemplateArgMatcher>  argsMatchers;
 };
+
 
 class TemplateMatcher : public Matcher
 {
 public:
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
-        return matchResult = all_of(Is<clang::tok::less>(), templateArgsMatcher, Is<clang::tok::greater>()).match(matchRange);
+        auto matcher = all_of(
+            token_is(clang::tok::less),
+            templateArgsMatcher,
+            token_is(clang::tok::greater)
+        );
+
+        return matchResult = matcher.match(matchRange);
     }
 
     const auto& getTemplateArgs() const
@@ -314,15 +353,88 @@ private:
     TemplateArgsMatcher  templateArgsMatcher;
 };
 
+class DoubleTemplateMatcher : public Matcher
+{
+public:
+    MatchResult  match(const TokenRange& matchRange)
+    {
+        auto matcher =
+            all_of(
+                token_is(clang::tok::less),
+                opt(
+                    rep(
+                        all_of(
+                            argsMatchers1,
+                            token_is(clang::tok::comma)
+                        ),
+                        argsMatchers1
+                    )
+                ),
+                nestedTemplateName,
+                token_is(clang::tok::less),
+                opt(
+                    rep(
+                        all_of(
+                            argsMatchers2,
+                            token_is(clang::tok::comma)
+                        ),
+                        argsMatchers2
+                    )
+                ),
+                cap(argsMatchers2, argsMatchers2),
+                Is<clang::tok::greatergreater>()
+            );
+
+        return matchResult = matcher.match(matchRange);
+    }
+
+    const auto& getTemplateArgs1() const
+    {
+        return argsMatchers1;
+    }
+
+    const auto& getTemplateArgs2() const
+    {
+        return argsMatchers2;
+    }
+
+    std::string getNestedTemplateName() const
+    {
+        assert(nestedTemplateName.getMatchResult().isMatched());
+        return nestedTemplateName.getName();
+    }
+
+
+private:
+
+    ListMatcher<TemplateArgMatcher>  argsMatchers1;
+    ListMatcher<TemplateArgMatcher>  argsMatchers2;
+
+    //TemplateArgsMatcher  templateArgsMatcher1;
+    CustomNameMatcher  nestedTemplateName;
+    //TemplateArgsMatcher  templateArgsMatcher2;
+};
 
 
 class CustomTypeMatcher : public Matcher
 {
 public:
 
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
-        return matchResult = all_of( typeNameMatcher, opt(templateMatcher), opt(rep(fieldsMatchers, fieldsMatchers))).match(matchRange);
+        auto matcher =
+            all_of(
+                typeNameMatcher,
+                opt(
+                    any_of(
+                        templateMatcher,
+                        templateMatcher2
+                    )
+                ),
+                opt(rep(fieldsMatchers, fieldsMatchers))
+            );
+            
+        return matchResult = matcher.match(matchRange);
     }
 
     const auto& getFields() const
@@ -347,18 +459,30 @@ public:
         return templateMatcher;
     }
 
+    bool isNestedTemplate() const
+    {
+        return templateMatcher2.getMatchResult().isMatched();
+    }
+    const auto& getNestedTemplateMatcher() const
+    {
+        assert(isNestedTemplate());
+        return templateMatcher2;
+    }
+
+
 private:
 
     ListMatcher<FieldMatcher>  fieldsMatchers;
     CustomNameMatcher  typeNameMatcher;
     TemplateMatcher  templateMatcher;
+    DoubleTemplateMatcher   templateMatcher2;
 };
 
 
 class TypeMatcher : public Matcher
 {
 public:
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {    
         auto matcher = all_of(any_of(baseTypeMatcher, stdIntMatcher, customMatcher), opt(complexMatcher));
         matchResult = matcher.match(matchRange);

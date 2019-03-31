@@ -27,14 +27,11 @@ public:
     MatchResult() : matched(false)
     {}
 
-    MatchResult(const TokenRange& m) :
-        matchedRange(m)
+    explicit MatchResult(const TokenRange& m) :
+        matchedRange(m),
+        matched(true)
     {
-        matched = matchedRange.first != matchedRange.second;
     }
-
-    ~MatchResult()
-    {}
 
     const TokenRange&  getMatchedRange() const 
     {
@@ -42,13 +39,13 @@ public:
         return matchedRange;
     }
 
-    TokenIterator begin() const
+    const TokenIterator& begin() const
     {
         assert(matched);
         return matchedRange.first;
     }
 
-    TokenIterator end() const
+    const TokenIterator& end() const
     {
         assert(matched);
         return matchedRange.second;
@@ -86,13 +83,13 @@ class Is : public Matcher
 {
 public:
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
         auto& beg = matchRange.first;
         auto& end = matchRange.second;
         if (beg != end && (*beg).is(tokenKind))
         {
-            return matchResult = MatchResult(std::make_pair(beg, std::next(beg, 1)));
+            return matchResult = MatchResult(std::make_pair(beg, std::next(beg)));
         }
 
         return matchResult = MatchResult();
@@ -104,20 +101,22 @@ class  TokenIs  : public Matcher
 {
 public:
 
-    TokenIs(const TokenKind& tokenKind) :
+    explicit TokenIs(const TokenKind& tokenKind) :
         m_tokenKind(tokenKind)
     {}
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
         auto& beg = matchRange.first;
         auto& end = matchRange.second;
         if (beg != end && (*beg).is(m_tokenKind))
         {
-            return matchResult = MatchResult(std::make_pair(beg, std::next(beg, 1)));
+            matchResult = MatchResult(std::make_pair(beg, std::next(beg)));
+            return matchResult;
         }
 
-        return matchResult = MatchResult();
+        matchResult = MatchResult();
+        return matchResult;
     }
 
 private:
@@ -131,34 +130,58 @@ auto token_is(const TokenKind& tokenKind)
     return TokenIs(tokenKind);
 }
 
-class BaseOpt
-{};
-
 template<typename T>
-class Opt : public BaseOpt
+class Opt 
 {
 public:
 
-    Opt(T& m) : matcher(m)
+    Opt(T m) : matcher(m)
     {}
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
-        return matcher.match(matchRange);
+        auto result = matcher.match(matchRange);
+        if (result.isMatched())
+            return result;
+
+        return MatchResult(std::make_pair(matchRange.first, matchRange.first));
     }
 
 private:
 
-    T&  matcher;
+    T  matcher;
 };
 
 
 template<typename T>
 inline
-auto opt(T& m )
+auto opt(T&& m )
 {
-    return Opt<T>(m);
+    return Opt<T>(std::forward<T>(m));
 }
+
+
+//template<typename T>
+//class Followed
+//{
+//public:
+//
+//    auto match(const TokenRange& matchRange)
+//    {
+//        T  matcher;
+//        if ( matcher.match(matchRange).isMatched() )
+//            return MatchResult(std::make_pair(matchRange.first, matchRange.first));
+//        return MatchResult();
+//    }
+//};
+//
+//template<typename T>
+//inline
+//auto followed(T& m)
+//{
+//    return Followed<T>();
+//}
+
 
 template <typename...> class AllOf;
 
@@ -167,22 +190,17 @@ class AllOf<T>
 {
 public:
 
-    AllOf(T& m) : matcher(m)
+    AllOf(T m) : matcher(m)
     {}
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
         return matcher.match(matchRange);
     }
 
-    bool is_optional()
-    {
-        return std::is_base_of<BaseOpt, T>::value;
-    }
-
 private:
 
-    T&  matcher;
+    T  matcher;
 };
 
 
@@ -191,57 +209,38 @@ class AllOf<T, Ts...> : public AllOf<Ts...>
 {
 public:
 
-    AllOf(T& m, Ts&... ts) : AllOf<Ts...>(ts...), matcher(m)
+    AllOf(T m, const Ts... ts) : AllOf<Ts...>(ts...), matcher(m)
     {}
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
-        auto result1 = matcher.match(matchRange);
+        MatchResult result1 = matcher.match(matchRange);
 
-        if (!result1.isMatched() )
+        if (!result1.isMatched())
         {
-            if (std::is_base_of<BaseOpt, T>::value)
-            {
-                return AllOf<Ts...>::match(matchRange);
-            }
-            else
-            {
-                return MatchResult();
-            }
+            return MatchResult();
         }
 
-        auto result2 = AllOf<Ts...>::match(std::make_pair(result1.end(), matchRange.second));
+        MatchResult result2 = AllOf<Ts...>::match(std::make_pair(result1.end(), matchRange.second));
 
         if (!result2.isMatched())
         {
-            if (AllOf<Ts...>::is_optional())
-            {
-                return result1;
-            }
-            else
-            {
-                return MatchResult();
-            }
+            return MatchResult();
         }
 
-        return MatchResult(std::make_pair(result1.begin(), result2.end()));        
-    }
-
-    bool is_optional()
-    {
-        return std::is_base_of<BaseOpt, T>::value && AllOf<Ts...>::is_optional();
+        return MatchResult(std::make_pair(result1.begin(), result2.end()));       
     }
 
 private:
  
-    T&  matcher;
+    T  matcher;
 };
 
 template <typename... Ts>
 inline
-auto all_of(Ts&... ts)
+auto all_of(Ts&&... ts)
 {
-    return AllOf<Ts...>(ts...);
+    return AllOf<Ts...>(std::forward<Ts>(ts)...);
 }
 
 
@@ -252,17 +251,17 @@ class AnyOf<T>
 {
 public:
 
-    AnyOf(T& m) : matcher(m)
+    AnyOf(T m) : matcher(m)
     {}
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
         return matcher.match(matchRange);
     }
 
 private:
 
-    T&  matcher;
+    T  matcher;
 };
 
 
@@ -271,12 +270,12 @@ class AnyOf<T, Ts...> : public AnyOf<Ts...>
 {
 public:
 
-    AnyOf(T& m, Ts&... ts) : AnyOf<Ts...>(ts...), matcher(m)
+    AnyOf(T m, Ts... ts) : AnyOf<Ts...>(ts...), matcher(m)
     {}
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
-        auto result = matcher.match(matchRange);
+        MatchResult result = matcher.match(matchRange);
         if (result.isMatched())
             return result;
 
@@ -285,65 +284,98 @@ public:
 
 private:
 
-    T& matcher;
+    T matcher;
 };
 
 template <typename... Ts>
 inline
-auto any_of(Ts&... ts)
+auto any_of(Ts&&... ts)
 {
-    return AnyOf<Ts...>(ts...);
+    return AnyOf<Ts...>(std::forward<Ts>(ts)...);
 }
 
-template <typename...> class CatcherList;
+template <typename...> class CaptureList;
 
 template<typename T>
-class CatcherList<T>
+class CaptureList<T>
 {
 public:
 
-    CatcherList(T& c) : catcher(c)
+    CaptureList(T& c) : capture(c)
     {}
 
     void complete()
     {
-        catcher.complete();
+        capture.complete();
     }
 
 private:
 
-    T&  catcher;
+    T&  capture;
 };
 
 template<typename T, typename... Ts>
-class CatcherList<T, Ts...> : public CatcherList<Ts...>
+class CaptureList<T, Ts...> : public CaptureList<Ts...>
 {
 public:
 
-    CatcherList(T& t, Ts& ... ts) : catcher(t), CatcherList<Ts...>(ts...)
+    CaptureList(T& t, Ts& ... ts) : capture(t), CaptureList<Ts...>(ts...)
     {}
 
     void complete() {
-        catcher.complete()
-        CatcherList<Ts...>::complete();
+        capture.complete()
+        CaptureList<Ts...>::complete();
     }
 
 private:
 
-    T&  catcher;
+    T&  capture;
 };
 
 
+template <typename T, typename... Cs>
+class Cap
+{
+public:
+
+    Cap(T& m, Cs& ... cs) : matcher(m), captures(cs...)
+    {}
+
+    MatchResult match(const TokenRange& matchRange)
+    {
+
+        MatchResult result = matcher.match(std::make_pair(matchRange.first, matchRange.second));
+        if (!result.isMatched())
+            return MatchResult();
+
+        captures.complete();
+
+        return result;
+    }
+
+private:
+
+    T&      matcher;
+    CaptureList<Cs...>  captures;
+};
+
+
+template<typename... Ts>
+inline
+auto cap(Ts & ... matchers)
+{
+    return Cap<Ts...>(matchers...);
+}
 
 template <typename T, typename... Cs>
 class Rep
 {
 public:
 
-    Rep(T& m, Cs& ... cs) : matcher(m), catchers(cs...)
+    Rep(T m, Cs& ... cs) : matcher(m), captures(cs...)
     {}
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
         auto& beg = matchRange.first;
         auto& end = matchRange.second;
@@ -351,11 +383,11 @@ public:
 
         while (cur != end)
         {
-            auto result = matcher.match(std::make_pair(cur, end));
+            MatchResult result = matcher.match(std::make_pair(cur, end));
             if (!result.isMatched())
                 break;
 
-            catchers.complete();
+            captures.complete();
 
             cur = result.end();
         }
@@ -368,17 +400,17 @@ public:
 
 private:
 
-    T&      matcher;
-    CatcherList<Cs...>  catchers;
+    T      matcher;
+    CaptureList<Cs...>  captures;
 };
 
 
 
 template<typename... Ts>
 inline
-auto rep(Ts & ... matchers)
+auto rep(Ts&& ... matchers)
 {
-    return Rep<Ts...>(matchers...);
+    return Rep<Ts...>(std::forward<Ts>(matchers)...);
 }
 
 template<typename T>
@@ -386,10 +418,10 @@ class ListMatcher
 {
 public:
 
-    auto match(const TokenRange& matchRange)
+    MatchResult match(const TokenRange& matchRange)
     {
         T matcher;
-        auto result = matcher.match(matchRange);
+        MatchResult result = matcher.match(matchRange);
         currentMatcher = std::move(matcher);
         return result;
     }
@@ -441,7 +473,7 @@ private:
 class NumericMatcher : public Matcher
 {
 public:
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
         return matchResult = Is<clang::tok::numeric_constant>().match(matchRange);
     }
@@ -451,14 +483,11 @@ class IdentifierMatcher : public Matcher
 {
 public:
 
-    auto  match(const TokenRange& matchRange)
+    MatchResult  match(const TokenRange& matchRange)
     {
         return matchResult = Is<clang::tok::identifier>().match(matchRange);
     }
 };
-
-
-
 
 
 } }

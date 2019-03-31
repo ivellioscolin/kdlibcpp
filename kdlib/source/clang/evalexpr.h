@@ -520,7 +520,11 @@ private:
 
     //void getTypeModifiers(std::list<TypeModifier*>& typeModifiers, clang::tok::TokenKind endToken);
 
+    std::string getTemplateArgs(const parser::ListMatcher<parser::TemplateArgMatcher>& argList);
+
     std::string getTemplateName(const parser::TemplateMatcher& templateMatcher);
+
+    std::string getNestedTemplateName(const parser::DoubleTemplateMatcher& templateMatcher);
 
     std::string getTypeName(const parser::TypeMatcher& typeMatcher);
 

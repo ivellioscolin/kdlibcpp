@@ -778,7 +778,8 @@ TypeInfoPtr TypeEval::getResult()
 
     TypeMatcher typeMatcher;
 
-    auto matchResult = all_of(typeMatcher, token_is(m_endToken)).match(std::make_pair(tokens.cbegin(), tokens.cend()));
+    auto matcher = all_of(typeMatcher, token_is(m_endToken));
+    auto matchResult = matcher.match(std::make_pair(tokens.cbegin(), tokens.cend()));
 
     if (!matchResult.isMatched())
         throw  ExprException(L"error syntax");
@@ -818,23 +819,23 @@ TypeInfoPtr TypeEval::getResult()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string TypeEval::getTemplateName(const parser::TemplateMatcher& templateMatcher)
+std::string TypeEval::getTemplateArgs(const parser::ListMatcher<parser::TemplateArgMatcher>& argList)
 {
-    std::string  templateName;
+    std::string  argsStr;
 
-    for (auto& arg : templateMatcher.getTemplateArgs())
+    for (auto& arg : argList)
     {
-        if (!templateName.empty())
-            templateName += ',';
+        if (!argsStr.empty())
+            argsStr += ',';
 
         if (arg.isType())
         {
-            templateName += getTypeName(arg.getTypeMatcher());
+            argsStr += getTypeName(arg.getTypeMatcher());
         }
         else if (arg.isNumeric())
         {
             auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getNumericMatcher().getMatchResult().getMatchedRange()).getResult();
-            templateName += std::to_string(value.getValue().asLongLong());
+            argsStr += std::to_string(value.getValue().asLongLong());
         }
         else
         {
@@ -842,10 +843,44 @@ std::string TypeEval::getTemplateName(const parser::TemplateMatcher& templateMat
         }
     }
 
+    return argsStr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string TypeEval::getTemplateName(const parser::TemplateMatcher& templateMatcher)
+{
+    std::string  templateName = getTemplateArgs(templateMatcher.getTemplateArgs());
+
     templateName.insert(templateName.begin(), '<');
     if (templateName.back() == '>')
         templateName.insert(templateName.end(), ' ');
     templateName.insert(templateName.end(), '>');
+
+    return templateName;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string TypeEval::getNestedTemplateName(const parser::DoubleTemplateMatcher& templateMatcher)
+{
+    std::string  templateName = getTemplateArgs(templateMatcher.getTemplateArgs1());
+
+    if (!templateName.empty())
+        templateName += ',';
+
+    templateName += templateMatcher.getNestedTemplateName();
+
+    templateName += '<';
+
+    templateName += getTemplateArgs(templateMatcher.getTemplateArgs2());
+
+    templateName.insert(templateName.begin(), '<');
+
+    if (templateName.back() == '>')
+        templateName.insert(templateName.end(), ' ');
+
+    templateName += "> >";
 
     return templateName;
 }
@@ -858,7 +893,7 @@ TypeInfoPtr TypeEval::getCustomType(const parser::CustomTypeMatcher&  customMatc
 
     std::string   typeName = customMatcher.getTypeNameMatcher().getName();
 
-    if (customMatcher.isTemplate())
+    if (customMatcher.isTemplate() || customMatcher.isNestedTemplate() )
     {
         for (auto namespaceMatcher : customMatcher.getTypeNameMatcher().getNamespaces())
         {
@@ -866,7 +901,14 @@ TypeInfoPtr TypeEval::getCustomType(const parser::CustomTypeMatcher&  customMatc
             typeName += namespaceMatcher.getName();
         }
 
-        typeName += getTemplateName(customMatcher.getTemplateMatcher());
+        if (customMatcher.isTemplate())
+        {
+            typeName += getTemplateName(customMatcher.getTemplateMatcher());
+        }
+        else if (customMatcher.isNestedTemplate())
+        {
+            typeName += getNestedTemplateName(customMatcher.getNestedTemplateMatcher());
+        }
 
         typeInfo = m_typeInfoProvider->getTypeByName(strToWStr(typeName));
 
@@ -942,7 +984,7 @@ std::string TypeEval::getCustomTypeName(const parser::CustomTypeMatcher& customM
 {
     std::string   typeName = customMatcher.getTypeNameMatcher().getName();
 
-    if (customMatcher.isTemplate())
+    if (customMatcher.isTemplate() || customMatcher.isNestedTemplate())
     {
         for (auto namespaceMatcher : customMatcher.getTypeNameMatcher().getNamespaces())
         {
@@ -950,7 +992,14 @@ std::string TypeEval::getCustomTypeName(const parser::CustomTypeMatcher& customM
             typeName += namespaceMatcher.getName();
         }
 
-        typeName += getTemplateName(customMatcher.getTemplateMatcher());
+        if (customMatcher.isTemplate())
+        {
+            typeName += getTemplateName(customMatcher.getTemplateMatcher());
+        }
+        else if (customMatcher.isNestedTemplate())
+        {
+            typeName += getNestedTemplateName(customMatcher.getNestedTemplateMatcher());
+        }
 
         for (auto fieldMatcher : customMatcher.getFields())
         {

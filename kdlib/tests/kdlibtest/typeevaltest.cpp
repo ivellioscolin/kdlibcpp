@@ -243,6 +243,7 @@ TEST(TypeEvalTest, Template)
     EXPECT_NO_THROW(evalType("TestStruct4<TestStruct1<int>, unsigned long>", typeProvider));
     EXPECT_THROW(evalType("TestStruct1<float>", typeProvider), TypeException);
     EXPECT_THROW(evalType("TestStruct1<unsigned", typeProvider), TypeException);  
+    EXPECT_THROW(evalType("TestStruct1<unsigned, unsigned", typeProvider), TypeException);
 }
 
 TEST(TypeEvalTest, TemplateNumeric)
