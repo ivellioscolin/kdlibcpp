@@ -155,7 +155,7 @@ protected:
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const {
+    virtual void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const {
         throw TypeException(L"Not applicable for managed objects");
     }
 

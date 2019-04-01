@@ -55,7 +55,7 @@ private:
 
 class DiaSymbol : public Symbol {
 public:
-    DiaSymbol( DiaSymbolPtr &_symbol, const std::wstring &_scope, MachineTypes machineType );
+    DiaSymbol(const  DiaSymbolPtr &_symbol, const std::wstring &_scope, MachineTypes machineType );
 
     static SymbolPtr fromGlobalScope( IDiaSymbol *_symbol, const std::wstring &_scope );
 

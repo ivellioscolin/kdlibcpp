@@ -324,7 +324,7 @@ public:
     
     virtual TypeInfoPtr Next();
 
-    TypeInfoProviderClangEnum(const std::wstring& mask, boost::shared_ptr<TypeInfoProviderClang>& clangProvider );
+    TypeInfoProviderClangEnum(const std::wstring& mask, const boost::shared_ptr<TypeInfoProviderClang>& clangProvider );
 
 
 private:

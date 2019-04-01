@@ -80,7 +80,7 @@ class PreIncrementOperation : public UnaryOperation
 {
     TypedValue getResult(const TypedValue& val) override
     {
-        return ++val.getValue();
+        return val.getValue() + 1;
     }
 };
 

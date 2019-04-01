@@ -171,7 +171,7 @@ protected:
 
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const;
 
-    virtual void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const
+    virtual void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const
     {
         std::vector<unsigned char>  buffer( getSize() );
         m_varData->readBytes(buffer, getSize() );
@@ -645,7 +645,7 @@ public:
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual void writeBytes(DataAccessorPtr& stream, size_t bytes = 0) const
+    virtual void writeBytes(const DataAccessorPtr& stream, size_t bytes = 0) const
     {
        throw TypeException(L"Not applicable for Void");
     }

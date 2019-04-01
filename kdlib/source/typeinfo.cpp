@@ -295,7 +295,7 @@ TypeInfoPtr loadType( const std::wstring &typeName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName )
+TypeInfoPtr loadType( const SymbolPtr &symbolScope, const std::wstring &symbolName )
 {
     SymbolPtr  symbol;
 
@@ -320,7 +320,7 @@ TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr loadType( SymbolPtr &symbol )
+TypeInfoPtr loadType( const SymbolPtr &symbol )
 {
     unsigned long symTag = symbol->getSymTag();
     TypeInfoPtr  ptr;
@@ -640,7 +640,7 @@ TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrS
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfo::getBaseTypeInfo( SymbolPtr &symbol )  
+TypeInfoPtr TypeInfo::getBaseTypeInfo( const SymbolPtr &symbol )  
 {
     std::wstring  symName = getBasicTypeName( symbol->getBaseType() );
 
@@ -676,7 +676,7 @@ TypeInfoPtr TypeInfo::getBaseTypeInfo( SymbolPtr &symbol )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr TypeInfo::getComplexTypeInfo( const std::wstring &typeName, SymbolPtr &symbolScope )
+TypeInfoPtr TypeInfo::getComplexTypeInfo( const std::wstring &typeName, const SymbolPtr &symbolScope )
 {
     std::wstring  innerSymName = getTypeNameFromComplex(typeName);
     if ( innerSymName.empty() )
@@ -1370,8 +1370,8 @@ void TypeInfoUdt::getFields()
 ///////////////////////////////////////////////////////////////////////////////
 
 void TypeInfoUdt::getFields( 
-        SymbolPtr &rootSym, 
-        SymbolPtr &baseVirtualSym,
+        const SymbolPtr &rootSym, 
+        const SymbolPtr &baseVirtualSym,
         MEMOFFSET_32 startOffset,
         MEMOFFSET_32 virtualBasePtr,
         size_t virtualDispIndex,
@@ -1521,7 +1521,7 @@ void TypeInfoEnum::getFields()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoSymbolFunctionPrototype::TypeInfoSymbolFunctionPrototype( SymbolPtr& symbol ) :
+TypeInfoSymbolFunctionPrototype::TypeInfoSymbolFunctionPrototype( const SymbolPtr& symbol ) :
     m_symbol(symbol)
 {
     // add this
@@ -1655,7 +1655,7 @@ TypeInfoPtr TypeInfoSymbolFunctionPrototype::getClassParent()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoSymbolBitField::TypeInfoSymbolBitField( SymbolPtr &symbol ) :
+TypeInfoSymbolBitField::TypeInfoSymbolBitField( const SymbolPtr &symbol ) :
     TypeInfoBitField(
         TypeInfo::getBaseTypeInfo( symbol->getType() ), 
         symbol->getBitPosition(),

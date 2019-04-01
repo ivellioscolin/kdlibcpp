@@ -130,7 +130,7 @@ public:
     virtual TypedVarPtr deref() = 0;
     virtual TypedVarPtr castTo(const std::wstring& typeName) const = 0;
     virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const = 0;
-    virtual void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const = 0;
+    virtual void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const = 0;
     virtual TypedValue call(const TypedValueList& arglst) = 0;
     virtual void setElement( const std::wstring& fieldName, const TypedValue& value) = 0;
     virtual void setElement( size_t index, const TypedValue& value ) = 0;
@@ -311,7 +311,7 @@ public:
         return m_value->castTo(typeInfo);
     }
 
-    void writeBytes(DataAccessorPtr& stream, size_t pos = 0) const {
+    void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const {
         return m_value->writeBytes(stream, pos);
     }
 

@@ -251,7 +251,7 @@ protected:
         NOT_IMPLEMENTED();
     }
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) {
+    virtual void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType ) {
         NOT_IMPLEMENTED();
     }
 
