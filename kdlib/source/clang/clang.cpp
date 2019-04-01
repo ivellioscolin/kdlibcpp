@@ -513,7 +513,7 @@ public:
        if ( Declaration->isInvalidDecl() )
             return true;
 
-        std::string&  name = Declaration->getQualifiedNameAsString();
+        const std::string&  name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
             return true;
@@ -531,7 +531,7 @@ public:
        if ( Declaration->isInvalidDecl() )
             return true;
 
-        std::string&  name = Declaration->getQualifiedNameAsString();
+        const std::string&  name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
             return true;
@@ -557,7 +557,7 @@ public:
                 return true;
         }
 
-        std::string& name = Declaration->getQualifiedNameAsString();
+        const std::string& name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
             return true;
@@ -574,7 +574,7 @@ public:
        if ( Declaration->isInvalidDecl() )
             return true;
 
-        std::string& name = Declaration->getQualifiedNameAsString();
+        const std::string& name = Declaration->getQualifiedNameAsString();
 
         if ( name != m_typeName)
             return true;
@@ -631,7 +631,7 @@ public:
                         pp.SuppressTagKeyword = true;
                         pp.MSVCFormatting = true;
 
-                        std::string name = (*specIt)->getTypeForDecl()->getCanonicalTypeInternal().getAsString(pp);
+                        const std::string  &name = (*specIt)->getTypeForDecl()->getCanonicalTypeInternal().getAsString(pp);
 
                         auto  rr = llvm::dyn_cast<CXXRecordDecl>(*specIt);
 
@@ -641,7 +641,7 @@ public:
                 }
                 else
                 {
-                    std::string  name = Declaration->getQualifiedNameAsString();
+                    const std::string  &name = Declaration->getQualifiedNameAsString();
                     (*m_typeMap)[name] = TypeInfoPtr(new TypeInfoClangStruct(strToWStr(name), m_session, definition));
                 }
             }
@@ -667,7 +667,7 @@ public:
            if ( Declaration->isInvalidDecl() )
                 return true;
 
-            std::string&  name = Declaration->getQualifiedNameAsString();
+            const std::string&  name = Declaration->getQualifiedNameAsString();
 
             QualType  decl = Declaration->getUnderlyingType().getCanonicalType();
 
@@ -816,7 +816,7 @@ TypeInfoEnumeratorPtr TypeInfoProviderClang::getTypeEnumerator(const std::wstrin
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoProviderClangEnum::TypeInfoProviderClangEnum(const std::wstring& mask, boost::shared_ptr<TypeInfoProviderClang>& clangProvider )
+TypeInfoProviderClangEnum::TypeInfoProviderClangEnum(const std::wstring& mask, const boost::shared_ptr<TypeInfoProviderClang>& clangProvider )
 {
     m_index = 0;
 

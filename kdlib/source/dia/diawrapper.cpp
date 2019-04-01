@@ -178,7 +178,7 @@ std::wstring getBasicTypeName( ULONG basicType )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-DiaSymbol::DiaSymbol(DiaSymbolPtr &_symbol, const std::wstring &_scope, MachineTypes machineType)
+DiaSymbol::DiaSymbol(const DiaSymbolPtr &_symbol, const std::wstring &_scope, MachineTypes machineType)
     : m_symbol(_symbol), m_scope(_scope), m_machineType(machineType)
 {
 }

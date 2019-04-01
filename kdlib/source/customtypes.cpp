@@ -28,7 +28,7 @@ protected:
     void throwIfFiledExist(const std::wstring &fieldName);
     void throwIfTypeRecursive(TypeInfoPtr type);
 
-    void checkAppendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
+    void checkAppendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType);
 
 protected:
 
@@ -66,7 +66,7 @@ public:
 
 private:
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
+    virtual void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ public:
 
 private:
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType);
+    virtual void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ protected:
         return m_callconv;
     }
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) {
+    virtual void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType ) {
         m_args.push_back(fieldType);
     }
 
@@ -198,7 +198,7 @@ void CustomBase::throwIfTypeRecursive(TypeInfoPtr type)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CustomBase::checkAppendField(const std::wstring &fieldName, TypeInfoPtr &fieldType)
+void CustomBase::checkAppendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType)
 {
     if ( !fieldType )
          throw DbgException( "typeInfo can not be None" );
@@ -209,7 +209,7 @@ void CustomBase::checkAppendField(const std::wstring &fieldName, TypeInfoPtr &fi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CustomStruct::appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType )
+void CustomStruct::appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType )
 {
     checkAppendField(fieldName, fieldType);
 
@@ -228,7 +228,7 @@ void CustomStruct::appendField(const std::wstring &fieldName, TypeInfoPtr &field
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CustomUnion::appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType )
+void CustomUnion::appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType )
 {
     checkAppendField(fieldName, fieldType);
 

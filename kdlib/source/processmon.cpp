@@ -28,8 +28,8 @@ public:
     TypeInfoPtr getTypeInfo(const std::wstring& name);
     void insertTypeInfo(const TypeInfoPtr& typeInfo);
 
-    void insertBreakpoint(BreakpointPtr& breakpoint);
-    void removeBreakpoint(BreakpointPtr& breakpoint);
+    void insertBreakpoint(const BreakpointPtr& breakpoint);
+    void removeBreakpoint(const BreakpointPtr& breakpoint);
 
     DebugCallbackResult breakpointHit(BreakpointPtr& breakpoint);
 
@@ -95,8 +95,8 @@ public:
     void registerEventsCallback(DebugEventsCallback *callback);
     void removeEventsCallback(DebugEventsCallback *callback);
 
-    void registerBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
-    void removeBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+    void registerBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+    void removeBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
 
 private:
 
@@ -173,7 +173,7 @@ void ProcessMonitor::removeEventsCallback(DebugEventsCallback *callback)
 
 /////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::registerBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
+void ProcessMonitor::registerBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
 {
     if ( id == -1 )
         id = getCurrentProcessId();
@@ -184,7 +184,7 @@ void ProcessMonitor::registerBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBU
 
 /////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::removeBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
+void ProcessMonitor::removeBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
 {
     if ( id == -1 )
         id = getCurrentProcessId();
@@ -770,7 +770,7 @@ void ProcessMonitorImpl::removeEventsCallback(DebugEventsCallback *callback)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::registerBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
+void ProcessMonitorImpl::registerBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
 {
     ProcessInfoPtr  processInfo = getProcess(id);
 
@@ -782,7 +782,7 @@ void ProcessMonitorImpl::registerBreakpoint( BreakpointPtr& breakpoint, PROCESS_
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::removeBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
+void ProcessMonitorImpl::removeBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id )
 {
     ProcessInfoPtr  processInfo = getProcess(id);
 
@@ -855,7 +855,7 @@ void ProcessInfo::insertTypeInfo(const TypeInfoPtr& typeInfo)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessInfo::insertBreakpoint(BreakpointPtr& breakpoint)
+void ProcessInfo::insertBreakpoint(const BreakpointPtr& breakpoint)
 {
     boost::recursive_mutex::scoped_lock l(m_breakpointLock);
     
@@ -864,7 +864,7 @@ void ProcessInfo::insertBreakpoint(BreakpointPtr& breakpoint)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessInfo::removeBreakpoint(BreakpointPtr& breakpoint)
+void ProcessInfo::removeBreakpoint(const BreakpointPtr& breakpoint)
 {
     BreakpointPtr origbp;
 

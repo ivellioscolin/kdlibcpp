@@ -20,8 +20,8 @@ class TypedVar;
 typedef boost::shared_ptr<TypedVar>     TypedVarPtr;
 
 TypeInfoPtr loadType( const std::wstring &symName );
-TypeInfoPtr loadType( SymbolPtr &symbol );
-TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
+TypeInfoPtr loadType( const SymbolPtr &symbol );
+TypeInfoPtr loadType( const SymbolPtr &symbolScope, const std::wstring &symbolName ); 
 
 TypeInfoPtr defineStruct( const std::wstring &structName, size_t align = 0 );
 TypeInfoPtr defineUnion( const std::wstring& unionName, size_t align = 0 );
@@ -37,8 +37,8 @@ std::wstring findSymbol( MEMOFFSET_64 offset, MEMDISPLACEMENT &displacement );
 class TypeInfo : public NumConvertable, private boost::noncopyable {
 
     friend TypeInfoPtr loadType( const std::wstring &symName );
-    friend TypeInfoPtr loadType( SymbolPtr &symbol );
-    friend TypeInfoPtr loadType( SymbolPtr &symbolScope, const std::wstring &symbolName ); 
+    friend TypeInfoPtr loadType( const SymbolPtr &symbol );
+    friend TypeInfoPtr loadType( const SymbolPtr &symbolScope, const std::wstring &symbolName ); 
     friend size_t getSymbolSize( const std::wstring &name );
 
 public:
@@ -114,7 +114,7 @@ public:
     virtual bool hasThis() = 0;
     virtual TypeInfoPtr getReturnType() = 0;
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) = 0;
+    virtual void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType ) = 0;
 
     virtual TypeInfoPtr getClassParent() = 0;
 
@@ -135,9 +135,9 @@ protected:
     static TypeInfoPtr getTypeInfoFromCache(const std::wstring &typeName );
 
     static TypeInfoPtr getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize = 0);
-    static TypeInfoPtr getBaseTypeInfo( SymbolPtr &symbolScope );
+    static TypeInfoPtr getBaseTypeInfo( const SymbolPtr &symbolScope );
 
-    static TypeInfoPtr getComplexTypeInfo( const std::wstring &typeName, SymbolPtr &symbolScope );
+    static TypeInfoPtr getComplexTypeInfo( const std::wstring &typeName, const SymbolPtr &symbolScope );
     static TypeInfoPtr getRecursiveComplexType( const std::wstring &typeName, TypeInfoPtr &lowestType, std::wstring &suffix, size_t ptrSize );
 
     TypeInfo() 

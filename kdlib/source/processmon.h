@@ -50,8 +50,8 @@ public: // module manipulation
 
 public: //breakpoint callbacks
 
-    static void registerBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
-    static void removeBreakpoint( BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+    static void registerBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+    static void removeBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
 
 public: //callbacks
     static void registerEventsCallback(DebugEventsCallback *callback);

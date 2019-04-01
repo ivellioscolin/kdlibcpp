@@ -63,11 +63,11 @@ public:
     ScopedBreakpoint() {
     }
 
-    ScopedBreakpoint(BreakpointPtr& bp) {
+    ScopedBreakpoint(const BreakpointPtr& bp) {
         m_internalBp = bp;
     }
 
-    ScopedBreakpoint& operator= (BreakpointPtr& bp) 
+    ScopedBreakpoint& operator= (const BreakpointPtr& bp) 
     {
         if ( m_internalBp )
              m_internalBp->remove();

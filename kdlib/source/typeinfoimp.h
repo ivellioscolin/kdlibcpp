@@ -11,7 +11,7 @@ namespace kdlib {
 
 size_t getPointerSizeByMachine(const SymbolPtr &symbol);
 
-inline size_t getPtrSizeBySymbol( SymbolPtr &typeSym )
+inline size_t getPtrSizeBySymbol( const SymbolPtr &typeSym )
 {
     SymTags symTag = typeSym->getSymTag();
     if ( symTag != SymTagPointerType )
@@ -262,7 +262,7 @@ protected:
         throw TypeException( getName(), L"type is not a function" ); 
     }
 
-    virtual void appendField(const std::wstring &fieldName, TypeInfoPtr &fieldType ) {
+    virtual void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType ) {
         throw TypeException( getName(), L"type is not editable" ); 
     }
 
@@ -385,7 +385,7 @@ private:
 class SymbolFields : public TypeInfoFields
 {
 public:
-    SymbolFields(SymbolPtr &symbol) :
+    SymbolFields(const SymbolPtr &symbol) :
          TypeInfoFields( symbol->getName() ),
          m_symbol(symbol)
     {}
@@ -404,7 +404,7 @@ class TypeInfoUdt : public SymbolFields
 {
 public:
 
-    TypeInfoUdt(SymbolPtr &symbol) :
+    TypeInfoUdt(const SymbolPtr &symbol) :
         SymbolFields( symbol )
         {}
 
@@ -455,8 +455,8 @@ protected:
     virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
 
     void getFields( 
-        SymbolPtr &rootSym, 
-        SymbolPtr &baseVirtualSym,
+        const SymbolPtr &rootSym, 
+        const SymbolPtr &baseVirtualSym,
         MEMOFFSET_32 startOffset = 0,
         MEMOFFSET_32 virtualBasePtr = 0,
         size_t virtualDispIndex = 0,
@@ -472,7 +472,7 @@ class TypeInfoEnum : public SymbolFields
 {
 public:
 
-    TypeInfoEnum( SymbolPtr& symbol ) :
+    TypeInfoEnum( const SymbolPtr& symbol ) :
         SymbolFields( symbol )
         {}
 
@@ -572,7 +572,7 @@ class TypeInfoSymbolFunctionPrototype : public TypeInfoFunctionPrototype
 {
 public:
 
-    TypeInfoSymbolFunctionPrototype( SymbolPtr& symbol );
+    TypeInfoSymbolFunctionPrototype( const SymbolPtr& symbol );
 
 protected:
 
@@ -746,7 +746,7 @@ class TypeInfoVtbl: public TypeInfoImp
 {
 public:
 
-    TypeInfoVtbl( SymbolPtr &symbol ) : m_symbol( symbol ) {}
+    TypeInfoVtbl( const SymbolPtr &symbol ) : m_symbol( symbol ) {}
 
     virtual std::wstring str() {
         return getName();
@@ -782,7 +782,7 @@ class TypeInfoBitField : public TypeInfoImp
 {
 public:
 
-    TypeInfoBitField( TypeInfoPtr fieldType, BITOFFSET bitPos, BITOFFSET bitWidth) :
+    TypeInfoBitField( const TypeInfoPtr& fieldType, BITOFFSET bitPos, BITOFFSET bitWidth) :
         m_bitType(fieldType),
         m_bitPos(bitPos),
         m_bitWidth(bitWidth)
@@ -829,7 +829,7 @@ class TypeInfoSymbolBitField : public TypeInfoBitField
 {
 public:
 
-    TypeInfoSymbolBitField( SymbolPtr &symbol );
+    TypeInfoSymbolBitField( const SymbolPtr &symbol );
 
 protected:
 
@@ -909,7 +909,7 @@ class TypeInfoSymbolPointer : public TypeInfoPointer
 {
 public:
 
-    TypeInfoSymbolPointer( SymbolPtr& symbol ) : 
+    TypeInfoSymbolPointer( const SymbolPtr& symbol ) : 
         TypeInfoPointer( loadType( symbol->getType() ), symbol->getSize() )
     {
         m_symbol = symbol;
@@ -989,7 +989,7 @@ class TypeInfoSymbolArray : public TypeInfoArray
 
 public:
 
-    TypeInfoSymbolArray( SymbolPtr& symbol ) : 
+    TypeInfoSymbolArray( const SymbolPtr& symbol ) : 
         TypeInfoArray( loadType( symbol->getType() ), symbol->getCount() )
     {
         m_symbol = symbol;
