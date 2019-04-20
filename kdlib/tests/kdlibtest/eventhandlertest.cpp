@@ -52,6 +52,7 @@ TEST_F(EventHandlerTest, KillProcessTargetChanged)
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput(_, _)).Times(AnyNumber());
 
     PROCESS_DEBUG_ID   process_id;
 
@@ -78,6 +79,7 @@ TEST_F(EventHandlerTest, DetachProcessTargetChanged)
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput(_, _)).Times(AnyNumber());
 
     PROCESS_DEBUG_ID   process_id;
 
@@ -104,6 +106,7 @@ TEST_F(EventHandlerTest, KillProcessesTargetChanged)
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput(_, _)).Times(AnyNumber());
 
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
@@ -128,6 +131,7 @@ TEST_F(EventHandlerTest, DetachProcessesTargetChanged)
     EXPECT_CALL(eventHandler, onModuleLoad(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onModuleUnload(_, _) ).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput(_, _)).Times(AnyNumber());
 
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
     ASSERT_NO_THROW( startProcess(L"targetapp.exe") );
@@ -149,6 +153,7 @@ TEST_F(EventHandlerTest, ChangeCurrentThread)
     EXPECT_CALL(eventHandler, onProcessExit(_, ProcessTerminate, _)).Times(1);
     EXPECT_CALL(eventHandler, onCurrentThreadChange(_)).Times(threadNumber-1);
     EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput(_, _)).Times(AnyNumber());
 
     for (unsigned int i = 1; i < threadNumber; ++i)
     {
@@ -171,6 +176,7 @@ TEST_F(EventHandlerTest, ScopeChange)
     EXPECT_CALL(eventHandler, onProcessExit(_, ProcessTerminate, _)).Times(1);
 
     EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput(_, _)).Times(AnyNumber());
     EXPECT_CALL(eventHandler, onChangeLocalScope()).Times(AtLeast(2));
 
     EXPECT_NO_THROW( debugCommand(L".frame 2") );
@@ -190,6 +196,7 @@ TEST_F(EventHandlerTest, SymbolPathChange)
     EXPECT_CALL(eventHandler, onChangeSymbolPaths()).Times(3);
 
     EXPECT_CALL(eventHandler, onExecutionStatusChange(_)).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput(_, _)).Times(AnyNumber());
 
     std::wstring sympath;
 

@@ -199,6 +199,7 @@ TEST_F( ModuleCallbackTest, loadModule)
     EXPECT_CALL(eventHandler, onModuleLoad( _,  Ne(std::wstring(L"ws2_32")))).Times(AnyNumber());
 
     EXPECT_CALL(eventHandler, onModuleUnload( _, _ )).Times(AnyNumber());
+    EXPECT_CALL(eventHandler, onDebugOutput( _, _ )).Times(AnyNumber());
 
     targetGo();
 }

@@ -14,183 +14,193 @@ class TypedVarImp : public TypedVar
 protected:
 
 
-    virtual std::wstring str() 
+    std::wstring str() override
     {
         NOT_IMPLEMENTED();
     }
 
 
-    virtual NumVariant getValue() const
+    NumVariant getValue() const override
     {
         NOT_IMPLEMENTED();
     }
 
-    virtual void setValue(const NumVariant& value) 
+    void setValue(const NumVariant& value) override
     {
         throw TypeException( m_typeInfo->getName(), L" failed to set value");
     }
 
-    virtual std::wstring  getStrValue() const 
+    std::wstring  getStrValue() const override
     {
         NOT_IMPLEMENTED();
     }
 
-    virtual void setStrValue(const std::wstring& value) 
+    void setStrValue(const std::wstring& value) override
     {
         NOT_IMPLEMENTED();
     }
 
-    virtual std::wstring printValue() const
+    std::wstring printValue() const override
     {
         NOT_IMPLEMENTED();
     }
 
-    virtual VarStorage getStorage() const
+    VarStorage getStorage() const override
     {
         return m_varData->getStorageType();
     }
 
-    virtual std::wstring getRegisterName() const
+    std::wstring getRegisterName() const override
     {
         return m_varData->getRegisterName();
     }
 
-    virtual MEMOFFSET_64 getAddress() const 
+    MEMOFFSET_64 getAddress() const override
     {
         return m_varData->getAddress();
     }
 
-    virtual MEMOFFSET_64 getDebugStart() const
+    MEMOFFSET_64 getDebugStart() const override
     {
         throw TypeException( L"is not a function");
     }
 
-    virtual MEMOFFSET_64 getDebugEnd() const
+    MEMOFFSET_64 getDebugEnd() const override
     {
         throw TypeException( L"is not a function");
     }
 
-    virtual size_t getSize() const
+    size_t getSize() const override
     {
         return m_typeInfo->getSize();
     }
 
-    virtual std::wstring getName() const
+    std::wstring getName() const override
     {
         if (m_name.empty() )
             throw TypeException( m_typeInfo->getName(), L" can not get variable name");
         return m_name;
     }
 
-    virtual TypeInfoPtr getType() const 
+    TypeInfoPtr getType() const override
     {
        return m_typeInfo;
     }
 
-    virtual TypedVarPtr deref() 
+    TypedVarPtr deref() override
     {
         throw TypeException( m_typeInfo->getName(), L"object can not be derefernced" );
     }
 
-    virtual TypedVarPtr getElement( const std::wstring& fieldName ) 
+    TypedVarPtr getElement( const std::wstring& fieldName ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
-    virtual TypedVarPtr getElement( size_t index ) 
+    TypedVarPtr getElement( size_t index ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) 
+    MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( size_t index ) 
+    MEMOFFSET_REL getElementOffset( size_t index ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
-    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) 
+    RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
-    virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) 
+    RELREG_ID getElementOffsetRelativeReg(size_t index ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
-    virtual VarStorage getElementStorage(const std::wstring& fieldName)
+    VarStorage getElementStorage(const std::wstring& fieldName) override
     {
         throw TypeException(m_typeInfo->getName(), L" not implemented for this type");
     }
 
-    virtual VarStorage getElementStorage(size_t index)
+    VarStorage getElementStorage(size_t index) override
     {
         throw TypeException(m_typeInfo->getName(), L" not implemented for this type");
     }
 
-    virtual size_t getElementCount()
+    size_t getElementCount() override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
-    virtual std::wstring getElementName( size_t index ) 
+    std::wstring getElementName( size_t index ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
-    virtual size_t getElementIndex( const std::wstring&  elementName )
+    size_t getElementIndex( const std::wstring&  elementName ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no named fields");
     }
 
-    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"")
+    TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no methods");
     }
     
-    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no methods");
     }
 
-    virtual unsigned long getElementReg(const std::wstring& fieldName)
+    unsigned long getElementReg(const std::wstring& fieldName) override
     {
         NOT_IMPLEMENTED();
     }
 
-    virtual unsigned long getElementReg(size_t index)
+    unsigned long getElementReg(size_t index) override
     {
         NOT_IMPLEMENTED();
     }
 
-    virtual TypedVarPtr castTo(const std::wstring& typeName) const;
+    TypedVarPtr castTo(const std::wstring& typeName) const override;
 
-    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const;
+    TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const override;
 
-    virtual void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const
+    void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const override
     {
         std::vector<unsigned char>  buffer( getSize() );
         m_varData->readBytes(buffer, getSize() );
         stream->writeBytes(buffer, pos);
     }
 
-    virtual TypedValue call(const TypedValueList& arglst)
+    TypedValue call(const TypedValueList& arglst) override
     {
         throw TypeException( L" is not a function");
     }
     
-    virtual void setElement( const std::wstring& fieldName, const TypedValue& value) 
+    void setElement( const std::wstring& fieldName, const TypedValue& value) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
     }
 
-    virtual void setElement( size_t index, const TypedValue& value ) 
+    void setElement( size_t index, const TypedValue& value ) override
     {
         throw TypeException( m_typeInfo->getName(), L" type has no fields or array elements");
+    }
+
+    TypedVarList getInlineFunctions(MEMOFFSET_64 offset) override
+    {
+        throw TypeException(m_typeInfo->getName(), L" type has no inlined functions");
+    }
+
+    void getSourceLine(MEMOFFSET_64 offset, std::wstring& fileName, unsigned long& lineno) override
+    {
+        throw TypeException(m_typeInfo->getName(), L" failed to get source line");
     }
 
 protected:
@@ -488,181 +498,191 @@ public:
     TypedVarVoid()
     {}
 
-    virtual std::wstring str() 
+    std::wstring str() override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual NumVariant getValue() const
+    NumVariant getValue() const override
     {
        throw TypeException(L"Not applicable for Void");
     } 
 
-    virtual void setValue(const NumVariant& value) 
+    void setValue(const NumVariant& value) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual std::wstring  getStrValue() const
+    std::wstring  getStrValue() const override
     {
         throw TypeException(L"Not applicable for Void");
     }
 
-    virtual void setStrValue(const std::wstring& value) 
+    void setStrValue(const std::wstring& value) 
     {
         throw TypeException(L"Not applicable for Void");
     }
 
-    virtual std::wstring printValue() const
+    std::wstring printValue() const override
     {
         throw TypeException(L"Not applicable for Void");
     }
 
-    virtual VarStorage getStorage() const
+    VarStorage getStorage() const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual std::wstring getRegisterName() const
+    std::wstring getRegisterName() const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual MEMOFFSET_64 getAddress() const 
+    MEMOFFSET_64 getAddress() const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual MEMOFFSET_64 getDebugStart() const
+    MEMOFFSET_64 getDebugStart() const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual MEMOFFSET_64 getDebugEnd() const
+    MEMOFFSET_64 getDebugEnd() const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual size_t getSize() const
+    size_t getSize() const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual std::wstring getName() const
+    std::wstring getName() const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypeInfoPtr getType() const;
+    TypeInfoPtr getType() const override;
 
-    virtual TypedVarPtr deref() 
+    TypedVarPtr deref() override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedVarPtr getElement( const std::wstring& fieldName ) 
+    TypedVarPtr getElement( const std::wstring& fieldName ) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedVarPtr getElement( size_t index ) 
+    TypedVarPtr getElement( size_t index ) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( const std::wstring& fieldName ) 
+    MEMOFFSET_REL getElementOffset( const std::wstring& fieldName )  override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( size_t index ) 
+    MEMOFFSET_REL getElementOffset( size_t index ) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) 
+    RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) 
+    RELREG_ID getElementOffsetRelativeReg(size_t index ) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual VarStorage getElementStorage(const std::wstring& fieldName)
+    VarStorage getElementStorage(const std::wstring& fieldName) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual VarStorage getElementStorage(size_t index)
+    VarStorage getElementStorage(size_t index) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual size_t getElementCount()
+    size_t getElementCount() override
      {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual std::wstring getElementName( size_t index ) 
+    std::wstring getElementName( size_t index ) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual size_t getElementIndex( const std::wstring&  elementName )
+    size_t getElementIndex( const std::wstring&  elementName ) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"")
+    TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") override
     {
        throw TypeException(L"Not applicable for Void");
     }
     
-    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype)
+    TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual unsigned long getElementReg(const std::wstring& fieldName)
+    unsigned long getElementReg(const std::wstring& fieldName) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual unsigned long getElementReg(size_t index)
+    unsigned long getElementReg(size_t index) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedVarPtr castTo(const std::wstring& typeName) const
+    TypedVarPtr castTo(const std::wstring& typeName) const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const
+    TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual void writeBytes(const DataAccessorPtr& stream, size_t bytes = 0) const
+    void writeBytes(const DataAccessorPtr& stream, size_t bytes = 0) const override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual TypedValue call(const TypedValueList& arglst)
+    TypedValue call(const TypedValueList& arglst) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual void setElement( const std::wstring& fieldName, const TypedValue& value) 
+    void setElement( const std::wstring& fieldName, const TypedValue& value) override
     {
        throw TypeException(L"Not applicable for Void");
     }
 
-    virtual void setElement( size_t index, const TypedValue& value ) 
+    void setElement( size_t index, const TypedValue& value ) override
     {
        throw TypeException(L"Not applicable for Void");
+    }
+
+    TypedVarList getInlineFunctions(MEMOFFSET_64 offset) override
+    {
+        throw TypeException(L"Not applicable for Void");
+    }
+
+    void getSourceLine(MEMOFFSET_64 offset, std::wstring& fileName, unsigned long& lineno) override
+    {
+        throw TypeException(L"Not applicable for Void");
     }
 };
 
@@ -672,38 +692,43 @@ class SymbolFunction : public TypedVarFunction
 {
 public:
 
-    SymbolFunction( SymbolPtr& symbol );
+    SymbolFunction( const SymbolPtr& symbol );
 
-    virtual MEMOFFSET_64 getDebugStart() const {
+    MEMOFFSET_64 getDebugStart() const override {
         return getDebugXImpl(SymTagFuncDebugStart);
     }
-    virtual MEMOFFSET_64 getDebugEnd() const {
+
+    MEMOFFSET_64 getDebugEnd() const override {
         return getDebugXImpl(SymTagFuncDebugEnd);
     }
 
-    virtual MEMOFFSET_REL getElementOffset( size_t index );
+    MEMOFFSET_REL getElementOffset( size_t index ) override;
 
-    virtual RELREG_ID getElementOffsetRelativeReg(size_t index );
+    RELREG_ID getElementOffsetRelativeReg(size_t index ) override;
 
-    virtual MEMOFFSET_REL getElementOffset( const std::wstring& paramName );
+    MEMOFFSET_REL getElementOffset( const std::wstring& paramName ) override;
  
-    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& paramName );
+    RELREG_ID getElementOffsetRelativeReg(const std::wstring& paramName ) override;
 
-    virtual unsigned long getElementReg(const std::wstring& fieldName);
+    unsigned long getElementReg(const std::wstring& fieldName) override;
 
-    virtual unsigned long getElementReg(size_t index);
+    unsigned long getElementReg(size_t index) override;
 
-    virtual size_t getElementIndex(const std::wstring& paramName );
+    size_t getElementIndex(const std::wstring& paramName ) override;
 
-    virtual std::wstring getElementName( size_t index );
+    std::wstring getElementName( size_t index ) override;
 
-    virtual VarStorage getElementStorage(const std::wstring& fieldName);
+    VarStorage getElementStorage(const std::wstring& fieldName) override;
 
-    virtual VarStorage getElementStorage(size_t index);
+    VarStorage getElementStorage(size_t index) override;
 
-    virtual size_t getSize() const {
+    size_t getSize() const override {
         return m_symbol->getSize();
     }
+
+    TypedVarList getInlineFunctions(MEMOFFSET_64 offset) override;
+
+    void getSourceLine(MEMOFFSET_64 offset, std::wstring& fileName, unsigned long& lineno) override;
 
 protected:
 
@@ -714,7 +739,9 @@ protected:
     SymbolPtr  m_symbol;
 };
 
+
 ///////////////////////////////////////////////////////////////////////////////
+
 
 class TypedVarMethodBound : public TypedVarFunction
 {
@@ -744,6 +771,25 @@ public:
     TypedVarMethodUnbound(const TypeInfoPtr& typeInfo, const DataAccessorPtr &dataSource, const std::wstring& name):
        TypedVarFunction(typeInfo, dataSource, name )
     {}
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+class SymbolInlineFunction : public TypedVarImp
+{
+public:
+
+    SymbolInlineFunction(const SymbolPtr& symbol);
+
+    void getSourceLine(MEMOFFSET_64 offset, std::wstring& fileName, unsigned long& lineno) override
+    {
+        m_symbol->getInlineSourceLine(offset, fileName, lineno);
+    }
+
+private:
+    SymbolPtr  m_symbol;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

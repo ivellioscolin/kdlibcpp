@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "kdlib\module.h"
+#include "kdlib\dbgengine.h"
 
 #include "stackimpl.h"
 
@@ -438,6 +439,55 @@ bool StackFrameImpl::findStaticVar(const std::wstring& varName)
 
 /////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr StackFrameImpl::getFunction()
+{
+    auto funcPtr = loadTypedVar(findSymbol(m_ip));
+    if (m_inlineIndex == 0 )
+        return funcPtr;
+
+    return *std::next(funcPtr->getInlineFunctions(m_ip).rbegin(), m_inlineIndex-1);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+std::wstring StackFrameImpl::getSymbol(bool showDisplacement)
+{
+    if (m_inlineIndex != 0)
+    {
+        auto funcPtr = loadTypedVar(findSymbol(m_ip));
+
+        return (*std::next(funcPtr->getInlineFunctions(m_ip).rbegin(), m_inlineIndex - 1))->getName();
+    }
+
+    if ( !showDisplacement )
+        return findSymbol(m_ip);
+
+    MEMDISPLACEMENT  displacement = 0;
+    std::wstring symbolName = findSymbol(m_ip, displacement);
+    std::wstringstream sstr;
+
+    sstr << symbolName << '+' << std::hex << displacement;
+
+    return sstr.str();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+void StackFrameImpl::getSourceLine(std::wstring& fileName, unsigned long& lineNo)
+{
+    if (m_inlineIndex != 0)
+    {
+        auto funcPtr = loadTypedVar(findSymbol(m_ip));
+        funcPtr->getSourceLine(m_ip, fileName, lineNo);
+        return;
+    }
+
+    long  displacement;
+    kdlib::getSourceLine(fileName, lineNo, displacement, m_ip);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 SymbolPtrList  StackFrameImpl::getLocalVars()
 {
 
@@ -449,8 +499,6 @@ SymbolPtrList  StackFrameImpl::getLocalVars()
 
         MEMDISPLACEMENT displacemnt;
         SymbolPtr symFunc = mod->getSymbolByVa( m_ip, SymTagFunction, &displacemnt );
-
-
 
         DebugRange  debugRange = getFuncDebugRange(symFunc);
 

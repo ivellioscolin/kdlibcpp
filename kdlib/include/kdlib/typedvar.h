@@ -134,6 +134,8 @@ public:
     virtual TypedValue call(const TypedValueList& arglst) = 0;
     virtual void setElement( const std::wstring& fieldName, const TypedValue& value) = 0;
     virtual void setElement( size_t index, const TypedValue& value ) = 0;
+    virtual TypedVarList getInlineFunctions(MEMOFFSET_64 offset) = 0;
+    virtual void getSourceLine(MEMOFFSET_64 offset, std::wstring& fileName, unsigned long& lineno) = 0;
 
 protected:
 

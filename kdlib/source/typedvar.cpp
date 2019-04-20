@@ -50,7 +50,7 @@ std::wstring printFieldValue( const TypeInfoPtr& fieldType, const TypedVarPtr& f
 }
 
 
-std::wstring getSymbolName( kdlib::SymbolPtr& symbol )
+std::wstring getSymbolName( const kdlib::SymbolPtr& symbol )
 {
     try {
         return symbol->getName();
@@ -219,9 +219,15 @@ TypedVarPtr getTypedVar( const TypeInfoPtr& typeInfo, const DataAccessorPtr &dat
 
 TypedVarPtr loadTypedVar( SymbolPtr &symbol )
 {
-    if ( SymTagFunction == symbol->getSymTag() )
+    auto symTag = symbol->getSymTag();
+
+    if ( SymTagFunction == symTag)
     {
         return TypedVarPtr( new SymbolFunction( symbol ) );
+    }
+    else if (SymTagInlineSite == symTag)
+    {
+        return TypedVarPtr(new SymbolInlineFunction(symbol));
     }
 
     if ( LocIsConstant != symbol->getLocType() )
@@ -1819,7 +1825,7 @@ void TypedVarFunction::makeCallx64()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolFunction::SymbolFunction( SymbolPtr& symbol ) :
+SymbolFunction::SymbolFunction( const SymbolPtr& symbol ) :
     TypedVarFunction( loadType( symbol ), getMemoryAccessor( symbol->getVa(), 0 ), ::getSymbolName(symbol) ),
     m_symbol( symbol )
 {
@@ -1969,6 +1975,38 @@ unsigned long SymbolFunction::getElementReg(size_t index)
 {
     SymbolPtr  paramSym = getChildSymbol(index);
     return paramSym->getRegisterId();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypedVarList  SymbolFunction::getInlineFunctions(MEMOFFSET_64 offset)
+{
+    auto symbolList = m_symbol->findInlineFramesByVA(offset);
+
+    TypedVarList  inlineFuncs;
+
+    for (auto& symbol : symbolList)
+    {
+        inlineFuncs.push_back(loadTypedVar(symbol));
+    }
+
+    return inlineFuncs;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void SymbolFunction::getSourceLine(MEMOFFSET_64 offset, std::wstring& fileName, unsigned long& lineno)
+{
+    long  displacement;
+    ::getSourceLine(fileName, lineno, displacement, offset);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolInlineFunction::SymbolInlineFunction(const SymbolPtr& symbol) :
+    TypedVarImp( loadType(symbol), getMemoryAccessor(symbol->getVa(), 0), ::getSymbolName(symbol)),
+    m_symbol(symbol)
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////

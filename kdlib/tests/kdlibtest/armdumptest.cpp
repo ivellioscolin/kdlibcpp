@@ -9,11 +9,12 @@
 
 using namespace kdlib;
 
+
 class ARMKernelMiniDump : public MemDumpFixture
 {
 public:
     ARMKernelMiniDump()
-        : MemDumpFixture( MemDumpFixture::getARMKernelDumpName() )
+        : MemDumpFixture( makeDumpFullName(MemDumps::WIN10_ARM) )
     {
     }
 };
@@ -76,3 +77,4 @@ TEST_F(ARMKernelMiniDump, Test)
         }
     }
 }
+

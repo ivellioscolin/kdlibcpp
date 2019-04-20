@@ -390,6 +390,10 @@ TypeInfoPtr loadType( const SymbolPtr &symbol )
         ptr = loadType( symbol->getType() );
         break;
 
+    case SymTagInlineSite:
+        ptr = loadType(symbol->getType());
+        break;
+
     default:
         throw TypeException( L"",  L"this type is not supported" );
     }

@@ -30,10 +30,11 @@ public:
             break;
 
         case StackTestMode::Wow64Dump:
-            m_dumpId = kdlib::loadDump(MemDumpFixture::getWow64UserDumpName());
-
             // path to targetapp.pdb
-            kdlib::appendSymbolPath(MemDumpFixture::getDumpsDirName());
+            m_oldSymPath = kdlib::getSymbolPath();
+            kdlib::appendSymbolPath(makeDumpDirName(MemDumps::STACKTEST_WOW64));
+
+            m_dumpId = kdlib::loadDump(makeDumpFullName(MemDumps::STACKTEST_WOW64));
             break;
 
         default:
@@ -57,6 +58,7 @@ public:
         case StackTestMode::Wow64Dump:
             try {
                 kdlib::closeDump(m_dumpId);
+                kdlib::setSymbolPath(m_oldSymPath);
             }
             catch (const kdlib::DbgException &)
             {
@@ -69,8 +71,9 @@ public:
     }
 
 private:
-    kdlib::PROCESS_DEBUG_ID m_processId{};
-    kdlib::PROCESS_DEBUG_ID m_dumpId{};
+    kdlib::PROCESS_DEBUG_ID m_processId = -1;
+    kdlib::PROCESS_DEBUG_ID m_dumpId = -1;
+    std::wstring  m_oldSymPath;
 };
 
 TEST_P( StackTest, Ctor )
@@ -245,9 +248,12 @@ TEST_P(StackTest, SwitchTo)
 
 TEST_P( StackTest, ChangeScopeEvent )
 {
+    using namespace testing;
+
     EventHandlerMock  eventHandler;
 
     EXPECT_CALL(eventHandler, onChangeLocalScope()).Times(2);
+    EXPECT_CALL(eventHandler, onDebugOutput(_,_)).Times(AnyNumber());
 
     StackFramePtr  frame1;
     ASSERT_NO_THROW(frame1 = getStack()->getFrame(1));
@@ -262,7 +268,7 @@ class Wow64StackTest : public MemDumpFixture
 {
 public:
     Wow64StackTest() :
-        MemDumpFixture{MemDumpFixture::getWow64UserDumpName()}
+        MemDumpFixture(makeDumpFullName(MemDumps::STACKTEST_WOW64))
     {
     }
 };
@@ -279,3 +285,112 @@ TEST_F(Wow64StackTest, NotCurrentThread)
 
     EXPECT_EQ(std::wstring(L"TppWorkerThread"), findSymbol(stack->getFrame(1)->getIP()));
 }
+
+
+class InlineStackTest : public ::testing::WithParamInterface<const wchar_t*>, public MemDumpFixture
+{
+
+public:
+
+    InlineStackTest() : MemDumpFixture( makeDumpFullName(GetParam()) )
+    {}
+
+    void SetUp() override
+    {
+        MemDumpFixture::SetUp();
+
+        // path to targetapp.pdb
+        m_oldSymPath = kdlib::getSymbolPath();
+        kdlib::appendSymbolPath(makeDumpDirName(GetParam()));
+    }
+
+    void TearDown() override 
+    {
+        kdlib::setSymbolPath(m_oldSymPath);
+
+        MemDumpFixture::TearDown();
+    }
+
+protected:
+
+    std::wstring  m_oldSymPath;
+};
+
+TEST_P(InlineStackTest, GetStack)
+{
+    EXPECT_NO_THROW(getStack(true));
+}
+
+TEST_P(InlineStackTest, InlineFrame)
+{
+    auto stk = getStack(true);
+    EXPECT_TRUE(stk->getFrame(0)->isInline());
+    EXPECT_FALSE(stk->getFrame(2)->isInline());
+}
+
+TEST_P(InlineStackTest, InlineFrameOffset)
+{
+    auto stk = getStack(true);
+    EXPECT_TRUE(stk->getFrame(0)->getRET() == stk->getFrame(1)->getRET());
+    EXPECT_TRUE(stk->getFrame(1)->getRET() == stk->getFrame(2)->getRET());
+}
+
+TEST_P(InlineStackTest, InlineFunc)
+{
+    auto func = loadTypedVar(L"stackTestRun1");
+    auto stack = getStack(true);
+    auto offset = stack->getFrame(2)->getIP();
+
+    EXPECT_EQ(0, func->getInlineFunctions(func->getDebugStart()).size());
+    EXPECT_EQ(2, func->getInlineFunctions(offset).size());
+
+    EXPECT_EQ(L"stackTestClass::stackMethod", func->getInlineFunctions(offset).front()->getName());
+    EXPECT_EQ(L"Void(__thiscall stackTestClass::)(Double, Int4B)", func->getInlineFunctions(offset).front()->getType()->getName());
+}
+
+TEST_P(InlineStackTest, InlineFuncSource)
+{
+    auto func = loadTypedVar(L"stackTestRun1");
+    auto stack = getStack(true);
+    auto offset = stack->getFrame(2)->getIP();
+    
+    std::wstring  fileName;
+    unsigned long  lineno;
+    auto inlineFunc = *std::next(func->getInlineFunctions(offset).begin());
+    inlineFunc->getSourceLine(offset, fileName, lineno);
+    EXPECT_EQ(144, lineno);
+    EXPECT_NE(std::string::npos, fileName.find(L"targetapp.cpp"));
+}
+
+TEST_P(InlineStackTest, InlineStackGetFunc)
+{
+    auto stack = getStack(true);
+    EXPECT_EQ(L"stackTestClass::stackMethod", stack->getFrame(0)->getFunction()->getName());
+    EXPECT_EQ(L"stackTestRun2", stack->getFrame(1)->getFunction()->getName());
+    EXPECT_EQ(L"stackTestRun1", stack->getFrame(2)->getFunction()->getName());
+}
+
+TEST_P(InlineStackTest, InlineStackGetSymbol)
+{
+    auto stack = getStack(true);
+    EXPECT_EQ(L"stackTestClass::stackMethod", stack->getFrame(0)->getSymbol(false) );
+    EXPECT_EQ(L"stackTestRun2", stack->getFrame(1)->getSymbol(false) );
+    EXPECT_EQ(L"stackTestRun1", stack->getFrame(2)->getSymbol(false) );
+
+    EXPECT_EQ(0, stack->getFrame(2)->getSymbol(true).find(L"stackTestRun1+"));
+}
+
+TEST_P(InlineStackTest, InlineStackSourceLine)
+{
+    auto stack = getStack(true);
+    std::wstring  fileName;
+    unsigned long  lineNumber;
+    stack->getFrame(2)->getSourceLine(fileName, lineNumber);
+    EXPECT_EQ(172, lineNumber);
+    EXPECT_NE(std::string::npos, fileName.find(L"targetapp.cpp"));
+}
+
+INSTANTIATE_TEST_CASE_P(ReleaseStackDumps, InlineStackTest, ::testing::Values(
+    MemDumps::STACKTEST_X64_RELEASE
+    ,MemDumps::STACKTEST_WOW64_RELEASE
+));
