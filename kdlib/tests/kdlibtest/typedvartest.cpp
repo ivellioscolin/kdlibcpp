@@ -705,3 +705,19 @@ TEST_F(TypedVarTest, MakeArrayValue)
     EXPECT_NO_THROW(makeArrayValue(std::vector<float>(10)));
     EXPECT_NO_THROW(makeArrayValue(std::vector<double>(10)));
 }
+
+
+TEST_F(TypedVarTest, GetSource)
+{
+    TypedVarPtr funcptr;
+    std::wstring  fileName;
+    unsigned long  lineNo;
+
+    ASSERT_NO_THROW(funcptr = loadTypedVar(L"CdeclFuncReturn"));
+    funcptr->getSourceLine(funcptr->getAddress(), fileName, lineNo);
+    EXPECT_EQ(40, lineNo);
+
+    ASSERT_NO_THROW(funcptr = loadTypedVar(L"classChild::childMethod"));
+    funcptr->getSourceLine(funcptr->getAddress(), fileName, lineNo);
+    EXPECT_EQ(278, lineNo);
+}

@@ -27,147 +27,192 @@ public:
 
 protected:
 
-    std::wstring str() {
+    std::wstring str() override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual VarStorage getStorage() const {
+    VarStorage getStorage() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual std::wstring  getRegisterName() const {
+    std::wstring  getRegisterName() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual MEMOFFSET_64 getAddress() const {
+    MEMOFFSET_64 getAddress() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual MEMOFFSET_64 getDebugStart() const {
+    MEMOFFSET_64 getDebugStart() const override
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual MEMOFFSET_64 getDebugEnd() const {
+    MEMOFFSET_64 getDebugEnd() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual size_t getSize() const {
+    size_t getSize() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual std::wstring getName() const {
+    std::wstring getName() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedVarPtr getElement( const std::wstring& fieldName ) {
+    TypedVarPtr getElement( const std::wstring& fieldName ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedVarPtr getElement( size_t index ) {
+    TypedVarPtr getElement( size_t index ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual VarStorage getElementStorage(const std::wstring& fieldName) {
+    VarStorage getElementStorage(const std::wstring& fieldName) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual VarStorage getElementStorage(size_t index ) {
+    VarStorage getElementStorage(size_t index ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual MEMOFFSET_REL getElementOffset(const std::wstring& fieldName ) {
+    MEMOFFSET_REL getElementOffset(const std::wstring& fieldName ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual MEMOFFSET_REL getElementOffset(size_t index ) {
+    MEMOFFSET_REL getElementOffset(size_t index ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) {
+    RELREG_ID getElementOffsetRelativeReg(const std::wstring& fieldName ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual RELREG_ID getElementOffsetRelativeReg(size_t index ) {
+    RELREG_ID getElementOffsetRelativeReg(size_t index ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual unsigned long getElementReg(const std::wstring& fieldName) {
+    unsigned long getElementReg(const std::wstring& fieldName) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual unsigned long getElementReg(size_t index) {
+    unsigned long getElementReg(size_t index) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual size_t getElementCount() {
+    size_t getElementCount() override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual std::wstring getElementName( size_t index ) {
+    std::wstring getElementName( size_t index ) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual size_t getElementIndex(const std::wstring&  elementName) {
+    size_t getElementIndex(const std::wstring&  elementName) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") {
+    TypedVarPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) {
+    TypedVarPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) override
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypeInfoPtr getType() const {
+    TypeInfoPtr getType() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual NumVariant getValue() const {
+    NumVariant getValue() const override
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual void setValue(const NumVariant& value) {
+    void setValue(const NumVariant& value) {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual std::wstring  getStrValue() const {
+    std::wstring  getStrValue() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual void setStrValue(const std::wstring& value) {
+    void setStrValue(const std::wstring& value) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual std::wstring printValue() const  {
+    std::wstring printValue() const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedVarPtr deref() {
+    TypedVarPtr deref() override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedVarPtr castTo(const std::wstring& typeName) const {
+    TypedVarPtr castTo(const std::wstring& typeName) const override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const {
+    TypedVarPtr castTo(const TypeInfoPtr &typeInfo) const override
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const {
+    void writeBytes(const DataAccessorPtr& stream, size_t pos = 0) const override
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual TypedValue call(const TypedValueList& arglst) {
+    TypedValue call(const TypedValueList& arglst) override 
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual void setElement( const std::wstring& fieldName, const TypedValue& value) {
+    void setElement( const std::wstring& fieldName, const TypedValue& value) override
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 
-    virtual void setElement( size_t index, const TypedValue& value ) {
+    void setElement( size_t index, const TypedValue& value ) override 
+    {
+        throw TypeException(L"Not applicable for managed objects");
+    }
+
+    TypedVarList getInlineFunctions(MEMOFFSET_64 offset) override
+    {
+        throw TypeException(L"Not applicable for managed objects");
+    }
+
+    void getSourceLine(MEMOFFSET_64 offset, std::wstring& fileName, unsigned long& lineno) override
+    {
         throw TypeException(L"Not applicable for managed objects");
     }
 

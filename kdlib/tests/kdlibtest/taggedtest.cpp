@@ -9,7 +9,7 @@ using namespace kdlib;
 class TaggedTest : public MemDumpFixture
 {
 public:
-    TaggedTest() : MemDumpFixture(MemDumpFixture::getKernelDumpName()) {}
+    TaggedTest() : MemDumpFixture(makeDumpFullName(MemDumps::WIN8_X64)) {}
 };
 
 struct __declspec(uuid("D03DC06F-D88E-44C5-BA2A-FAE035172D19")) ExistingId {};

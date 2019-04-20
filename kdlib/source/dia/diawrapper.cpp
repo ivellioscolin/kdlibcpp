@@ -424,7 +424,7 @@ ULONG DiaSymbol::getRegisterId()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ULONG DiaSymbol::getRegRealativeId()
+unsigned long DiaSymbol::getRegRealativeId()
 {
     switch (m_machineType)
     {
@@ -488,13 +488,6 @@ bool DiaSymbol::isUndecorated(const std::wstring &undecName)
         return true;
 
     return !( undecName == std::wstring( _bstr_t(bstrName, false) ) );
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-ULONG DiaSymbol::getIndexId()
-{
-    return callSymbol(get_symIndexId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -770,6 +763,68 @@ unsigned long DiaSymbol::getVirtualBaseOffset()
 
 //////////////////////////////////////////////////////////////////////////////
 
+SymbolPtrList DiaSymbol::findInlineFramesByVA(MEMOFFSET_64 va)
+{
+    CComPtr<IDiaEnumSymbols>  symEnum;
+    HRESULT hres = m_symbol->findInlineFramesByVA(va, &symEnum);
+    if (FAILED(hres))
+        return SymbolPtrList();
+
+    LONG  count;
+    hres = symEnum->get_Count(&count);
+    if (S_OK != hres)
+        throw DiaException(L"Call IDiaSymbol::findInlineFramesByVA", hres);
+
+    SymbolPtrList  symList;
+
+    for (auto i = 0; i < count; ++i)
+    {
+        CComPtr<IDiaSymbol> sym;
+        hres = symEnum->Item(i, &sym);
+        if (FAILED(hres) )
+            throw DiaException(L"Call IDiaEnumSymbols::Item", hres);     
+
+        SymbolPtr symbol(new DiaSymbol(sym, m_scope, m_machineType));
+
+        symList.push_back(symbol);
+    }
+
+    return symList;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void DiaSymbol::getInlineSourceLine(MEMOFFSET_64 offset, std::wstring &fileName, unsigned long &lineNo)
+{
+    CComPtr<IDiaEnumLineNumbers>  enumLineNumbers;
+
+    HRESULT  hres = m_symbol->findInlineeLinesByVA(offset, 1, &enumLineNumbers);
+    if (FAILED(hres) )
+        throw DiaException(L"Call IDiaSymbol::findInlineeLinesByVA", hres);
+
+    DiaLineNumberPtr  sourceLine;
+    hres = enumLineNumbers->Item(0, &sourceLine);
+    if (S_OK != hres)
+        throw DiaException(L"failed to find source line");
+
+    DiaSourceFilePtr  sourceFile;
+    hres = sourceLine->get_sourceFile(&sourceFile);
+    if (S_OK != hres)
+        throw DiaException(L"failed to find source line");
+
+    autoBstr  fileNameBstr;
+    hres = sourceFile->get_fileName(&fileNameBstr);
+    if (S_OK != hres)
+        throw DiaException(L"failed to find source line");
+    fileName = _bstr_t(fileNameBstr, false);
+
+    hres = sourceLine->get_lineNumber(&lineNo);
+    if (S_OK != hres)
+        throw DiaException(L"failed to find source line");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 std::wstring DiaSession::getScopeName( IDiaSession* session, IDiaSymbol *globalScope )
 {
   std::wstring scopeName;
@@ -847,7 +902,7 @@ void DiaSession::getSourceLine( ULONG64 offset, std::wstring &fileName, ULONG &l
         throw DiaException(L"failed to find source line");
     fileName = _bstr_t(fileNameBstr, false);
 
-    hres = sourceLine->get_lineNumber( &lineNo );
+    hres = sourceLine->get_lineNumber( &lineNo);
     if (S_OK != hres)
         throw DiaException(L"failed to find source line");
 

@@ -39,66 +39,76 @@ class StackFrameImpl : public StackFrame, public boost::enable_shared_from_this<
 {
 public:
 
-    StackFrameImpl(unsigned long number, MEMOFFSET_64 ip, MEMOFFSET_64 ret, MEMOFFSET_64 fp, MEMOFFSET_64 sp, const CPUContextPtr &cpuCtx) :
+    StackFrameImpl(unsigned long number, MEMOFFSET_64 ip, MEMOFFSET_64 ret, MEMOFFSET_64 fp, 
+        MEMOFFSET_64 sp, const CPUContextPtr &cpuCtx, unsigned long inlineIndex = 0) :
         m_number(number),
         m_ip(ip),
         m_ret(ret),
         m_fp(fp),
         m_sp(sp),
-        m_cpuContext(cpuCtx)
+        m_cpuContext(cpuCtx),
+        m_inlineIndex(inlineIndex)
         {}
 
-    unsigned long getNumber() const
+    unsigned long getNumber() const override
     {
         return m_number;
     }
 
-    virtual MEMOFFSET_64 getIP() const 
+    MEMOFFSET_64 getIP() const override
     {
         return m_ip;
     }
 
-    virtual MEMOFFSET_64 getRET() const
+    MEMOFFSET_64 getRET() const override
     {
         return m_ret;
     }
 
-    virtual MEMOFFSET_64  getFP() const
+    MEMOFFSET_64  getFP() const override
     {
         return m_fp;
     }
 
-    virtual MEMOFFSET_64  getSP() const
+    MEMOFFSET_64  getSP() const override
     {
         return m_sp;
     }
 
-    virtual CPUContextPtr getCPUContext()
+    CPUContextPtr getCPUContext() override
     {
         return m_cpuContext;
     }
 
-    virtual unsigned long getTypedParamCount();
-    virtual TypedVarPtr getTypedParam(unsigned long index);
-    virtual std::wstring  getTypedParamName(unsigned long index);
-    virtual TypedVarPtr getTypedParam(const std::wstring& paramName);
-    virtual bool findParam(const std::wstring& paramName);
+    unsigned long getTypedParamCount() override;
+    TypedVarPtr getTypedParam(unsigned long index) override;
+    std::wstring  getTypedParamName(unsigned long index) override;
+    TypedVarPtr getTypedParam(const std::wstring& paramName) override;
+    bool findParam(const std::wstring& paramName) override;
 
-    virtual unsigned long getLocalVarCount();
-    virtual TypedVarPtr getLocalVar(unsigned long index);
-    virtual TypedVarPtr getLocalVar(const std::wstring& paramName);
-    virtual std::wstring  getLocalVarName(unsigned long index);
-    virtual bool findLocalVar(const std::wstring& varName);
+    unsigned long getLocalVarCount() override;
+    TypedVarPtr getLocalVar(unsigned long index) override;
+    TypedVarPtr getLocalVar(const std::wstring& paramName) override;
+    std::wstring  getLocalVarName(unsigned long index) override;
+    bool findLocalVar(const std::wstring& varName) override;
 
-    virtual unsigned long getStaticVarCount();
-    virtual TypedVarPtr getStaticVar(unsigned long index);
-    virtual TypedVarPtr getStaticVar(const std::wstring& paramName);
-    virtual std::wstring  getStaticVarName(unsigned long index);
-    virtual bool findStaticVar(const std::wstring& varName);
+    unsigned long getStaticVarCount() override;
+    TypedVarPtr getStaticVar(unsigned long index) override;
+    TypedVarPtr getStaticVar(const std::wstring& paramName) override;
+    std::wstring  getStaticVarName(unsigned long index) override;
+    bool findStaticVar(const std::wstring& varName) override;
 
-    virtual void switchTo() {
+    void switchTo()  override {
         setCurrentStackFrame(shared_from_this());
     }
+
+    bool isInline() override {
+        return m_inlineIndex > 0;
+    }
+
+    TypedVarPtr getFunction() override;
+    std::wstring getSymbol(bool showDisplacement = true) override;
+    void getSourceLine(std::wstring& fileName, unsigned long& lineNo) override;
 
 private:
 
@@ -117,7 +127,7 @@ private:
     MEMOFFSET_64  m_sp;
     CPUContextPtr  m_cpuContext;
     unsigned long  m_number;
-
+    unsigned long  m_inlineIndex;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

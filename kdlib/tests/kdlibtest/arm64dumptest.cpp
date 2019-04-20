@@ -13,7 +13,7 @@ class ARM64KernelMiniDump : public MemDumpFixture
 {
 public:
     ARM64KernelMiniDump()
-        : MemDumpFixture( MemDumpFixture::getARM64KernelDumpName())
+        : MemDumpFixture( makeDumpFullName(MemDumps::WIN10_ARM64) )
     {
     }
 };

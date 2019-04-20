@@ -31,7 +31,7 @@ public:
 public:
 
      CComPtr<IDebugClient5>         client;
-     CComPtr<IDebugControl4>        control;
+     CComPtr<IDebugControl5>        control;
      CComPtr<IDebugSystemObjects4>  system;
      CComPtr<IDebugDataSpaces4>     dataspace;
      CComPtr<IDebugSymbols3>        symbols;

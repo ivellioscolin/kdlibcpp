@@ -24,7 +24,7 @@ public:
     {
         PROCESS_DEBUG_ID  dumpId;
 
-        ASSERT_NO_THROW(dumpId = kdlib::loadDump(MemDumpFixture::getKernelDumpName()));
+        ASSERT_NO_THROW(dumpId = kdlib::loadDump(makeDumpFullName(MemDumps::WIN8_X64)));
 
         m_dumpIds.push_back(dumpId);
     }

@@ -59,105 +59,105 @@ public:
 
     static SymbolPtr fromGlobalScope( IDiaSymbol *_symbol, const std::wstring &_scope );
 
-    SymbolPtr getChildByName(const std::wstring &_name );
+    SymbolPtr getChildByName(const std::wstring &_name ) override;
 
-    ULONG getRva();
-
+    ULONG getRva() override;
+     
     SymbolPtrList findChildren(
         ULONG symTag,
         const std::wstring &name = L"",
         bool caseSensitive = FALSE
-    );
+    ) override;
 
-    SymbolPtrList findChildrenByRVA(unsigned long symTag, unsigned long rva);
+    SymbolPtrList findChildrenByRVA(unsigned long symTag, unsigned long rva) override;
 
-    size_t getSize();
+    size_t getSize() override;
 
-    std::wstring getName();
-    std::wstring getScopeName();
+    std::wstring getName() override;
+    std::wstring getScopeName() override;
 
-    SymbolPtr getType();
+    SymbolPtr getType() override;
 
-    SymbolPtr getIndexType();
+    SymbolPtr getIndexType() override;
 
-    SymTags getSymTag();
+    SymTags getSymTag() override;
 
-    ULONGLONG getVa();
+    ULONGLONG getVa() override;
 
-    ULONG getLocType();
+    ULONG getLocType() override;
 
-    LONG getOffset();
+    LONG getOffset() override;
 
-    size_t getCount();
+    size_t getCount() override;
 
-    void getValue( NumVariant &vtValue );
+    void getValue( NumVariant &vtValue ) override;
 
-    bool isBasicType();
+    bool isBasicType() override;
 
-    bool isIndirectVirtualBaseClass();
+    bool isIndirectVirtualBaseClass() override;
 
-    bool isVirtualBaseClass();
+    bool isVirtualBaseClass() override;
 
-    bool isVirtual();
+    bool isVirtual() override;
 
-    ULONG getBaseType();
+    ULONG getBaseType() override;
 
-    ULONG getBitPosition();
+    ULONG getBitPosition() override;
 
-    ULONG getIndexId();
+    ULONG getUdtKind() override;
 
-    ULONG getUdtKind();
+    ULONG getDataKind() override;
 
-    ULONG getDataKind();
+    ULONG getRegisterId() override;
 
-    ULONG getRegisterId();
+    unsigned long getRegRealativeId() override;
 
-    virtual ULONG getRegRealativeId() override;
+    SymbolPtr getObjectPointerType() override;
 
-    virtual SymbolPtr getObjectPointerType() override;
+    ULONG getCallingConvention() override;
 
-    virtual ULONG getCallingConvention() override;
+    SymbolPtr getClassParent() override;
 
-    virtual SymbolPtr getClassParent() override;
-
-    MachineTypes getMachineType() {
+    MachineTypes getMachineType() override {
         return m_machineType;
     }
 
-    //SymbolPtr getChildByName(const std::string &_name);
+    size_t getChildCount( ULONG symTag ) override;
 
-    size_t getChildCount( ULONG symTag );
-
-    size_t getChildCount() {
+    size_t getChildCount() override
+    {
         return getChildCount(SymTagNull);
     }
 
-    SymbolPtr getChildByIndex(ULONG symTag, ULONG _index );
+    SymbolPtr getChildByIndex(ULONG symTag, ULONG _index ) override;
 
-    SymbolPtr getChildByIndex(ULONG _index ) {
+    SymbolPtr getChildByIndex(ULONG _index ) override
+    {
         return getChildByIndex( SymTagNull, _index );
     }
     
-    bool isConstant();
+    bool isConstant() override;
 
-    int getVirtualBasePointerOffset();
+    int getVirtualBasePointerOffset() override;
 
-    ULONG getVirtualBaseDispIndex();
+    ULONG getVirtualBaseDispIndex() override;
 
-    ULONG getVirtualBaseDispSize();
+    ULONG getVirtualBaseDispSize() override;
 
-    void setLoadAddress( ULONGLONG baseAddress );
+    SymbolPtr getVirtualTableShape() override;
 
-     SymbolPtr getVirtualTableShape();
+    unsigned long getVirtualBaseOffset() override;
 
-    unsigned long getVirtualBaseOffset();
+    SymbolPtrList findInlineFramesByVA(MEMOFFSET_64 va) override;
+
+    void getInlineSourceLine(MEMOFFSET_64, std::wstring &fileName, unsigned long &lineNo) override;
 
 public:
     typedef std::pair<ULONG, const wchar_t *> ValueNameEntry;
     static const ValueNameEntry basicTypeName[];
     static const size_t cntBasicTypeName;
 
-    static std::string getBasicTypeName( ULONG basicType );
+    //static std::string getBasicTypeName( ULONG basicType );
 
 protected:
 

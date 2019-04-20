@@ -510,6 +510,16 @@ public:
     {
         NOT_IMPLEMENTED();
     }
+
+    SymbolPtrList findInlineFramesByVA(MEMOFFSET_64 va) override
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    void getInlineSourceLine(MEMOFFSET_64, std::wstring &fileName, unsigned long &lineNo) override
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 

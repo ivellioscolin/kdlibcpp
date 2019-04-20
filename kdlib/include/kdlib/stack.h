@@ -47,6 +47,11 @@ public:
     virtual bool findStaticVar(const std::wstring& varName) = 0;
 
     virtual void switchTo() = 0;
+    virtual bool isInline() = 0;
+
+    virtual TypedVarPtr getFunction() = 0;
+    virtual std::wstring getSymbol(bool showDisplacement = true) = 0;
+    virtual void getSourceLine(std::wstring& fileName, unsigned long& lineNo) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -66,7 +71,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-StackPtr getStack();
+StackPtr getStack(bool inlineFrames = false);
 StackFramePtr getCurrentStackFrame();
 unsigned long getCurrentStackFrameNumber();
 void setCurrentStackFrame(const StackFramePtr& stackFrame);

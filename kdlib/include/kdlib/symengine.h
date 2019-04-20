@@ -55,6 +55,8 @@ enum SymTags
     SymTagCustomType,
     SymTagManagedType,
     SymTagDimension,
+    SymTagCallSite,
+    SymTagInlineSite,
     SymTagMax
 };
 
@@ -209,6 +211,8 @@ public:
     virtual SymbolPtr getClassParent() = 0; // "this" for method
     virtual SymbolPtr getVirtualTableShape() = 0;
     virtual unsigned long getVirtualBaseOffset() = 0;
+    virtual SymbolPtrList findInlineFramesByVA(MEMOFFSET_64) = 0;
+    virtual void getInlineSourceLine(MEMOFFSET_64, std::wstring &fileName, unsigned long &lineNo) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
