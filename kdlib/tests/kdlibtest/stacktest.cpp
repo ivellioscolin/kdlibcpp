@@ -373,11 +373,14 @@ TEST_P(InlineStackTest, InlineStackGetFunc)
 TEST_P(InlineStackTest, InlineStackGetSymbol)
 {
     auto stack = getStack(true);
-    EXPECT_EQ(L"stackTestClass::stackMethod", stack->getFrame(0)->getSymbol(false) );
-    EXPECT_EQ(L"stackTestRun2", stack->getFrame(1)->getSymbol(false) );
-    EXPECT_EQ(L"stackTestRun1", stack->getFrame(2)->getSymbol(false) );
+    MEMDISPLACEMENT  displacement;
+    EXPECT_EQ(L"stackTestClass::stackMethod", stack->getFrame(0)->findSymbol(displacement) );
+    EXPECT_EQ(L"stackTestRun2", stack->getFrame(1)->findSymbol(displacement) );
+    EXPECT_EQ(L"stackTestRun1", stack->getFrame(2)->findSymbol(displacement) );
 
-    EXPECT_EQ(0, stack->getFrame(2)->getSymbol(true).find(L"stackTestRun1+"));
+    displacement = 0;
+    stack->getFrame(2)->findSymbol(displacement);
+    EXPECT_NE(0, displacement);
 }
 
 TEST_P(InlineStackTest, InlineStackSourceLine)

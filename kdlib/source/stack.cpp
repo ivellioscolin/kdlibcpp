@@ -441,7 +441,7 @@ bool StackFrameImpl::findStaticVar(const std::wstring& varName)
 
 TypedVarPtr StackFrameImpl::getFunction()
 {
-    auto funcPtr = loadTypedVar(findSymbol(m_ip));
+    auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
     if (m_inlineIndex == 0 )
         return funcPtr;
 
@@ -450,25 +450,18 @@ TypedVarPtr StackFrameImpl::getFunction()
 
 /////////////////////////////////////////////////////////////////////////////
 
-std::wstring StackFrameImpl::getSymbol(bool showDisplacement)
+std::wstring StackFrameImpl::findSymbol(MEMDISPLACEMENT &displacement)
 {
+    displacement = 0;
+
     if (m_inlineIndex != 0)
     {
-        auto funcPtr = loadTypedVar(findSymbol(m_ip));
+        auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
 
         return (*std::next(funcPtr->getInlineFunctions(m_ip).rbegin(), m_inlineIndex - 1))->getName();
     }
 
-    if ( !showDisplacement )
-        return findSymbol(m_ip);
-
-    MEMDISPLACEMENT  displacement = 0;
-    std::wstring symbolName = findSymbol(m_ip, displacement);
-    std::wstringstream sstr;
-
-    sstr << symbolName << '+' << std::hex << displacement;
-
-    return sstr.str();
+    return kdlib::findSymbol(m_ip, displacement);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -477,7 +470,7 @@ void StackFrameImpl::getSourceLine(std::wstring& fileName, unsigned long& lineNo
 {
     if (m_inlineIndex != 0)
     {
-        auto funcPtr = loadTypedVar(findSymbol(m_ip));
+        auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
         funcPtr->getSourceLine(m_ip, fileName, lineNo);
         return;
     }

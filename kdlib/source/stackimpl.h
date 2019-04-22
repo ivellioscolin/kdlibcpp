@@ -107,7 +107,7 @@ public:
     }
 
     TypedVarPtr getFunction() override;
-    std::wstring getSymbol(bool showDisplacement = true) override;
+    std::wstring findSymbol(MEMDISPLACEMENT &displacement) override;
     void getSourceLine(std::wstring& fileName, unsigned long& lineNo) override;
 
 private:

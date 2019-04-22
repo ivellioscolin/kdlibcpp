@@ -50,7 +50,7 @@ public:
     virtual bool isInline() = 0;
 
     virtual TypedVarPtr getFunction() = 0;
-    virtual std::wstring getSymbol(bool showDisplacement = true) = 0;
+    virtual std::wstring findSymbol(MEMDISPLACEMENT &displacement) = 0;
     virtual void getSourceLine(std::wstring& fileName, unsigned long& lineNo) = 0;
 };
 

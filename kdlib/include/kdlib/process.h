@@ -120,7 +120,7 @@ public:
     virtual bool isCurrent() = 0;
     virtual void setCurrent() = 0;
 
-    virtual StackPtr getStack() = 0;
+    virtual StackPtr getStack(bool inlineFrame=false) = 0;
 
     virtual MEMOFFSET_64 getInstructionOffset() = 0;
     virtual MEMOFFSET_64 getStackOffset() = 0;

@@ -589,15 +589,15 @@ protected:
             switchContext();
     }
 
-    virtual StackPtr getStack() {
+    virtual StackPtr getStack(bool inlineFrame) {
         if (isCurrent())
-            return kdlib::getStack();
+            return kdlib::getStack(inlineFrame);
 
         ContextAutoRestore  contextRestore;
 
         switchContext();
 
-        return kdlib::getStack();
+        return kdlib::getStack(inlineFrame);
     }
 
     virtual unsigned long getNumberRegisters() {
