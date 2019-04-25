@@ -368,6 +368,7 @@ TEST_P(InlineStackTest, InlineStackGetFunc)
     EXPECT_EQ(L"stackTestClass::stackMethod", stack->getFrame(0)->getFunction()->getName());
     EXPECT_EQ(L"stackTestRun2", stack->getFrame(1)->getFunction()->getName());
     EXPECT_EQ(L"stackTestRun1", stack->getFrame(2)->getFunction()->getName());
+    EXPECT_EQ(L"stackTestRun", stack->getFrame(3)->getFunction()->getName());
 }
 
 TEST_P(InlineStackTest, InlineStackGetSymbol)
@@ -377,6 +378,7 @@ TEST_P(InlineStackTest, InlineStackGetSymbol)
     EXPECT_EQ(L"stackTestClass::stackMethod", stack->getFrame(0)->findSymbol(displacement) );
     EXPECT_EQ(L"stackTestRun2", stack->getFrame(1)->findSymbol(displacement) );
     EXPECT_EQ(L"stackTestRun1", stack->getFrame(2)->findSymbol(displacement) );
+    EXPECT_EQ(L"stackTestRun", stack->getFrame(3)->findSymbol(displacement));
 
     displacement = 0;
     stack->getFrame(2)->findSymbol(displacement);
@@ -388,8 +390,21 @@ TEST_P(InlineStackTest, InlineStackSourceLine)
     auto stack = getStack(true);
     std::wstring  fileName;
     unsigned long  lineNumber;
+
+    stack->getFrame(0)->getSourceLine(fileName, lineNumber);
+    EXPECT_EQ(129, lineNumber);
+    EXPECT_NE(std::string::npos, fileName.find(L"targetapp.cpp"));
+
+    stack->getFrame(1)->getSourceLine(fileName, lineNumber);
+    EXPECT_EQ(144, lineNumber);
+    EXPECT_NE(std::string::npos, fileName.find(L"targetapp.cpp"));
+
     stack->getFrame(2)->getSourceLine(fileName, lineNumber);
     EXPECT_EQ(172, lineNumber);
+    EXPECT_NE(std::string::npos, fileName.find(L"targetapp.cpp"));
+
+    stack->getFrame(3)->getSourceLine(fileName, lineNumber);
+    EXPECT_EQ(185, lineNumber);
     EXPECT_NE(std::string::npos, fileName.find(L"targetapp.cpp"));
 }
 

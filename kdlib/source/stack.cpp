@@ -445,7 +445,13 @@ TypedVarPtr StackFrameImpl::getFunction()
     if (m_inlineIndex == 0 )
         return funcPtr;
 
-    return *std::next(funcPtr->getInlineFunctions(m_ip).rbegin(), m_inlineIndex-1);
+    for (MEMDISPLACEMENT i = 0; ; ++i)
+    {
+        const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
+
+        if (inlineFunctions.size() >= m_inlineIndex)
+            return *std::next(inlineFunctions.rbegin(), m_inlineIndex - 1);
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -458,7 +464,13 @@ std::wstring StackFrameImpl::findSymbol(MEMDISPLACEMENT &displacement)
     {
         auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
 
-        return (*std::next(funcPtr->getInlineFunctions(m_ip).rbegin(), m_inlineIndex - 1))->getName();
+        for (MEMDISPLACEMENT i = 0; ; ++i)
+        {
+            const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
+
+            if (inlineFunctions.size() >= m_inlineIndex)
+                return (*std::next(inlineFunctions.rbegin(), m_inlineIndex - 1))->getName();
+        }
     }
 
     return kdlib::findSymbol(m_ip, displacement);
@@ -471,8 +483,14 @@ void StackFrameImpl::getSourceLine(std::wstring& fileName, unsigned long& lineNo
     if (m_inlineIndex != 0)
     {
         auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
-        funcPtr->getSourceLine(m_ip, fileName, lineNo);
-        return;
+
+        for (MEMDISPLACEMENT i = 0; ; ++i)
+        {
+            const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
+
+            if (inlineFunctions.size() >= m_inlineIndex)
+                return (*std::next(inlineFunctions.rbegin(), m_inlineIndex - 1))->getSourceLine(m_ip - i, fileName, lineNo);
+        }
     }
 
     long  displacement;

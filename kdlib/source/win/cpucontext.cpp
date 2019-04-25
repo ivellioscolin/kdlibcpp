@@ -343,22 +343,19 @@ StackPtr getStackImpl(bool inlineFrames)
 
         for (ULONG i = 0; i < filledFrames; ++i)
         {
-            int  j = i;
-            while ( (frames[j].InlineFrameContext & 0x200) != 0 )
-                j++;
-     
-            for (; i <= j; ++i)
-            {
-                stackFrames.push_back(StackFramePtr(new StackFrameImpl(
-                    j,
-                    frames[j].InstructionOffset,
-                    frames[j].ReturnOffset,
-                    frames[j].FrameOffset,
-                    frames[j].StackOffset,
-                    CPUContextPtr(new ContextType(contexts[i])),
-                    j - i
-                )));
-            }
+            int j = 0;
+            while ( (frames[i + j].InlineFrameContext & 0x200) != 0 )
+                ++j;
+
+            stackFrames.push_back(StackFramePtr(new StackFrameImpl(
+                i,
+                frames[i+j].InstructionOffset,
+                frames[i+j].ReturnOffset,
+                frames[i+j].FrameOffset,
+                frames[i+j].StackOffset,
+                CPUContextPtr(new ContextType(contexts[i])),
+                j
+            )));
         }
 
         return StackPtr(new StackImpl(stackFrames));
