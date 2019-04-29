@@ -343,10 +343,18 @@ TEST_P(InlineStackTest, InlineFunc)
 
     EXPECT_EQ(0, func->getInlineFunctions(func->getDebugStart()).size());
     EXPECT_EQ(2, func->getInlineFunctions(offset).size());
+}
+
+TEST_P(InlineStackTest, InlineFuncName)
+{
+    auto func = loadTypedVar(L"stackTestRun1");
+    auto stack = getStack(true);
+    auto offset = stack->getFrame(2)->getIP();
 
     EXPECT_EQ(L"stackTestClass::stackMethod", func->getInlineFunctions(offset).front()->getName());
     EXPECT_EQ(L"Void(__thiscall stackTestClass::)(Double, Int4B)", func->getInlineFunctions(offset).front()->getType()->getName());
 }
+
 
 TEST_P(InlineStackTest, InlineFuncSource)
 {
@@ -383,6 +391,18 @@ TEST_P(InlineStackTest, InlineStackGetSymbol)
     displacement = 0;
     stack->getFrame(2)->findSymbol(displacement);
     EXPECT_NE(0, displacement);
+}
+
+TEST_P(InlineStackTest, InlineFuncAddress)
+{
+    auto stack = getStack(true);
+    EXPECT_NE(0L, stack->getFrame(0)->getFunction()->getAddress());
+}
+
+TEST_P(InlineStackTest, DISABLED_InlineFuncSize)
+{
+    auto stack = getStack(true);
+    EXPECT_NE(0L, stack->getFrame(0)->getFunction()->getSize());
 }
 
 TEST_P(InlineStackTest, InlineStackSourceLine)

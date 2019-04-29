@@ -787,6 +787,11 @@ public:
         m_symbol->getInlineSourceLine(offset, fileName, lineno);
     }
 
+    size_t getSize() const override
+    {
+        NOT_IMPLEMENTED();
+    }
+
 private:
     SymbolPtr  m_symbol;
 
