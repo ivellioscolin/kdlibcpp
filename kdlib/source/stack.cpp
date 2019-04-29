@@ -445,13 +445,15 @@ TypedVarPtr StackFrameImpl::getFunction()
     if (m_inlineIndex == 0 )
         return funcPtr;
 
-    for (MEMDISPLACEMENT i = 0; ; ++i)
+    for (MEMDISPLACEMENT i = 0; i <= 1; ++i)
     {
         const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
 
         if (inlineFunctions.size() >= m_inlineIndex)
             return *std::next(inlineFunctions.rbegin(), m_inlineIndex - 1);
     }
+
+    throw TypeException(L"failed to find inline function");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -460,41 +462,44 @@ std::wstring StackFrameImpl::findSymbol(MEMDISPLACEMENT &displacement)
 {
     displacement = 0;
 
-    if (m_inlineIndex != 0)
+    if (m_inlineIndex == 0)
+        return kdlib::findSymbol(m_ip, displacement);
+
+    auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
+
+    for (MEMDISPLACEMENT i = 0; i <= 1; ++i)
     {
-        auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
+        const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
 
-        for (MEMDISPLACEMENT i = 0; ; ++i)
-        {
-            const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
-
-            if (inlineFunctions.size() >= m_inlineIndex)
-                return (*std::next(inlineFunctions.rbegin(), m_inlineIndex - 1))->getName();
-        }
+        if (inlineFunctions.size() >= m_inlineIndex)
+            return (*std::next(inlineFunctions.rbegin(), m_inlineIndex - 1))->getName();
     }
 
-    return kdlib::findSymbol(m_ip, displacement);
+    throw TypeException(L"failed to find inline function");
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 void StackFrameImpl::getSourceLine(std::wstring& fileName, unsigned long& lineNo)
 {
-    if (m_inlineIndex != 0)
+    if (m_inlineIndex == 0)
     {
-        auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
-
-        for (MEMDISPLACEMENT i = 0; ; ++i)
-        {
-            const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
-
-            if (inlineFunctions.size() >= m_inlineIndex)
-                return (*std::next(inlineFunctions.rbegin(), m_inlineIndex - 1))->getSourceLine(m_ip - i, fileName, lineNo);
-        }
+        long  displacement;
+        kdlib::getSourceLine(fileName, lineNo, displacement, m_ip);
+        return;
     }
 
-    long  displacement;
-    kdlib::getSourceLine(fileName, lineNo, displacement, m_ip);
+    auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
+
+    for (MEMDISPLACEMENT i = 0; i <= 1; ++i)
+    {
+        const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
+
+        if (inlineFunctions.size() >= m_inlineIndex)
+            return (*std::next(inlineFunctions.rbegin(), m_inlineIndex - 1))->getSourceLine(m_ip - i, fileName, lineNo);
+    }
+
+    throw TypeException(L"failed to find inline function");
 }
 
 /////////////////////////////////////////////////////////////////////////////
