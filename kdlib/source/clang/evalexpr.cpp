@@ -53,9 +53,11 @@ TypedValue evalExpr(const std::string& expr, const ScopePtr& scope, const TypeIn
 
     auto diagnosticOptions = new clang::DiagnosticOptions();
 
-    auto textDiagnosticPrinter = new clang::TextDiagnosticPrinter(llvm::outs(), diagnosticOptions);
+    //auto textDiagnosticPrinter = new clang::TextDiagnosticPrinter(llvm::outs(), diagnosticOptions);
 
-    clang::DiagnosticsEngine  diagnosticEngine(diagnosticIDs, diagnosticOptions, textDiagnosticPrinter);
+    auto diagnosticConsumer = new clang::IgnoringDiagConsumer();
+
+    clang::DiagnosticsEngine  diagnosticEngine(diagnosticIDs, diagnosticOptions, diagnosticConsumer);
 
     clang::LangOptions  langOptions;
 
@@ -93,7 +95,7 @@ TypedValue evalExpr(const std::string& expr, const ScopePtr& scope, const TypeIn
     preprocessor.Initialize(*targetInfo);
 
     preprocessor.EnterMainSourceFile();
-    textDiagnosticPrinter->BeginSourceFile(langOptions, &preprocessor);
+    diagnosticConsumer->BeginSourceFile(langOptions, &preprocessor);
 
     clang::Token token;
 
@@ -112,7 +114,7 @@ TypedValue evalExpr(const std::string& expr, const ScopePtr& scope, const TypeIn
 
     } while (!token.is(clang::tok::eof));
 
-    textDiagnosticPrinter->EndSourceFile();
+    diagnosticConsumer->EndSourceFile();
 
     ExprEval  exprEval(scope, typeInfoProvider, &tokens);
 
@@ -136,9 +138,11 @@ TypeInfoPtr evalType(const std::string& expr, const TypeInfoProviderPtr typeInfo
 
     auto diagnosticOptions = new clang::DiagnosticOptions();
 
-    auto textDiagnosticPrinter = new clang::TextDiagnosticPrinter(llvm::outs(), diagnosticOptions);
+    //auto textDiagnosticPrinter = new clang::TextDiagnosticPrinter(llvm::outs(), diagnosticOptions);
 
-    clang::DiagnosticsEngine  diagnosticEngine(diagnosticIDs, diagnosticOptions, textDiagnosticPrinter);
+    auto diagnosticConsumer = new clang::IgnoringDiagConsumer();
+
+    clang::DiagnosticsEngine  diagnosticEngine(diagnosticIDs, diagnosticOptions, diagnosticConsumer);
 
     clang::LangOptions  langOptions;
 
@@ -175,7 +179,7 @@ TypeInfoPtr evalType(const std::string& expr, const TypeInfoProviderPtr typeInfo
     preprocessor.Initialize(*targetInfo);
 
     preprocessor.EnterMainSourceFile();
-    textDiagnosticPrinter->BeginSourceFile(langOptions, &preprocessor);
+    diagnosticConsumer->BeginSourceFile(langOptions, &preprocessor);
 
     clang::Token token;
 
@@ -194,7 +198,7 @@ TypeInfoPtr evalType(const std::string& expr, const TypeInfoProviderPtr typeInfo
 
     } while (!token.is(clang::tok::eof));
 
-    textDiagnosticPrinter->EndSourceFile();
+    diagnosticConsumer->EndSourceFile();
 
     TypeEval  exprEval(ScopePtr(new ScopeList()), typeInfoProvider, &tokens);
 
