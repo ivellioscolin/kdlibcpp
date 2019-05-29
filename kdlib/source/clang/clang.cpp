@@ -11,6 +11,9 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendAction.h"
 #include "clang/Tooling/Tooling.h"
+#include "clang/Parse/ParseAST.h"
+#include "clang/Lex/PreprocessorOptions.h"
+#include "clang/Driver/Driver.h"
 
 #include "kdlib/typeinfo.h"
 #include "kdlib/exceptions.h"
@@ -754,45 +757,84 @@ TypeInfoPtr compileType( const std::wstring& sourceCode, const std::wstring& typ
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class ASTBuilderAction : public clang::tooling::ToolAction
+{
+    std::vector<std::unique_ptr<ASTUnit>> &ASTs;
+
+public:
+    ASTBuilderAction(std::vector<std::unique_ptr<ASTUnit>> &ASTs) : ASTs(ASTs) {}
+
+    bool runInvocation(std::shared_ptr<CompilerInvocation> Invocation,
+        FileManager *Files,
+        std::shared_ptr<PCHContainerOperations> PCHContainerOps,
+        DiagnosticConsumer *DiagConsumer) override {
+        std::unique_ptr<ASTUnit> AST = ASTUnit::LoadFromCompilerInvocation(
+            Invocation, std::move(PCHContainerOps),
+            CompilerInstance::createDiagnostics(&Invocation->getDiagnosticOpts(),
+                DiagConsumer,
+                /*ShouldOwnClient=*/false),
+            Files);
+
+        if (!AST)
+            return false;
+
+        ASTs.push_back(std::move(AST));
+        return true;
+    }
+};
+
 TypeInfoProviderClang::TypeInfoProviderClang( const std::string& sourceCode, const std::string& compileOptions)
 {
+    std::vector<std::unique_ptr<ASTUnit>> ASTs;
+    ASTBuilderAction Action(ASTs);
+    llvm::IntrusiveRefCntPtr<vfs::OverlayFileSystem> OverlayFileSystem(
+        new vfs::OverlayFileSystem(vfs::getRealFileSystem()));
+    llvm::IntrusiveRefCntPtr<vfs::InMemoryFileSystem> InMemoryFileSystem(
+        new vfs::InMemoryFileSystem);
+    OverlayFileSystem->pushOverlay(InMemoryFileSystem);
+    llvm::IntrusiveRefCntPtr<FileManager> Files(
+        new FileManager(FileSystemOptions(), OverlayFileSystem));
+
     std::vector< std::string > args;
 
+    args.push_back("clang-tool");
+    args.push_back("-fsyntax-only");
+
     typedef boost::tokenizer< boost::escaped_list_separator<char> > Tokenizer;
-    boost::escaped_list_separator<char> Separator( '\\', ' ', '\"' );
+    boost::escaped_list_separator<char> Separator('\\', ' ', '\"');
 
-    Tokenizer tok(compileOptions, Separator );
+    Tokenizer tok(compileOptions, Separator);
 
-    std::copy(tok.begin(), tok.end(), std::inserter(args, args.end() ) );
+    std::copy(tok.begin(), tok.end(), std::inserter(args, args.end()));
 
-    args.push_back("-w");
+    args.push_back("input.cc");
 
-    std::vector< std::string >::iterator  it = args.begin();
-    for ( ; it != args.end(); ++it )
-    {
-        if ( 0 == it->find("--target") )
-            break;
-    }
+    ToolInvocation toolInvocation(
+        args,
+        &Action, 
+        Files.get(), 
+        std::move(std::make_shared< PCHContainerOperations >())
+    );
 
-    if ( it == args.end() )
-    {
-        if (targetExecutionStatus() != DebugStatusNoDebuggee )
-        {
-            if (getCPUMode() == CPU_AMD64)
-                args.push_back("--target=x86_64-pc-windows-msvc");
-            else if (getCPUMode() == CPU_I386)
-                args.push_back("--target=i686-pc-windows-msvc");
-        }
-    }
+    InMemoryFileSystem->addFile("input.cc", 0, llvm::MemoryBuffer::getMemBuffer(sourceCode.c_str()));
 
-    std::unique_ptr<ASTUnit>  ast = buildASTFromCodeWithArgs(sourceCode, args );
+#ifndef _DEBUG
+
+    IgnoringDiagConsumer   diagnosticConsumer;
+
+    toolInvocation.setDiagnosticConsumer(&diagnosticConsumer);
+
+#endif
+
+    toolInvocation.run();
+
+    std::unique_ptr<ASTUnit>  ast = std::move(ASTs[0]);
 
     m_astSession = ClangASTSession::getASTSession(ast);
 
     DeclNextVisitor   visitor(m_astSession, &m_typeCache);
 
     visitor.TraverseDecl( m_astSession->getASTContext().getTranslationUnitDecl() );
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -852,7 +894,6 @@ TypeInfoProviderPtr  getTypeInfoProviderFromSource(const std::string&  source, c
 {
     return TypeInfoProviderPtr(new TypeInfoProviderClang(source, opts));
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
