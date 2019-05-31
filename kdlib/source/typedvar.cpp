@@ -785,7 +785,7 @@ std::wstring TypedVarBase::str()
     sstr << " Value: ";
     try
     {
-        sstr << L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+        sstr << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
     }
     catch (const MemoryException &)
     {
@@ -1130,7 +1130,7 @@ std::wstring TypedVarPointer::printValue() const
 
     try {
 
-         sstr << L"0x" << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
+         sstr << getValue().asHex() <<  L" (" << getValue().asStr() <<  L")";
          return sstr.str();
 
     }
@@ -1242,7 +1242,7 @@ std::wstring TypedVarBitField::printValue() const
     std::wstringstream  sstr;
 
     try {
-        sstr << L"0x" << getValue().asHex() << L" (" << getValue().asStr() << L")";
+        sstr << getValue().asHex() << L" (" << getValue().asStr() << L")";
         return sstr.str();
     }
     catch (MemoryException&)
