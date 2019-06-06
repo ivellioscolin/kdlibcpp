@@ -1,12 +1,14 @@
 #pragma once
 
 #include "parser.h"
+#include "exprparser.h"
 
 namespace kdlib {
 
 
 bool isBaseTypeKeyWord(const clang::Token& token);
 bool isStandardIntType(const clang::Token& token);
+bool isTrueFalse(const clang::Token& token);
 std::string  getIdentifier(const clang::Token& token);
 bool isOperationToken(const clang::Token& token);
 
@@ -219,8 +221,10 @@ public:
         if (matchRange.first == matchRange.second)
             return matchResult = MatchResult();
 
-        if (isStandardIntType(*matchRange.first) || isBaseTypeKeyWord(*matchRange.first))
-            return matchResult = MatchResult();
+        if (isStandardIntType(*matchRange.first) 
+            || isBaseTypeKeyWord(*matchRange.first) 
+            || isTrueFalse(*matchRange.first) )
+                return matchResult = MatchResult();
 
         auto matcher = all_of(nameMatcher, opt(rep(namespacesMatchers, namespacesMatchers)));
 
@@ -244,35 +248,6 @@ private:
     ListMatcher<NamespaceMatcher>  namespacesMatchers;
 };
 
-
-
-
-class TemplateNumericArgMatcher : public Matcher
-{
-public:
-
-    MatchResult  match(const TokenRange& matchRange)
-    {
-        auto& beg = matchRange.first;
-        auto cur = beg;
-        for (; cur != matchRange.second; cur++)
-        {
-            if ((*cur).is(clang::tok::numeric_constant))
-                continue;
-
-            if (isOperationToken(*cur))
-                continue;
-
-            break;
-        }
-
-        if ( cur != beg )
-            return matchResult = MatchResult(std::make_pair(beg, cur));
-
-        return matchResult = MatchResult();
-    }
-};
-
 class TypeMatcher;
 
 class TemplateArgMatcher : public Matcher
@@ -285,22 +260,21 @@ public:
 
     const TypeMatcher& getTypeMatcher() const;
 
-    bool isNumeric() const
+    bool isExpression() const
     {
-        return numericMatcher.getMatchResult().isMatched();
+        return exprMatcher.getMatchResult().isMatched();
     }
 
-    const auto& getNumericMatcher() const
+    const auto& getExpressionMatcher() const
     {
-        return numericMatcher;
+        return exprMatcher;
     }
 
 private:
 
     std::unique_ptr<TypeMatcher>  typeMatcher;
 
-    TemplateNumericArgMatcher  numericMatcher;
-
+    ConstExpressionMatcher  exprMatcher;
 };
 
 class TemplateArgsMatcher : public Matcher
@@ -322,7 +296,6 @@ public:
     }
 
 private:
-    
 
     ListMatcher<TemplateArgMatcher>  argsMatchers;
 };
@@ -409,10 +382,7 @@ private:
 
     ListMatcher<TemplateArgMatcher>  argsMatchers1;
     ListMatcher<TemplateArgMatcher>  argsMatchers2;
-
-    //TemplateArgsMatcher  templateArgsMatcher1;
     CustomNameMatcher  nestedTemplateName;
-    //TemplateArgsMatcher  templateArgsMatcher2;
 };
 
 
@@ -555,7 +525,11 @@ inline
 MatchResult TemplateArgMatcher::match(const TokenRange& matchRange)
 {
     typeMatcher = std::make_unique<TypeMatcher>();
-    return matchResult = any_of(*typeMatcher.get(), numericMatcher).match(matchRange);
+    auto matcher = any_of(
+        exprMatcher,
+        *typeMatcher.get()
+        );
+    return matchResult = matcher.match(matchRange);
 }
 
 inline

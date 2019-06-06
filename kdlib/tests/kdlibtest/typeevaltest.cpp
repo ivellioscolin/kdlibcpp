@@ -259,10 +259,12 @@ TEST(TypeEvalTest, TemplateNumeric)
     TestStruct0<-4>  val3;            \
     TestStruct0<true>  val4;          \
     TestStruct1<2, 0xFFFF>  val5;     \
+    TestStruct0<'a'>  val6;           \
     ";
 
     TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
 
+    EXPECT_NO_THROW(evalType("TestStruct0<'a'>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct0<0x4>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct0<-4>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct1<2,0xFFFF>", typeProvider));
@@ -348,6 +350,61 @@ TEST(TypeEvalTest, TemplateConstExpr)
     EXPECT_NO_THROW(evalType("TestStruct<~0xFFFFFFFF>", typeProvider));
 }
 
+
+TEST(TypeEvalTest, TemplateConstExpr2)
+{
+    static const char sourceCode[] = " \
+    template<int>                      \
+    struct TestStruct {                \
+    };                                 \
+    TestStruct<10>   testVal1;         \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+
+    EXPECT_NO_THROW(evalType("TestStruct<5+5>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<15-5>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<2+3+5>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<(10-5)+5>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<5+(10-(2+3))>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<(10-5)*2>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<20/2>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<120%11>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<5<<1>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<20>>1>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<11 & 0xFE>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<0x2|8>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<0x18 ^ 0x12>", typeProvider));
+
+    EXPECT_THROW(evalType("TestStruct0<5+(10-(2+3)>", typeProvider), TypeException);
+    EXPECT_THROW(evalType("TestStruct0<1/0>", typeProvider), TypeException);
+}
+
+TEST(TypeEvalTest, TemplateConstExpr3)
+{
+    static const char sourceCode[] = " \
+    template<bool>                     \
+    struct TestStruct {                \
+    };                                 \
+    TestStruct<true>   testVal1;       \
+    TestStruct<false>  testVal2;       \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+    EXPECT_NO_THROW(evalType("TestStruct<true>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<false>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<1==1>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<1!=0>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<1<2>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<1<=2>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<1>2>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<true>=false>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<true || 0>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<0x11 && 1>", typeProvider));
+
+    EXPECT_THROW(evalType("TestStruct0<5&&&5>", typeProvider), TypeException);
+}
+
 TEST(TypeEvalTest, TemplateClose)
 {
     static const char sourceCode[] = " \
@@ -367,5 +424,6 @@ TEST(TypeEvalTest, TemplateClose)
     EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int> > >", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int>>>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int>> >", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int> >>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int> >>", typeProvider));
 }

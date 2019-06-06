@@ -75,6 +75,12 @@ TEST(ExprEval, NumberExpression)
     EXPECT_THROW(evalExpr(L"5/"), DbgException);
 }
 
+TEST(ExprEval, DivisionError)
+{
+    EXPECT_THROW(evalExpr("5/0"), DbgException);
+    EXPECT_THROW(evalExpr("5/0.0"), DbgException);
+}
+
 TEST(ExprEval, UnMinus)
 {
     EXPECT_EQ(-2 + 3, evalExpr(L"-2 + 3"));

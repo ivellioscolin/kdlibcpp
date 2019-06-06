@@ -712,7 +712,7 @@ NumVariant TypedVarBase::getValue() const
         return NumVariant( m_varData->readDouble() );
 
     if ( m_typeInfo->getName() == L"Bool" )
-        return NumVariant( m_varData->readByte() );
+        return NumVariant( 0 != m_varData->readByte() );
 
     if ( m_typeInfo->getName() == L"Hresult" )
         return NumVariant( m_varData->readDWord() );

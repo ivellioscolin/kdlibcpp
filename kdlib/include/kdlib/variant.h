@@ -15,9 +15,9 @@ class NumVariantError : public std::exception
 
 
 template<typename T>
-struct equal_op{
+struct equal_op {
 
-    bool operator()( const T &t1, const T &t2 ) {
+    bool operator()(const T &t1, const T &t2) {
         return t1 == t2;
     }
 };
@@ -25,7 +25,7 @@ struct equal_op{
 template<typename T>
 struct gt_op
 {
-    bool operator()( const T &t1, const T &t2 ) {
+    bool operator()(const T &t1, const T &t2) {
         return t1 < t2;
     }
 };
@@ -33,7 +33,7 @@ struct gt_op
 template<typename T>
 struct add_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 + t2;
     }
 };
@@ -41,7 +41,7 @@ struct add_op {
 template<typename T>
 struct sub_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 - t2;
     }
 };
@@ -50,7 +50,7 @@ struct sub_op {
 template<typename T>
 struct mul_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 * t2;
     }
 };
@@ -59,7 +59,7 @@ struct mul_op {
 template<typename T>
 struct div_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 / t2;
     }
 };
@@ -69,55 +69,55 @@ struct div_op {
 template<typename T>
 struct mod_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 % t2;
     }
 
 };
 
 template<typename T>
-struct or_op  {
+struct or_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 | t2;
     }
 };
 
 
 template<typename T>
-struct and_op  {
+struct and_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 & t2;
     }
 };
 
 
 template<typename T>
-struct xor_op  {
+struct xor_op {
 
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 ^ t2;
     }
 };
 
 template<typename T>
 struct lshift_op {
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 << t2;
     }
 };
 
 template<typename T>
 struct rshift_op {
-    T operator() ( const T &t1, const T &t2 ) {
+    T operator() (const T &t1, const T &t2) {
         return t1 >> t2;
     }
 };
 
 
 
-class NumVariant 
+class NumVariant
 {
 
 public:
@@ -128,14 +128,14 @@ public:
         m_ucharVal = 0;
     }
 
-    NumVariant( const NumVariant  &var )
+    NumVariant(const NumVariant  &var)
     {
         copy(var);
     }
 
-    NumVariant operator=(const NumVariant  &var )
+    NumVariant operator=(const NumVariant  &var)
     {
-        copy( var );
+        copy(var);
         return *this;
     }
 
@@ -226,51 +226,51 @@ public:
     }
 
     char asChar() const {
-        return cast( charT ).m_charVal;
+        return cast(charT).m_charVal;
     }
 
     unsigned char asUChar() const {
-        return cast( ucharT ).m_ucharVal;
+        return cast(ucharT).m_ucharVal;
     }
 
     short asShort() const {
-        return cast( shortT ).m_shortVal;
+        return cast(shortT).m_shortVal;
     }
 
     unsigned short asUShort() const {
-        return cast( ushortT ).m_ushortVal;
+        return cast(ushortT).m_ushortVal;
     }
 
     long asLong() const {
-        return cast( longT ).m_longVal;
+        return cast(longT).m_longVal;
     }
 
     unsigned long asULong() const {
-        return cast( ulongT ).m_ulongVal;
+        return cast(ulongT).m_ulongVal;
     }
 
     long long asLongLong() const {
-        return cast( longlongT ).m_longlongVal;
+        return cast(longlongT).m_longlongVal;
     }
 
     unsigned long long asULongLong() const {
-        return cast( ulonglongT ).m_ulonglongVal;
+        return cast(ulonglongT).m_ulonglongVal;
     }
 
     int asInt() const {
-        return cast( intT ).m_intVal;
+        return cast(intT).m_intVal;
     }
 
     unsigned int asUInt() const {
-        return cast( uintT ).m_uintVal;
+        return cast(uintT).m_uintVal;
     }
 
     float asFloat() const {
-        return cast( floatT ).m_floatVal;
+        return cast(floatT).m_floatVal;
     }
 
     double asDouble() const {
-        return cast( doubleT ).m_doubleVal;
+        return cast(doubleT).m_doubleVal;
     }
 
     bool asBool() const {
@@ -283,39 +283,39 @@ public:
 
         sstr << std::dec;
 
-        switch ( m_numType )
+        switch (m_numType)
         {
         case charT:
         case shortT:
         case longT:
         case intT:
-           sstr << asInt();
-           return sstr.str();
+            sstr << asInt();
+            return sstr.str();
 
         case ucharT:
         case ushortT:
         case ulongT:
         case uintT:
-           sstr << asUInt();
-           return sstr.str();
+            sstr << asUInt();
+            return sstr.str();
 
         case longlongT:
-           sstr << m_longlongVal;
-           return sstr.str();
+            sstr << m_longlongVal;
+            return sstr.str();
 
         case ulonglongT:
-           sstr << m_ulonglongVal;
-           return sstr.str();
+            sstr << m_ulonglongVal;
+            return sstr.str();
 
         case floatT:
-           sstr.precision(8);
-           sstr << std::defaultfloat << m_floatVal;
-           return sstr.str();
+            sstr.precision(8);
+            sstr << std::defaultfloat << m_floatVal;
+            return sstr.str();
 
         case doubleT:
-           sstr.precision(16);
-           sstr << std::defaultfloat << m_doubleVal;
-           return sstr.str();
+            sstr.precision(16);
+            sstr << std::defaultfloat << m_doubleVal;
+            return sstr.str();
         }
 
         throw NumVariantError();
@@ -327,29 +327,29 @@ public:
 
         sstr << std::hex << std::showbase;
 
-        switch ( m_numType )
+        switch (m_numType)
         {
         case charT:
         case shortT:
         case longT:
         case intT:
-           sstr << asInt();
-           return sstr.str();
+            sstr << asInt();
+            return sstr.str();
 
         case ucharT:
         case ushortT:
         case ulongT:
         case uintT:
-           sstr << asUInt();
-           return sstr.str();
+            sstr << asUInt();
+            return sstr.str();
 
         case longlongT:
-           sstr << m_longlongVal;
-           return sstr.str();
+            sstr << m_longlongVal;
+            return sstr.str();
 
         case ulonglongT:
-           sstr << m_ulonglongVal;
-           return sstr.str();
+            sstr << m_ulonglongVal;
+            return sstr.str();
 
         case floatT:
             sstr.precision(8);
@@ -367,7 +367,7 @@ public:
 
     size_t getSize() const
     {
-        switch ( m_numType )
+        switch (m_numType)
         {
         case charT: return sizeof(char);
         case shortT: return sizeof(short);
@@ -430,12 +430,12 @@ public:
         return m_numType == floatT;
     }
 
-    bool isDouble() const  {
+    bool isDouble() const {
         return m_numType == doubleT;
     }
 
     bool isSigned() const {
-        return NumVariant(-1).cast( m_numType ) < NumVariant(0);
+        return NumVariant(-1).cast(m_numType) < NumVariant(0);
     }
 
     bool isInteger() const {
@@ -451,7 +451,7 @@ public:
         setChar(val);
     }
 
-    void setUChar( unsigned char val) {
+    void setUChar(unsigned char val) {
         m_numType = ucharT;
         m_ucharVal = val;
     }
@@ -541,13 +541,13 @@ public:
 
     template< typename RetT, template<class> class FuncT>
     static
-    RetT all_op( const NumVariant& v1, const NumVariant& v2 )
+        RetT all_op(const NumVariant& v1, const NumVariant& v2)
     {
-        NumVariant::NumType  t = maxType( v1, v2 );
-        NumVariant v3 = v1.cast( t );
-        NumVariant v4 = v2.cast( t );
+        NumVariant::NumType  t = maxType(v1, v2);
+        NumVariant v3 = v1.cast(t);
+        NumVariant v4 = v2.cast(t);
 
-        switch( t )
+        switch (t)
         {
         case floatT:
             return FuncT<float>()(v3.m_floatVal, v4.m_floatVal);
@@ -556,25 +556,25 @@ public:
             return FuncT<double>()(v3.m_doubleVal, v4.m_doubleVal);
         }
 
-        return int_op<RetT, FuncT>( v3, v4 );
+        return int_op<RetT, FuncT>(v3, v4);
     }
 
     template< typename RetT, template<class> class FuncT>
     static
-    RetT int_op( const NumVariant& v1, const NumVariant& v2 )
+        RetT int_op(const NumVariant& v1, const NumVariant& v2)
     {
-        NumVariant::NumType  t = maxType( v1, v2 );
-        NumVariant v3 = v1.cast( t );
-        NumVariant v4 = v2.cast( t );
+        NumVariant::NumType  t = maxType(v1, v2);
+        NumVariant v3 = v1.cast(t);
+        NumVariant v4 = v2.cast(t);
 
-        switch( t )
+        switch (t)
         {
         case charT:
             return FuncT<char>()(v3.m_charVal, v4.m_charVal);
 
         case ucharT:
             return FuncT<unsigned char>()(v3.m_ucharVal, v4.m_ucharVal);
-        
+
         case shortT:
             return FuncT<short>()(v3.m_shortVal, v4.m_shortVal);
 
@@ -598,10 +598,10 @@ public:
 
         case uintT:
             return FuncT<unsigned int>()(v3.m_uintVal, v4.m_uintVal);
-            
+
         case floatT:
         case doubleT:
-             throw NumVariantError();
+            throw NumVariantError();
         }
 
         throw NumVariantError();
@@ -623,7 +623,7 @@ public:
     explicit operator unsigned short() const {
         return asUShort();
     }
-    
+
     explicit operator unsigned long() const {
         return asULong();
     }
@@ -651,12 +651,12 @@ public:
     explicit operator int() const {
         return asInt();
     }
-    
-    explicit operator unsigned int() const{
+
+    explicit operator unsigned int() const {
         return asUInt();
     }
 
-    explicit operator bool () const {
+    explicit operator bool() const {
         return asChar() != 0;
     }
 
@@ -682,44 +682,44 @@ private:
         double m_doubleVal;
     };
 
-    static NumType maxType( const NumVariant& v1, const NumVariant& v2 )
+    static NumType maxType(const NumVariant& v1, const NumVariant& v2)
     {
-        static const NumType castMatrix[maxT][maxT] = 
+        static const NumType castMatrix[maxT][maxT] =
         {
-          //  charT         ucharT      shortT      ushortT     longT       ulongT,         longlongT       ulonglongT,     intT        uintT       floatT      doubleT
-            { intT,         intT,       intT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //charT
-            { maxT,         intT,       intT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //ucharT
-            { maxT,         maxT,       intT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //shortT
-            { maxT,         maxT,       maxT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //ushortT
-            { maxT,         maxT,       maxT,       maxT,       longT,      ulongT,         longlongT,      ulonglongT,     longT,      ulongT,     floatT,     doubleT },     //longT
-            { maxT,         maxT,       maxT,       maxT,       maxT,       ulongT,         longlongT,      ulonglongT,     ulongT,     ulongT,     floatT,     doubleT },     //ulongT
-            { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           longlongT,      ulonglongT,     longlongT,  longlongT,  floatT,     doubleT },     //longlongT 
-            { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           ulonglongT,     ulonglongT, ulonglongT, floatT,     doubleT },     //ulonglongT
-            { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           intT,       uintT,      floatT,     doubleT },     //intT
-            { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           maxT,       uintT,      floatT,     doubleT },     //uintT
-            { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           maxT,       maxT,       floatT,     doubleT },     //floatT
-            { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           maxT,       maxT,       maxT,       doubleT }      //doubleT
+            //  charT         ucharT      shortT      ushortT     longT       ulongT,         longlongT       ulonglongT,     intT        uintT       floatT      doubleT
+                { intT,         intT,       intT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //charT
+                { maxT,         intT,       intT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //ucharT
+                { maxT,         maxT,       intT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //shortT
+                { maxT,         maxT,       maxT,       intT,       longT,      ulongT,         longlongT,      ulonglongT,     intT,       uintT,      floatT,     doubleT },     //ushortT
+                { maxT,         maxT,       maxT,       maxT,       longT,      ulongT,         longlongT,      ulonglongT,     longT,      ulongT,     floatT,     doubleT },     //longT
+                { maxT,         maxT,       maxT,       maxT,       maxT,       ulongT,         longlongT,      ulonglongT,     ulongT,     ulongT,     floatT,     doubleT },     //ulongT
+                { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           longlongT,      ulonglongT,     longlongT,  longlongT,  floatT,     doubleT },     //longlongT 
+                { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           ulonglongT,     ulonglongT, ulonglongT, floatT,     doubleT },     //ulonglongT
+                { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           intT,       uintT,      floatT,     doubleT },     //intT
+                { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           maxT,       uintT,      floatT,     doubleT },     //uintT
+                { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           maxT,       maxT,       floatT,     doubleT },     //floatT
+                { maxT,         maxT,       maxT,       maxT,       maxT,       maxT,           maxT,           maxT,           maxT,       maxT,       maxT,       doubleT }      //doubleT
         };
 
-        if ( v1.m_numType >= maxT || v2.m_numType >= maxT )
+        if (v1.m_numType >= maxT || v2.m_numType >= maxT)
             throw NumVariantError();
-      
+
         return v1.m_numType <= v2.m_numType ? castMatrix[v1.m_numType][v2.m_numType] : castMatrix[v2.m_numType][v1.m_numType];
     }
 
-     NumVariant cast( NumType t ) {
-         return const_cast<const NumVariant&>(*this).cast(t);
-     }
+    NumVariant cast(NumType t) {
+        return const_cast<const NumVariant&>(*this).cast(t);
+    }
 
 
-    NumVariant cast( NumType t ) const
+    NumVariant cast(NumType t) const
     {
-        switch ( t )
+        switch (t)
         {
         case charT:
-           return cast<char>();
+            return cast<char>();
         case ucharT:
-           return cast<unsigned char>();
+            return cast<unsigned char>();
         case shortT:
             return cast<short>();
         case ushortT:
@@ -748,41 +748,41 @@ private:
     template<typename T>
     NumVariant cast() const
     {
-        switch( m_numType )
+        switch (m_numType)
         {
         case charT:
-            return static_cast<T>( m_charVal );
+            return static_cast<T>(m_charVal);
         case ucharT:
-            return static_cast<T>( m_ucharVal );
+            return static_cast<T>(m_ucharVal);
         case shortT:
-            return static_cast<T>( m_shortVal );
+            return static_cast<T>(m_shortVal);
         case ushortT:
-            return static_cast<T>( m_ushortVal );
+            return static_cast<T>(m_ushortVal);
         case longT:
-            return static_cast<T>( m_longVal );
+            return static_cast<T>(m_longVal);
         case ulongT:
-            return static_cast<T>( m_ulongVal );
+            return static_cast<T>(m_ulongVal);
         case longlongT:
-            return static_cast<T>( m_longlongVal );
+            return static_cast<T>(m_longlongVal);
         case ulonglongT:
-            return static_cast<T>( m_ulonglongVal );
+            return static_cast<T>(m_ulonglongVal);
         case intT:
-            return static_cast<T>( m_intVal );
+            return static_cast<T>(m_intVal);
         case uintT:
-            return static_cast<T>( m_uintVal );
+            return static_cast<T>(m_uintVal);
         case floatT:
-            return static_cast<T>( m_floatVal );
+            return static_cast<T>(m_floatVal);
         case doubleT:
-            return static_cast<T>( m_doubleVal );
+            return static_cast<T>(m_doubleVal);
         }
 
         throw NumVariantError();
     }
 
-    void copy( const NumVariant &var )
+    void copy(const NumVariant &var)
     {
         m_numType = var.m_numType;
-        switch( m_numType )
+        switch (m_numType)
         {
         case charT:
             m_charVal = var.m_charVal;

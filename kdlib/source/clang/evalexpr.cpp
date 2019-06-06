@@ -303,7 +303,6 @@ TypedValue  ExprEval::getResult()
         return ternaryOp->getResult(operands.front());
 
     return operands.front();
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -836,9 +835,9 @@ std::string TypeEval::getTemplateArgs(const parser::ListMatcher<parser::Template
         {
             argsStr += getTypeName(arg.getTypeMatcher());
         }
-        else if (arg.isNumeric())
+        else if (arg.isExpression())
         {
-            auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getNumericMatcher().getMatchResult().getMatchedRange()).getResult();
+            auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getExpressionMatcher().getMatchResult().getMatchedRange()).getResult();
             argsStr += std::to_string(value.getValue().asLongLong());
         }
         else
@@ -895,7 +894,7 @@ TypeInfoPtr TypeEval::getCustomType(const parser::CustomTypeMatcher&  customMatc
 {
     TypeInfoPtr  typeInfo;
 
-    std::string   typeName = customMatcher.getTypeNameMatcher().getName();
+    std::string  typeName = customMatcher.getTypeNameMatcher().getName();
 
     if (customMatcher.isTemplate() || customMatcher.isNestedTemplate() )
     {
@@ -1200,6 +1199,21 @@ static const std::regex floatLiteralRe("\\d*((\\.(\\d+(e[+\\-]?\\d+)?)?)|(e[+\\-
 
 TypedValue  getNumericConst(const clang::Token& token)
 {
+    if (token.is(clang::tok::identifier))
+    {
+        std::string  strVal = token.getIdentifierInfo()->getName();
+
+        if (strVal == "false")
+            return TypedValue(false);
+        if (strVal == "true")
+            return TypedValue(true);
+
+        throw ExprException(L"error syntax");
+    }
+
+    if (token.isOneOf(clang::tok::char_constant, clang::tok::wide_char_constant))
+        return  getCharConst(token);
+
     std::string  strVal(token.getLiteralData(), token.getLength());
 
     std::smatch  smatch;
@@ -1461,6 +1475,18 @@ bool isStandardIntType(const clang::Token& token)
     return false;
 }
 
+bool isTrueFalse(const clang::Token& token)
+{
+    if (token.is(clang::tok::identifier))
+    {
+        std::string  name(token.getIdentifierInfo()->getNameStart(), token.getLength());
+
+        return name == "true" || name == "false";
+    }
+
+    return false;
+}
+
 kdlib::TypeInfoPtr getStandardIntType(const std::string& name)
 {
     return standardIntTypes.at(name)();
@@ -1492,7 +1518,21 @@ bool isBinOperation(const clang::Token& token)
     );
 }
 
+///////////////////////////////////////////////////////////////////////////////
 
+bool isOperationToken(const clang::Token& token)
+{
+    return isBinOperation(token) ||
+        token.isOneOf(
+            clang::tok::exclaim,
+            clang::tok::plusplus,
+            clang::tok::minusminus,
+            clang::tok::tilde,
+            clang::tok::l_paren,
+            clang::tok::r_paren
+        );
+   
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1515,19 +1555,6 @@ std::string  getIdentifier(const clang::Token& token)
     return std::string(token.getIdentifierInfo()->getNameStart(), token.getLength());
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-bool isOperationToken(const clang::Token& token)
-{
-    return (token.isOneOf(
-        clang::tok::minus,
-        clang::tok::plus,
-        clang::tok::exclaim,
-        clang::tok::plusplus,
-        clang::tok::minusminus,
-        clang::tok::tilde
-    ));
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1542,32 +1569,133 @@ TypedValue ExprEval2::getResult()
     if (!matchResult.isMatched() || matchResult.end() != m_tokenRange.second)
         throw  ExprException(L"error syntax");
 
-    TypedValue  value = getNumericConst(*exprMatcher.getOperand().getNumeric().getMatchResult().begin());
-
-    for (auto op : exprMatcher.getLeftOps())
-    {
-        auto opToken = *op.getMatchResult().begin();
-        std::unique_ptr< UnaryOperation>  op;
-
-        if (opToken.is(clang::tok::minus))
-            op.reset(new UnMinusOperation());
-        else if (opToken.is(clang::tok::plus))
-            op.reset(new UnPlusOperation());
-        else if (opToken.is(clang::tok::exclaim))
-            op.reset(new BooleanNotOperation());
-        else if (opToken.is(clang::tok::plusplus))
-            op.reset(new PreIncrementOperation());
-        else if (opToken.is(clang::tok::tilde))
-            op.reset(new BitwiseNotOperation());
-        else
-            throw ExprException(L"error syntax");
-
-        value = op->getResult(value);
-    }
-        
-    return value;
+    return getResultForMatcher(exprMatcher);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+TypedValue ExprEval2::getResultForMatcher(const parser::ConstExpressionMatcher& matcher)
+{
+    std::list< std::unique_ptr<BinOperation>> operations;
+
+    std::list<TypedValue>  operands;
+
+    std::transform(
+        matcher.getOperationMatchers().begin(),
+        matcher.getOperationMatchers().end(),
+        std::back_inserter(operations),
+        [](auto& operationMatcher) {
+            if (operationMatcher.isAdd())
+                return std::unique_ptr<BinOperation>(new AddExprOperation());
+            if (operationMatcher.isMinus())
+                return std::unique_ptr<BinOperation>(new SubExprOperation());
+            if (operationMatcher.isStar())
+                return std::unique_ptr<BinOperation>(new MultExprOperation());
+            if (operationMatcher.isSlash())
+                return std::unique_ptr<BinOperation>(new DivExprOperation());
+            if (operationMatcher.isPercent())
+                return std::unique_ptr<BinOperation>(new ModExprOperation());
+            if (operationMatcher.isGreaterGreater())
+                return std::unique_ptr<BinOperation>(new RightShiftOperation());
+            if (operationMatcher.isLessLess())
+                return std::unique_ptr<BinOperation>(new LeftShiftOperation());
+            if (operationMatcher.isAmp())
+                return std::unique_ptr<BinOperation>(new BitwiseAndOperation());
+            if (operationMatcher.isPipe())
+                return std::unique_ptr<BinOperation>(new BitwiseOrOperation());
+            if (operationMatcher.isCaret())
+                return std::unique_ptr<BinOperation>(new BitwiseXorOperation());
+            if (operationMatcher.isEqualequal())
+                return std::unique_ptr<BinOperation>(new EqualOperation());
+            if (operationMatcher.isExclaimequal())
+                return std::unique_ptr<BinOperation>(new NotEqualOperation());
+            if (operationMatcher.isLess())
+                return std::unique_ptr<BinOperation>(new LessOperation());
+            if (operationMatcher.isLessEqual())
+                return std::unique_ptr<BinOperation>(new LessEqualOperation());
+            if (operationMatcher.isGreater())
+                return std::unique_ptr<BinOperation>(new GreaterOperation());
+            if (operationMatcher.isGreaterEqual())
+                return std::unique_ptr<BinOperation>(new GreaterEqualOperation());
+            if (operationMatcher.isPipePipe())
+                return std::unique_ptr<BinOperation>(new BoolOrOperation());
+            if (operationMatcher.isAmpAmp())
+                return std::unique_ptr<BinOperation>(new BoolAndOperation());
+            throw  ExprException(L"error syntax");
+        } );
+
+    std::transform(
+        matcher.getOperandMatchers().begin(),
+        matcher.getOperandMatchers().end(),
+        std::back_inserter(operands),
+        [](auto& operandMatcher) -> TypedValue
+    {
+        if (operandMatcher.isNumericMatcher())
+        {
+            auto val = getNumericConst(*operandMatcher.getNumericMatcher().getMatchResult().begin());
+
+            std::for_each( 
+                operandMatcher.getUnaryOperations().begin(),
+                operandMatcher.getUnaryOperations().end(),
+                [&val](auto& unaryOperationMatcher)
+            {
+                if (unaryOperationMatcher.isPlus())
+                    val = UnPlusOperation().getResult(val);
+                else if (unaryOperationMatcher.isMinus())
+                    val = UnMinusOperation().getResult(val);
+                else if (unaryOperationMatcher.isExclaim())
+                    val = BooleanNotOperation().getResult(val);
+                else if (unaryOperationMatcher.isTilde())
+                    val = BitwiseNotOperation().getResult(val);
+                else
+                    throw  ExprException(L"error syntax");
+            });
+
+            return val;
+        }
+
+        if (operandMatcher.isNestedExpression())
+        {
+            return getResultForMatcher(operandMatcher.getNestedExpressionMatcher().getExprMatcher());
+        }
+        throw  ExprException(L"error syntax");
+    });
+
+    while (!operations.empty())
+    {
+        auto  op = std::max_element(operations.begin(), operations.end(),
+            [](const auto& op1, const auto& op2)
+        {
+            return op1->getPriority() > op2->getPriority();
+        });
+
+        auto op1 = operands.begin();
+        std::advance(op1, std::distance(operations.begin(), op));
+
+        auto op2 = operands.begin();
+        std::advance(op2, std::distance(operations.begin(), op) + 1);
+
+        TypedValue res;
+        
+        try 
+        {
+            res = (*op)->getResult(*op1, *op2);
+        }
+        catch (DbgException&)
+        {
+            throw  ExprException(L"error syntax");
+        }
+
+        operations.erase(op);
+
+        *op1 = res;
+        operands.erase(op2);
+
+        continue;
+    }
+
+    return operands.front();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1738,6 +1866,9 @@ TypedValue MultExprOperation::getResult(const TypedValue& val1, const TypedValue
 
 TypedValue DivExprOperation::getResult(const TypedValue& val1, const TypedValue& val2)
 {
+    if (val2 == 0 )
+        throw DbgException("expression division error");
+
     if (val1.getType()->isBase() && val2.getType()->isBase())
         return val1 / val2;
 

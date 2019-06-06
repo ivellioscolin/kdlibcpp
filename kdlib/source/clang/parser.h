@@ -323,7 +323,7 @@ public:
     {}
 
     void complete() {
-        capture.complete()
+        capture.complete();
         CaptureList<Ts...>::complete();
     }
 
@@ -446,6 +446,11 @@ public:
         return matcherList.rend();
     }
 
+    bool empty() const
+    {
+        return begin() == end();
+    }
+
     void complete()
     {
         if (currentMatcher.getMatchResult().isMatched())
@@ -473,9 +478,34 @@ private:
 class NumericMatcher : public Matcher
 {
 public:
+
     MatchResult  match(const TokenRange& matchRange)
     {
-        return matchResult = Is<clang::tok::numeric_constant>().match(matchRange);
+        auto res = Is<clang::tok::numeric_constant>().match(matchRange);
+        if (res.isMatched())
+            return matchResult = res;
+
+        res = any_of(
+            token_is(clang::tok::char_constant),
+            token_is(clang::tok::wide_char_constant)
+        ).match(matchRange);
+
+        if (res.isMatched())
+            return matchResult = res;
+
+        res = Is<clang::tok::identifier>().match(matchRange);
+
+        if (!res.isMatched())
+            return matchResult = MatchResult();
+
+        auto &token = *res.begin();
+
+        std::string  strVal(token.getIdentifierInfo()->getNameStart(), token.getLength());
+
+        if (strVal == "false" || strVal == "true")
+           return matchResult = res;
+
+        return matchResult = MatchResult();
     }
 };
 

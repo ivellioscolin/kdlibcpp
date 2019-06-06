@@ -7,6 +7,7 @@
 
 #include "strconvert.h"
 #include "typeparser.h"
+#include "exprparser.h"
 
 namespace kdlib {
 
@@ -37,11 +38,13 @@ public:
 
 class UnMinusOperation : public UnaryOperation
 {
+public:
     TypedValue getResult(const TypedValue& val) override;
 };
 
 class UnPlusOperation : public UnaryOperation
 {
+public:
     TypedValue getResult(const TypedValue& val) override
     {
         return val;
@@ -50,6 +53,7 @@ class UnPlusOperation : public UnaryOperation
 
 class DerefOperation : public UnaryOperation
 {
+public:
     TypedValue getResult(const TypedValue& val) override
     {
         TypedValue  v = val;
@@ -60,6 +64,7 @@ class DerefOperation : public UnaryOperation
 
 class RefOperation : public UnaryOperation
 {
+public:
     TypedValue getResult(const TypedValue& val) override
     {
         return makePointer(val.getType(), val.getAddress());
@@ -68,16 +73,19 @@ class RefOperation : public UnaryOperation
 
 class BitwiseNotOperation : public UnaryOperation
 {
+public:
     TypedValue getResult(const TypedValue& val) override;
 };
 
 class BooleanNotOperation : public UnaryOperation
 {
+public:
     TypedValue getResult(const TypedValue& val) override;
 };
 
 class PreIncrementOperation : public UnaryOperation
 {
+public:
     TypedValue getResult(const TypedValue& val) override
     {
         return val.getValue() + 1;
@@ -1371,6 +1379,8 @@ public:
     TypedValue  getResult();
 
 private:
+
+    static TypedValue getResultForMatcher(const parser::ConstExpressionMatcher& matcher);
 
     ScopePtr   m_scope;
     TypeInfoProviderPtr  m_typeInfoProvider;
