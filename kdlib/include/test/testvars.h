@@ -146,6 +146,10 @@ struct structWithNested {
              short m_field9;
          };
     };
+
+    enum {
+        NestConst = 123
+    };
 };
 
 extern structWithNested g_structWithNested;

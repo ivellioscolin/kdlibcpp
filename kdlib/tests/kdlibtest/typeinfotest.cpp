@@ -631,3 +631,8 @@ TEST_F(TypeInfoTest, TemplateStruct)
     EXPECT_EQ(L"TemplateStruct<TemplateStruct<int> [4]>", loadType(L"TemplateStruct<TemplateStruct<int> [4]>")->getName());
 }
 
+TEST_F(TypeInfoTest, StructNestedEnum)
+{
+    EXPECT_EQ(structWithNested::NestConst, *loadType(L"structWithNested")->getElement(L"NestConst"));
+}
+

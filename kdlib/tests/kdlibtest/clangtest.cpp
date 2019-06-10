@@ -519,3 +519,19 @@ TEST_F(ClangTest, MultipleInheritance)
     std::wstring  str;
     EXPECT_NO_THROW(str = typeInfo->str());
 }
+
+TEST_F(ClangTest, NestedEnum)
+{
+    static const wchar_t srcCode[] = L"\
+    struct Test {                      \
+        enum {                         \
+           VAL = 1                     \
+        };                             \
+    };                                 \
+    ";
+
+    TypeInfoPtr  testStruct;
+    ASSERT_NO_THROW(testStruct = compileType(srcCode, L"Test"));
+
+    EXPECT_EQ(1, *testStruct->getElement(L"VAL"));
+}
