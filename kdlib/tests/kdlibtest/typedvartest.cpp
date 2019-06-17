@@ -719,10 +719,11 @@ TEST_F(TypedVarTest, GetSource)
 
     ASSERT_NO_THROW(funcptr = loadTypedVar(L"classChild::childMethod"));
     funcptr->getSourceLine(funcptr->getAddress(), fileName, lineNo);
-    EXPECT_EQ(282, lineNo);
+    EXPECT_EQ(286, lineNo);
 }
 
 TEST_F(TypedVarTest, StructNestedEnum)
 {
+    EXPECT_EQ(g_structWithEnum.digit, *loadTypedVar(L"g_structWithEnum")->getElement(L"digit"));
     EXPECT_EQ(g_structWithNested.NestConst, *loadTypedVar(L"g_structWithNested")->getElement(L"NestConst"));
 }

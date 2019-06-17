@@ -351,6 +351,8 @@ TEST_F( TypeInfoTest, Str )
 {
     std::wstring str;
     ASSERT_NO_THROW( str = loadType(L"enumType")->str() );
+    ASSERT_NO_THROW( str = loadType(L"structWithNested")->str() );
+    ASSERT_NO_THROW(str = loadType(L"g_virtChild")->str());
 }
 
 
@@ -619,7 +621,7 @@ TEST_F(TypeInfoTest, PdbProviderEnum)
 
     ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator(L"struct*") );
     for ( count = 0; 0 != typeEnum->Next(); ++count);
-    EXPECT_EQ(12, count);
+    EXPECT_EQ(16, count);
 }
 
 TEST_F(TypeInfoTest, TemplateStruct)
@@ -634,5 +636,6 @@ TEST_F(TypeInfoTest, TemplateStruct)
 TEST_F(TypeInfoTest, StructNestedEnum)
 {
     EXPECT_EQ(structWithNested::NestConst, *loadType(L"structWithNested")->getElement(L"NestConst"));
+    EXPECT_EQ(structWithNested::NestConst1, *loadType(L"structWithNested")->getElement(L"NestConst1"));
 }
 

@@ -150,6 +150,10 @@ struct structWithNested {
     enum {
         NestConst = 123
     };
+
+    enum NestedEnum {
+        NestConst1 = 345
+    };
 };
 
 extern structWithNested g_structWithNested;

@@ -51,8 +51,14 @@ public:
 
     MEMOFFSET_REL getOffset() const
     {
-        if ( m_staticOffset != 0 )
-            throw TypeException( m_name, L"static field has only virtual address" );
+        if ( m_staticMember )
+            throw TypeException( m_name, L"static field has no offset" );
+
+        if (m_methodMember )
+            throw TypeException(m_name, L"method has no offset");
+
+        if (m_constMember)
+            throw TypeException(m_name, L"constatnt has no offset");
 
         return m_offset;
     }
@@ -70,6 +76,11 @@ public:
     bool isMethod() const 
     {
         return m_methodMember;
+    }
+
+    bool isConstMember() const
+    {
+        return m_constMember;
     }
 
     MEMOFFSET_64 getStaticOffset() const
@@ -107,7 +118,8 @@ protected:
          m_virtualDispSize( 0 ),
          m_staticMember( false ),
          m_virtualMember( false ),
-         m_methodMember(false)
+         m_methodMember(false),
+         m_constMember(false)
          {}
 
     std::wstring  m_name;
@@ -125,6 +137,7 @@ protected:
     bool  m_staticMember;
     bool  m_virtualMember;
     bool  m_methodMember;
+    bool  m_constMember;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -151,6 +164,15 @@ public:
         SymbolUdtField *p = new SymbolUdtField( sym, name );
         p->m_staticOffset = offset;
         p->m_staticMember = true;
+        return TypeFieldPtr(p);
+    }
+
+    static TypeFieldPtr getConstField(
+        const SymbolPtr &sym,
+        const std::wstring& name)
+    {
+        SymbolUdtField *p = new SymbolUdtField(sym, name);
+        p->m_constMember = true;
         return TypeFieldPtr(p);
     }
 

@@ -890,6 +890,11 @@ std::wstring TypeInfoFields::print()
     {
         TypeFieldPtr   udtField = m_fields.lookup(i);
 
+        if (udtField->isConstMember())
+        {
+            continue;
+        }
+        else
         if ( udtField->isStaticMember() )
         {
             sstr << L"   =" << std::right << std::setw(10) << std::setfill(L'0') << std::hex << udtField->getStaticOffset();
@@ -1401,7 +1406,9 @@ void TypeInfoUdt::getFields(
         {
             TypeFieldPtr  fieldPtr;
 
-            switch ( childSym->getDataKind() )
+            auto dataKind = childSym->getDataKind();
+
+            switch (dataKind )
             {
             case DataIsMember:
                 if ( baseVirtualSym )
@@ -1413,21 +1420,32 @@ void TypeInfoUdt::getFields(
                     fieldPtr = SymbolUdtField::getField( childSym, childSym->getName(), startOffset + childSym->getOffset() );
                 }
                 break;
+
             case DataIsStaticMember:
-
-                std::wstring  fieldName = childSym->getName();
-                MEMOFFSET_64  staticOffset = 0L;
-
-                try 
                 {
-                    staticOffset = childSym->getVa();
-                }
-                catch(SymbolException& )
-                {}
+                    std::wstring  fieldName = childSym->getName();
+                    MEMOFFSET_64  staticOffset = 0L;
 
-                fieldPtr = SymbolUdtField::getStaticField(childSym, fieldName, staticOffset);
+                    try
+                    {
+                        staticOffset = childSym->getVa();
+                    }
+                    catch (SymbolException&)
+                    {
+                    }
+
+                    fieldPtr = SymbolUdtField::getStaticField(childSym, fieldName, staticOffset);
+                }
 
                 break;
+
+            case DataIsConstant:
+                fieldPtr = SymbolUdtField::getConstField(childSym, childSym->getName());
+                break;
+
+            default:
+
+                throw TypeException(m_name, L"Unsupported field type");
             }
 
             m_fields.push_back( fieldPtr );
@@ -1448,8 +1466,12 @@ void TypeInfoUdt::getFields(
 
             m_fields.push_back( fieldPtr );
         }
-
-    }  
+        else
+        if (symTag == SymTagEnum)
+        {
+            getFields(childSym, SymbolPtr(), startOffset);
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

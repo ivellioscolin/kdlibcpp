@@ -819,11 +819,12 @@ TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
     if ( m_typeInfo->isStaticMember(fieldName) )
     {
         MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
-
-        //if ( staticOffset == 0 )
-        //   NOT_IMPLEMENTED();
-
         return  loadTypedVar( fieldType, staticOffset );
+    }
+
+    if (fieldType->isConstant())
+    {
+        return TypedValue(fieldType->getValue()).get();
     }
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
