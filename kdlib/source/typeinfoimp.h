@@ -34,256 +34,326 @@ class TypeInfoImp : public TypeInfo, public boost::enable_shared_from_this<TypeI
 {
 protected:
 
-    virtual std::wstring str() {
+    std::wstring str() override
+    {
         NOT_IMPLEMENTED();
     }
 
-    virtual std::wstring getName() {
+    std::wstring getName() override
+    {
         NOT_IMPLEMENTED();
     }
 
-    virtual std::wstring getScopeName() {
+    std::wstring getScopeName() override
+    {
         throw TypeException( getName(), L"type has no scope name" );
     }
 
-    virtual std::pair<std::wstring, std::wstring> splitName() {
+    std::pair<std::wstring, std::wstring> splitName() override
+    {
         return std::pair<std::wstring, std::wstring>(getName(), std::wstring());
     }
 
-    virtual size_t getSize() {
+    size_t getSize() override
+    {
         NOT_IMPLEMENTED();
     }
 
-    virtual size_t getPtrSize() {
+    size_t getPtrSize()override
+    {
         return ptrSize();
     }
 
-    virtual TypeInfoPtr ptrTo( size_t ptrSize = 0 );
+    TypeInfoPtr ptrTo( size_t ptrSize = 0 ) override;
 
-    virtual TypeInfoPtr deref() {
+    TypeInfoPtr deref() override
+    {
         throw TypeException( getName(), L"type can not be dereffered" );
     }
 
-    virtual TypeInfoPtr arrayOf( size_t size );
+    TypeInfoPtr arrayOf( size_t size ) override;
 
-    virtual bool isArray() {
+    bool isArray() override
+    {
         return false;
     }
 
-    virtual bool isPointer() {
+    bool isPointer() override
+    {
         return false;
     }
 
-    virtual bool isVoid() {
+    bool isVoid() override
+    {
         return false;
     }
 
-    virtual bool isBase() {
+    bool isBase() override
+    {
         return false;
     }
 
-    virtual bool isUserDefined() {
+    bool isUserDefined() override
+    {
         return false;
     }
 
-    virtual bool isEnum() {
+    bool isEnum() override 
+    {
         return false;
     }
 
-    virtual bool isBitField() {
+    bool isBitField() override
+    {
         return false;
     }
 
-    virtual bool isFunction() {
+    bool isFunction() override
+    {
         return false;
     }
 
-    virtual bool isVtbl() {
+    bool isVtbl() override
+    {
         return false;
     }
 
-    virtual bool isNoType() {
+    bool isNoType() override
+    {
         return false;
     }
 
-    virtual bool isConstant() {
+    bool isConstant() override
+    {
         return m_constant;
     }
 
-    virtual bool isVirtual() {
+    bool isVirtual() override
+    {
         throw TypeException( getName(), L"type is not class method" );
     }
 
-    virtual TypeInfoPtr getElement( const std::wstring &name ) {
+    TypeInfoPtr getElement( const std::wstring &name ) override
+    {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
 
-    virtual TypeInfoPtr getElement( size_t index ) {
+    TypeInfoPtr getElement( size_t index ) override
+    {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( const std::wstring &name ) {
+    MEMOFFSET_REL getElementOffset( const std::wstring &name ) override
+    {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( size_t index ) {
+    MEMOFFSET_REL getElementOffset( size_t index ) override
+    {
          throw TypeException( getName(), L" type has no fields or array elements");
     }
 
-    virtual size_t getElementCount() {
+    size_t getElementCount() override
+    {
         throw TypeException( getName(), L" type has no fields or array elements");
     }
 
-    virtual std::wstring getElementName( size_t index ) {
+    std::wstring getElementName( size_t index ) override
+    {
          NOT_IMPLEMENTED();
     }
 
-    virtual size_t getElementIndex( const std::wstring &name ) {
+    size_t getElementIndex( const std::wstring &name ) override
+    {
          NOT_IMPLEMENTED();
     }
 
-    virtual BITOFFSET getBitOffset() {
+    BITOFFSET getBitOffset() override
+    {
          throw TypeException( getName(), L" type is not a bit field");
     }
 
-    virtual BITOFFSET getBitWidth() {
+    BITOFFSET getBitWidth() override 
+    {
          throw TypeException( getName(), L" type is not a bit field");
     }
 
-    virtual TypeInfoPtr getBitType() {
+    TypeInfoPtr getBitType() override
+    {
          throw TypeException( getName(), L" type is not a bit field");
     }
     
-    virtual  MEMOFFSET_64 getElementVa( const std::wstring &name ) {
+    MEMOFFSET_64 getElementVa( const std::wstring &name ) override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual  MEMOFFSET_64 getElementVa( size_t index ) {
+    MEMOFFSET_64 getElementVa( size_t index )override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual bool isStaticMember( const std::wstring &name ) {
+    bool isStaticMember( const std::wstring &name ) override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual bool isStaticMember( size_t index ) {
+    bool isStaticMember( size_t index ) override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual bool isVirtualMember( const std::wstring &name ) {
+    bool isVirtualMember( const std::wstring &name ) override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual bool isVirtualMember( size_t index ) {
+    bool isVirtualMember( size_t index ) override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype)  {
+    bool isConstMember(const std::wstring &name) override
+    {
+        throw TypeException(getName(), L"type is not a struct");
+    }
+    
+    bool isConstMember(size_t index) override
+    {
+        throw TypeException(getName(), L"type is not a struct");
+    }
+
+    TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype) override
+    {
         throw TypeException( getName(), L"type has no methods" ); 
     }
 
-    virtual TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) {
+    TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) override
+    {
         throw TypeException( getName(), L"type has no methods" ); 
     }
 
-    virtual TypeInfoPtr getMethod( size_t index ) {
+    TypeInfoPtr getMethod( size_t index ) override
+    {
         throw TypeException( getName(), L"type has no methods" ); 
     }
 
-    virtual std::wstring getMethodName(size_t index) {
+    std::wstring getMethodName(size_t index) override
+    {
         throw TypeException(getName(), L"type has no methods");
     }
 
-    virtual size_t getMethodsCount() {
+    size_t getMethodsCount() override
+    {
         throw TypeException( getName(), L"type has no methods" ); 
     }
 
-    virtual TypeInfoPtr getBaseClass( const std::wstring& className) {
+    TypeInfoPtr getBaseClass( const std::wstring& className) override
+    {
         throw TypeException( getName(), L"type has no base class" ); 
     }
 
-    virtual TypeInfoPtr getBaseClass( size_t index ) {
+    TypeInfoPtr getBaseClass( size_t index ) override
+    {
         throw TypeException( getName(), L"type has no base class" ); 
     }
 
-    virtual size_t getBaseClassesCount() {
+    size_t getBaseClassesCount() override
+    {
         throw TypeException( getName(), L"type has no base class" ); 
     }
 
-    virtual MEMOFFSET_REL getBaseClassOffset( const std::wstring &name ) {
+    MEMOFFSET_REL getBaseClassOffset( const std::wstring &name ) override
+    {
         throw TypeException( getName(), L"type has no base class" ); 
     }
 
-    virtual MEMOFFSET_REL getBaseClassOffset( size_t index ) {
+    MEMOFFSET_REL getBaseClassOffset( size_t index ) override
+    {
         throw TypeException( getName(), L"type has no base class" );
     }
 
-    virtual bool isBaseClassVirtual( const std::wstring &name ) {
+    bool isBaseClassVirtual( const std::wstring &name ) override
+    {
         throw TypeException( getName(), L"type has no base class" );
     }
 
-    virtual bool isBaseClassVirtual( size_t index ) {
+    bool isBaseClassVirtual( size_t index ) override
+    {
         throw TypeException( getName(), L"type has no base class" );
     }
 
-    virtual void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
+    void getBaseClassVirtualDisplacement( const std::wstring &name, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) override
+    {
         throw TypeException( getName(), L"type is not virtual inherited" );
     }
 
-    virtual void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
+    void getBaseClassVirtualDisplacement( size_t index, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) override
+    {
         throw TypeException( getName(), L"type is not virtual inherited" );
     }
 
-    virtual bool isMethodMember( const std::wstring &name ) {
+    //bool isMethodMember( const std::wstring &name ) override
+    //{
+    //    throw TypeException( getName(), L"type is not a struct" ); 
+    //}
+
+    //bool isMethodMember( size_t index ) override
+    //{
+    //    throw TypeException( getName(), L"type is not a struct" ); 
+    //}
+
+    void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual bool isMethodMember( size_t index ) {
+    void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) override
+    {
         throw TypeException( getName(), L"type is not a struct" ); 
     }
 
-    virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
-        throw TypeException( getName(), L"type is not a struct" ); 
-    }
-
-    virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) {
-        throw TypeException( getName(), L"type is not a struct" ); 
-    }
-
-    virtual CallingConventionType getCallingConvention() {
+    CallingConventionType getCallingConvention() override
+    {
         throw TypeException( getName(), L"type is not a function" ); 
     }
 
-    virtual bool hasThis() {
+    bool hasThis() override
+    {
         throw TypeException( getName(), L"type is not a function" ); 
     }
 
-    virtual TypeInfoPtr getReturnType() {
+    TypeInfoPtr getReturnType() override
+    {
         throw TypeException( getName(), L"type is not a function" ); 
     }
 
-    virtual void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType ) {
+    void appendField(const std::wstring &fieldName, const TypeInfoPtr &fieldType ) override
+    {
         throw TypeException( getName(), L"type is not editable" ); 
     }
 
-    virtual TypeInfoPtr getClassParent() {
+    TypeInfoPtr getClassParent() override
+    {
         throw TypeException( getName(), L"has no class parent" ); 
     }
 
-    virtual size_t getAlignReq() {
+    size_t getAlignReq() override
+    {
         throw TypeException( getName(), L"has no alignment-requirement" );
     }
 
-    virtual TypeInfoPtr getVTBL() {
+    TypeInfoPtr getVTBL() override
+    {
         throw TypeException( getName(), L"has no VTBL" );
     }
 
-    virtual MEMOFFSET_REL getVtblOffset() 
+    MEMOFFSET_REL getVtblOffset() override
     {
         throw TypeException( getName(), L"type is not a virtual method" ); 
     }
 
-    virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource);
+    TypedVarPtr getVar(const DataAccessorPtr &dataSource) override;
 
 public:
 
@@ -342,12 +412,14 @@ protected:
 
     virtual size_t getElementCount();
 
-    virtual  MEMOFFSET_64 getElementVa( const std::wstring &name );
-    virtual  MEMOFFSET_64 getElementVa( size_t index );
-    virtual bool isStaticMember( const std::wstring &name );
-    virtual bool isStaticMember( size_t index );
-    virtual bool isVirtualMember( const std::wstring &name );
-    virtual bool isVirtualMember( size_t index );
+    MEMOFFSET_64 getElementVa( const std::wstring &name ) override;
+    MEMOFFSET_64 getElementVa( size_t index ) override;
+    bool isStaticMember( const std::wstring &name ) override;
+    bool isStaticMember( size_t index ) override;
+    bool isVirtualMember( const std::wstring &name ) override;
+    bool isVirtualMember( size_t index ) override;
+    bool isConstMember(const std::wstring &name) override;
+    bool isConstMember(size_t index) override;
 
     virtual size_t getAlignReq();
 

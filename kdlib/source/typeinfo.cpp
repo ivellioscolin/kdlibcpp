@@ -145,6 +145,11 @@ std::wstring printStructType(TypeInfoPtr& structType)
 
     for ( size_t i = 0; i < fieldCount; ++i )
     {
+        if (structType->isConstMember(i) )
+        {
+            continue;
+        }
+        else
         if ( structType->isStaticMember(i) )
         {
             sstr << L"   =" << std::right << std::setw(10) << std::setfill(L'0') << std::hex << structType->getElementVa(i);
@@ -1084,6 +1089,32 @@ bool TypeInfoFields::isVirtualMember( size_t index )
     return m_fields.lookup( index )->isVirtualMember();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoFields::isConstMember(const std::wstring &name)
+{
+    checkFields();
+
+    size_t  pos = name.find_first_of(L'.');
+
+    TypeFieldPtr  fieldPtr = m_fields.lookup(std::wstring(name, 0, pos));
+
+    if (pos == std::wstring::npos)
+        return fieldPtr->isConstMember();
+
+    TypeInfoPtr  fieldType = fieldPtr->getTypeInfo();
+
+    return fieldType->isConstMember(std::wstring(name, pos + 1));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoFields::isConstMember(size_t index)
+{
+    checkFields();
+
+    return m_fields.lookup(index)->isConstMember();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1126,7 +1157,10 @@ void TypeInfoUdt::getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtu
 
 std::wstring TypeInfoUdt::str()
 {
-    return std::wstring(L"class/struct : ") + TypeInfoFields::print();
+    TypeInfoPtr  selfPtr = shared_from_this();
+    return printStructType(selfPtr);
+
+    //return std::wstring(L"class/struct : ") + TypeInfoFields::print();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

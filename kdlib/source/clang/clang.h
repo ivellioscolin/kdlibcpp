@@ -263,7 +263,6 @@ public:
 };
 
 
-
 class TypeFieldClangEnumField : public TypeField
 {
 public:

@@ -268,6 +268,17 @@ void TypeInfoClangStruct::getRecursiveFields( clang::RecordDecl* recordDecl, MEM
             m_fields.push_back( TypeFieldClangField::getStaticField(m_astSession, recordDecl, varDecl) );
             continue;
         }
+
+        clang::EnumDecl  * enumDecl = llvm::dyn_cast<clang::EnumDecl>(*declit);
+        if ( enumDecl )
+        {
+            for (clang::EnumDecl::enumerator_iterator enumIt = enumDecl->enumerator_begin(); enumIt != enumDecl->enumerator_end(); ++enumIt)
+            {
+                std::string   fieldName = enumIt->getNameAsString();
+
+                m_fields.push_back(TypeFieldClangEnumField::getField(m_astSession, *enumIt));
+            }
+        }
     }
 }
 
@@ -470,6 +481,7 @@ TypeFieldPtr TypeFieldClangEnumField::getField(ClangASTSessionPtr& astSession, c
 
     field->m_decl = EnumDecl;
     field->m_astSession = astSession;
+    field->m_constMember = true;    
 
     return TypeFieldPtr(field);
 }

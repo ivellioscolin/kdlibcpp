@@ -88,6 +88,9 @@ public:
     virtual bool isVirtualMember( const std::wstring &name ) = 0;
     virtual bool isVirtualMember( size_t index ) = 0;
 
+    virtual bool isConstMember(const std::wstring &name) = 0;
+    virtual bool isConstMember(size_t index) = 0;
+
     virtual bool isVirtual() = 0;
 
     virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") = 0;

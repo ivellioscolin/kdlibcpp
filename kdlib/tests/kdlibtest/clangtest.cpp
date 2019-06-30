@@ -527,6 +527,9 @@ TEST_F(ClangTest, NestedEnum)
         enum {                         \
            VAL = 1                     \
         };                             \
+        enum NestedEnum {              \
+          VAL1 = 2                     \
+        };                             \
     };                                 \
     ";
 
@@ -534,4 +537,5 @@ TEST_F(ClangTest, NestedEnum)
     ASSERT_NO_THROW(testStruct = compileType(srcCode, L"Test"));
 
     EXPECT_EQ(1, *testStruct->getElement(L"VAL"));
+    EXPECT_EQ(2, *testStruct->getElement(L"VAL1"));
 }
