@@ -67,6 +67,7 @@ public:
     virtual bool isFunction() = 0;
     virtual bool isVtbl() = 0;
     virtual bool isNoType() = 0;
+    virtual bool isTemplate() = 0;
 
     virtual BITOFFSET getBitOffset() = 0;
     virtual BITOFFSET getBitWidth() = 0;

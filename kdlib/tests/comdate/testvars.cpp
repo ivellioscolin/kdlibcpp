@@ -220,3 +220,5 @@ std::list<int>  g_stdIntList;
 
 TestStructTemplate<int>   g_testStructTemplate;
 TestClassTemplate<int>   g_testClassTemplate;
+TestTemplateTwoTypes<int,TestClassTemplate<int>>  g_testTemplateTwoTypes;
+TestTemplateTwoValues<2,10>  g_testTemplateTwoValues;

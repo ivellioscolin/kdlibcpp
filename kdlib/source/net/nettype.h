@@ -103,6 +103,10 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual bool isTemplate() {
+        return false;
+    }
+
     virtual BITOFFSET getBitOffset() {
         NOT_IMPLEMENTED();
     }

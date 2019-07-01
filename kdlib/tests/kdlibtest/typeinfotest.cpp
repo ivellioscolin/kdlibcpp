@@ -639,3 +639,12 @@ TEST_F(TypeInfoTest, StructNestedEnum)
     EXPECT_EQ(structWithNested::NestConst1, *loadType(L"structWithNested")->getElement(L"NestConst1"));
 }
 
+TEST_F(TypeInfoTest, isTemplate)
+{
+    EXPECT_TRUE(loadType(L"TemplateStruct<int>")->isTemplate());
+    EXPECT_TRUE(loadType(L"TestTemplateTwoTypes<int,TestClassTemplate<int> >")->isTemplate());
+    EXPECT_TRUE(loadType(L"TestTemplateTwoValues<2,10>")->isTemplate());
+    EXPECT_FALSE(loadType(L"UInt4B")->isTemplate());
+    EXPECT_FALSE(loadType(L"structWithNested")->isTemplate());
+}
+

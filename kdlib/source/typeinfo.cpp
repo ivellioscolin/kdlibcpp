@@ -819,6 +819,13 @@ TypedVarPtr TypeInfoImp::getVar(const DataAccessorPtr &dataSource)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool TypeInfoImp::isTemplate()
+{
+    return getName().find_first_of(L'<') != std::wstring::npos;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring TypeInfoReference::getName()
 {
     std::wstring       name;

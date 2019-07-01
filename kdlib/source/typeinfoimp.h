@@ -133,6 +133,8 @@ protected:
         throw TypeException( getName(), L"type is not class method" );
     }
 
+    bool isTemplate() override;
+ 
     TypeInfoPtr getElement( const std::wstring &name ) override
     {
          throw TypeException( getName(), L" type has no fields or array elements");

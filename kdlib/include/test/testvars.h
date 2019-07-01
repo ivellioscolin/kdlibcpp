@@ -465,6 +465,22 @@ class TestClassTemplate
 
 extern  TestClassTemplate<int>   g_testClassTemplate;
 
+template<typename T1, typename T2>
+class TestTemplateTwoTypes
+{
+    T1  field1;
+    T2  field2;
+};
+
+extern TestTemplateTwoTypes<int, TestClassTemplate<int> >  g_testTemplateTwoTypes;
+
+template<int t1, int t2>
+class TestTemplateTwoValues
+{
+};
+
+extern TestTemplateTwoValues<2, 10>  g_testTemplateTwoValues;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack ( pop )

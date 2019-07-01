@@ -452,6 +452,7 @@ TEST_F(ClangTest, TemplateStruct)
 
     EXPECT_EQ(L"Int4B", typeProvider->getTypeByName(L"TestStruct<int,float>")->getElement(0)->getName());
     EXPECT_EQ(L"UInt4B", typeProvider->getTypeByName(L"TestStruct<char,unsigned long>")->getElement(1)->getName());
+    EXPECT_TRUE(typeProvider->getTypeByName(L"TestStruct<char,unsigned long>")->isTemplate());
     EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct"), TypeException);
     EXPECT_THROW(typeProvider->getTypeByName(L"TestStruct<float>"), TypeException);
 }
