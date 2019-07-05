@@ -427,3 +427,18 @@ TEST(TypeEvalTest, TemplateClose)
     EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int> >>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,TestStruct<int,int> >>", typeProvider));
 }
+
+TEST(TypeEvalTest, TemplateUnusedType)
+{
+    static const char sourceCode[] = " \
+    template<typename T1, typename T2> \
+    struct TestStruct {                \
+    };                                 \
+    TestStruct<int,TestStruct<int, TestStruct<int,int>>>     testVal; \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+
+    EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,int>>", typeProvider));
+}
+

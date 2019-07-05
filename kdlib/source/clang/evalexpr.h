@@ -507,7 +507,7 @@ class TypeEval {
 public:
        
     TypeEval(const ScopePtr& scope,
-        const TypeInfoProviderPtr typeInfoProvider,
+        const TypeInfoProviderPtr& typeInfoProvider,
         std::list<clang::Token>* tokens,
         clang::tok::TokenKind  endToken = clang::tok::eof
     ) : m_scope(scope), m_typeInfoProvider(typeInfoProvider), m_tokens(tokens), m_endToken(endToken)
@@ -515,18 +515,14 @@ public:
 
     TypeInfoPtr   getResult();
 
+    std::list<std::string>  getTemplateArgList();
+
 private:
 
 
     TypeInfoPtr getBaseType();
 
     TypeInfoPtr getStandardIntType();
-
-    //TypeInfoPtr getCustomType();
-
-    //TypeInfoPtr getComplexType(TypeInfoPtr& origType);
-
-    //void getTypeModifiers(std::list<TypeModifier*>& typeModifiers, clang::tok::TokenKind endToken);
 
     std::string getTemplateArgs(const parser::ListMatcher<parser::TemplateArgMatcher>& argList);
 

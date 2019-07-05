@@ -3,13 +3,13 @@
 #include <sstream>
 #include <iomanip>
 
-
 #include <boost/regex.hpp>
 
 #include "kdlib/exceptions.h"
 #include "kdlib/dbgengine.h"
 #include "kdlib/module.h"
 #include "kdlib/typeinfo.h"
+
 
 #include "typeinfoimp.h"
 #include "typedvarimp.h"
@@ -822,6 +822,32 @@ TypedVarPtr TypeInfoImp::getVar(const DataAccessorPtr &dataSource)
 bool TypeInfoImp::isTemplate()
 {
     return getName().find_first_of(L'<') != std::wstring::npos;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+size_t TypeInfoImp::getTemplateArgsCount()
+{
+    if ( !isTemplate() )
+        throw TypeException(getName(), L"type is not a template");
+
+    const auto& templateArgs = kdlib::getTempalteArgs(getName());
+    return templateArgs.size();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypeInfoImp::getTemplateArg(size_t index)
+{
+    if (!isTemplate())
+        throw TypeException(getName(), L"type is not a template");
+
+    const auto& templateArgs = kdlib::getTempalteArgs(getName());
+
+    if (index >= templateArgs.size())
+        throw IndexException(index);
+
+    return *std::next(templateArgs.begin(), index);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

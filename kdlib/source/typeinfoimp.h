@@ -28,6 +28,9 @@ std::wstring printStructType(TypeInfoPtr& structType);
 std::wstring printPointerType(TypeInfoPtr&  ptrType);
 std::wstring printEnumType(TypeInfoPtr& enumType);
 
+std::list<std::wstring> getTempalteArgs(const std::wstring& typeName);
+std::list<std::string> getTempalteArgs(const std::string& typeName);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class TypeInfoImp : public TypeInfo, public boost::enable_shared_from_this<TypeInfoImp>
@@ -295,16 +298,6 @@ protected:
         throw TypeException( getName(), L"type is not virtual inherited" );
     }
 
-    //bool isMethodMember( const std::wstring &name ) override
-    //{
-    //    throw TypeException( getName(), L"type is not a struct" ); 
-    //}
-
-    //bool isMethodMember( size_t index ) override
-    //{
-    //    throw TypeException( getName(), L"type is not a struct" ); 
-    //}
-
     void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize ) override
     {
         throw TypeException( getName(), L"type is not a struct" ); 
@@ -356,6 +349,10 @@ protected:
     }
 
     TypedVarPtr getVar(const DataAccessorPtr &dataSource) override;
+
+    size_t getTemplateArgsCount() override;
+
+    std::wstring getTemplateArg(size_t index) override;
 
 public:
 

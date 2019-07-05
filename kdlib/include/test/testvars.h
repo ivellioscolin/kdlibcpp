@@ -481,6 +481,16 @@ class TestTemplateTwoValues
 
 extern TestTemplateTwoValues<2, 10>  g_testTemplateTwoValues;
 
+struct UnusedStruct
+{
+};
+
+template<typename T>
+class ClassNoField
+{};
+
+extern ClassNoField<UnusedStruct>  g_templateUnusedStruct;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack ( pop )

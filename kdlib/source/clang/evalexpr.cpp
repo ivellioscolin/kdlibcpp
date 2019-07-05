@@ -207,6 +207,93 @@ TypeInfoPtr evalType(const std::string& expr, const TypeInfoProviderPtr typeInfo
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::list<std::string> getTempalteArgs(const std::string& expr)
+{
+    auto  preprocessorOptions = std::make_shared<clang::PreprocessorOptions>();
+
+    llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> diagnosticIDs(new clang::DiagnosticIDs());
+
+    auto diagnosticOptions = new clang::DiagnosticOptions();
+
+    auto diagnosticConsumer = new clang::IgnoringDiagConsumer();
+
+    clang::DiagnosticsEngine  diagnosticEngine(diagnosticIDs, diagnosticOptions, diagnosticConsumer);
+
+    clang::LangOptions  langOptions;
+
+    llvm::IntrusiveRefCntPtr<clang::vfs::InMemoryFileSystem>  memoryFileSystem(new clang::vfs::InMemoryFileSystem());
+    memoryFileSystem->addFile("<input>", 0, llvm::MemoryBuffer::getMemBuffer(expr.c_str()));
+
+    clang::FileSystemOptions  fileSystemOptions;
+    clang::FileManager  fileManager(fileSystemOptions, memoryFileSystem);
+    clang::SourceManager  sourceManager(diagnosticEngine, fileManager);
+
+    const clang::FileEntry *pFile = fileManager.getFile("<input>");
+    clang::FileID  fileID = sourceManager.getOrCreateFileID(pFile, clang::SrcMgr::C_User);
+    sourceManager.setMainFileID(fileID);
+
+    clang::MemoryBufferCache  memoryBufferCache;
+
+    auto headerSearchOptions = std::make_shared<clang::HeaderSearchOptions>();
+    auto targetOptions = std::make_shared<clang::TargetOptions>();
+    targetOptions->Triple = llvm::sys::getDefaultTargetTriple();
+    clang::TargetInfo*  targetInfo = clang::TargetInfo::CreateTargetInfo(diagnosticEngine, targetOptions);
+    clang::HeaderSearch  headerSearch(headerSearchOptions, sourceManager, diagnosticEngine, langOptions, targetInfo);
+
+    clang::CompilerInstance  compilerInstance;
+
+    clang::Preprocessor   preprocessor(
+        preprocessorOptions,
+        diagnosticEngine,
+        langOptions,
+        sourceManager,
+        memoryBufferCache,
+        headerSearch,
+        compilerInstance
+    );
+    preprocessor.Initialize(*targetInfo);
+
+    preprocessor.EnterMainSourceFile();
+    diagnosticConsumer->BeginSourceFile(langOptions, &preprocessor);
+
+    clang::Token token;
+
+    std::list<clang::Token>  tokens;
+
+    do {
+
+        preprocessor.Lex(token);
+
+        if (diagnosticEngine.hasErrorOccurred())
+        {
+            NOT_IMPLEMENTED();
+        }
+
+        tokens.push_back(token);
+
+    } while (!token.is(clang::tok::eof));
+
+    diagnosticConsumer->EndSourceFile();
+
+    TypeEval  exprEval(getDefaultScope(), getDefaultTypeInfoProvider(), &tokens);
+
+    return exprEval.getTemplateArgList();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::list<std::wstring> getTempalteArgs(const std::wstring& typeName)
+{
+    const std::list<std::string>&  argList = getTempalteArgs(wstrToStr(typeName));
+    std::list<std::wstring>  wargLst;
+    std::for_each(argList.begin(), argList.end(), [&wargLst](const auto& arg) {
+        wargLst.push_back(strToWStr(arg));
+    });
+    return wargLst;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 ExprEval::ExprEval(const ScopePtr& scope,
     const TypeInfoProviderPtr& typeInfoProvider,
     std::list<clang::Token>* tokens,
@@ -818,6 +905,96 @@ TypeInfoPtr TypeEval::getResult()
     *m_tokens = tokens;
 
     return typeInfo;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::list<std::string>  TypeEval::getTemplateArgList()
+{
+    using namespace parser;
+
+    std::list<clang::Token>  tokens;
+    std::copy_if(m_tokens->cbegin(), m_tokens->cend(), std::back_inserter(tokens), [](auto& token) {
+        return !token.is(clang::tok::kw_const);
+    });
+
+    TypeMatcher typeMatcher;
+
+    auto matcher = all_of(typeMatcher, token_is(m_endToken));
+    auto matchResult = matcher.match(std::make_pair(tokens.cbegin(), tokens.cend()));
+
+    if (!matchResult.isMatched())
+        throw  ExprException(L"error syntax");
+
+    if (!typeMatcher.isCustomType())
+        throw  ExprException(L"error syntax");
+
+    const auto& customMatcher = typeMatcher.getCustomMatcher();
+
+    if (customMatcher.isTemplate())
+    {
+        const auto& argList = customMatcher.getTemplateMatcher().getTemplateArgs();
+
+        std::list<std::string>  argStrList;
+
+        for (auto& arg : argList)
+        {
+            if (arg.isType())
+            {
+                argStrList.push_back(getTypeName(arg.getTypeMatcher()));
+            }
+            else if (arg.isExpression())
+            {
+                auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getExpressionMatcher().getMatchResult().getMatchedRange()).getResult();
+                argStrList.push_back(std::to_string(value.getValue().asLongLong()));
+            }
+            else
+            {
+                throw  ExprException(L"error syntax");
+            }
+        }
+
+        return argStrList;
+    }
+
+    if (customMatcher.isNestedTemplate())
+    {
+        const auto& templateMatcher = customMatcher.getNestedTemplateMatcher();
+        const auto& argList = templateMatcher.getTemplateArgs1();
+        
+        std::list<std::string>  argStrList;
+
+        for (auto& arg : argList)
+        {
+            if (arg.isType())
+            {
+                argStrList.push_back(getTypeName(arg.getTypeMatcher()));
+            }
+            else if (arg.isExpression())
+            {
+                auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getExpressionMatcher().getMatchResult().getMatchedRange()).getResult();
+                argStrList.push_back(std::to_string(value.getValue().asLongLong()));
+            }
+            else
+            {
+                throw  ExprException(L"error syntax");
+            }
+        }
+
+        std::string  templateName = templateMatcher.getNestedTemplateName();
+
+        templateName += '<';
+
+        templateName += getTemplateArgs(templateMatcher.getTemplateArgs2());
+
+        templateName += '>';
+
+        argStrList.push_back(templateName);
+
+        return argStrList;
+    }
+
+    throw  ExprException(L"error syntax");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

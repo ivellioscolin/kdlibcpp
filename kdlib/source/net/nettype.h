@@ -286,6 +286,16 @@ protected:
     virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource) {
         NOT_IMPLEMENTED();
     }
+
+    size_t getTemplateArgsCount() override
+    {
+        NOT_IMPLEMENTED();
+    }
+
+    std::wstring getTemplateArg(size_t index) override
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

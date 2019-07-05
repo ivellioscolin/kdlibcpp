@@ -132,6 +132,9 @@ public:
 
     virtual TypedVarPtr getVar(const DataAccessorPtr &dataSource) = 0;
 
+    virtual size_t getTemplateArgsCount() = 0;
+    virtual std::wstring getTemplateArg(size_t index) = 0;
+
 protected:
 
     static bool isBaseType( const std::wstring &typeName );

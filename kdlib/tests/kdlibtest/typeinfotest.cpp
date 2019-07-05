@@ -621,7 +621,7 @@ TEST_F(TypeInfoTest, PdbProviderEnum)
 
     ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator(L"struct*") );
     for ( count = 0; 0 != typeEnum->Next(); ++count);
-    EXPECT_EQ(16, count);
+    EXPECT_EQ(14, count);
 }
 
 TEST_F(TypeInfoTest, TemplateStruct)
@@ -648,3 +648,18 @@ TEST_F(TypeInfoTest, isTemplate)
     EXPECT_FALSE(loadType(L"structWithNested")->isTemplate());
 }
 
+TEST_F(TypeInfoTest, TemplateArgCount)
+{
+    EXPECT_EQ(1, loadType(L"TemplateStruct<int>")->getTemplateArgsCount());
+    EXPECT_EQ(2, loadType(L"TestTemplateTwoValues<2,10>")->getTemplateArgsCount());
+    EXPECT_EQ(2, loadType(L"TestTemplateTwoTypes<int,TestClassTemplate<int> >")->getTemplateArgsCount());
+    EXPECT_THROW(loadType(L"structWithNested")->getTemplateArgsCount(), TypeException);
+}
+
+TEST_F(TypeInfoTest, TemplateArg)
+{
+    EXPECT_EQ(L"int", loadType(L"TemplateStruct<int>")->getTemplateArg(0));
+    EXPECT_EQ(L"10", loadType(L"TestTemplateTwoValues<2,10>")->getTemplateArg(1));
+    EXPECT_EQ(L"TestClassTemplate<int>", loadType(L"TestTemplateTwoTypes<int,TestClassTemplate<int> >")->getTemplateArg(1));
+    EXPECT_THROW(loadType(L"TemplateStruct<int>")->getTemplateArg(1), IndexException);
+}

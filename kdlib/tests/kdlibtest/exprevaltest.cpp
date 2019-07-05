@@ -426,6 +426,11 @@ TEST_F(ExprEvalTarget, ClassTemplate)
     EXPECT_EQ(sizeof(TestClassTemplate<int>), evalExpr("sizeof(TestClassTemplate<int>)", m_targetModule->getScope()));
 }
 
+TEST_F(ExprEvalTarget, ClassTemplateUnusedType)
+{
+    EXPECT_EQ(sizeof(ClassNoField<UnusedStruct>), evalExpr("sizeof(ClassNoField<UnusedStruct>)", m_targetModule->getScope()));
+}
+
 TEST_F(ExprEvalTarget, Eval1)
 {
     EXPECT_EQ(g_testArray[1].m_field1, evalExpr("g_testArray[1].m_field1", m_targetModule->getScope()));
