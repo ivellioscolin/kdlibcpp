@@ -179,6 +179,16 @@ public:
         return arrayMatcher;
     }
 
+    bool isReference() const
+    {
+        return refMatcher.getMatchResult().isMatched();
+    }
+
+    const RefMatcher& getRefMatcher() const
+    {
+        assert(isReference());
+        return refMatcher;
+    }
 
 private:
 

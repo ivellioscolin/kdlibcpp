@@ -801,6 +801,12 @@ TypeInfoPtr applyComplexModifierRecursive(const parser::ComplexMatcher& matcher,
 {
     TypeInfoPtr  typeInfo = typeInfo_;
 
+    if (matcher.isReference())
+    {
+        if (typeInfo->isVoid() )
+            throw  ExprException(L"error syntax");
+    }
+
     if (matcher.isPointer())
     {
         for ( auto p : matcher.getPointerMatcher().getPointerMatchers() )
@@ -1266,6 +1272,12 @@ std::string  TypeEval::getBaseTypeName(const parser::BaseTypeMatcher& baseTypeMa
 
 TypeInfoPtr TypeEval::getBaseType()
 {
+    if (m_tokens->front().is(clang::tok::kw_void))
+    {
+        m_tokens->pop_front();
+        return loadType(L"Void");
+    }
+
     std::unique_ptr<BaseTypeBuilder>  baseTypeBuilder(new EmptyBaseTypeBuilder);
 
     while (true)
@@ -1637,7 +1649,8 @@ static const std::map< std::string, std::function<kdlib::TypeInfoPtr(void)>  >  
     { "size_t", []() { return kdlib::ptrSize() == 4 ? kdlib::loadType(L"UInt4B") : kdlib::loadType(L"UInt8B");  } },
     { "intptr_t", []() { return kdlib::ptrSize() == 4 ? kdlib::loadType(L"Int4B") : kdlib::loadType(L"Int8B");  } },
     { "uintptr_t", []() { return kdlib::ptrSize() == 4 ? kdlib::loadType(L"UInt4B") : kdlib::loadType(L"UInt8B");  } },
-    { "bool", []() { return kdlib::loadType(L"Bool");  } }
+    { "bool", []() { return kdlib::loadType(L"Bool");  } },
+    { "void", []() { return kdlib::loadType(L"Void"); } }
 };
 
 bool isStandardIntType(const clang::Token& token)
@@ -1976,6 +1989,11 @@ TypedValue TypeCastOperation::castToPtr(const TypedValue& val)
     }
 
     if (val.getType()->isArray())
+    {
+        return TypedValue(val.getAddress()).castTo(m_type);
+    }
+
+    if (val.getType()->isUserDefined())
     {
         return TypedValue(val.getAddress()).castTo(m_type);
     }

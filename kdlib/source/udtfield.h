@@ -58,7 +58,7 @@ public:
             throw TypeException(m_name, L"method has no offset");
 
         if (m_constMember)
-            throw TypeException(m_name, L"constatnt has no offset");
+            throw TypeException(m_name, L"constant has no offset");
 
         return m_offset;
     }

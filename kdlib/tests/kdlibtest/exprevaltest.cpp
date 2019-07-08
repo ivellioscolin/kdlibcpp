@@ -437,3 +437,11 @@ TEST_F(ExprEvalTarget, Eval1)
     EXPECT_EQ(g_structTest1.m_field4->m_field1 + 200, evalExpr("g_structTest1.m_field4->m_field1 + 200", m_targetModule->getScope()));
     EXPECT_EQ( (g_testArray + 1)->m_field1 % 4, evalExpr("(g_testArray + 1)->m_field1 % 4", m_targetModule->getScope()));
 }
+
+TEST_F(ExprEvalTarget, StructAsPointer)
+{
+    auto var = loadTypedVar(L"g_classChild");
+    auto scope = makeScope({ { L"this", var } });
+
+    EXPECT_EQ(var->getAddress(), evalExpr("(void*)this", scope));
+}

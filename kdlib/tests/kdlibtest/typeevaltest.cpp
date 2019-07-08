@@ -442,3 +442,15 @@ TEST(TypeEvalTest, TemplateUnusedType)
     EXPECT_NO_THROW(evalType("TestStruct<int,TestStruct<int,int>>", typeProvider));
 }
 
+TEST(TypeEvalTest, Void)
+{
+    EXPECT_EQ(L"Void", evalType("void")->getName());
+    EXPECT_EQ(L"Void*", evalType("void *")->getName());
+    EXPECT_EQ(L"Void*[1]", evalType("void *[1]")->getName());
+
+    EXPECT_THROW(evalType("void&"), TypeException);
+    EXPECT_THROW(evalType("void&&"), TypeException);
+    EXPECT_THROW(evalType("void[5]"), TypeException);
+
+}
+
