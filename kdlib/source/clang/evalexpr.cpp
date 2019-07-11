@@ -779,6 +779,9 @@ TypedValue ExprEval::getIdentifierValue()
     if (fullName == "false")
         return TypedValue(false);
 
+    if (fullName == "nullptr")
+        return TypedValue(nullptr);
+
     TypedValue   result;
     std::wstring  wname = strToWStr(fullName);
     if (m_scope->find(wname, result))
@@ -1989,11 +1992,6 @@ TypedValue TypeCastOperation::castToPtr(const TypedValue& val)
     }
 
     if (val.getType()->isArray())
-    {
-        return TypedValue(val.getAddress()).castTo(m_type);
-    }
-
-    if (val.getType()->isUserDefined())
     {
         return TypedValue(val.getAddress()).castTo(m_type);
     }

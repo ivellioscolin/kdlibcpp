@@ -310,6 +310,12 @@ TEST(ExprEval, PointerArithm)
     EXPECT_THROW(evalExpr("-(long*)10"), DbgException);
 }
 
+TEST(ExprEval, NullPtr)
+{
+    EXPECT_EQ(0, evalExpr("(void*)0"));
+    EXPECT_EQ(0, evalExpr("(int**)nullptr"));
+}
+
 class ExprEvalTarget : public ProcessFixture
 {
 public:
@@ -381,11 +387,6 @@ TEST_F(ExprEvalTarget, CastUdt)
     EXPECT_THROW(evalExpr("(structTest)g_classChild", m_targetModule->getScope()), DbgException);
 }
 
-//
-//TEST_F(ExprEvalTarget, CastUdt)
-//{
-//    EXPECT_THROW(evalExpr("(int)g_classChild", m_targetModule->getScope()), DbgException);
-
 TEST_F(ExprEvalTarget, EnumVal)
 {
     EXPECT_EQ(enumType::THREE, evalExpr("enumType::THREE", m_targetModule->getScope()));
@@ -438,10 +439,3 @@ TEST_F(ExprEvalTarget, Eval1)
     EXPECT_EQ( (g_testArray + 1)->m_field1 % 4, evalExpr("(g_testArray + 1)->m_field1 % 4", m_targetModule->getScope()));
 }
 
-TEST_F(ExprEvalTarget, StructAsPointer)
-{
-    auto var = loadTypedVar(L"g_classChild");
-    auto scope = makeScope({ { L"this", var } });
-
-    EXPECT_EQ(var->getAddress(), evalExpr("(void*)this", scope));
-}

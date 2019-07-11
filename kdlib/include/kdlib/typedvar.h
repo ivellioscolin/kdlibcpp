@@ -70,6 +70,7 @@ TypedVarPtr loadBoolVar( bool var );
 TypedVarPtr loadFloatVar( float var );
 TypedVarPtr loadDoubleVar( double var );
 TypedVarPtr loadWCharVar( wchar_t var );
+TypedVarPtr loadNullPtr();
 
 class TypedVar : public NumConvertable, private boost::noncopyable {
 
@@ -175,6 +176,7 @@ public:
     TypedValue( double var ) : m_value( loadDoubleVar(var) ) {}
     TypedValue( wchar_t var ) : m_value( loadWCharVar(var) ) {}
     TypedValue( bool var ) : m_value( loadBoolVar(var) ) {}
+    TypedValue( nullptr_t ) : m_value(loadNullPtr() ) {}
 
     template<typename T>
     TypedValue(T* var) : m_value(loadULongLongVar((unsigned long long)var)) {}

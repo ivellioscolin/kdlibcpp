@@ -100,7 +100,7 @@ DataAccessorPtr getCacheAccessor(size_t bufferSize, const std::wstring&  locatio
 DataAccessorPtr getCacheAccessor(const void* rawBuffer, size_t bufferSize, const std::wstring&  location=L"");
 DataAccessorPtr getCacheAccessor(const NumVariant& var, const std::wstring&  location=L"");
 
-template<typename T>
+template<typename T, typename std::enable_if< !std::is_integral<T>::value >::type* = nullptr >
 DataAccessorPtr getCacheAccessor(const T& structType, const std::wstring&  location=L"")
 {
     return getCacheAccessor(&structType, sizeof(structType), location);

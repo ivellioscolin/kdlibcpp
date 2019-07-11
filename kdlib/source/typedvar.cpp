@@ -621,6 +621,14 @@ TypedVarPtr loadBoolVar(bool var)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr loadNullPtr()
+{
+    DataAccessorPtr  accessor = getCacheAccessor(8);
+    return loadType(L"Void*")->getVar(accessor);
+} 
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr loadFloatVar( float var )
 {
     DataAccessorPtr  accessor = getCacheAccessor( sizeof(float) );
