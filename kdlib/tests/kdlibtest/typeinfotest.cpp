@@ -663,3 +663,8 @@ TEST_F(TypeInfoTest, TemplateArg)
     EXPECT_EQ(L"TestClassTemplate<int>", loadType(L"TestTemplateTwoTypes<int,TestClassTemplate<int> >")->getTemplateArg(1));
     EXPECT_THROW(loadType(L"TemplateStruct<int>")->getTemplateArg(1), IndexException);
 }
+
+TEST_F(TypeInfoTest, TemplateArgStdPair)
+{
+    EXPECT_EQ(3, loadType(L"g_stdIntList")->getElement(L"_Mypair")->getTemplateArgsCount());
+}

@@ -1212,6 +1212,11 @@ std::string TypeEval::getCustomTypeName(const parser::CustomTypeMatcher& customM
 
 std::string  TypeEval::getBaseTypeName(const parser::BaseTypeMatcher& baseTypeMatcher)
 {
+    if (baseTypeMatcher.getMatchResult().begin()->is(clang::tok::kw_void))
+    {
+        return "void";
+    }
+
     std::unique_ptr<BaseTypeBuilder>  baseTypeBuilder(new EmptyBaseTypeBuilder);
 
     for (auto& token : baseTypeMatcher.getMatchResult())
