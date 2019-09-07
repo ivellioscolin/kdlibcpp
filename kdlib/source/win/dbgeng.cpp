@@ -2736,6 +2736,17 @@ void dinput(const std::wstring &str)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void setStatusMessage(const std::wstring &str)
+{
+    g_dbgMgr->control->OutputWide(
+        DEBUG_OUTPUT_STATUS,
+        L"%ws",
+        str.c_str()
+    );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 } // kdlib namespace end 
 
 

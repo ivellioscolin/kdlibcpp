@@ -12,6 +12,7 @@ std::wstring dreadline();
 void eprint( const std::wstring &str );
 void eprintln( const std::wstring &str );
 void dinput( const std::wstring &str );
+void setStatusMessage(const std::wstring &str);
 
 ///////////////////////////////////////////////////////////////////////////////
 
