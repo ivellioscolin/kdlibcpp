@@ -125,15 +125,21 @@ TEST(TypeEvalTest, ArrayBaseType)
     EXPECT_EQ(L"Int8B[2][3]", evalType("long long[2][3]")->getName());
     EXPECT_EQ(L"UInt8B[1]", evalType("uint64_t[1]")->getName());
 
-    EXPECT_EQ(sizeof( short[10][2] ), evalType("short[10][2]")->getSize());
-     
-    EXPECT_THROW(evalType("int[]"), TypeException);
+    EXPECT_EQ(sizeof(short[10][2]), evalType("short[10][2]")->getSize());
+}
+
+TEST(TypeEvalTest, IncpmleteArrayType)
+{
+    EXPECT_NO_THROW(evalType("int[]"));
+    EXPECT_NO_THROW(evalType("int[][2]"));
+    EXPECT_THROW(evalType("int[][]"), TypeException);
+    EXPECT_THROW(evalType("int[2][]"), TypeException);
 }
 
 TEST(TypeEvalTest, ComplexBaseType)
 {
     EXPECT_EQ(L"Int1B(*)[20]", evalType("char (*)[20]")->getName());
-    EXPECT_EQ(sizeof(char (*)[20]), evalType("char (*)[20]")->getSize());
+    EXPECT_EQ(sizeof(char(*)[20]), evalType("char (*)[20]")->getSize());
 
     EXPECT_EQ(L"Int1B(*[5])[20]", evalType("char (*[5])[20]")->getName());
     EXPECT_EQ(sizeof(char(*[5])[20]), evalType("char (*[5])[20]")->getSize());
@@ -142,10 +148,14 @@ TEST(TypeEvalTest, ComplexBaseType)
     EXPECT_EQ(sizeof(char(*(*)[5])[20]), evalType("char (*(*)[5])[20]")->getSize());
 }
 
+TEST(TypeEvalTest, IncompleteComplexType)
+{
+    EXPECT_EQ(sizeof(int(*)[]), evalType("int(*)[]")->getSize());
+    EXPECT_EQ(sizeof(int(*)[][4]), evalType("int(*)[][4]")->getSize());
+}
 
 TEST(TypeEvalTest, StructType)
 {
-
     struct TestStruct {
         int  field1;
         char  field2;
@@ -186,7 +196,6 @@ TEST(TypeEvalTest, EnumType)
         TEN = 10                      \
     };                                \
     ";
-
 
     TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
 
@@ -451,6 +460,40 @@ TEST(TypeEvalTest, Void)
     EXPECT_THROW(evalType("void&"), TypeException);
     EXPECT_THROW(evalType("void&&"), TypeException);
     EXPECT_THROW(evalType("void[5]"), TypeException);
-
 }
+
+TEST(TypeEvalTest, TemplateIncompleteArray)
+{
+    static const char sourceCode[] = "              \
+    template<typename T1>                           \
+    struct TestStruct {                             \
+    };                                              \
+    TestStruct<int[]>                  testVal1;    \
+    TestStruct<int*[]>                 testVal2;    \
+    TestStruct<void*[]>                testVal3;    \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+    
+    EXPECT_NO_THROW(evalType("TestStruct<int[]>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<int*[]>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<void*[]>", typeProvider));
+}
+
+TEST(TypeEvalTest, TemplateVoid)
+{
+    static const char sourceCode[] = "              \
+    template<typename T1, typename T2, typename T3> \
+    struct TestStruct {                             \
+    };                                              \
+    TestStruct<void,void*,void*[1]>    testVal1;    \
+    TestStruct<void,void*,void*[]>     testVal2;    \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+
+    EXPECT_NO_THROW(evalType("TestStruct<void,void*,void*[1]>", typeProvider));
+    EXPECT_NO_THROW(evalType("TestStruct<void,void*,void*[]>", typeProvider));
+}
+
 

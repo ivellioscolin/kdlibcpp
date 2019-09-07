@@ -74,22 +74,49 @@ private:
 
 };
 
+class ArrayIndexMatcher : public Matcher
+{
+public:
+
+    MatchResult match(const TokenRange& matchRange)
+    {
+        auto matcher = all_of(Is<clang::tok::l_square>(), opt(numericMatcher), Is<clang::tok::r_square>());
+        return matchResult = matcher.match(matchRange);
+    }
+
+    bool isIndexComplete() const
+    {
+        return numericMatcher.getMatchResult().isMatched();
+    }
+
+    const auto& getIndexMatcher() const
+    {
+        assert(isIndexComplete());
+        return numericMatcher;
+    }
+
+private:
+
+    NumericMatcher  numericMatcher;
+
+};
+
 class ArrayMatcher : public Matcher
 {
 public:
 
     MatchResult match(const TokenRange& matchRange)
     {
-        return matchResult = rep(all_of(Is<clang::tok::l_square>(), numericMatcher, Is<clang::tok::r_square>()), numericMatcher).match(matchRange);
+        return matchResult = rep(indexMatcher, indexMatcher).match(matchRange);
     }
 
     const auto& getArrayIndices() const {
-        return numericMatcher;
+        return indexMatcher;
     }
 
 private:
 
-    ListMatcher<NumericMatcher> numericMatcher;
+    ListMatcher<ArrayIndexMatcher> indexMatcher;
 };
 
 class ComplexMatcher;

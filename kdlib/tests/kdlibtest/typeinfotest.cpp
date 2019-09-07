@@ -668,3 +668,22 @@ TEST_F(TypeInfoTest, TemplateArgStdPair)
 {
     EXPECT_EQ(3, loadType(L"g_stdIntList")->getElement(L"_Mypair")->getTemplateArgsCount());
 }
+
+TEST_F(TypeInfoTest, DISABLED_IncomleteStruct)
+{
+    TypeInfoPtr  typeInfo;
+    ASSERT_NO_THROW(typeInfo = loadType(L"g_structAbstract"));
+    EXPECT_NO_THROW(typeInfo->deref());
+    EXPECT_THROW(typeInfo->deref()->getSize(), TypeException); //DIA return 0 size, there is no way to know a type in incomplete
+}
+
+TEST_F(TypeInfoTest, ArrayOfIncomplete)
+{
+    TypeInfoPtr  typeInfo;
+    ASSERT_NO_THROW(typeInfo = loadType(L"Int1B")->arrayOf());
+    EXPECT_EQ(L"Int1B[]", typeInfo->getName());
+    
+    EXPECT_THROW(typeInfo->getSize(), TypeException);
+    EXPECT_THROW(typeInfo->arrayOf(1), TypeException);
+    EXPECT_THROW(typeInfo->arrayOf(), TypeException);
+}

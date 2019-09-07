@@ -819,10 +819,17 @@ TypeInfoPtr applyComplexModifierRecursive(const parser::ComplexMatcher& matcher,
     if (matcher.isArray())
     {
         auto  indices = matcher.getArrayMatcher().getArrayIndices();
-        for ( auto it = indices.rbegin(); it != indices.rend(); ++it)
+        for (auto it = indices.rbegin(); it != indices.rend(); ++it)
         {
-            auto i = getNumericConst(*it->getMatchResult().begin()).getValue().asLongLong();
-            typeInfo = typeInfo->arrayOf(i);
+            if (it->isIndexComplete())
+            {
+                auto i = getNumericConst(*it->getIndexMatcher().getMatchResult().begin()).getValue().asLongLong();
+                typeInfo = typeInfo->arrayOf(i);
+            }
+            else
+            {
+                typeInfo = typeInfo->arrayOf();
+            }
         }
     }
   
@@ -856,8 +863,15 @@ std::string getTypeModifierRecursive(const parser::ComplexMatcher& matcher)
         auto  indices = matcher.getArrayMatcher().getArrayIndices();
         for (auto it = indices.rbegin(); it != indices.rend(); ++it)
         {
-            auto i = getNumericConst(*it->getMatchResult().begin()).getValue().asLongLong();
-            sstr << '[' << std::dec << i << ']';
+            if (it->isIndexComplete())
+            {
+                auto i = getNumericConst(*it->getIndexMatcher().getMatchResult().begin()).getValue().asLongLong();
+                sstr << '[' << std::dec << i << ']';
+            }
+            else
+            {
+                sstr << "[]";
+            }
         }
     }
 

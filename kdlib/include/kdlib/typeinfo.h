@@ -55,6 +55,7 @@ public:
     virtual TypeInfoPtr ptrTo( size_t ptrSize = 0 ) = 0;
     virtual TypeInfoPtr deref() = 0;
     virtual TypeInfoPtr arrayOf( size_t size ) = 0;
+    virtual TypeInfoPtr arrayOf() = 0; // make incomplete array
 
     virtual bool isArray() = 0;
     virtual bool isPointer() = 0;
@@ -93,6 +94,8 @@ public:
     virtual bool isConstMember(size_t index) = 0;
 
     virtual bool isVirtual() = 0;
+
+    virtual bool isIncomplete() = 0;
 
     virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") = 0;
     virtual TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) = 0;

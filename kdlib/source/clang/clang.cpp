@@ -89,6 +89,9 @@ TypeInfoPtr getTypeForClangType( ClangASTSessionPtr&  astSession, const clang::Q
     if ( qualType->isArrayType() )
     {
         const ArrayType*  arrayType = qualType->getAsArrayTypeUnsafe();
+        if (llvm::isa<clang::IncompleteArrayType>(arrayType))
+            return TypeInfoPtr( new TypeInfoIncompleteClangArray(astSession, arrayType));
+
         return TypeInfoPtr( new TypeInfoClangArray(astSession, arrayType ) );
     }
 

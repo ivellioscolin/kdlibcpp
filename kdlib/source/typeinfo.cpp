@@ -783,7 +783,18 @@ TypeInfoPtr TypeInfoImp::ptrTo( size_t ptrSize )
 
 TypeInfoPtr TypeInfoImp::arrayOf( size_t size )
 {
+    if (isIncomplete())
+        throw TypeException(getName(), L"can not make array of incomplete type");
     return TypeInfoPtr( new TypeInfoArray( shared_from_this(), size ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr TypeInfoImp::arrayOf()
+{
+    if (isIncomplete())
+        throw TypeException(getName(), L"can not make array of incomplete type");
+    return TypeInfoPtr(new TypeInfoIncompleteArray(shared_from_this()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -855,32 +866,38 @@ std::wstring TypeInfoImp::getTemplateArg(size_t index)
 std::wstring TypeInfoReference::getName()
 {
     std::wstring       name;
-    TypeInfo          *typeInfo = this;
+    TypeInfoPtr        typeInfo = shared_from_this();
 
     std::pair<std::wstring, std::wstring> tiName;
     do {
 
         if ( typeInfo->isArray() )
         {
-            std::vector<size_t>  indices;
-
-            do {
-                indices.push_back( typeInfo->getElementCount() );
-            }
-            while( ( typeInfo = dynamic_cast<TypeInfoArray*>(typeInfo)->deref().get() )->isArray() );
-
-            if ( !name.empty() )
+            if (!name.empty())
             {
-                name.insert( 0, 1, L'(' );
-                name.insert( name.size(), 1, L')' );
+                name.insert(0, 1, L'(');
+                name.insert(name.size(), 1, L')');
             }
 
-            std::wstringstream  sstr;
+            do
+            {
+                if (typeInfo->isIncomplete())
+                {
+                    name += L"[]";
+                }
+                else
+                {
+                    std::wstringstream  sstr;
+                    sstr << L'[' << typeInfo->getElementCount() << L']';
+                    name += sstr.str();
+                }
 
-            for ( std::vector<size_t>::iterator  it = indices.begin(); it != indices.end(); ++it )
-                sstr << L'[' << *it << L']';
+                typeInfo = typeInfo->deref();
 
-            name += sstr.str();
+                if (!typeInfo->isArray())
+                    break;
+
+            } while (true);
 
             continue;
         }
@@ -889,9 +906,7 @@ std::wstring TypeInfoReference::getName()
         {
             name.insert( 0, 1, L'*' );
 
-            TypeInfoPointer *ptrTypeInfo = dynamic_cast<TypeInfoPointer*>(typeInfo);
-
-            typeInfo = ptrTypeInfo->deref().get();
+            typeInfo = typeInfo->deref();
 
             continue;
         }
@@ -905,13 +920,6 @@ std::wstring TypeInfoReference::getName()
     name += tiName.second;
 
     return name;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypeInfoPtr TypeInfoArray::getElement( size_t index )
-{
-    return m_derefType;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

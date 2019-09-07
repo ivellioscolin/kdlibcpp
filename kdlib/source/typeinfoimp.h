@@ -76,6 +76,8 @@ protected:
 
     TypeInfoPtr arrayOf( size_t size ) override;
 
+    TypeInfoPtr arrayOf() override;
+
     bool isArray() override
     {
         return false;
@@ -134,6 +136,11 @@ protected:
     bool isVirtual() override
     {
         throw TypeException( getName(), L"type is not class method" );
+    }
+
+    bool isIncomplete() override
+    {
+        return false;
     }
 
     bool isTemplate() override;
@@ -997,61 +1004,104 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TypeInfoArray : public TypeInfoReference 
+class TypeInfoIncompleteArray : public TypeInfoReference
+{
+public:
+
+    TypeInfoIncompleteArray(const TypeInfoPtr &derefType) : m_derefType(derefType)
+    {}
+
+    TypeInfoPtr deref() override
+    {
+        return m_derefType;
+    }
+
+    size_t getAlignReq() override
+    {
+        return deref()->getAlignReq();
+    }
+
+    std::wstring str() override
+    {
+        return getName();
+    }
+
+    bool isArray() override
+    {
+        return true;
+    }
+
+    bool isIncomplete() override
+    {
+        return true;
+    }
+
+    size_t getPtrSize() override
+    {
+        return m_derefType->getPtrSize();
+    }
+
+    TypeInfoPtr getElement(size_t index) override
+    {
+        return m_derefType;
+    }
+
+    size_t getElementCount() override
+    {
+        throw TypeException(getName(), L" array is incomplete");
+    }
+
+    size_t getSize() override
+    {
+        throw TypeException(getName(), L" array is incomplete");
+    }
+
+protected:
+
+    TypeInfoPtr  m_derefType;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class TypeInfoArray : public TypeInfoIncompleteArray
 {
 
 public:
 
-    TypeInfoArray( const TypeInfoPtr &derefType, size_t count ) 
+    TypeInfoArray(const TypeInfoPtr &derefType, size_t count) : TypeInfoIncompleteArray(derefType)
     {
         size_t maxCount = SIZE_MAX / derefType->getSize();
         if (count > maxCount)
             throw TypeException(L"Failed to create too long array");
 
-        m_derefType = derefType;
         m_count = count;
     }
 
-    virtual TypeInfoPtr deref() {
-        return m_derefType;
-    }
-    //TypeInfoPtr getDerefType() {
-    //    return m_derefType;
-
-    virtual size_t getAlignReq() {
-        return deref()->getAlignReq();
-    }
-
 protected:
 
-    virtual std::wstring str() {
-        return getName();
-    }
-
-    virtual bool isArray() 
+    bool isIncomplete() override
     {
-        return true;
+        return false;
     }
 
-    virtual size_t getElementCount() {
+    size_t getElementCount() override
+    {
         return m_count;
     }
 
-    virtual size_t getSize() {
+    size_t getSize() override
+    {
         return m_derefType->getSize() * m_count;
     }
 
-    virtual size_t getPtrSize() {
-        return m_derefType->getPtrSize();
-    }
-
-    TypeInfoPtr getElement( size_t index );
-
 protected:
 
-    TypeInfoPtr  m_derefType;
     size_t  m_count;
 };
+
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

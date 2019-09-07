@@ -122,67 +122,74 @@ public:
 
 protected:
 
-    virtual bool isUserDefined() {
+    bool isUserDefined() override {
         return true;
     }
 
-    virtual std::wstring getName() {
+    std::wstring getName() override  {
         return  m_name;
     }
 
-    virtual std::wstring str();
+    std::wstring str() override;
 
-
-    virtual TypeInfoPtr getElement( const std::wstring &name ) {
+    size_t getSize() override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual TypeInfoPtr getElement( size_t index ) {
+    TypeInfoPtr getElement( const std::wstring &name ) override  {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( const std::wstring &name ) {
+    TypeInfoPtr getElement( size_t index ) override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual MEMOFFSET_REL getElementOffset( size_t index ) {
+    MEMOFFSET_REL getElementOffset( const std::wstring &name ) override  {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual std::wstring getElementName( size_t index ) {
+    MEMOFFSET_REL getElementOffset( size_t index ) override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual size_t getElementIndex( const std::wstring &name ) {
+    std::wstring getElementName( size_t index ) override  {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual size_t getElementCount() {
+    size_t getElementIndex( const std::wstring &name )  override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual  MEMOFFSET_64 getElementVa( const std::wstring &name ) {
+    size_t getElementCount() override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual  MEMOFFSET_64 getElementVa( size_t index ) {
+    MEMOFFSET_64 getElementVa( const std::wstring &name ) override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual bool isStaticMember( const std::wstring &name ) {
+    MEMOFFSET_64 getElementVa( size_t index ) override  {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual bool isStaticMember( size_t index ) {
+    bool isStaticMember( const std::wstring &name ) override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual bool isVirtualMember( const std::wstring &name ) {
+    bool isStaticMember( size_t index ) override {
         throw TypeException(L"not complete declaration");
     }
 
-    virtual bool isVirtualMember( size_t index ) {
+    bool isVirtualMember( const std::wstring &name ) override {
         throw TypeException(L"not complete declaration");
+    }
+
+    bool isVirtualMember( size_t index ) override  {
+        throw TypeException(L"not complete declaration");
+    }
+
+    bool isIncomplete() override {
+        return true;
     }
 
 protected:
@@ -222,6 +229,28 @@ protected:
     static TypeInfoPtr getDerefType( ClangASTSessionPtr& session, const clang::ArrayType* arrayType);
 
     size_t getElementCount(const clang::ArrayType* arrayType);
+
+};
+
+
+class TypeInfoIncompleteClangArray : public TypeInfoClangArray
+{
+public:
+    TypeInfoIncompleteClangArray(ClangASTSessionPtr& session, const clang::ArrayType* arrayType) :
+        TypeInfoClangArray(session, arrayType)
+    {}
+
+protected:
+
+    bool isIncomplete() override
+    {
+        return true;
+    }
+
+    size_t getSize() override
+    {
+        throw TypeException(L"incomplete array");
+    }
 
 };
 

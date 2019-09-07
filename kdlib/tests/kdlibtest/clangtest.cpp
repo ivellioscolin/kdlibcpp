@@ -539,4 +539,39 @@ TEST_F(ClangTest, NestedEnum)
 
     EXPECT_EQ(1, *testStruct->getElement(L"VAL"));
     EXPECT_EQ(2, *testStruct->getElement(L"VAL1"));
+
+
+}
+
+TEST_F(ClangTest, PtrToIncompleteArray)
+{
+    static const wchar_t srcCode[] = L" \
+    struct Test {                       \
+        int(*a)[];                      \
+    };                                  \
+    ";
+
+    TypeInfoPtr  testStruct;
+    ASSERT_NO_THROW(testStruct = compileType(srcCode, L"Test"));
+    EXPECT_NO_THROW(testStruct->getElement(L"a")->getSize());
+    EXPECT_NO_THROW(testStruct->getElement(L"a")->deref());
+    EXPECT_TRUE(testStruct->getElement(L"a")->deref()->isIncomplete());
+    EXPECT_THROW(testStruct->getElement(L"a")->deref()->getSize(), TypeException);
+}
+
+TEST_F(ClangTest, PtrToIncompleteStruct)
+{
+    static const wchar_t srcCode[] = L" \
+    struct Test1;                       \
+    struct Test2 {                      \
+        Test1*  t;                      \
+    };                                  \
+    ";
+
+    TypeInfoPtr  testStruct;
+    ASSERT_NO_THROW(testStruct = compileType(srcCode, L"Test2"));
+    EXPECT_NO_THROW(testStruct->getElement(L"t")->getSize());
+    EXPECT_NO_THROW(testStruct->getElement(L"t")->deref());
+    EXPECT_TRUE(testStruct->getElement(L"t")->deref()->isIncomplete());
+    EXPECT_THROW(testStruct->getElement(L"t")->deref()->getSize(), TypeException);
 }

@@ -59,6 +59,10 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual TypeInfoPtr arrayOf() {
+        NOT_IMPLEMENTED();
+    }
+
     virtual bool isArray() {
         NOT_IMPLEMENTED();
     }
@@ -180,6 +184,10 @@ protected:
     }
 
     virtual bool isVirtual() {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isIncomplete() {
         NOT_IMPLEMENTED();
     }
 
