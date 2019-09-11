@@ -260,7 +260,11 @@ void TypeInfoClangStruct::getRecursiveFields( clang::RecordDecl* recordDecl, MEM
             }
             else
             {
-                m_fields.push_back( TypeFieldClangField::getField(m_astSession, recordDecl, fieldDecl, startOffset) );
+
+                auto field = TypeFieldClangField::getField(m_astSession, recordDecl, fieldDecl, startOffset);
+                if (recordDecl != m_decl)
+                    field->setMemberInherited();
+                m_fields.push_back(field);
                 continue;
             }
         }
@@ -268,7 +272,10 @@ void TypeInfoClangStruct::getRecursiveFields( clang::RecordDecl* recordDecl, MEM
         clang::VarDecl *varDecl = llvm::dyn_cast<clang::VarDecl>(*declit);
         if ( varDecl )
         {
-            m_fields.push_back( TypeFieldClangField::getStaticField(m_astSession, recordDecl, varDecl) );
+            auto field = TypeFieldClangField::getStaticField(m_astSession, recordDecl, varDecl);
+            if (recordDecl != m_decl)
+                field->setMemberInherited();
+            m_fields.push_back(field);
             continue;
         }
 

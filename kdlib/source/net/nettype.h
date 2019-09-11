@@ -183,6 +183,14 @@ protected:
         NOT_IMPLEMENTED();
     }
 
+    virtual bool isInheritedMember(const std::wstring &name) {
+        NOT_IMPLEMENTED();
+    }
+
+    virtual bool isInheritedMember(size_t index) {
+        NOT_IMPLEMENTED();
+    }
+
     virtual bool isVirtual() {
         NOT_IMPLEMENTED();
     }

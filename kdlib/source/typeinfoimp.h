@@ -235,6 +235,16 @@ protected:
         throw TypeException(getName(), L"type is not a struct");
     }
 
+    bool isInheritedMember(const std::wstring &name) override
+    {
+        throw TypeException(getName(), L"type is not a struct");
+    }
+
+    bool isInheritedMember(size_t index) override
+    {
+        throw TypeException(getName(), L"type is not a struct");
+    }
+
     TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype) override
     {
         throw TypeException( getName(), L"type has no methods" ); 
@@ -426,6 +436,8 @@ protected:
     bool isVirtualMember( size_t index ) override;
     bool isConstMember(const std::wstring &name) override;
     bool isConstMember(size_t index) override;
+    bool isInheritedMember(const std::wstring &name) override;
+    bool isInheritedMember(size_t index) override;
 
     virtual size_t getAlignReq();
 

@@ -83,6 +83,16 @@ public:
         return m_constMember;
     }
 
+    bool isInheritedMember() const
+    {
+        return m_inheritedMember;
+    }
+
+    void setMemberInherited() 
+    {
+        m_inheritedMember = true;
+    }
+
     MEMOFFSET_64 getStaticOffset() const
     {
         if ( m_staticMember )
@@ -119,7 +129,8 @@ protected:
          m_staticMember( false ),
          m_virtualMember( false ),
          m_methodMember(false),
-         m_constMember(false)
+         m_constMember(false),
+         m_inheritedMember(false)
          {}
 
     std::wstring  m_name;
@@ -138,6 +149,7 @@ protected:
     bool  m_virtualMember;
     bool  m_methodMember;
     bool  m_constMember;
+    bool  m_inheritedMember;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////

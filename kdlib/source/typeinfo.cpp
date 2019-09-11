@@ -1159,6 +1159,32 @@ bool TypeInfoFields::isConstMember(size_t index)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool TypeInfoFields::isInheritedMember(const std::wstring &name)
+{
+    checkFields();
+
+    size_t  pos = name.find_first_of(L'.');
+
+    TypeFieldPtr  fieldPtr = m_fields.lookup(std::wstring(name, 0, pos));
+
+    if (pos == std::wstring::npos)
+        return fieldPtr->isInheritedMember();
+
+    TypeInfoPtr  fieldType = fieldPtr->getTypeInfo();
+
+    return fieldType->isInheritedMember(std::wstring(name, pos + 1));
+}
+///////////////////////////////////////////////////////////////////////////////
+
+bool TypeInfoFields::isInheritedMember(size_t index)
+{
+    checkFields();
+
+    return m_fields.lookup(index)->isInheritedMember();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 size_t TypeInfoFields::getAlignReq()
 {
     size_t alignReq = 1;
@@ -1522,6 +1548,9 @@ void TypeInfoUdt::getFields(
 
                 throw TypeException(m_name, L"Unsupported field type");
             }
+
+            if (rootSym != m_symbol)
+                fieldPtr->setMemberInherited();
 
             m_fields.push_back( fieldPtr );
         }

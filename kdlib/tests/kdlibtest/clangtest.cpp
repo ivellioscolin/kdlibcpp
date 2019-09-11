@@ -575,3 +575,22 @@ TEST_F(ClangTest, PtrToIncompleteStruct)
     EXPECT_TRUE(testStruct->getElement(L"t")->deref()->isIncomplete());
     EXPECT_THROW(testStruct->getElement(L"t")->deref()->getSize(), TypeException);
 }
+
+TEST_F(ClangTest, isInheritedMember)
+{
+    static const wchar_t srcCode[] = L" \
+    struct Base {                       \
+       int mbase;                       \
+    };                                  \
+    struct Test : Base {                \
+       int mchild;                      \
+    };                                  \
+    ";
+
+    TypeInfoPtr  testStruct;
+    ASSERT_NO_THROW(testStruct = compileType(srcCode, L"Test"));
+    EXPECT_TRUE(testStruct->isInheritedMember(L"mbase"));
+    EXPECT_FALSE(testStruct->isInheritedMember(L"mchild"));
+    EXPECT_TRUE(testStruct->isInheritedMember(0));
+    EXPECT_FALSE(testStruct->isInheritedMember(1));
+ }

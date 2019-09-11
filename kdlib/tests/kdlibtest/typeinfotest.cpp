@@ -687,3 +687,15 @@ TEST_F(TypeInfoTest, ArrayOfIncomplete)
     EXPECT_THROW(typeInfo->arrayOf(1), TypeException);
     EXPECT_THROW(typeInfo->arrayOf(), TypeException);
 }
+
+TEST_F(TypeInfoTest, isInheritedMember)
+{
+    TypeInfoPtr  typeInfo;
+    ASSERT_NO_THROW(typeInfo = loadType(L"classChild"));
+    EXPECT_TRUE(typeInfo->isInheritedMember(L"m_count"));
+    EXPECT_TRUE(typeInfo->isInheritedMember(L"m_stdstr"));
+    EXPECT_FALSE(typeInfo->isInheritedMember(L"m_childField"));
+    EXPECT_FALSE(typeInfo->isInheritedMember(typeInfo->getElementIndex(L"m_staticConst")));
+    EXPECT_TRUE(typeInfo->isInheritedMember(typeInfo->getElementIndex(L"m_baseField")));
+    EXPECT_THROW(loadType(L"Int8B[]")->isInheritedMember(0), TypeException);
+}

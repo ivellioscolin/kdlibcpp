@@ -41,6 +41,16 @@ class TypeInfo : public NumConvertable, private boost::noncopyable {
     friend TypeInfoPtr loadType( const SymbolPtr &symbolScope, const std::wstring &symbolName ); 
     friend size_t getSymbolSize( const std::wstring &name );
 
+
+public:
+
+    enum MemberFilter
+    {
+        DataMember = 0x1,      // include data member
+        InheritedMember = 0x2, // include inherited member
+        MethodMember = 0x4     // include method
+    };
+
 public:
 
     virtual std::wstring str() = 0;
@@ -69,6 +79,7 @@ public:
     virtual bool isVtbl() = 0;
     virtual bool isNoType() = 0;
     virtual bool isTemplate() = 0;
+    virtual bool isIncomplete() = 0;
 
     virtual BITOFFSET getBitOffset() = 0;
     virtual BITOFFSET getBitWidth() = 0;
@@ -93,9 +104,10 @@ public:
     virtual bool isConstMember(const std::wstring &name) = 0;
     virtual bool isConstMember(size_t index) = 0;
 
-    virtual bool isVirtual() = 0;
+    virtual bool isInheritedMember(const std::wstring &name) = 0;
+    virtual bool isInheritedMember(size_t index) = 0;
 
-    virtual bool isIncomplete() = 0;
+    virtual bool isVirtual() = 0;
 
     virtual TypeInfoPtr getMethod( const std::wstring &name, const std::wstring&  prototype = L"") = 0;
     virtual TypeInfoPtr getMethod( const std::wstring &name, TypeInfoPtr prototype) = 0;
