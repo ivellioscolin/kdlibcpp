@@ -820,38 +820,6 @@ std::wstring TypedVarBase::printValue() const
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedVarPtr TypedVarUdt::getElement( const std::wstring& fieldName )
-{
-    TypeInfoPtr fieldType = m_typeInfo->getElement( fieldName );
-
-    if ( m_typeInfo->isStaticMember(fieldName) )
-    {
-        MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
-        return  loadTypedVar( fieldType, staticOffset );
-    }
-
-    if (fieldType->isConstant())
-    {
-        return TypedValue(fieldType->getValue()).get();
-    }
-
-    MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
-
-    if ( m_typeInfo->isVirtualMember( fieldName ) )
-    {
-        fieldOffset += getVirtualBaseDisplacement( fieldName );
-    }
-
-    return  loadTypedVar( fieldType,  m_varData->copy(fieldOffset, fieldType->getSize()) );
-}
-///////////////////////////////////////////////////////////////////////////////
-
-void TypedVarUdt::setElement( const std::wstring& fieldName, const TypedValue& value)
-{
-    getElement(fieldName)->setValue(value);
-}
-///////////////////////////////////////////////////////////////////////////////
-
 TypedVarPtr TypedVarUdt::getMethod( const std::wstring &methodName, const std::wstring&  prototype)
 {
 
@@ -996,6 +964,40 @@ TypedVarPtr TypedVarUdt::getVirtualMethodRecursive(
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedVarPtr TypedVarUdt::getElement(const std::wstring& fieldName)
+{
+    TypeInfoPtr fieldType = m_typeInfo->getElement(fieldName);
+
+    if (m_typeInfo->isStaticMember(fieldName))
+    {
+        MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(fieldName);
+        return  loadTypedVar(fieldType, staticOffset);
+    }
+
+    if (fieldType->isConstant())
+    {
+        return TypedValue(fieldType->getValue()).get();
+    }
+
+    MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(fieldName);
+
+    if (m_typeInfo->isVirtualMember(fieldName))
+    {
+        fieldOffset += getVirtualBaseDisplacement(fieldName);
+    }
+
+    return  loadTypedVar(fieldType, m_varData->copy(fieldOffset, fieldType->getSize()));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void TypedVarUdt::setElement(const std::wstring& fieldName, const TypedValue& value)
+{
+    getElement(fieldName)->setValue(value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypedVarPtr TypedVarUdt::getElement( size_t index )
 {
     TypeInfoPtr fieldType = m_typeInfo->getElement( index );
@@ -1005,6 +1007,11 @@ TypedVarPtr TypedVarUdt::getElement( size_t index )
         MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(index);
 
         return  loadTypedVar( fieldType, staticOffset );
+    }
+
+    if (fieldType->isConstant())
+    {
+        return TypedValue(fieldType->getValue()).get();
     }
 
     MEMOFFSET_32   fieldOffset = m_typeInfo->getElementOffset(index);
