@@ -624,7 +624,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DeclNextVisitor : public RecursiveASTVisitor<DeclNextVisitor> 
+class DeclNextVisitor : public RecursiveASTVisitor<DeclNextVisitor>
 {
 
 public:
@@ -632,7 +632,7 @@ public:
     DeclNextVisitor(ClangASTSessionPtr& astSession, std::map<std::string, TypeInfoPtr>* typeMap) :
         m_session(astSession),
         m_typeMap(typeMap)
-   {}
+    {}
 
     bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
     {
@@ -672,7 +672,7 @@ public:
             }
             else
             {
-                std::string  name = Declaration->getQualifiedNameAsString();
+                const std::string  &name = Declaration->getQualifiedNameAsString();
                 (*m_typeMap)[name] = TypeInfoPtr(new TypeInfoClangStructNoDef(strToWStr(name), m_session, Declaration));
             }
 
@@ -689,7 +689,7 @@ public:
 
         try {
 
-           if ( Declaration->isInvalidDecl() )
+            if (Declaration->isInvalidDecl())
                 return true;
 
             const std::string&  name = Declaration->getQualifiedNameAsString();
@@ -698,8 +698,10 @@ public:
 
             (*m_typeMap)[name] = getTypeForClangType(m_session, decl);
 
-        } catch(TypeException& )
-        {}
+        }
+        catch (TypeException&)
+        {
+        }
 
         return true;
     }
@@ -709,15 +711,15 @@ public:
     {
         try {
 
-            if ( Declaration->isInvalidDecl() )
+            if (Declaration->isInvalidDecl())
                 return true;
 
-            if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind:: TK_FunctionTemplate )
+            if (Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind::TK_FunctionTemplate)
                 return true;
 
-            if ( CXXRecordDecl  *parentClassDecl = llvm::dyn_cast<CXXRecordDecl>(Declaration->getDeclContext()))
+            if (CXXRecordDecl  *parentClassDecl = llvm::dyn_cast<CXXRecordDecl>(Declaration->getDeclContext()))
             {
-                if ( parentClassDecl->getDescribedClassTemplate() )
+                if (parentClassDecl->getDescribedClassTemplate())
                     return true;
             }
 
@@ -725,31 +727,35 @@ public:
 
             const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
 
-            TypeInfoPtr  typeInfo = TypeInfoPtr( new TypeInfoClangFunc(m_session, protoType ) );
+            TypeInfoPtr  typeInfo = TypeInfoPtr(new TypeInfoClangFunc(m_session, protoType));
 
             (*m_typeMap)[name] = typeInfo;
 
-        } catch(TypeException& )
-        {}
+        }
+        catch (TypeException&)
+        {
+        }
 
         return true;
     }
 
-    bool VisitEnumDecl (EnumDecl *Declaration)
+    bool VisitEnumDecl(EnumDecl *Declaration)
     {
-       try {
-           if ( Declaration->isInvalidDecl() )
+        try {
+            if (Declaration->isInvalidDecl())
                 return true;
 
             std::string  name = Declaration->getQualifiedNameAsString();
 
-            TypeInfoPtr  typeInfo = TypeInfoPtr( new TypeInfoClangEnum(m_session, Declaration) );
+            TypeInfoPtr  typeInfo = TypeInfoPtr(new TypeInfoClangEnum(m_session, Declaration));
 
-    
+
             (*m_typeMap)[name] = typeInfo;
 
-        } catch(TypeException& )
-        {}
+        }
+        catch (TypeException&)
+        {
+        }
 
         return true;
     }
@@ -760,6 +766,53 @@ private:
     ClangASTSessionPtr  m_session;
 
     std::map<std::string, TypeInfoPtr>  *m_typeMap;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class FuncVisitor : public RecursiveASTVisitor<FuncVisitor>
+{
+
+public:
+
+    FuncVisitor(ClangASTSessionPtr& astSession, std::vector<std::string>&  symbols) :
+        m_session(astSession),
+        m_symbols(symbols)
+   {}
+
+
+    bool VisitFunctionDecl(FunctionDecl *Declaration)
+    {
+        try {
+
+            if ( Declaration->isInvalidDecl() )
+                return true;
+
+            if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind::TK_FunctionTemplate )
+                return true;
+
+            SmallString<64> buf;
+            llvm::raw_svector_ostream stream(buf);
+            LangOptions  lo;
+            PrintingPolicy pp(lo);
+            pp.SuppressTagKeyword = true;
+            pp.MSVCFormatting = true;
+
+            Declaration->getNameForDiagnostic(stream, pp, true);
+      
+            m_symbols.push_back(stream.str());
+
+        } catch(TypeException& )
+        {}
+
+        return true;
+    }
+private:
+
+
+    ClangASTSessionPtr  m_session;
+
+    std::vector<std::string>  &m_symbols;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -919,5 +972,84 @@ TypeInfoProviderPtr  getTypeInfoProviderFromSource(const std::string&  source, c
 
 ///////////////////////////////////////////////////////////////////////////////
 
+SymbolEnumeratorClang::SymbolEnumeratorClang(const std::string&  sourceCode, const std::string&  compileOptions)
+{
+    std::vector<std::unique_ptr<ASTUnit>> ASTs;
+    ASTBuilderAction Action(ASTs);
+    llvm::IntrusiveRefCntPtr<vfs::OverlayFileSystem> OverlayFileSystem(
+        new vfs::OverlayFileSystem(vfs::getRealFileSystem()));
+    llvm::IntrusiveRefCntPtr<vfs::InMemoryFileSystem> InMemoryFileSystem(
+        new vfs::InMemoryFileSystem);
+    OverlayFileSystem->pushOverlay(InMemoryFileSystem);
+    llvm::IntrusiveRefCntPtr<FileManager> Files(
+        new FileManager(FileSystemOptions(), OverlayFileSystem));
+
+    std::vector< std::string > args;
+
+    args.push_back("clang-tool");
+    args.push_back("-fsyntax-only");
+
+    typedef boost::tokenizer< boost::escaped_list_separator<char> > Tokenizer;
+    boost::escaped_list_separator<char> Separator('\\', ' ', '\"');
+
+    Tokenizer tok(compileOptions, Separator);
+
+    std::copy(tok.begin(), tok.end(), std::inserter(args, args.end()));
+
+    args.push_back("input.cc");
+
+    ToolInvocation toolInvocation(
+        args,
+        &Action,
+        Files.get(),
+        std::move(std::make_shared< PCHContainerOperations >())
+    );
+
+    InMemoryFileSystem->addFile("input.cc", 0, llvm::MemoryBuffer::getMemBuffer(sourceCode.c_str()));
+
+#ifndef _DEBUG
+
+    IgnoringDiagConsumer   diagnosticConsumer;
+
+    toolInvocation.setDiagnosticConsumer(&diagnosticConsumer);
+
+#endif
+
+    toolInvocation.run();
+
+    std::unique_ptr<ASTUnit>  ast = std::move(ASTs[0]);
+
+    auto astSession = ClangASTSession::getASTSession(ast);
+
+    FuncVisitor   visitor(astSession, m_symbols);
+
+    visitor.TraverseDecl(astSession->getASTContext().getTranslationUnitDecl());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring SymbolEnumeratorClang::Next()
+{
+    if (m_index < m_symbols.size())
+        return strToWStr(m_symbols[m_index++]);
+    
+    return std::wstring();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolEnumeratorPtr getSymbolEnumeratorFromSource(const std::wstring& source, const std::wstring&  opts)
+{
+    return SymbolEnumeratorPtr( new SymbolEnumeratorClang(wstrToStr(source), wstrToStr(opts) ) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SymbolEnumeratorPtr getSymbolEnumeratorFromSource(const std::string& source, const std::string&  opts)
+{
+    return SymbolEnumeratorPtr(new SymbolEnumeratorClang(source, opts));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -383,9 +383,25 @@ private:
     ClangASTSessionPtr  m_astSession;
 
     std::map< std::string, TypeInfoPtr>  m_typeCache;
-
 };
 
 
+class SymbolEnumeratorClang : public SymbolEnumerator, public boost::enable_shared_from_this<SymbolEnumeratorClang>
+{
+
+public:
+
+    SymbolEnumeratorClang(const std::string&  sourceCode, const std::string&  compileOptions);
+
+private:
+
+    std::wstring Next() override;
+
+private:
+
+    size_t   m_index = 0;
+
+    std::vector<std::string>  m_symbols;
+};
 
 }

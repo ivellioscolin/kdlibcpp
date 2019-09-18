@@ -594,3 +594,36 @@ TEST_F(ClangTest, isInheritedMember)
     EXPECT_TRUE(testStruct->isInheritedMember(0));
     EXPECT_FALSE(testStruct->isInheritedMember(1));
  }
+
+TEST_F(ClangTest, EnumFuncNames)
+{
+    static const wchar_t srcCode[] = L"      \
+    void func(int, char);                    \
+    inline void func1() {}                   \
+    template <int> int func2() { return 0; } \
+    template<> int func2<2>() { return 1; }  \
+    namespace testns {                       \
+        char func3(void);                    \
+    }                                        \
+    class testcls {                          \
+      voit method(int)                       \
+    };                                       \
+    ";
+
+    SymbolEnumeratorPtr  symEnum = getSymbolEnumeratorFromSource(srcCode);
+
+    std::wstring symbol;
+    std::vector<std::wstring> symbols;
+    while ( !(symbol = symEnum->Next()).empty() )
+    {
+        symbols.push_back(symbol);
+    }
+
+    EXPECT_EQ( std::vector<std::wstring>({ 
+        L"func",
+        L"func1",
+        L"func2<2>", 
+        L"testns::func3",
+        L"testcls::method"
+        }), symbols);
+}

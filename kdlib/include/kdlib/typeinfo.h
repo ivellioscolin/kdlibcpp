@@ -180,7 +180,6 @@ typedef boost::shared_ptr<TypeInfoProvider>     TypeInfoProviderPtr;
 class TypeInfoProvider 
 {
 public:
-
     virtual TypeInfoPtr getTypeByName(const std::wstring& name) = 0;
     virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask = L"") = 0;
 };
@@ -190,10 +189,20 @@ public:
     virtual TypeInfoPtr Next() = 0;
 };
 
+class SymbolEnumerator {
+public:
+    virtual std::wstring Next() = 0;
+};
+
+typedef boost::shared_ptr<SymbolEnumerator>    SymbolEnumeratorPtr;
+
 TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source, const std::wstring&  opts = L"" );
 TypeInfoProviderPtr  getTypeInfoProviderFromSource(const std::string&  source, const std::string&  opts = "");
 TypeInfoProviderPtr  getTypeInfoProviderFromPdb( const std::wstring&  pdbFile, MEMOFFSET_64  loadBase = 0 );
 TypeInfoProviderPtr  getDefaultTypeInfoProvider();
+
+SymbolEnumeratorPtr  getSymbolEnumeratorFromSource(const std::wstring& source, const std::wstring&  opts = L"");
+SymbolEnumeratorPtr  getSymbolEnumeratorFromSource(const std::string& source, const std::string&  opts = "");
 
 ///////////////////////////////////////////////////////////////////////////////
 
