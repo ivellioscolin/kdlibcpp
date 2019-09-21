@@ -25,6 +25,40 @@
 using namespace clang;
 using namespace clang::tooling;
 
+namespace {
+    
+std::string getFunctionNameFromDecl(FunctionDecl* funcDec)
+{
+    SmallString<64> buf;
+    llvm::raw_svector_ostream stream(buf);
+    LangOptions  lo;
+    PrintingPolicy pp(lo);
+    pp.SuppressTagKeyword = true;
+    pp.MSVCFormatting = true;
+    funcDec->getNameForDiagnostic(stream, pp, true);
+    return stream.str();
+}
+
+std::string getRecordNameFromDecl(CXXRecordDecl* decl)
+{
+    auto templateSpecialization = llvm::dyn_cast<ClassTemplateSpecializationDecl>(decl);
+    if (templateSpecialization)
+    {
+        SmallString<64> buf;
+        llvm::raw_svector_ostream stream(buf);
+        LangOptions  lo;
+        PrintingPolicy pp(lo);
+        pp.SuppressTagKeyword = true;
+        pp.MSVCFormatting = true;
+        templateSpecialization->getNameForDiagnostic(stream, pp, true);
+        return stream.str();
+    }
+
+    return decl->getQualifiedNameAsString();
+}
+
+}
+
 namespace kdlib{
 
 TypeInfoPtr getTypeForClangBuiltinType(const clang::BuiltinType* builtinType)
@@ -112,9 +146,9 @@ TypeInfoPtr getTypeForClangType( ClangASTSessionPtr&  astSession, const clang::Q
 
     if ( qualType->isFunctionProtoType() )
     {
-        const FunctionProtoType*   funcType = qualType->getAs<FunctionProtoType>();
+        auto  funcProto = qualType->getAs<FunctionProtoType>();
 
-        return TypeInfoPtr( new TypeInfoClangFunc(astSession, funcType) );
+        return TypeInfoPtr( new TypeInfoClangFuncPrototype(astSession, funcProto) );
     }
 
     if ( qualType->isEnumeralType() )
@@ -185,8 +219,8 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
             sstr << m_recordDecl->getNameAsString() << "::<unnamed-type-" << wstrToStr(getName()) << '>';
             name = sstr.str();
         }
-
-       return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_astSession, decl->getDefinition() ) );
+ return TypeInfoPtr( new TypeInfoClangStruct( strToWStr(name), m_astSession, decl->getDefinition() ) );
+      
     }
 
     clang::FieldDecl *fieldDecl = llvm::dyn_cast<clang::FieldDecl>(m_fieldDecl);
@@ -448,15 +482,16 @@ TypeInfoPtr TypeInfoClangRef::deref()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoClangFunc::TypeInfoClangFunc(ClangASTSessionPtr& session, const FunctionProtoType* funcProto)
+TypeInfoClangFuncPrototype::TypeInfoClangFuncPrototype(ClangASTSessionPtr& session, const FunctionProtoType* funcProto)
 {
+
     m_returnType = getTypeForClangType(session, funcProto->getReturnType());
 
-    switch ( funcProto->getCallConv() )
+    switch (funcProto->getCallConv())
     {
     case CC_C:
-         m_callconv = CallConv_NearC;
-         break;
+        m_callconv = CallConv_NearC;
+        break;
 
     case CC_X86StdCall:
         m_callconv = CallConv_NearStd;
@@ -475,9 +510,21 @@ TypeInfoClangFunc::TypeInfoClangFunc(ClangASTSessionPtr& session, const Function
 
     }
 
-    for ( clang::FunctionProtoType::param_type_iterator paramIt =  funcProto->param_type_begin(); paramIt != funcProto->param_type_end(); paramIt++)
+    for (clang::FunctionProtoType::param_type_iterator paramIt = funcProto->param_type_begin(); paramIt != funcProto->param_type_end(); paramIt++)
     {
-        m_args.push_back( getTypeForClangType(session, *paramIt ) );
+        m_args.push_back(getTypeForClangType(session, *paramIt));
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoClangFunc::TypeInfoClangFunc(ClangASTSessionPtr& session, clang::FunctionDecl*  funcDecl) :
+    TypeInfoClangFuncPrototype(session, funcDecl->getFunctionType()->getAs< FunctionProtoType>() )
+{
+    CXXRecordDecl  *parentClassDecl = llvm::dyn_cast<CXXRecordDecl>(funcDecl->getDeclContext());
+    if (parentClassDecl)
+    {
+        auto  name = strToWStr(getRecordNameFromDecl(parentClassDecl));
+        m_classParent = TypeInfoPtr(new TypeInfoClangStruct(name, session, parentClassDecl->getDefinition()));
     }
 }
 
@@ -521,106 +568,6 @@ void TypeInfoClangEnum::getFields()
         m_fields.push_back( TypeFieldClangEnumField::getField(m_astSession, *enumIt) );
     }
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-class DeclNamedVisitor : public RecursiveASTVisitor<DeclNamedVisitor> 
-{
-public:
-
-    DeclNamedVisitor(ClangASTSessionPtr&  astSession, const std::string&  typeName) :
-        m_session(astSession),
-        m_typeName(typeName)
-    {}
-
-    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
-    {
-       if ( Declaration->isInvalidDecl() )
-            return true;
-
-        const std::string&  name = Declaration->getQualifiedNameAsString();
-
-        if ( name != m_typeName)
-            return true;
-
-       if ( Declaration->getDefinition() )
-            m_typeInfo = TypeInfoPtr( new TypeInfoClangStruct( strToWStr(Declaration->getNameAsString()), m_session, Declaration->getDefinition() ) );
-       else
-            m_typeInfo = TypeInfoPtr( new TypeInfoClangStructNoDef( strToWStr(Declaration->getNameAsString()), m_session, Declaration ) );
-
-        return false;
-    }
-
-    bool VisitTypedefDecl(TypedefDecl  *Declaration)
-    {
-       if ( Declaration->isInvalidDecl() )
-            return true;
-
-        const std::string&  name = Declaration->getQualifiedNameAsString();
-
-        if ( name != m_typeName)
-            return true;
-
-        QualType  decl = Declaration->getUnderlyingType().getCanonicalType();
-
-        m_typeInfo = getTypeForClangType(m_session, decl);
-
-        return false;
-    }
-
-    bool VisitFunctionDecl(FunctionDecl *Declaration)
-    {
-       if ( Declaration->isInvalidDecl() )
-            return true;
-
-        if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind:: TK_FunctionTemplate )
-            return true;
-
-        if ( CXXRecordDecl  *parentClassDecl = llvm::dyn_cast<CXXRecordDecl>(Declaration->getDeclContext()))
-        {
-            if ( parentClassDecl->getDescribedClassTemplate() )
-                return true;
-        }
-
-        const std::string& name = Declaration->getQualifiedNameAsString();
-
-        if ( name != m_typeName)
-            return true;
-
-         const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
-
-        m_typeInfo = TypeInfoPtr( new TypeInfoClangFunc(m_session, protoType ) );
-
-        return false;
-    }
-
-    bool VisitEnumDecl (EnumDecl *Declaration)
-    {
-       if ( Declaration->isInvalidDecl() )
-            return true;
-
-        const std::string& name = Declaration->getQualifiedNameAsString();
-
-        if ( name != m_typeName)
-            return true;
-
-        m_typeInfo = TypeInfoPtr( new TypeInfoClangEnum(m_session, Declaration) );
-
-        return false;
-    }
-
-    TypeInfoPtr  getTypeInfo() {
-        return m_typeInfo;
-    }
-
-private:
-
-    std::string  m_typeName;
-
-    ClangASTSessionPtr  m_session;
-
-    TypeInfoPtr  m_typeInfo;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -675,7 +622,6 @@ public:
                 const std::string  &name = Declaration->getQualifiedNameAsString();
                 (*m_typeMap)[name] = TypeInfoPtr(new TypeInfoClangStructNoDef(strToWStr(name), m_session, Declaration));
             }
-
         }
         catch (TypeException&)
         {
@@ -723,11 +669,9 @@ public:
                     return true;
             }
 
-            std::string  name = Declaration->getQualifiedNameAsString();
+            std::string  name = getFunctionNameFromDecl(Declaration);
 
-            const FunctionProtoType*  protoType = Declaration->getFunctionType()->getAs<FunctionProtoType>();
-
-            TypeInfoPtr  typeInfo = TypeInfoPtr(new TypeInfoClangFunc(m_session, protoType));
+            TypeInfoPtr  typeInfo = TypeInfoPtr(new TypeInfoClangFunc(m_session, Declaration));
 
             (*m_typeMap)[name] = typeInfo;
 
@@ -791,16 +735,7 @@ public:
             if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind::TK_FunctionTemplate )
                 return true;
 
-            SmallString<64> buf;
-            llvm::raw_svector_ostream stream(buf);
-            LangOptions  lo;
-            PrintingPolicy pp(lo);
-            pp.SuppressTagKeyword = true;
-            pp.MSVCFormatting = true;
-
-            Declaration->getNameForDiagnostic(stream, pp, true);
-      
-            m_symbols.push_back(stream.str());
+            m_symbols.push_back(getFunctionNameFromDecl(Declaration));
 
         } catch(TypeException& )
         {}

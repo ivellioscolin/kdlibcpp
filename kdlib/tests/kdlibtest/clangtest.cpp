@@ -316,7 +316,7 @@ TEST_F(ClangTest, WindowsH)
 TEST_F(ClangTest, NtddkH)
 {
     std::wstring  src = L"#include <ntddk.h>\r\n";
-    std::wstring  opt = L"-I\"C:/Program Files (x86)/Windows Kits/8.1/Include/km\" \
+    std::wstring  opt = L"-I\"C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/km\" \
         -I\"C:/Program Files (x86)/Windows Kits/8.1/Include/shared\" \
         -D_AMD64_ --target=x86_64-pc-windows-msvc -w";
 
@@ -392,48 +392,6 @@ TEST_F(ClangTest, TypeProviderEnum)
 }
 
 
-static const wchar_t template_func_src1[] = L"\
-                                             \
-    template<typename T1, typename T2>       \
-    T1 func(T2 v) {                          \
-       return v * 10;                        \
-    }                                        \
-";
-
-
-static const wchar_t template_func_src2[] = L"\
-                                             \
-    template<typename T1, typename T2>       \
-    T1 func(T2 v) {                          \
-       return v * 10;                        \
-    }                                        \
-                                             \
-    template<>                               \
-    int func<int,int>(int v);                \
-    ";
-
-static const wchar_t template_func_src3[] = L"\
-                                             \
-    template<typename T>                     \
-    class Generic {                          \
-                                             \
-        int intMethod() {                    \
-            return 0;                        \
-        }                                    \
-                                             \
-        T  tMethod() {                       \
-            return 0;                        \
-        }                                    \
-    };                                       \
-";
-
-TEST_F(ClangTest, TemplateFunc)
-{
-    EXPECT_THROW(compileType(template_func_src1, L"func"), TypeException );
-    EXPECT_NO_THROW( compileType(template_func_src2, L"func") );
-    EXPECT_THROW( compileType(template_func_src3, L"Generic::intMethod"), TypeException );
-    EXPECT_THROW( compileType(template_func_src3, L"Generic::tMethod"), TypeException );
-}
 
 TEST_F(ClangTest, TemplateStruct)
 {
@@ -606,7 +564,7 @@ TEST_F(ClangTest, EnumFuncNames)
         char func3(void);                    \
     }                                        \
     class testcls {                          \
-      voit method(int)                       \
+      void method(int);                      \
     };                                       \
     ";
 
@@ -626,4 +584,41 @@ TEST_F(ClangTest, EnumFuncNames)
         L"testns::func3",
         L"testcls::method"
         }), symbols);
+}
+
+TEST_F(ClangTest, Func)
+{
+    static const wchar_t srcCode[] = L"      \
+    void func(int, char);                    \
+    inline void func1() {}                   \
+    template <int> int func2() { return 0; } \
+    template<> int func2<2>() { return 1; }  \
+    namespace testns {                       \
+        char func3(void);                    \
+    }                                        \
+    class testcls {                          \
+      void method(int);                      \
+    };                                       \
+    template<typename T>                     \
+    class testcls1 {                         \
+       void method();                        \
+    };                                       \
+    template<>                               \
+    class testcls1<int> {                    \
+        void method();                       \
+    };                                       \
+    ";
+
+    EXPECT_EQ(L"Void(__cdecl)(Int4B, Char)", compileType(srcCode, L"func")->getName());
+    EXPECT_EQ(L"Void(__cdecl)()", compileType(srcCode, L"func1")->getName());
+    EXPECT_EQ(L"Int4B(__cdecl)()", compileType(srcCode, L"func2<2>")->getName());
+    EXPECT_EQ(L"Char(__cdecl)()", compileType(srcCode, L"testns::func3")->getName());
+    EXPECT_EQ(L"Void(__cdecl testcls::)(Int4B)", compileType(srcCode, L"testcls::method")->getName());
+    EXPECT_EQ(L"Void(__cdecl testcls1<int>::)()", compileType(srcCode, L"testcls1<int>::method")->getName());
+
+    EXPECT_THROW(compileType(srcCode, L"func2"), TypeException);
+    EXPECT_THROW(compileType(srcCode, L"func3"), TypeException);
+    EXPECT_THROW(compileType(srcCode, L"method"), TypeException);
+    EXPECT_THROW(compileType(srcCode, L"testcls1::method"), TypeException);
+    EXPECT_THROW(compileType(srcCode, L"testcls1<char>::method"), TypeException);
 }

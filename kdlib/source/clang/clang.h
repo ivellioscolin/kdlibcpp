@@ -282,13 +282,27 @@ protected:
     const clang::ReferenceType*  m_refType;
 };
 
-class TypeInfoClangFunc : public TypeInfoFunctionPrototype
+class TypeInfoClangFuncPrototype : public TypeInfoFunctionPrototype
+{
+public:
+    TypeInfoClangFuncPrototype(ClangASTSessionPtr& session, const clang::FunctionProtoType* functionProtoType);
+};
+
+class TypeInfoClangFunc : public TypeInfoClangFuncPrototype
 {
 
 public:
 
-    TypeInfoClangFunc(ClangASTSessionPtr& session, const clang::FunctionProtoType* funcProto);
+    TypeInfoClangFunc(ClangASTSessionPtr& session, clang::FunctionDecl*  funcDecl);
 
+private:
+
+    TypeInfoPtr getClassParent() override
+    {
+        return m_classParent;
+    }
+
+    TypeInfoPtr  m_classParent;
 };
 
 
