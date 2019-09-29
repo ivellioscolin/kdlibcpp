@@ -206,14 +206,7 @@ public:
         m_globalSymbol( DiaSymbol::fromGlobalScope( globalScope, getScopeName( session, globalScope ) ) ),
         m_session( session ),
         m_symbolFileName( symbolFile )
-        {
-            CoInitialize(NULL);
-        }
-
-    ~DiaSession()
-    {
-        CoUninitialize();
-    }
+        {}
 
     virtual SymbolPtr getSymbolScope() {
         return m_globalSymbol;
