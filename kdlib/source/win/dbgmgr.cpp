@@ -83,7 +83,7 @@ DebugManager::~DebugManager()
 
     client->SetOutputCallbacks(NULL);
 
-    CoUninitialize();
+    //CoUninitialize();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

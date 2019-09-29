@@ -400,12 +400,37 @@ private:
 };
 
 
-class SymbolEnumeratorClang : public SymbolEnumerator, public boost::enable_shared_from_this<SymbolEnumeratorClang>
+class SymbolEnumeratorClang;
+
+class SymbolProviderClang : public SymbolProvider, public boost::enable_shared_from_this< SymbolProviderClang>
 {
 
 public:
 
-    SymbolEnumeratorClang(const std::string&  sourceCode, const std::string&  compileOptions);
+    friend SymbolEnumeratorClang;
+
+    SymbolProviderClang(const std::string&  sourceCode, const std::string&  compileOptions);
+
+private:
+
+    SymbolEnumeratorPtr getSymbolEnumerator(const std::wstring& mask = L"") override;
+
+    ClangASTSessionPtr  m_astSession;
+
+    std::vector<std::string>  m_symbols;
+};
+
+
+class SymbolEnumeratorClang : public SymbolEnumerator
+{
+
+public:
+
+    SymbolEnumeratorClang(const std::wstring& mask, const boost::shared_ptr<SymbolProviderClang>& clangProvider) :
+        m_symbolProvider(clangProvider),
+        m_index(0),
+        m_mask(wstrToStr(mask))
+    {}
 
 private:
 
@@ -413,9 +438,11 @@ private:
 
 private:
 
-    size_t   m_index = 0;
+    size_t   m_index;
 
-    std::vector<std::string>  m_symbols;
+    std::string  m_mask;
+
+    boost::shared_ptr<SymbolProviderClang> m_symbolProvider;
 };
 
 }

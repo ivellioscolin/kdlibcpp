@@ -568,7 +568,7 @@ TEST_F(ClangTest, EnumFuncNames)
     };                                       \
     ";
 
-    SymbolEnumeratorPtr  symEnum = getSymbolEnumeratorFromSource(srcCode);
+    auto  symEnum = getSymbolProviderFromSource(srcCode)->getSymbolEnumerator();
 
     std::wstring symbol;
     std::vector<std::wstring> symbols;
@@ -613,8 +613,16 @@ TEST_F(ClangTest, Func)
     EXPECT_EQ(L"Void(__cdecl)()", compileType(srcCode, L"func1")->getName());
     EXPECT_EQ(L"Int4B(__cdecl)()", compileType(srcCode, L"func2<2>")->getName());
     EXPECT_EQ(L"Char(__cdecl)()", compileType(srcCode, L"testns::func3")->getName());
-    EXPECT_EQ(L"Void(__cdecl testcls::)(Int4B)", compileType(srcCode, L"testcls::method")->getName());
-    EXPECT_EQ(L"Void(__cdecl testcls1<int>::)()", compileType(srcCode, L"testcls1<int>::method")->getName());
+    if (kdlib::is64bitSystem())
+    {
+        EXPECT_EQ(L"Void(__cdecl testcls::)(Int4B)", compileType(srcCode, L"testcls::method")->getName());
+        EXPECT_EQ(L"Void(__cdecl testcls1<int>::)()", compileType(srcCode, L"testcls1<int>::method")->getName());
+    }
+    else
+    {
+        EXPECT_EQ(L"Void(__thiscall testcls::)(Int4B)", compileType(srcCode, L"testcls::method")->getName());
+        EXPECT_EQ(L"Void(__thiscall testcls1<int>::)()", compileType(srcCode, L"testcls1<int>::method")->getName());
+    }
 
     EXPECT_THROW(compileType(srcCode, L"func2"), TypeException);
     EXPECT_THROW(compileType(srcCode, L"func3"), TypeException);

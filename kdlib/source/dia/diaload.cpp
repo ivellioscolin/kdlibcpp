@@ -53,22 +53,6 @@ static SymbolSessionPtr createSession(
 
     do {
 
-        hres = dataSource.CoCreateInstance(__uuidof(DiaSource), NULL, CLSCTX_INPROC_SERVER);
-        if ( S_OK == hres )
-            break;
-
-        hres = dataSource.CoCreateInstance(__uuidof(DiaSourceAlt), NULL, CLSCTX_INPROC_SERVER);
-        if (S_OK == hres)
-            break;
-
-        hres = dataSource.CoCreateInstance(MSDIA12_CLASSGUID, NULL, CLSCTX_INPROC_SERVER);
-        if (S_OK == hres)
-            break;
-
-        hres = dataSource.CoCreateInstance(MSDIA11_CLASSGUID, NULL, CLSCTX_INPROC_SERVER);
-        if (S_OK == hres)
-            break;
-
         HMODULE  hModule = NULL;
 
         if ( !GetModuleHandleEx(
@@ -93,23 +77,63 @@ static SymbolSessionPtr createSession(
         if (S_OK == hres)
             break;
 
-        pos = fileName.find_last_of(L'\\');
+        hres = dataSource.CoCreateInstance(__uuidof(DiaSource), NULL, CLSCTX_INPROC_SERVER);
+        if ( S_OK == hres )
+            break;
 
-        fileName.replace(pos, fileName.length() - pos, L"\\msdia120.dll");
-
-        hres = NoRegCoCreate(fileName.c_str(), MSDIA12_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        hres = dataSource.CoCreateInstance(__uuidof(DiaSourceAlt), NULL, CLSCTX_INPROC_SERVER);
         if (S_OK == hres)
             break;
 
-        pos = fileName.find_last_of(L'\\');
-
-        fileName.replace(pos, fileName.length() - pos, L"\\msdia110.dll");
-
-        hres = NoRegCoCreate(fileName.c_str(), MSDIA11_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        hres = dataSource.CoCreateInstance(MSDIA12_CLASSGUID, NULL, CLSCTX_INPROC_SERVER);
         if (S_OK == hres)
             break;
 
-        throw DiaException(L"Call ::CoCreateInstance", hres);
+        hres = dataSource.CoCreateInstance(MSDIA11_CLASSGUID, NULL, CLSCTX_INPROC_SERVER);
+        if (S_OK == hres)
+            break;
+
+        //HMODULE  hModule = NULL;
+
+        //if ( !GetModuleHandleEx(
+        //        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, 
+        //        (LPCTSTR)createSession,
+        //        &hModule) )
+        //            throw DiaException(L"failed to load msdia library");
+
+        //DWORD fileNameSize = 0x1000;
+        //
+        //std::vector<wchar_t>  fileNameBuffer(fileNameSize);
+
+        //GetModuleFileNameW(hModule, &fileNameBuffer[0], fileNameSize);
+
+        //std::wstring  fileName(&fileNameBuffer[0], fileNameSize);
+
+        //size_t pos = fileName.find_last_of(L'\\');
+
+        //fileName.replace(pos, fileName.length() - pos, L"\\msdia140.dll");
+
+        //hres = NoRegCoCreate(fileName.c_str(), MSDIA14_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        //if (S_OK == hres)
+        //    break;
+
+        //pos = fileName.find_last_of(L'\\');
+
+        //fileName.replace(pos, fileName.length() - pos, L"\\msdia120.dll");
+
+        //hres = NoRegCoCreate(fileName.c_str(), MSDIA12_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        //if (S_OK == hres)
+        //    break;
+
+        //pos = fileName.find_last_of(L'\\');
+
+        //fileName.replace(pos, fileName.length() - pos, L"\\msdia110.dll");
+
+        //hres = NoRegCoCreate(fileName.c_str(), MSDIA11_CLASSGUID, __uuidof(IDiaDataSource), (void**)&dataSource);
+        //if (S_OK == hres)
+        //    break;
+
+        //throw DiaException(L"Call ::CoCreateInstance", hres);
 
     } while( FALSE);
 

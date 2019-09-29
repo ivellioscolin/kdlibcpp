@@ -907,7 +907,7 @@ TypeInfoProviderPtr  getTypeInfoProviderFromSource(const std::string&  source, c
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolEnumeratorClang::SymbolEnumeratorClang(const std::string&  sourceCode, const std::string&  compileOptions)
+SymbolProviderClang::SymbolProviderClang(const std::string&  sourceCode, const std::string&  compileOptions)
 {
     std::vector<std::unique_ptr<ASTUnit>> ASTs;
     ASTBuilderAction Action(ASTs);
@@ -963,26 +963,41 @@ SymbolEnumeratorClang::SymbolEnumeratorClang(const std::string&  sourceCode, con
 
 ///////////////////////////////////////////////////////////////////////////////
 
+SymbolEnumeratorPtr SymbolProviderClang::getSymbolEnumerator(const std::wstring& mask)
+{
+    return SymbolEnumeratorPtr(new SymbolEnumeratorClang(mask, shared_from_this()));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::wstring SymbolEnumeratorClang::Next()
 {
-    if (m_index < m_symbols.size())
-        return strToWStr(m_symbols[m_index++]);
+    const auto& symbols = m_symbolProvider->m_symbols;
+
+    while (m_index < symbols.size())
+    {
+        const auto& sym = symbols[m_index++];
+        if (m_mask.empty() || fnmatch(m_mask, sym))
+            return strToWStr(sym);
+    }
+
+    return L"";
     
     return std::wstring();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolEnumeratorPtr getSymbolEnumeratorFromSource(const std::wstring& source, const std::wstring&  opts)
+SymbolProviderPtr getSymbolProviderFromSource(const std::wstring& source, const std::wstring&  opts)
 {
-    return SymbolEnumeratorPtr( new SymbolEnumeratorClang(wstrToStr(source), wstrToStr(opts) ) );
+    return SymbolProviderPtr( new SymbolProviderClang(wstrToStr(source), wstrToStr(opts) ) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolEnumeratorPtr getSymbolEnumeratorFromSource(const std::string& source, const std::string&  opts)
+SymbolProviderPtr getSymbolProviderFromSource(const std::string& source, const std::string&  opts)
 {
-    return SymbolEnumeratorPtr(new SymbolEnumeratorClang(source, opts));
+    return SymbolProviderPtr(new SymbolProviderClang(source, opts));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
