@@ -570,11 +570,12 @@ TEST_F(ClangTest, EnumFuncNames)
 
     auto  symEnum = getSymbolProviderFromSource(srcCode)->getSymbolEnumerator();
 
-    std::wstring symbol;
     std::vector<std::wstring> symbols;
-    while ( !(symbol = symEnum->Next()).empty() )
+    std::vector<std::wstring> types;
+    while (symEnum->Next())
     {
-        symbols.push_back(symbol);
+        symbols.push_back(symEnum->getName());
+        types.push_back(symEnum->getType()->getName());
     }
 
     EXPECT_EQ( std::vector<std::wstring>({ 
@@ -584,6 +585,14 @@ TEST_F(ClangTest, EnumFuncNames)
         L"testns::func3",
         L"testcls::method"
         }), symbols);
+
+    EXPECT_EQ(std::vector<std::wstring>({
+        L"Void(__cdecl)(Int4B, Char)",
+        L"Void(__cdecl)()",
+        L"Int4B(__cdecl)()",
+        L"Char(__cdecl)()",
+        kdlib::is64bitSystem() ? L"Void(__cdecl testcls::)(Int4B)" : L"Void(__thiscall testcls::)(Int4B)"
+        }), types );
 }
 
 TEST_F(ClangTest, Func)

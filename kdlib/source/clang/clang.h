@@ -402,6 +402,8 @@ private:
 
 class SymbolEnumeratorClang;
 
+using SymbolList = std::vector<std::pair<std::string, clang::FunctionDecl*> >;
+
 class SymbolProviderClang : public SymbolProvider, public boost::enable_shared_from_this< SymbolProviderClang>
 {
 
@@ -417,7 +419,7 @@ private:
 
     ClangASTSessionPtr  m_astSession;
 
-    std::vector<std::string>  m_symbols;
+    SymbolList  m_symbols;
 };
 
 
@@ -426,15 +428,18 @@ class SymbolEnumeratorClang : public SymbolEnumerator
 
 public:
 
-    SymbolEnumeratorClang(const std::wstring& mask, const boost::shared_ptr<SymbolProviderClang>& clangProvider) :
+    SymbolEnumeratorClang(const std::string& mask, const boost::shared_ptr<SymbolProviderClang>& clangProvider) :
         m_symbolProvider(clangProvider),
-        m_index(0),
-        m_mask(wstrToStr(mask))
+        m_index(-1),
+        m_mask(mask)
     {}
 
 private:
 
-    std::wstring Next() override;
+    virtual bool Next() override;
+    virtual std::wstring getName() override;
+    virtual MEMOFFSET_64 getOffset() override;
+    virtual TypeInfoPtr getType() override;
 
 private:
 

@@ -193,7 +193,7 @@ class SymbolProvider;
 typedef boost::shared_ptr<SymbolProvider>  SymbolProviderPtr;
 
 class SymbolEnumerator;
-typedef boost::shared_ptr< SymbolEnumerator>  SymbolEnumeratorPtr;
+typedef boost::shared_ptr<SymbolEnumerator>  SymbolEnumeratorPtr;
 
 class SymbolProvider {
 public:
@@ -202,7 +202,10 @@ public:
 
 class SymbolEnumerator {
 public:
-    virtual std::wstring Next() = 0;
+    virtual bool Next() = 0;
+    virtual std::wstring getName() = 0;
+    virtual MEMOFFSET_64 getOffset() = 0;
+    virtual TypeInfoPtr getType() = 0;
 };
 
 TypeInfoProviderPtr  getTypeInfoProviderFromSource( const std::wstring&  source, const std::wstring&  opts = L"" );

@@ -719,7 +719,7 @@ class FuncVisitor : public RecursiveASTVisitor<FuncVisitor>
 
 public:
 
-    FuncVisitor(ClangASTSessionPtr& astSession, std::vector<std::string>&  symbols) :
+    FuncVisitor(ClangASTSessionPtr& astSession, SymbolList&  symbols) :
         m_session(astSession),
         m_symbols(symbols)
    {}
@@ -735,7 +735,7 @@ public:
             if ( Declaration->getTemplatedKind() == FunctionDecl::TemplatedKind::TK_FunctionTemplate )
                 return true;
 
-            m_symbols.push_back(getFunctionNameFromDecl(Declaration));
+            m_symbols.push_back(std::make_pair(getFunctionNameFromDecl(Declaration), Declaration));
 
         } catch(TypeException& )
         {}
@@ -747,7 +747,7 @@ private:
 
     ClangASTSessionPtr  m_session;
 
-    std::vector<std::string>  &m_symbols;
+    SymbolList  &m_symbols;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -954,36 +954,56 @@ SymbolProviderClang::SymbolProviderClang(const std::string&  sourceCode, const s
 
     std::unique_ptr<ASTUnit>  ast = std::move(ASTs[0]);
 
-    auto astSession = ClangASTSession::getASTSession(ast);
+    m_astSession = ClangASTSession::getASTSession(ast);
 
-    FuncVisitor   visitor(astSession, m_symbols);
+    FuncVisitor   visitor(m_astSession, m_symbols);
 
-    visitor.TraverseDecl(astSession->getASTContext().getTranslationUnitDecl());
+    visitor.TraverseDecl(m_astSession->getASTContext().getTranslationUnitDecl());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 SymbolEnumeratorPtr SymbolProviderClang::getSymbolEnumerator(const std::wstring& mask)
 {
-    return SymbolEnumeratorPtr(new SymbolEnumeratorClang(mask, shared_from_this()));
+    return SymbolEnumeratorPtr(new SymbolEnumeratorClang(wstrToStr(mask), shared_from_this()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::wstring SymbolEnumeratorClang::Next()
+bool SymbolEnumeratorClang::Next()
 {
     const auto& symbols = m_symbolProvider->m_symbols;
 
-    while (m_index < symbols.size())
+    while (m_index + 1 < symbols.size() )
     {
-        const auto& sym = symbols[m_index++];
-        if (m_mask.empty() || fnmatch(m_mask, sym))
-            return strToWStr(sym);
+        const auto& sym = symbols[++m_index];
+        if (m_mask.empty() || fnmatch(m_mask, sym.first))
+        {
+            return true;
+        }
     }
 
-    return L"";
-    
-    return std::wstring();
+    return false;
+}
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring SymbolEnumeratorClang::getName()
+{
+    return strToWStr(m_symbolProvider->m_symbols[m_index].first);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+MEMOFFSET_64 SymbolEnumeratorClang::getOffset()
+{
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr SymbolEnumeratorClang::getType()
+{
+    return TypeInfoPtr(new TypeInfoClangFunc(m_symbolProvider->m_astSession, m_symbolProvider->m_symbols[m_index].second));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
