@@ -133,7 +133,7 @@ static SymbolSessionPtr createSession(
         //if (S_OK == hres)
         //    break;
 
-        //throw DiaException(L"Call ::CoCreateInstance", hres);
+        throw DiaException(L"Failed to find msdia", hres);
 
     } while( FALSE);
 
