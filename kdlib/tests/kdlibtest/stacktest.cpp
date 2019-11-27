@@ -432,3 +432,41 @@ INSTANTIATE_TEST_CASE_P(ReleaseStackDumps, InlineStackTest, ::testing::Values(
     MemDumps::STACKTEST_X64_RELEASE
     ,MemDumps::STACKTEST_WOW64_RELEASE
 ));
+
+class DiaRegToRegRelativei386Test : public MemDumpFixture
+{
+public:
+  DiaRegToRegRelativei386Test() :
+    MemDumpFixture(makeDumpFullName(MemDumps::STACKTEST_CV_ALLREG_I386))
+  {
+  }
+};
+
+TEST_F(DiaRegToRegRelativei386Test, CV_ALLREG_VFRAME)
+{
+  auto stack = getStack(true);
+  auto frame = stack->getFrame(0);
+  unsigned long paramCount = frame->getTypedParamCount();
+  EXPECT_NE(0, paramCount);
+  for (unsigned long i = 0; i < paramCount; ++i)
+    ASSERT_NO_THROW(frame->getTypedParam(i));
+}
+
+class DiaRegToRegRelativeAmd64Test : public MemDumpFixture
+{
+public:
+  DiaRegToRegRelativeAmd64Test() :
+    MemDumpFixture(makeDumpFullName(MemDumps::STACKTEST_CV_ALLREG_AMD64))
+  {
+  }
+};
+
+TEST_F(DiaRegToRegRelativeAmd64Test, CV_ALLREG_VFRAME)
+{
+  auto stack = getStack(true);
+  auto frame = stack->getFrame(0);
+  unsigned long localCount = frame->getLocalVarCount();
+  EXPECT_NE(0, localCount);
+  for (unsigned long i = 0; i < localCount; ++i)
+    ASSERT_NO_THROW(frame->getLocalVar(i));
+}

@@ -13,6 +13,7 @@
 
 #include "test/testfunc.h"
 #include "test/testvars.h"
+#include "test_cv_allreg.h"
 
 int breakOnRun();
 int breakpointTestRun();
@@ -94,6 +95,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
     if ( testGroup == L"childprocess" )
         return startChildProcess();
+
+    if ( testGroup == L"test_cv_allreg" )
+        return test_cv_allreg();
 
     return breakOnRun();
 }

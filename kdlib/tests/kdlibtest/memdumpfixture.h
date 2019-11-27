@@ -15,6 +15,8 @@ public:
     static constexpr wchar_t*  STACKTEST_WOW64 = L"targetapp_stacktest_wow64";
     static constexpr wchar_t*  STACKTEST_X64_RELEASE = L"targetapp_stacktest_x64_release";
     static constexpr wchar_t*  STACKTEST_WOW64_RELEASE = L"targetapp_stacktest_wow64_release";
+    static constexpr wchar_t*  STACKTEST_CV_ALLREG_I386 = L"targetapp_test_cv_allreg_i386";
+    static constexpr wchar_t*  STACKTEST_CV_ALLREG_AMD64 = L"targetapp_test_cv_allreg_amd64";
     static constexpr wchar_t*  WIN10_ARM64 = L"win10_arm64_mem";
     static constexpr wchar_t*  WIN10_ARM = L"win10_arm_rpi3_mem";
     static constexpr wchar_t*  WIN8_X64 = L"win8_x64_mem";
