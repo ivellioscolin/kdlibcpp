@@ -21,6 +21,7 @@ namespace {
 const DiaRegToRegRelativeBase g_DiaRegToRegRelativeAmd64 {
     { CV_AMD64_RIP, rriInstructionPointer },
     { CV_AMD64_RBP, rriStackFrame },
+    { CV_ALLREG_VFRAME, rriStackFrame },
     { CV_AMD64_RSP, rriStackPointer },
 };
 
