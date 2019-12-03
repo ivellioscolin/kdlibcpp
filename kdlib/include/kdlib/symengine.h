@@ -120,7 +120,7 @@ enum BasicTypes
 
 ////////////////////////////////////////////////////////////////////////////////
 
-enum RegRealativeIds
+enum RegRelativeIds
 {
     rriInstructionPointer,
     rriStackFrame,
@@ -205,7 +205,7 @@ public:
     virtual bool isVirtualBaseClass() = 0;
     virtual bool isVirtual() = 0;
     virtual unsigned long getRegisterId() = 0;
-    virtual unsigned long getRegRealativeId() = 0;  // <- RegRealativeId
+    virtual unsigned long getRegRelativeId() = 0;  // <- RegRelativeId
     virtual SymbolPtr getObjectPointerType() = 0; // "this" for method
     virtual unsigned long getCallingConvention() = 0; // <- CallingConventionType
     virtual SymbolPtr getClassParent() = 0; // "this" for method

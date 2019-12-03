@@ -110,7 +110,7 @@ public:
 
     ULONG getRegisterId() override;
 
-    unsigned long getRegRealativeId() override;
+    unsigned long getRegRelativeId() override;
 
     SymbolPtr getObjectPointerType() override;
 
@@ -161,7 +161,7 @@ public:
 
 protected:
 
-    ULONG getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative);
+    ULONG getRegRelativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative);
 
     bool isUndecorated(const std::wstring &undecName);
     

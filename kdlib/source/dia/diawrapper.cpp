@@ -425,18 +425,18 @@ ULONG DiaSymbol::getRegisterId()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-unsigned long DiaSymbol::getRegRealativeId()
+unsigned long DiaSymbol::getRegRelativeId()
 {
     switch (m_machineType)
     {
     case IMAGE_FILE_MACHINE_AMD64:
-        return getRegRealativeIdImpl(g_DiaRegToRegRelativeAmd64);
+        return getRegRelativeIdImpl(g_DiaRegToRegRelativeAmd64);
     case IMAGE_FILE_MACHINE_I386:
-        return getRegRealativeIdImpl(g_DiaRegToRegRelativeI386);
+        return getRegRelativeIdImpl(g_DiaRegToRegRelativeI386);
     case IMAGE_FILE_MACHINE_ARM64:
-        return getRegRealativeIdImpl(g_DiaRegToRegRelativeArm64);
+        return getRegRelativeIdImpl(g_DiaRegToRegRelativeArm64);
     case IMAGE_FILE_MACHINE_ARMNT:
-        return getRegRealativeIdImpl(g_DiaRegToRegRelativeArm);
+        return getRegRelativeIdImpl(g_DiaRegToRegRelativeArm);
     }
     throw DiaException(L"Unsupported machine type");
 }
@@ -467,7 +467,7 @@ SymbolPtr DiaSymbol::getClassParent()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ULONG DiaSymbol::getRegRealativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative)
+ULONG DiaSymbol::getRegRelativeIdImpl(const DiaRegToRegRelativeBase &DiaRegToRegRelative)
 {
     const DWORD registerId = callSymbol(get_registerId);
     DiaRegToRegRelativeBase::const_iterator it = DiaRegToRegRelative.find(registerId);

@@ -505,7 +505,7 @@ public:
         NOT_IMPLEMENTED();
     }
 
-    virtual ULONG getRegRealativeId()
+    virtual ULONG getRegRelativeId()
     {
         NOT_IMPLEMENTED();
     }
