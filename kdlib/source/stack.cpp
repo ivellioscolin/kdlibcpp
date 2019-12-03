@@ -113,7 +113,7 @@ TypedVarPtr StackFrameImpl::getTypedParam(unsigned long index)
     {
         MEMOFFSET_REL relOffset = sym->getOffset();
 
-        RELREG_ID regRel = sym->getRegRealativeId();
+        RELREG_ID regRel = sym->getRegRelativeId();
 
         MEMOFFSET_64  offset = getOffset(regRel, relOffset);
 
@@ -167,7 +167,7 @@ TypedVarPtr StackFrameImpl::getTypedParam(const std::wstring& paramName)
             {
                 MEMOFFSET_REL relOffset = sym->getOffset();
 
-                RELREG_ID regRel = sym->getRegRealativeId();
+                RELREG_ID regRel = sym->getRegRelativeId();
 
                 MEMOFFSET_64  offset = getOffset(regRel, relOffset);
 
@@ -246,7 +246,7 @@ TypedVarPtr StackFrameImpl::getLocalVar(unsigned long index)
     {
         MEMOFFSET_REL relOffset = sym->getOffset();
 
-        RELREG_ID regRel = sym->getRegRealativeId();
+        RELREG_ID regRel = sym->getRegRelativeId();
 
         MEMOFFSET_64  offset = getOffset(regRel, relOffset);
 
@@ -300,7 +300,7 @@ TypedVarPtr StackFrameImpl::getLocalVar(const std::wstring& paramName)
             {
                 MEMOFFSET_REL relOffset = sym->getOffset();
 
-                RELREG_ID regRel = sym->getRegRealativeId();
+                RELREG_ID regRel = sym->getRegRelativeId();
 
                 MEMOFFSET_64  offset = getOffset(regRel, relOffset);
 

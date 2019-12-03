@@ -1889,7 +1889,7 @@ RELREG_ID SymbolFunction::getElementOffsetRelativeReg(size_t index )
 {
     SymbolPtr  paramSym = getChildSymbol(index);
 
-    return paramSym->getRegRealativeId();
+    return paramSym->getRegRelativeId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1927,7 +1927,7 @@ RELREG_ID SymbolFunction::getElementOffsetRelativeReg(const std::wstring& paramN
 {
     SymbolPtr  paramSym = m_symbol->getChildByName(paramName);
 
-    return paramSym->getRegRealativeId();
+    return paramSym->getRegRelativeId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1982,7 +1982,7 @@ unsigned long SymbolFunction::getElementReg(const std::wstring& fieldName)
 {
     SymbolPtr  paramSym = m_symbol->getChildByName(fieldName);
 
-    return paramSym->getRegRealativeId();
+    return paramSym->getRegRelativeId();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
