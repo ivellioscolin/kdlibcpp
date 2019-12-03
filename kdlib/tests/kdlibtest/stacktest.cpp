@@ -287,21 +287,23 @@ TEST_F(Wow64StackTest, NotCurrentThread)
 }
 
 
-class InlineStackTest : public ::testing::WithParamInterface<const wchar_t*>, public MemDumpFixture
+class MemDumpSymPathFixture : public MemDumpFixture
 {
 
 public:
 
-    InlineStackTest() : MemDumpFixture( makeDumpFullName(GetParam()) )
+    MemDumpSymPathFixture(const std::wstring &dumpName, const std::wstring &symPath)
+      : MemDumpFixture(dumpName)
+      , m_symPath(symPath)
     {}
 
     void SetUp() override
     {
         MemDumpFixture::SetUp();
 
-        // path to targetapp.pdb
+        // setup path to symbols
         m_oldSymPath = kdlib::getSymbolPath();
-        kdlib::appendSymbolPath(makeDumpDirName(GetParam()));
+        kdlib::appendSymbolPath(m_symPath);
     }
 
     void TearDown() override 
@@ -314,6 +316,16 @@ public:
 protected:
 
     std::wstring  m_oldSymPath;
+    std::wstring  m_symPath;
+};
+
+class InlineStackTest : public ::testing::WithParamInterface<const wchar_t*>, public MemDumpSymPathFixture
+{
+
+public:
+
+    InlineStackTest() : MemDumpSymPathFixture( makeDumpFullName(GetParam()), makeDumpDirName(GetParam()))
+    {}
 };
 
 TEST_P(InlineStackTest, GetStack)
@@ -433,11 +445,12 @@ INSTANTIATE_TEST_CASE_P(ReleaseStackDumps, InlineStackTest, ::testing::Values(
     ,MemDumps::STACKTEST_WOW64_RELEASE
 ));
 
-class DiaRegToRegRelativei386Test : public MemDumpFixture
+class DiaRegToRegRelativei386Test : public MemDumpSymPathFixture
 {
 public:
   DiaRegToRegRelativei386Test() :
-    MemDumpFixture(makeDumpFullName(MemDumps::STACKTEST_CV_ALLREG_I386))
+    MemDumpSymPathFixture(makeDumpFullName(MemDumps::STACKTEST_CV_ALLREG_I386),
+      makeDumpDirName(MemDumps::STACKTEST_CV_ALLREG_I386))
   {
   }
 };
@@ -452,11 +465,12 @@ TEST_F(DiaRegToRegRelativei386Test, CV_ALLREG_VFRAME)
     ASSERT_NO_THROW(frame->getTypedParam(i));
 }
 
-class DiaRegToRegRelativeAmd64Test : public MemDumpFixture
+class DiaRegToRegRelativeAmd64Test : public MemDumpSymPathFixture
 {
 public:
   DiaRegToRegRelativeAmd64Test() :
-    MemDumpFixture(makeDumpFullName(MemDumps::STACKTEST_CV_ALLREG_AMD64))
+    MemDumpSymPathFixture(makeDumpFullName(MemDumps::STACKTEST_CV_ALLREG_AMD64),
+      makeDumpDirName(MemDumps::STACKTEST_CV_ALLREG_AMD64))
   {
   }
 };
