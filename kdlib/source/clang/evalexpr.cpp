@@ -34,8 +34,6 @@ kdlib::TypeInfoPtr getStandardIntType(const std::string& name);
 
 bool isBinOperation(const clang::Token& token);
 
-bool isInt64KeyWord(const clang::Token& token);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedValue evalExpr(const std::wstring& expr, const ScopePtr& scope, const TypeInfoProviderPtr& typeInfoProvider)
@@ -849,14 +847,35 @@ std::string getTypeModifierRecursive(const parser::ComplexMatcher& matcher)
 
     if (matcher.isPointer())
     {
+        bool  needSpace = false;
         for (auto p : matcher.getPointerMatcher().getPointerMatchers())
+        {
+            if (needSpace)
+            {
+                sstr << ' ';
+                needSpace = false;
+            }
             sstr << '*';
+            if (p.isConst())
+            {
+                sstr << "const";
+                needSpace = true;
+            }
+        }
+    }
+
+    if (matcher.isReference())
+    {
+        if (matcher.getRefMatcher().isLvalue())
+            sstr << '&';
+        else
+            sstr << "&&";
     }
 
     if (matcher.isNestedMatcher())
     {
         sstr << '(' << getTypeModifierRecursive(matcher.getNestedMatcher().getInnerMatcher()) << ')';
-    }
+    }   
     
     if (matcher.isArray())
     {
@@ -884,15 +903,10 @@ TypeInfoPtr TypeEval::getResult()
 {
     using namespace parser;
 
-    std::list<clang::Token>  tokens;
-    std::copy_if(m_tokens->cbegin(), m_tokens->cend(), std::back_inserter(tokens), [](auto& token){
-        return !token.is(clang::tok::kw_const);
-    });
-
-    TypeMatcher typeMatcher;
+    QualifiedTypeMatcher typeMatcher;
 
     auto matcher = all_of(typeMatcher, token_is(m_endToken));
-    auto matchResult = matcher.match(std::make_pair(tokens.cbegin(), tokens.cend()));
+    auto matchResult = matcher.match(std::make_pair(m_tokens->cbegin(), m_tokens->cend()));
 
     if (!matchResult.isMatched())
         throw  ExprException(L"error syntax");
@@ -901,11 +915,11 @@ TypeInfoPtr TypeEval::getResult()
 
     if (typeMatcher.isBasedType())
     {
-        typeInfo = getBaseType();
+        typeInfo = typeMatcher.getBaseTypeMatcher().getBaseType();
     }
     else if (typeMatcher.isStandardIntType())
     {
-        typeInfo = getStandardIntType();
+        typeInfo = getStandardIntType(typeMatcher.getStandardIntMatcher());
     }
     else if (typeMatcher.isCustomType())
     {
@@ -924,8 +938,7 @@ TypeInfoPtr TypeEval::getResult()
         typeInfo = applyComplexModifierRecursive(typeMatcher.getComplexMather(), typeInfo);
     }  
 
-    tokens.erase(matchResult.begin(), matchResult.end());
-    *m_tokens = tokens;
+    m_tokens->erase(matchResult.begin(), matchResult.end());
 
     return typeInfo;
 }
@@ -936,15 +949,10 @@ std::list<std::string>  TypeEval::getTemplateArgList()
 {
     using namespace parser;
 
-    std::list<clang::Token>  tokens;
-    std::copy_if(m_tokens->cbegin(), m_tokens->cend(), std::back_inserter(tokens), [](auto& token) {
-        return !token.is(clang::tok::kw_const);
-    });
-
     TypeMatcher typeMatcher;
 
     auto matcher = all_of(typeMatcher, token_is(m_endToken));
-    auto matchResult = matcher.match(std::make_pair(tokens.cbegin(), tokens.cend()));
+    auto matchResult = matcher.match(std::make_pair(m_tokens->cbegin(), m_tokens->cend()));
 
     if (!matchResult.isMatched())
         throw  ExprException(L"error syntax");
@@ -956,59 +964,33 @@ std::list<std::string>  TypeEval::getTemplateArgList()
 
     if (customMatcher.isTemplate())
     {
-        const auto& argList = customMatcher.getTemplateMatcher().getTemplateArgs();
+        const auto& argListMatcher = customMatcher.getTemplateMatcher().getTemplateArgs();
 
-        std::list<std::string>  argStrList;
-
-        for (auto& arg : argList)
-        {
-            if (arg.isType())
-            {
-                argStrList.push_back(getTypeName(arg.getTypeMatcher()));
-            }
-            else if (arg.isExpression())
-            {
-                auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getExpressionMatcher().getMatchResult().getMatchedRange()).getResult();
-                argStrList.push_back(std::to_string(value.getValue().asLongLong()));
-            }
-            else
-            {
-                throw  ExprException(L"error syntax");
-            }
-        }
-
-        return argStrList;
+        return getTemplateArgList(argListMatcher);
     }
 
     if (customMatcher.isNestedTemplate())
     {
         const auto& templateMatcher = customMatcher.getNestedTemplateMatcher();
-        const auto& argList = templateMatcher.getTemplateArgs1();
+        const auto& argListMatcher = templateMatcher.getTemplateArgs1();
         
-        std::list<std::string>  argStrList;
-
-        for (auto& arg : argList)
-        {
-            if (arg.isType())
-            {
-                argStrList.push_back(getTypeName(arg.getTypeMatcher()));
-            }
-            else if (arg.isExpression())
-            {
-                auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getExpressionMatcher().getMatchResult().getMatchedRange()).getResult();
-                argStrList.push_back(std::to_string(value.getValue().asLongLong()));
-            }
-            else
-            {
-                throw  ExprException(L"error syntax");
-            }
-        }
+        std::list<std::string>  argStrList = getTemplateArgList(argListMatcher);
 
         std::string  templateName = templateMatcher.getNestedTemplateName();
 
         templateName += '<';
 
-        templateName += getTemplateArgs(templateMatcher.getTemplateArgs2());
+        const auto& nestedArgList = getTemplateArgList(templateMatcher.getTemplateArgs2());
+
+        std::string argsStr;
+        for (const auto& arg : nestedArgList)
+        {
+            if (!argsStr.empty())
+                argsStr += ',';
+            argsStr += arg;
+        }
+
+        templateName += argsStr;
 
         templateName += '>';
 
@@ -1022,28 +1004,42 @@ std::list<std::string>  TypeEval::getTemplateArgList()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string TypeEval::getTemplateArgs(const parser::ListMatcher<parser::TemplateArgMatcher>& argList)
+std::list<std::string>  TypeEval::getTemplateArgList(const parser::ListMatcher<parser::TemplateArgMatcher>& argList)
 {
-    std::string  argsStr;
+    std::list<std::string>  argStrList;
 
     for (auto& arg : argList)
     {
-        if (!argsStr.empty())
-            argsStr += ',';
-
         if (arg.isType())
         {
-            argsStr += getTypeName(arg.getTypeMatcher());
+            argStrList.push_back(getTypeName(arg.getTypeMatcher()));
         }
         else if (arg.isExpression())
         {
             auto  value = ExprEval2(m_scope, m_typeInfoProvider, arg.getExpressionMatcher().getMatchResult().getMatchedRange()).getResult();
-            argsStr += std::to_string(value.getValue().asLongLong());
+            argStrList.push_back(std::to_string(value.getValue().asLongLong()));
         }
         else
         {
             throw  ExprException(L"error syntax");
         }
+    }
+
+    return argStrList;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string TypeEval::getTemplateArgs(const parser::ListMatcher<parser::TemplateArgMatcher>& argListMatcher)
+{
+    const auto& argList = getTemplateArgList(argListMatcher);
+
+    std::string argsStr;
+    for (const auto& arg : argList)
+    {
+        if (!argsStr.empty())
+            argsStr += ',';
+        argsStr += arg;
     }
 
     return argsStr;
@@ -1054,7 +1050,7 @@ std::string TypeEval::getTemplateArgs(const parser::ListMatcher<parser::Template
 std::string TypeEval::getTemplateName(const parser::TemplateMatcher& templateMatcher)
 {
     std::string  templateName = getTemplateArgs(templateMatcher.getTemplateArgs());
-
+    
     templateName.insert(templateName.begin(), '<');
     if (templateName.back() == '>')
         templateName.insert(templateName.end(), ' ');
@@ -1158,18 +1154,27 @@ TypeInfoPtr TypeEval::getCustomType(const parser::CustomTypeMatcher&  customMatc
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string TypeEval::getTypeName(const parser::TypeMatcher& typeMatcher)
+std::string TypeEval::getTypeName(const parser::QualifiedTypeMatcher& typeMatcher)
 {
     std::string  typeName;
 
+    if (typeMatcher.isConst())
+    {
+        typeName = "const ";
+    }
+
     if (typeMatcher.isBasedType())
     {
-        typeName = getBaseTypeName(typeMatcher.getBaseTypeMatcher());
+        typeName += typeMatcher.getBaseTypeMatcher().getTypeName();
     }
     else
     if (typeMatcher.isCustomType())
     {
-        typeName = getCustomTypeName(typeMatcher.getCustomMatcher());
+        typeName += getCustomTypeName(typeMatcher.getCustomMatcher());
+    }
+    else
+    {
+        throw  ExprException(L"error syntax");
     }
 
     if (typeMatcher.isComplexType())
@@ -1224,182 +1229,10 @@ std::string TypeEval::getCustomTypeName(const parser::CustomTypeMatcher& customM
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string  TypeEval::getBaseTypeName(const parser::BaseTypeMatcher& baseTypeMatcher)
+TypeInfoPtr TypeEval::getStandardIntType(const parser::StandardIntMatcher& stdIntMatcher)
 {
-    if (baseTypeMatcher.getMatchResult().begin()->is(clang::tok::kw_void))
-    {
-        return "void";
-    }
-
-    std::unique_ptr<BaseTypeBuilder>  baseTypeBuilder(new EmptyBaseTypeBuilder);
-
-    for (auto& token : baseTypeMatcher.getMatchResult())
-    {
-        if (token.is(clang::tok::kw_int))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addInt());
-        }
-        else
-        if (token.is(clang::tok::kw_char))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addChar());
-        }
-        else
-        if (token.is(clang::tok::kw_short))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addShort());
-        }
-        else
-        if (token.is(clang::tok::kw_unsigned))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addUnsigned());
-        }
-        else
-        if (token.is(clang::tok::kw_signed))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addSigned());
-        }
-        else
-        if (token.is(clang::tok::kw_long))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addLong());
-        }
-        else
-        if (isInt64KeyWord(token))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addLong());
-            baseTypeBuilder.reset(baseTypeBuilder->addLong());
-        }
-        else
-        if (token.is(clang::tok::kw_float))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addFloat());
-        }
-        else
-        if (token.is(clang::tok::kw_double))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addDouble());
-        }
-        else
-        {
-            throw ExprException(L"error syntax");
-        }
-    }
-
-    return baseTypeBuilder->getTypeName();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-
-TypeInfoPtr TypeEval::getBaseType()
-{
-    if (m_tokens->front().is(clang::tok::kw_void))
-    {
-        m_tokens->pop_front();
-        return loadType(L"Void");
-    }
-
-    std::unique_ptr<BaseTypeBuilder>  baseTypeBuilder(new EmptyBaseTypeBuilder);
-
-    while (true)
-    {
-        auto  token = m_tokens->front();
-
-        if (token.is(m_endToken))
-            break;
-   
-        if (token.is(clang::tok::kw_int))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addInt());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_char))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addChar());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_short))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addShort());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_unsigned))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addUnsigned());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_signed))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addSigned());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_long))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addLong());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (isInt64KeyWord(token))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addLong());
-            baseTypeBuilder.reset(baseTypeBuilder->addLong());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_float))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addFloat());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_double))
-        {
-            baseTypeBuilder.reset(baseTypeBuilder->addDouble());
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.is(clang::tok::kw_const))
-        {
-            m_tokens->pop_front();
-            continue;
-        }
-
-        if (token.isOneOf(clang::tok::star, clang::tok::l_paren, clang::tok::l_square, 
-            clang::tok::amp, clang::tok::ampamp))
-            break;
-
-        throw ExprException(L"error syntax");
-    }
-
-    return baseTypeBuilder->getResult();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypeInfoPtr TypeEval::getStandardIntType()
-{
-    auto  token = m_tokens->front();
-    m_tokens->pop_front();
-
-    assert(token.is(clang::tok::identifier));
- 
-    std::string  name(token.getIdentifierInfo()->getNameStart(), token.getLength());
-
+    auto& token = stdIntMatcher.getMatchResult().begin();
+    std::string  name(token->getIdentifierInfo()->getNameStart(), token->getLength());
     return kdlib::getStandardIntType(name);
 }
 

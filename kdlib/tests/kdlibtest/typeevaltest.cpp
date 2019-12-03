@@ -128,7 +128,7 @@ TEST(TypeEvalTest, ArrayBaseType)
     EXPECT_EQ(sizeof(short[10][2]), evalType("short[10][2]")->getSize());
 }
 
-TEST(TypeEvalTest, IncpmleteArrayType)
+TEST(TypeEvalTest, IncomleteArrayType)
 {
     EXPECT_NO_THROW(evalType("int[]"));
     EXPECT_NO_THROW(evalType("int[][2]"));
@@ -250,6 +250,7 @@ TEST(TypeEvalTest, Template)
     EXPECT_NO_THROW(evalType("TestStruct2<TestStruct1<double> >", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct4<int, signed char>", typeProvider));
     EXPECT_NO_THROW(evalType("TestStruct4<TestStruct1<int>, unsigned long>", typeProvider));
+
     EXPECT_THROW(evalType("TestStruct1<float>", typeProvider), TypeException);
     EXPECT_THROW(evalType("TestStruct1<unsigned", typeProvider), TypeException);  
     EXPECT_THROW(evalType("TestStruct1<unsigned, unsigned", typeProvider), TypeException);
@@ -281,8 +282,52 @@ TEST(TypeEvalTest, TemplateNumeric)
     EXPECT_THROW(evalType("TestStruct0<0.1>", typeProvider), TypeException);
 }
 
+TEST(TypeEvalTest, TemplateConst)
+{
+    static const char sourceCode[] = "           \
+    template<typename T1, typename...>           \
+    struct TestStruct1 {                         \
+    };                                           \
+    TestStruct1<const int>   val1;               \
+    TestStruct1<const int,const char>   val2;   \
+    ";
 
-TEST(TypeEvalTest, DISABLED_TemplateConstRef)
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+
+    EXPECT_EQ(L"TestStruct1<const int>", evalType("TestStruct1<int const>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int>", evalType("TestStruct1<const int>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int>", evalType("TestStruct1<const int const>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int>", evalType("TestStruct1<const const int>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int,const char>", evalType("TestStruct1<const int, const char>", typeProvider)->getName());
+
+    EXPECT_THROW(evalType("TestStruct1<const>", typeProvider), TypeException);
+    EXPECT_THROW(evalType("TestStruct1<int, char>", typeProvider), TypeException);
+}
+
+TEST(TypeEvalTest, TemplateConstPtr)
+{
+    static const char sourceCode[] = "           \
+    template<typename T1, typename...>           \
+    struct TestStruct1 {                         \
+    };                                           \
+    TestStruct1<const int*>   val1;              \
+    TestStruct1<const int* const>  val2;         \
+    TestStruct1<const int* const *const>  val3;  \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+
+    EXPECT_EQ(L"TestStruct1<const int *>", evalType("TestStruct1<const int*>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int *>", evalType("TestStruct1<int const *>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int *const>", evalType("TestStruct1<const int* const>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int *const>", evalType("TestStruct1<const int const * const>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const int *const *const>", evalType("TestStruct1<const int *const *const>", typeProvider)->getName());
+
+    EXPECT_THROW(evalType("TestStruct1<const*>", typeProvider), TypeException);
+    EXPECT_THROW(evalType("TestStruct1<const *int>", typeProvider), TypeException);
+}
+
+TEST(TypeEvalTest, TemplateConstRef)
 {
     static const char sourceCode[] = "\
     template<typename T>              \
@@ -296,10 +341,14 @@ TEST(TypeEvalTest, DISABLED_TemplateConstRef)
 
     TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
 
-    EXPECT_NO_THROW(evalType("TestStruct1<long&>", typeProvider));
-    EXPECT_NO_THROW(evalType("TestStruct1<long&&>", typeProvider));
-    EXPECT_NO_THROW(evalType("TestStruct1<const long&>", typeProvider));
-    EXPECT_NO_THROW(evalType("TestStruct1<const long&&>", typeProvider));
+    EXPECT_EQ(L"TestStruct1<long &>", evalType("TestStruct1<long&>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<long &&>", evalType("TestStruct1<long &&>", typeProvider)->getName());
+
+    EXPECT_EQ(L"TestStruct1<const long &>", evalType("TestStruct1<const long&>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const long &&>", evalType("TestStruct1<const long&&>", typeProvider)->getName());
+
+    EXPECT_EQ(L"TestStruct1<const long &>", evalType("TestStruct1<const long& const>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct1<const long &&>", evalType("TestStruct1<const long&& const>", typeProvider)->getName());
 }
 
 TEST(TypeEvalTest, TemplateNamespace)
@@ -483,17 +532,38 @@ TEST(TypeEvalTest, TemplateIncompleteArray)
 TEST(TypeEvalTest, TemplateVoid)
 {
     static const char sourceCode[] = "              \
-    template<typename T1, typename T2, typename T3> \
+    template<typename T1, typename ...>             \
     struct TestStruct {                             \
     };                                              \
-    TestStruct<void,void*,void*[1]>    testVal1;    \
-    TestStruct<void,void*,void*[]>     testVal2;    \
+    TestStruct<void>                   testVal1;    \
+    TestStruct<const void>             testVal2;    \
+    TestStruct<void,void*,void*[1]>    testVal3;    \
+    TestStruct<void,void*,void*[]>     testVal4;    \
     ";
 
     TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
 
-    EXPECT_NO_THROW(evalType("TestStruct<void,void*,void*[1]>", typeProvider));
-    EXPECT_NO_THROW(evalType("TestStruct<void,void*,void*[]>", typeProvider));
+    EXPECT_EQ(L"TestStruct<void>", evalType("TestStruct<void>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct<const void>", evalType("TestStruct<void const>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct<const void>", evalType("TestStruct<const void>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct<void,void *,void *[1]>", evalType("TestStruct<void,void*,void *[1]>", typeProvider)->getName());
+    EXPECT_EQ(L"TestStruct<void,void *,void *[]>", evalType("TestStruct<void,void *,void*[]>", typeProvider)->getName());
 }
 
+TEST(TypeEvalTest, getTempalteArgs)
+{
+    static const char sourceCode[] = "                          \
+    template<typename T1, typename ...>                         \
+    struct TestStruct {                                         \
+    };                                                          \
+    TestStruct<int, const int, long *const> testVal1;    \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+    TypeInfoPtr type = evalType("TestStruct<int, const int, long *const>", typeProvider);
+
+    EXPECT_EQ(L"int", type->getTemplateArg(0));
+    EXPECT_EQ(L"const int", type->getTemplateArg(1));
+    EXPECT_EQ(L"long *const", type->getTemplateArg(2));
+}
 

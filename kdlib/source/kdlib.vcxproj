@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="clang\basetypematcher.cpp" />
     <ClCompile Include="clang\clang.cpp" />
     <ClCompile Include="clang\evalexpr.cpp" />
     <ClCompile Include="customtypes.cpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="..\include\kdlib\typeinfo.h" />
     <ClInclude Include="..\include\kdlib\variant.h" />
     <ClInclude Include="..\include\kdlib\windbg.h" />
+    <ClInclude Include="clang\basetypematcher.h" />
     <ClInclude Include="clang\clang.h" />
     <ClInclude Include="clang\evalexpr.h" />
     <ClInclude Include="clang\exprparser.h" />
