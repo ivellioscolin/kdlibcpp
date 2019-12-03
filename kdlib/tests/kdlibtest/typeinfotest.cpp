@@ -621,7 +621,7 @@ TEST_F(TypeInfoTest, PdbProviderEnum)
 
     ASSERT_NO_THROW( typeEnum = typeProvider->getTypeEnumerator(L"struct*") );
     for ( count = 0; 0 != typeEnum->Next(); ++count);
-    EXPECT_EQ(14, count);
+    EXPECT_GT(40, count);
 }
 
 TEST_F(TypeInfoTest, TemplateStruct)

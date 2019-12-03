@@ -150,6 +150,9 @@
     <ClCompile Include="win\cpucontextarm.cpp" />
     <ClCompile Include="win\cpucontextarm64.cpp" />
     <ClCompile Include="win\cpucontexti386.cpp" />
+    <ClCompile Include="clang\basetypematcher.cpp">
+      <Filter>clang</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -302,6 +305,9 @@
       <Filter>clang</Filter>
     </ClInclude>
     <ClInclude Include="clang\exprparser.h">
+      <Filter>clang</Filter>
+    </ClInclude>
+    <ClInclude Include="clang\basetypematcher.h">
       <Filter>clang</Filter>
     </ClInclude>
   </ItemGroup>

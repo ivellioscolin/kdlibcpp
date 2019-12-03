@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "clang/Lex/Token.h"
-
+#include "clang/Lex/Preprocessor.h"
 
 namespace kdlib {
 
@@ -129,6 +129,8 @@ auto token_is(const TokenKind& tokenKind)
 {
     return TokenIs(tokenKind);
 }
+
+
 
 template<typename T>
 class Opt 
@@ -330,6 +332,17 @@ public:
 private:
 
     T&  capture;
+};
+
+template<>
+class CaptureList<> 
+{
+public:
+
+    CaptureList() = default;
+
+    void complete() {
+    }
 };
 
 

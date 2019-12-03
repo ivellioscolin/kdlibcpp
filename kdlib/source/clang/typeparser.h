@@ -2,38 +2,16 @@
 
 #include "parser.h"
 #include "exprparser.h"
+#include "basetypematcher.h"
 
 namespace kdlib {
 
-
-bool isBaseTypeKeyWord(const clang::Token& token);
-bool isStandardIntType(const clang::Token& token);
 bool isTrueFalse(const clang::Token& token);
 std::string  getIdentifier(const clang::Token& token);
 bool isOperationToken(const clang::Token& token);
 
 namespace parser {
 
-class BaseTypeMatcher : public Matcher
-{
-public:
-
-    MatchResult  match(const TokenRange& matchRange)
-    {
-        auto& beg = matchRange.first;
-        auto cur = beg;
-        for (; cur != matchRange.second; ++cur)
-        {
-            if (!isBaseTypeKeyWord(*cur))
-                break;
-        }
-        
-        if (beg != cur)
-            return matchResult = MatchResult(std::make_pair(beg, cur));
-
-        return matchResult = MatchResult();
-    }
-};
 
 class StandardIntMatcher : public Matcher
 {
@@ -60,7 +38,33 @@ public:
 
     MatchResult  match(const TokenRange& matchRange)
     {
-        return matchResult = rep(pointersMatcher, pointersMatcher).match(matchRange);
+        auto matcher = all_of(
+            token_is(clang::tok::star),
+            opt(constMatcher),
+            opt(rep(token_is(clang::tok::kw_const)))
+        );
+
+        return matchResult = matcher.match(matchRange);
+    }
+
+    bool isConst() const
+    {
+        return constMatcher.getMatchResult().isMatched();
+    }
+
+private:
+
+    Is<clang::tok::kw_const>  constMatcher;
+};
+
+class PointerPointerMatcher : public Matcher
+{
+public:
+
+    MatchResult  match(const TokenRange& matchRange)
+    {
+        auto matcher = rep(pointersMatcher, pointersMatcher);
+        return matchResult = matcher.match(matchRange);
     }
 
     const auto&  getPointerMatchers() const
@@ -70,8 +74,7 @@ public:
 
 private:
 
-    ListMatcher<Is<clang::tok::star>>  pointersMatcher;
-
+    ListMatcher<PointerMatcher>  pointersMatcher;
 };
 
 class ArrayIndexMatcher : public Matcher
@@ -141,8 +144,28 @@ public:
 
     MatchResult  match(const TokenRange& matchRange)
     {
-        return matchResult = any_of(Is<clang::tok::amp>(), Is<clang::tok::ampamp>()).match(matchRange);
+        auto matcher = all_of(
+            any_of(lvalueRefMatcher, rvalueRefMacther),
+            opt(rep(token_is(clang::tok::kw_const) ) )
+        );
+
+        return matchResult = matcher.match(matchRange);
     }
+
+    bool isLvalue() const 
+    {
+        return lvalueRefMatcher.getMatchResult().isMatched();
+    }
+
+    bool isRvalue() const
+    {
+        return rvalueRefMacther.getMatchResult().isMatched();
+    }
+
+private:
+
+    Is<clang::tok::amp> lvalueRefMatcher;
+    Is<clang::tok::ampamp> rvalueRefMacther;
 };
 
 class ComplexMatcher : public Matcher
@@ -153,7 +176,7 @@ public:
     MatchResult  match(const TokenRange& matchRange)
     {
         auto matcher =  all_of(
-            opt(pointerMatcher), 
+            opt(pointersMatcher), 
             opt(
                 any_of(
                     refMatcher, 
@@ -175,13 +198,13 @@ public:
 
     bool isPointer() const
     {
-        return pointerMatcher.getMatchResult().isMatched();
+        return pointersMatcher.getMatchResult().isMatched();
     }
 
-    const PointerMatcher& getPointerMatcher() const
+    const auto& getPointerMatcher() const
     {
         assert(isPointer());
-        return pointerMatcher;
+        return pointersMatcher;
     }
 
     bool isNestedMatcher() const
@@ -189,7 +212,7 @@ public:
         return nestedComplexMatcher.getMatchResult().isMatched();
     }
 
-    const NestedComplexMatcher& getNestedMatcher() const
+    const auto& getNestedMatcher() const
     {
         assert(isNestedMatcher());
         return nestedComplexMatcher;
@@ -200,7 +223,7 @@ public:
         return arrayMatcher.getMatchResult().isMatched();
     }
 
-    const ArrayMatcher& getArrayMatcher() const
+    const auto& getArrayMatcher() const
     {
         assert(isArray());
         return arrayMatcher;
@@ -211,7 +234,7 @@ public:
         return refMatcher.getMatchResult().isMatched();
     }
 
-    const RefMatcher& getRefMatcher() const
+    const auto& getRefMatcher() const
     {
         assert(isReference());
         return refMatcher;
@@ -219,7 +242,7 @@ public:
 
 private:
 
-    PointerMatcher   pointerMatcher;
+    PointerPointerMatcher   pointersMatcher;
     ArrayMatcher  arrayMatcher;
     RefMatcher   refMatcher;
     NestedComplexMatcher  nestedComplexMatcher;
@@ -285,7 +308,7 @@ private:
     ListMatcher<NamespaceMatcher>  namespacesMatchers;
 };
 
-class TypeMatcher;
+class QualifiedTypeMatcher;
 
 class TemplateArgMatcher : public Matcher
 {
@@ -295,7 +318,7 @@ public:
 
     bool isType() const;
 
-    const TypeMatcher& getTypeMatcher() const;
+    const QualifiedTypeMatcher& getTypeMatcher() const;
 
     bool isExpression() const
     {
@@ -309,7 +332,7 @@ public:
 
 private:
 
-    std::unique_ptr<TypeMatcher>  typeMatcher;
+    std::unique_ptr<QualifiedTypeMatcher>  typeMatcher;
 
     ConstExpressionMatcher  exprMatcher;
 };
@@ -491,7 +514,7 @@ class TypeMatcher : public Matcher
 public:
     MatchResult  match(const TokenRange& matchRange)
     {    
-        auto matcher = all_of(any_of(baseTypeMatcher, stdIntMatcher, customMatcher), opt(complexMatcher));
+        auto matcher = any_of(baseTypeMatcher, stdIntMatcher, customMatcher);
         matchResult = matcher.match(matchRange);
         return matchResult;
     }
@@ -512,15 +535,10 @@ public:
         return stdIntMatcher.getMatchResult().isMatched();
     }
 
-    bool isComplexType() const
+    const StandardIntMatcher& getStandardIntMatcher() const
     {
-        return complexMatcher.getMatchResult().isMatched();
-    }
-
-    const ComplexMatcher& getComplexMather() const
-    {
-        assert(isComplexType());
-        return complexMatcher;
+        assert(isStandardIntType());
+        return stdIntMatcher;
     }
 
     bool isCustomType() const
@@ -534,12 +552,76 @@ public:
         return customMatcher;
     }
 
-
 private:
 
     CustomTypeMatcher  customMatcher;
     BaseTypeMatcher  baseTypeMatcher;
     StandardIntMatcher  stdIntMatcher;
+};
+
+class QualifiedTypeMatcher : public Matcher
+{
+public:
+    MatchResult  match(const TokenRange& matchRange)
+    {
+        auto matcher = all_of(
+            typeMatcher,
+            opt(complexMatcher)
+        );
+        matchResult = matcher.match(matchRange);
+        return matchResult;
+    }
+
+    bool isConst() const
+    {
+       // return (typeMatcher.isBasedType() && typeMatcher.getBaseTypeMatcher().isConst());
+        return false;
+    }
+
+    bool isBasedType() const
+    {
+        return typeMatcher.isBasedType();
+    }
+
+    const BaseTypeMatcher& getBaseTypeMatcher() const
+    {
+        return typeMatcher.getBaseTypeMatcher();
+    }
+
+    bool isStandardIntType() const
+    {
+        return typeMatcher.isStandardIntType();
+    }
+
+    const StandardIntMatcher& getStandardIntMatcher() const
+    {
+        return typeMatcher.getStandardIntMatcher();
+    }
+
+    bool isCustomType() const
+    {
+        return typeMatcher.isCustomType();
+    }
+
+    const CustomTypeMatcher& getCustomMatcher() const
+    {
+        return typeMatcher.getCustomMatcher();
+    }
+
+    bool isComplexType() const
+    {
+        return complexMatcher.getMatchResult().isMatched();
+    }
+    
+    const ComplexMatcher& getComplexMather() const
+    {
+        assert(isComplexType());
+        return complexMatcher;
+    }
+
+private:
+
+    TypeMatcher  typeMatcher;
     ComplexMatcher complexMatcher;
 };
 
@@ -557,11 +639,10 @@ const ComplexMatcher& NestedComplexMatcher::getInnerMatcher() const
     return *innerMatcher.get();
 } 
 
-
 inline
 MatchResult TemplateArgMatcher::match(const TokenRange& matchRange)
 {
-    typeMatcher = std::make_unique<TypeMatcher>();
+    typeMatcher = std::make_unique<QualifiedTypeMatcher>();
     auto matcher = any_of(
         exprMatcher,
         *typeMatcher.get()
@@ -576,7 +657,7 @@ bool TemplateArgMatcher::isType() const
 }
 
 inline
-const TypeMatcher& TemplateArgMatcher::getTypeMatcher() const 
+const QualifiedTypeMatcher& TemplateArgMatcher::getTypeMatcher() const
 {
     assert(isType());
     return *typeMatcher.get();
