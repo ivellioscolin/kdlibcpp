@@ -154,11 +154,12 @@ MEMOFFSET_64 NetModule::getImageBase(ICorDebugModule* module)
 
 TypeInfoPtr NetModule::getTypeByName( const std::wstring &typeName )
 {
-    initCorDebugModule();
+    //initCorDebugModule();
 
-    NOT_IMPLEMENTED();
+    throw TypeException(typeName, L"not found");
 
-   // return TypeInfoPtr( new NetTypeClass(m_metaDataProvider, typeName) );
+    //auto typeToken = m_metaDataProvider->getTypeTokenByName(typeName);
+    //return m_metaDataProvider->getTypeByName(type);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
