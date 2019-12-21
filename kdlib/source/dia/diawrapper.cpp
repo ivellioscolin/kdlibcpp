@@ -135,7 +135,7 @@ std::wstring DiaException::makeFullDesc(const std::wstring &desc, HRESULT hres, 
                 FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL,
                 hres,
-                LOCALE_INVARIANT, //MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
                 (PWCHAR)&errMessage,
                 0,
                 NULL);
