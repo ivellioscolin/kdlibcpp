@@ -2,6 +2,7 @@
 
 #include <string>
 #include <list>
+#include <map>
 
 #pragma pack( push, 4 )
 
@@ -448,6 +449,7 @@ extern TemplateStruct<TemplateStruct<int>[4]>  g_template4;
 ////////////////////////////////////////////////////////////////////////////////
 
 extern std::list<int>  g_stdIntList;
+extern std::map<int, TemplateStruct<int> > g_stdMap;
 
 template<typename T>
 struct TestStructTemplate

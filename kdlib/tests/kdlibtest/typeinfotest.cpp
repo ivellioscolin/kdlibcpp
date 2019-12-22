@@ -669,6 +669,17 @@ TEST_F(TypeInfoTest, TemplateArgStdPair)
     EXPECT_EQ(3, loadType(L"g_stdIntList")->getElement(L"_Mypair")->getTemplateArgsCount());
 }
 
+TEST_F(TypeInfoTest, TemplateArgStdMap)
+{
+    kdlib::TypeInfoPtr  stdMap = loadType(L"g_stdMap");
+    EXPECT_EQ(4, stdMap->getTemplateArgsCount());
+    EXPECT_EQ(3, stdMap->getElement(L"_Mypair")->getTemplateArgsCount());
+    EXPECT_EQ(3, stdMap->getElement(L"_Mypair")->getElement(L"_Myval2")->getTemplateArgsCount());
+    EXPECT_EQ(L"std::allocator<std::_Tree_node<std::pair<int const ,TemplateStruct<int> >,void *> >", stdMap->getElement(L"_Mypair")->getElement(L"_Myval2")->getTemplateArg(0));
+    EXPECT_EQ(L"1", stdMap->getElement(L"_Mypair")->getElement(L"_Myval2")->getTemplateArg(2));
+
+}
+
 TEST_F(TypeInfoTest, DISABLED_IncomleteStruct)
 {
     TypeInfoPtr  typeInfo;

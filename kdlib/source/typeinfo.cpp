@@ -1,9 +1,7 @@
 #include "stdafx.h"
-
 #include <sstream>
 #include <iomanip>
-
-#include <boost/regex.hpp>
+#include <regex>
 
 #include "kdlib/exceptions.h"
 #include "kdlib/dbgengine.h"
@@ -20,13 +18,13 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex complexSymMatch(L"^([\\*]*)([^\\(\\)\\*\\[\\]]*)([\\(\\)\\*\\[\\]\\d]*)$");
+static const std::wregex complexSymMatch(L"^([\\*]*)([^\\(\\)\\*\\[\\]]*)([\\(\\)\\*\\[\\]\\d]*)$");
 
 std::wstring getTypeNameFromComplex( const std::wstring &fullTypeName )
 {
-    boost::wsmatch    matchResult;
+    std::wsmatch    matchResult;
 
-    if ( !boost::regex_match( fullTypeName, matchResult, complexSymMatch ) )
+    if ( !std::regex_match( fullTypeName, matchResult, complexSymMatch ) )
         return L"";
 
     return std::wstring( matchResult[2].first, matchResult[2].second );
@@ -34,9 +32,9 @@ std::wstring getTypeNameFromComplex( const std::wstring &fullTypeName )
 
 std::wstring getTypeSuffixFromComplex( const std::wstring &fullTypeName )
 {
-    boost::wsmatch    matchResult;
+    std::wsmatch    matchResult;
 
-    if ( !boost::regex_match( fullTypeName, matchResult, complexSymMatch ) )
+    if ( !std::regex_match( fullTypeName, matchResult, complexSymMatch ) )
         return L"";
 
     return std::wstring( matchResult[3].first, matchResult[3].second );
@@ -45,13 +43,13 @@ std::wstring getTypeSuffixFromComplex( const std::wstring &fullTypeName )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex bracketMatch(L"^([^\\(]*)\\((.*)\\)([^\\)]*)$"); 
+static const std::wregex bracketMatch(L"^([^\\(]*)\\((.*)\\)([^\\)]*)$"); 
 
 void getBracketExpression( std::wstring &suffix, std::wstring &bracketExpression )
 {
-    boost::wsmatch    matchResult;
+    std::wsmatch    matchResult;
 
-    if ( boost::regex_match( suffix, matchResult, bracketMatch  ) )
+    if ( std::regex_match( suffix, matchResult, bracketMatch  ) )
     {
         bracketExpression = std::wstring( matchResult[2].first, matchResult[2].second );
         
@@ -69,13 +67,13 @@ void getBracketExpression( std::wstring &suffix, std::wstring &bracketExpression
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex ptrMatch(L"^\\*(.*)$");
+static const std::wregex ptrMatch(L"^\\*(.*)$");
 
 bool getPtrExpression( std::wstring &suffix )
 {
-    boost::wsmatch    matchResult;
+    std::wsmatch    matchResult;
 
-    if ( boost::regex_match( suffix, matchResult, ptrMatch  ) )
+    if ( std::regex_match( suffix, matchResult, ptrMatch  ) )
     {
         suffix = std::wstring(matchResult[1].first, matchResult[1].second );
 
@@ -87,13 +85,13 @@ bool getPtrExpression( std::wstring &suffix )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex arrayMatch(L"^(.*)\\[(\\d+)\\]$");
+static const std::wregex arrayMatch(L"^(.*)\\[(\\d+)\\]$");
 
 bool getArrayExpression( std::wstring &suffix, size_t &arraySize )
 {
-    boost::wsmatch    matchResult;
+    std::wsmatch    matchResult;
 
-    if ( boost::regex_match( suffix, matchResult, arrayMatch  ) )
+    if ( std::regex_match( suffix, matchResult, arrayMatch  ) )
     {
         std::wstringstream  sstr;
         sstr << std::wstring(matchResult[2].first, matchResult[2].second );
@@ -484,26 +482,26 @@ std::wstring  getMethodPrototype( kdlib::TypeInfoPtr&  methodType )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex  prototypeMatch1(L"(\\w+)\\s*\\(\\s*(\\w+)\\s*\\)\\s*\\((.*)\\)");
-static const boost::wregex  prototypeMatch2(L"(\\w+)\\s*\\(\\s*(\\w+)\\s+(\\w+)::\\s*\\)\\s*\\((.*)\\)");
+static const std::wregex  prototypeMatch1(L"(\\w+)\\s*\\(\\s*(\\w+)\\s*\\)\\s*\\((.*)\\)");
+static const std::wregex  prototypeMatch2(L"(\\w+)\\s*\\(\\s*(\\w+)\\s+(\\w+)::\\s*\\)\\s*\\((.*)\\)");
 
 bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodPrototype)
 {
-    boost::wsmatch    matchResult;
+    std::wsmatch    matchResult;
 
     std::wstring  returnType;
     std::wstring  callConversion;
     std::wstring  className;
     std::wstring  args;
 
-    if ( boost::regex_match( methodPrototype, matchResult, prototypeMatch1  ) )
+    if ( std::regex_match( methodPrototype, matchResult, prototypeMatch1  ) )
     {
         returnType = std::wstring(matchResult[1].first, matchResult[1].second);
         callConversion = std::wstring(matchResult[2].first, matchResult[2].second);
         args = std::wstring(matchResult[3].first, matchResult[3].second);
     }
     else
-    if ( boost::regex_match( methodPrototype, matchResult, prototypeMatch2  ) )
+    if ( std::regex_match( methodPrototype, matchResult, prototypeMatch2  ) )
     {
         returnType = std::wstring(matchResult[1].first, matchResult[1].second);
         callConversion = std::wstring(matchResult[2].first, matchResult[2].second);
@@ -526,7 +524,7 @@ bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodProtot
     if ( !className.empty() && className != methodType->getClassParent()->getName() )
         return false;
 
-    args.erase( std::remove_if(args.begin(), args.end(), std::isspace), args.end());
+    args.erase(std::remove_if(args.begin(), args.end(), [](const auto& c) { return std::isspace(c, std::locale()); }), args.end());
 
     std::wstringstream  sargs;
 
@@ -552,7 +550,7 @@ bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodProtot
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex baseMatch(L"^(Char)|(WChar)|(Int1B)|(UInt1B)|(Int2B)|(UInt2B)|(Int4B)|(UInt4B)|(Int8B)|(UInt8B)|(Long)|(ULong)|(Float)|(Bool)|(Double)|(Void)|(Hresult)|(NoType)$" );
+static const std::wregex baseMatch(L"^(Char)|(WChar)|(Int1B)|(UInt1B)|(Int2B)|(UInt2B)|(Int4B)|(UInt4B)|(Int8B)|(UInt8B)|(Long)|(ULong)|(Float)|(Bool)|(Double)|(Void)|(Hresult)|(NoType)$" );
 
 bool TypeInfo::isBaseType( const std::wstring &typeName )
 {
@@ -565,8 +563,8 @@ bool TypeInfo::isBaseType( const std::wstring &typeName )
             return false;
     }
 
-    boost::wsmatch    baseMatchResult;
-    return boost::regex_match( name, baseMatchResult, baseMatch );
+    std::wsmatch    baseMatchResult;
+    return std::regex_match( name, baseMatchResult, baseMatch );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -583,9 +581,9 @@ TypeInfoPtr TypeInfo::getBaseTypeInfo( const std::wstring &typeName, size_t ptrS
     if ( isComplexType( typeName ) )
         return getComplexTypeInfo( typeName, SymbolPtr() );
 
-    boost::wsmatch    baseMatchResult;
+    std::wsmatch    baseMatchResult;
 
-    if ( boost::regex_match( typeName, baseMatchResult, baseMatch ) )
+    if ( std::regex_match( typeName, baseMatchResult, baseMatch ) )
     {
         if ( baseMatchResult[1].matched )
             return TypeInfoPtr( new TypeInfoBaseWrapper<char>(L"Char", ptrSize) );
@@ -839,26 +837,104 @@ bool TypeInfoImp::isTemplate()
 
 size_t TypeInfoImp::getTemplateArgsCount()
 {
-    if ( !isTemplate() )
-        throw TypeException(getName(), L"type is not a template");
-
-    const auto& templateArgs = kdlib::getTempalteArgs(getName());
-    return templateArgs.size();
+    return getTempalteArgs().size();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 std::wstring TypeInfoImp::getTemplateArg(size_t index)
 {
-    if (!isTemplate())
-        throw TypeException(getName(), L"type is not a template");
-
-    const auto& templateArgs = kdlib::getTempalteArgs(getName());
+    const auto& templateArgs = getTempalteArgs();
 
     if (index >= templateArgs.size())
         throw IndexException(index);
 
     return *std::next(templateArgs.begin(), index);
+}
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+std::pair<std::wstring::const_iterator, std::wstring::const_iterator> removeSpaces(const std::wstring::const_iterator& it1, const std::wstring::const_iterator& it2)
+{
+    auto result = std::make_pair(it1, it2);
+
+    while (result.first != result.second && *result.first == L' ')
+    {
+        result.first = std::next(result.first);
+    }
+
+    while (result.first != result.second)
+    {
+        auto prev = std::prev(result.second);
+        if (*prev != L' ')
+            break;
+        result.second = prev;
+    }
+
+    return result;
+}
+
+static const std::wregex templateMatch(L"^([\\w:]*)<(.*)>$");
+
+}
+
+std::list<std::wstring> TypeInfoImp::getTempalteArgs()
+{
+    std::wsmatch    matchResult;
+    const auto&  typeName = getName();
+    if ( !std::regex_match(typeName, matchResult, templateMatch))
+        throw TypeException(getName(), L"type is not a template");
+    
+    std::list<std::wstring>   argList;
+
+    auto  current = matchResult[2].first;
+    auto  argStart = current;
+    auto  end = matchResult[2].second;
+
+    int  nestedLevel = 0;
+
+    while (true)
+    {
+        if (nestedLevel == 0)
+        {
+            if (current == end)
+            {
+                auto arg = removeSpaces(argStart, current);
+                argList.push_back(std::wstring(arg.first, arg.second));
+                break;
+            }
+            else
+            if (*current == ',')
+            {
+                argList.push_back(std::wstring(argStart, current));
+                current = std::next(current);
+                argStart = current;
+            }
+            else
+            if (*current == '<')
+            {
+                nestedLevel++;
+                current = std::next(current);
+            }
+            else
+            {
+                current = std::next(current);
+            }
+        }
+        else
+        {
+            if (current == end)
+                break;
+            else if (*current == '<')
+                nestedLevel++;
+            else if (*current == '>')
+                nestedLevel--;
+            current = std::next(current);
+        }
+    }  
+
+    return argList;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,9 +28,6 @@ std::wstring printStructType(TypeInfoPtr& structType);
 std::wstring printPointerType(TypeInfoPtr&  ptrType);
 std::wstring printEnumType(TypeInfoPtr& enumType);
 
-std::list<std::wstring> getTempalteArgs(const std::wstring& typeName);
-std::list<std::string> getTempalteArgs(const std::string& typeName);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 class TypeInfoImp : public TypeInfo, public boost::enable_shared_from_this<TypeInfoImp>
@@ -399,6 +396,8 @@ protected:
 
         return  m_constantValue;
     }
+
+    std::list<std::wstring> getTempalteArgs();
 };
 
 

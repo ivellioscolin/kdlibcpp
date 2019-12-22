@@ -5,24 +5,27 @@
 
 using namespace kdlib;
 
-class NetTest : public NetProcessFixture
+typedef ::testing::Types<NetProcessFixture, NetDumpFixture>  NetTargetTypes;
+
+template <typename T>
+class NetTest : public T
 {
 };
 
+TYPED_TEST_CASE(NetTest, NetTargetTypes);
 
-TEST_F(NetTest, ProcessIsManaged)
+TYPED_TEST(NetTest, ProcessIsManaged)
 {
     EXPECT_TRUE(TargetProcess::getCurrent()->isManaged());
 }
 
-TEST_F(NetTest, NetModuleIsManaged)
+TYPED_TEST(NetTest, NetModuleIsManaged)
 {
     EXPECT_TRUE(m_targetModule->isManaged());
     EXPECT_FALSE( loadModule(L"ntdll")->isManaged());
 }
 
-
-TEST_F(NetTest, NetHeap)
+TYPED_TEST(NetTest, NetHeap)
 {
     kdlib::TargetHeapPtr  targetHeap;
     ASSERT_NO_THROW(targetHeap = TargetProcess::getCurrent()->getManagedHeap());
@@ -38,20 +41,18 @@ TEST_F(NetTest, NetHeap)
     EXPECT_TRUE( heapEnum->next(address, typeName, size) );
 }
 
-//TEST_F(NetTest, NetModuleEnumTypes)
-//{
-//    EXPECT_EQ( 
-//        TypeNameList( { L"managedapp.Class1",
-//        L"managedapp.Class1.Nested",
-//        L"managedapp.Program" } ),
-//        m_targetModule->enumTypes() );
-//
-//    EXPECT_EQ( 
-//        TypeNameList( { L"managedapp.Class1",
-//        L"managedapp.Class1.Nested" } ),
-//        m_targetModule->enumTypes(L"*Class1*") );
-//
-//}
+TYPED_TEST(NetTest, NetModuleEnumTypes)
+{
+    auto types = m_targetModule->enumTypes();
+    EXPECT_NE(types.end(), std::find(types.begin(), types.end(), L"managedapp.Class1.Nested"));
+    EXPECT_EQ(types.end(), std::find(types.begin(), types.end(), L"managedapp.Notexist"));
+}
+
+TYPED_TEST(NetTest, DISABLED_GetType)
+{
+    EXPECT_EQ(L"managedapp.Class1", m_targetModule->getTypeByName(L"managedapp.Class1")->getName());
+}
+
 //
 //TEST_F(NetTest, ClassField)
 //{
