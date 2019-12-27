@@ -759,11 +759,7 @@ TypeInfoPtr TypeInfo::getTypeInfoFromCache(const std::wstring &typeName)
 
     MEMOFFSET_64 moduleOffset = findModuleBySymbol(typeName);
 
-    ModulePtr module = loadModule(moduleOffset);
-
-    SymbolPtr  symbolScope = module->getSymbolScope();
-
-    TypeInfoPtr  typeInfo = loadType(symbolScope, typeName);
+    TypeInfoPtr  typeInfo = loadModule(moduleOffset)->getTypeByName(typeName);;
 
     ProcessMonitor::insertTypeInfo(typeInfo);
 
@@ -2098,6 +2094,40 @@ TypeInfoPtr TypeInfoSymbolProvider::getTypeByName(const std::wstring& name)
 TypeInfoEnumeratorPtr TypeInfoSymbolProvider::getTypeEnumerator(const std::wstring& mask)
 {
     return TypeInfoEnumeratorPtr( new TypeInfoSymbolEnum(m_symbolSession, mask) );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypeInfoSymbolProvider::makeTypeName(const std::wstring& typeName, const std::wstring& typeQualifier, bool isConst)
+{
+    std::wstringstream  wstr;
+
+    wstr << typeName;
+
+    if (!typeQualifier.empty())
+        wstr << L' ' << typeQualifier;
+
+    if (isConst)
+        wstr << L" const ";
+
+    return wstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::wstring TypeInfoDefaultProvider::makeTypeName(const std::wstring& typeName, const std::wstring& typeQualifier, bool isConst)
+{
+    std::wstringstream  wstr;
+
+    wstr << typeName;
+
+    if (!typeQualifier.empty())
+        wstr << L' ' << typeQualifier;
+
+    if (isConst)
+        wstr << L" const ";
+
+    return wstr.str();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

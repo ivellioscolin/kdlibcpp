@@ -710,3 +710,4 @@ TEST_F(TypeInfoTest, isInheritedMember)
     EXPECT_TRUE(typeInfo->isInheritedMember(typeInfo->getElementIndex(L"m_baseField")));
     EXPECT_THROW(loadType(L"Int8B[]")->isInheritedMember(0), TypeException);
 }
+

@@ -868,6 +868,23 @@ TypeInfoEnumeratorPtr TypeInfoProviderClang::getTypeEnumerator(const std::wstrin
 
 ///////////////////////////////////////////////////////////////////////////////
 
+std::wstring TypeInfoProviderClang::makeTypeName(const std::wstring& typeName, const std::wstring& typeQualifier, bool isConst)
+{
+    std::wstringstream  wstr;
+
+    if (isConst)
+        wstr << L"const ";
+
+    wstr << typeName;
+
+    if (!typeQualifier.empty())
+        wstr << L' ' << typeQualifier;
+
+    return wstr.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 TypeInfoProviderClangEnum::TypeInfoProviderClangEnum(const std::wstring& mask, const boost::shared_ptr<TypeInfoProviderClang>& clangProvider )
 {
     m_index = 0;

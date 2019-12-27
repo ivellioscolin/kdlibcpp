@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include <set>
-#include <boost/regex.hpp>
+#include <regex>
 
 #include "kdlib/memaccess.h"
 #include "kdlib/exceptions.h"
@@ -652,7 +652,51 @@ ScopePtr ModuleImp::getScope()
 
     return ScopePtr(new ModuleScope(shared_from_this()));
 }
+///////////////////////////////////////////////////////////////////////////////
 
+//static const std::wregex constMatch(L"[<,](const\\s)([^,>]*)[,>]");
+//
+//TypeInfoPtr ModuleImp::getTypeByName(const std::wstring &typeName)
+//{
+//    try
+//    {
+//        return loadType(getSymbolScope(), typeName);
+//    }
+//    catch (SymbolException& symExc)
+//    {
+//        if (typeName.find(L"const") == std::wstring::npos)
+//        {
+//            throw symExc;
+//        }
+//    }
+//
+//    // template<const int, int> in pdb symbols will be looks like template<int const ,int>
+//    // it is may be bug, but we can fix it
+//
+//    //std::wsmatch matchResult;
+//
+//    //auto  current = typeName.cbegin();
+//    //auto  end = typeName.cend();
+//
+//    //std::wstring  typeName1;
+//
+//    //while (std::regex_search(current, end, matchResult, constMatch))
+//    //{
+//    //    typeName1.insert(typeName1.end(), current, matchResult[1].first);
+//    //    typeName1.insert(typeName1.end(), matchResult[2].first, matchResult[2].second);
+//    //    typeName1.insert(typeName1.size(), L" const ");
+//
+//    //    current = matchResult[2].second;
+//    //}
+//
+//    //if (current != end)
+//    //{
+//    //    typeName1.insert(typeName1.end(), current, end);
+//    //}
+//
+//    return loadType(getSymbolScope(), typeName1);
+//
+//}
 ///////////////////////////////////////////////////////////////////////////////
 
 MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
@@ -730,13 +774,13 @@ void getSourceLine( std::wstring &fileName, unsigned long &lineno, long &displac
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static const boost::wregex moduleSymMatch(L"^(?:([^!]*)!)?([^!]+)$"); 
+static const std::wregex moduleSymMatch(L"^(?:([^!]*)!)?([^!]+)$"); 
 
 void splitSymName( const std::wstring &fullName, std::wstring &moduleName, std::wstring &symbolName )
 {
-    boost::wsmatch   matchResult;
+    std::wsmatch   matchResult;
 
-    if ( !boost::regex_match( fullName, matchResult, moduleSymMatch ) )
+    if ( !std::regex_match( fullName, matchResult, moduleSymMatch ) )
     {
         std::wstringstream   sstr;
         sstr << L"invalid symbol name: " << fullName;
@@ -756,5 +800,6 @@ void splitSymName( const std::wstring &fullName, std::wstring &moduleName, std::
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 
 }; // kdlib namespace end

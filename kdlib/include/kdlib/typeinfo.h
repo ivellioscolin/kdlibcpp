@@ -182,6 +182,7 @@ class TypeInfoProvider
 public:
     virtual TypeInfoPtr getTypeByName(const std::wstring& name) = 0;
     virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask = L"") = 0;
+    virtual std::wstring makeTypeName(const std::wstring& typeName, const std::wstring& qualified, bool const) = 0;
 };
 
 class TypeInfoEnumerator {

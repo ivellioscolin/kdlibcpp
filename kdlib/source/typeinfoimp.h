@@ -1110,10 +1110,6 @@ protected:
     size_t  m_count;
 };
 
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 class TypeInfoSymbolArray : public TypeInfoArray 
@@ -1163,9 +1159,11 @@ public:
 
 private:
 
-    virtual TypeInfoPtr getTypeByName(const std::wstring& name);
+    TypeInfoPtr getTypeByName(const std::wstring& name) override;
 
-    virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask = L"");
+    TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask = L"") override;
+
+    std::wstring makeTypeName(const std::wstring& typeName, const std::wstring& typeQualifier, bool isConst) override;
 
 private:
 
@@ -1187,6 +1185,8 @@ class TypeInfoDefaultProvider : public TypeInfoProvider
     {
         throw TypeException(L"failed to enumrate types");
     }
+
+    std::wstring makeTypeName(const std::wstring& typeName, const std::wstring& typeQualifier, bool isConst) override;
 };
 
 

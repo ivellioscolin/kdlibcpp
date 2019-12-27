@@ -439,3 +439,9 @@ TEST_F(ExprEvalTarget, Eval1)
     EXPECT_EQ( (g_testArray + 1)->m_field1 % 4, evalExpr("(g_testArray + 1)->m_field1 % 4", m_targetModule->getScope()));
 }
 
+TEST_F(ExprEvalTarget, TemplateConstCast)
+{
+    TypedValue  evalResult;
+    ASSERT_NO_THROW(evalResult = evalExpr("(std::_Compressed_pair<std::allocator<std::_Tree_node<std::pair<const int, TemplateStruct<int> >, void *> >, std::_Tree_val<std::_Tree_simple_types<std::pair<const int, TemplateStruct<int> > > >, 1>*)nullptr"));
+}
+

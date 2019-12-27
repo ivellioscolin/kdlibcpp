@@ -388,9 +388,11 @@ public:
 
 private:
 
-    virtual TypeInfoPtr getTypeByName(const std::wstring& name);
+    TypeInfoPtr getTypeByName(const std::wstring& name) override;
 
-    virtual TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask);
+    TypeInfoEnumeratorPtr getTypeEnumerator(const std::wstring& mask) override;
+
+    std::wstring makeTypeName(const std::wstring& typeName, const std::wstring& typeQualifier, bool isConst) override;
 
 private:
 

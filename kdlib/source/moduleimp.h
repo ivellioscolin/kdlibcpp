@@ -246,12 +246,12 @@ protected:
 
 
 class ModuleImp : public ModuleBaseImp, public boost::enable_shared_from_this<ModuleImp> {
-    
-    friend ModulePtr loadModule( MEMOFFSET_64 offset );
+
+    friend ModulePtr loadModule(MEMOFFSET_64 offset);
 
 protected:
 
-    explicit ModuleImp( MEMOFFSET_64 offset );
+    explicit ModuleImp(MEMOFFSET_64 offset);
 
 protected:
 
@@ -299,10 +299,10 @@ protected:
     std::wstring getSymFile();
 
     void
-    reloadSymbols();
+        reloadSymbols();
 
     void
-    resetSymbols() 
+        resetSymbols()
     {
         m_symSession.reset();
     }
@@ -312,23 +312,23 @@ protected:
         return !m_exportSymbols && !m_noSymbols;
     }
 
-    MEMOFFSET_64 getSymbolVa( const std::wstring &symbolName );
-    MEMOFFSET_32 getSymbolRva( const std::wstring &symbolName );
+    MEMOFFSET_64 getSymbolVa(const std::wstring &symbolName);
+    MEMOFFSET_32 getSymbolRva(const std::wstring &symbolName);
 
-    SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, MEMDISPLACEMENT* displacement = 0 );
-    SymbolPtr getSymbolByVa( MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement );
-    SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, MEMDISPLACEMENT* displacement = 0 );
-    SymbolPtr getSymbolByRva( MEMOFFSET_32 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement );
+    SymbolPtr getSymbolByVa(MEMOFFSET_64 offset, MEMDISPLACEMENT* displacement = 0);
+    SymbolPtr getSymbolByVa(MEMOFFSET_64 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement);
+    SymbolPtr getSymbolByRva(MEMOFFSET_32 offset, MEMDISPLACEMENT* displacement = 0);
+    SymbolPtr getSymbolByRva(MEMOFFSET_32 offset, unsigned long  symTag, MEMDISPLACEMENT* displacement);
 
-    SymbolPtr getSymbolByName( const std::wstring &symbolName );
+    SymbolPtr getSymbolByName(const std::wstring &symbolName);
 
     SymbolPtr getSymbolScope();
 
-    size_t getSymbolSize( const std::wstring &symName );
+    size_t getSymbolSize(const std::wstring &symName);
 
-
-    TypeInfoPtr getTypeByName( const std::wstring &typeName ) {
-        return loadType( getSymbolScope(), typeName );
+    TypeInfoPtr getTypeByName(const std::wstring &typeName)
+    {
+        return loadType(getSymbolScope(), typeName);
     }
 
     TypedVarPtr getTypedVarByAddr( MEMOFFSET_64 offset );

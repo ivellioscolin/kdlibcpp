@@ -1069,21 +1069,17 @@ TypeInfoPtr TypeEval::getCustomType(const parser::CustomTypeMatcher&  customMatc
 
 std::string TypeEval::getTypeName(const parser::QualifiedTypeMatcher& typeMatcher)
 {
-    std::string  typeName;
-
-    if (typeMatcher.isConst())
-    {
-        typeName = "const ";
-    }
+    std::string    typeName;
+    std::string    typeQualifier;
 
     if (typeMatcher.isBasedType())
     {
-        typeName += typeMatcher.getBaseTypeMatcher().getTypeName();
+        typeName =  typeMatcher.getBaseTypeMatcher().getTypeName();
     }
     else
     if (typeMatcher.isCustomType())
     {
-        typeName += getCustomTypeName(typeMatcher.getCustomMatcher());
+        typeName = getCustomTypeName(typeMatcher.getCustomMatcher());
     }
     else
     {
@@ -1091,12 +1087,13 @@ std::string TypeEval::getTypeName(const parser::QualifiedTypeMatcher& typeMatche
     }
 
     if (typeMatcher.isComplexType())
-    {
-        typeName += ' ';
-        typeName += getTypeModifierRecursive(typeMatcher.getComplexMather());
-    }
+     {
+         typeQualifier = getTypeModifierRecursive(typeMatcher.getComplexMather());
+     }
 
-    return typeName;
+    auto fullTypeName = m_typeInfoProvider->makeTypeName(strToWStr(typeName), strToWStr(typeQualifier), typeMatcher.isConst());
+
+    return wstrToStr(fullTypeName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

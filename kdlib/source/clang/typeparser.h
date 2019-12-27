@@ -574,8 +574,7 @@ public:
 
     bool isConst() const
     {
-       // return (typeMatcher.isBasedType() && typeMatcher.getBaseTypeMatcher().isConst());
-        return false;
+       return typeMatcher.isBasedType() && typeMatcher.getBaseTypeMatcher().isConst();
     }
 
     bool isBasedType() const

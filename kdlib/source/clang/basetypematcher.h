@@ -17,9 +17,20 @@ public:
 
     MatchResult  match(const TokenRange& matchRange);
 
-    std::string  getTypeName() const;
+    std::string  getTypeName() const
+    {
+        return m_typeName;
+    }
 
-    TypeInfoPtr getBaseType() const;
+    TypeInfoPtr getBaseType() const
+    {
+        return m_typeInfo;
+    }
+
+    bool isConst() const
+    {
+        return m_const;
+    }
 
 private:
 
