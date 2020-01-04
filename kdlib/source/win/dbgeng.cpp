@@ -773,13 +773,14 @@ size_t ptrSize()
 {
     HRESULT  hres;
 
-    hres = g_dbgMgr->control->IsPointer64Bit();
+    if (g_dbgMgr != nullptr )
+    {
+        hres = g_dbgMgr->control->IsPointer64Bit();
+        if (SUCCEEDED(hres) )
+            return S_OK == hres ? 8 : 4;
+    }
 
-    if (FAILED(hres))
-        //throw  DbgEngException( L"IDebugControl::IsPointer64Bit", hres );
-        return sizeof(void*);
-    
-    return S_OK == hres ? 8 : 4;
+    return sizeof(void*);  
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
