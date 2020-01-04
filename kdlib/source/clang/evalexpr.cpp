@@ -1077,6 +1077,12 @@ std::string TypeEval::getTypeName(const parser::QualifiedTypeMatcher& typeMatche
         typeName =  typeMatcher.getBaseTypeMatcher().getTypeName();
     }
     else
+    if (typeMatcher.isStandardIntType())
+    {
+        auto& token = typeMatcher.getStandardIntMatcher().getMatchResult().begin();
+        typeName = std::string(token->getIdentifierInfo()->getNameStart(), token->getLength());
+    }
+    else
     if (typeMatcher.isCustomType())
     {
         typeName = getCustomTypeName(typeMatcher.getCustomMatcher());

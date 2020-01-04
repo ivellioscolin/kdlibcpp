@@ -567,3 +567,17 @@ TEST(TypeEvalTest, getTempalteArgs)
     EXPECT_EQ(L"long *const", type->getTemplateArg(2));
 }
 
+
+TEST(TypeEvalTest, TemplateWcharT)
+{
+    static const char sourceCode[] = "                          \
+    template<typename T1, typename ...>                         \
+    struct TestStruct {                                         \
+    };                                                          \
+    TestStruct<wchar_t>  testVal1;                              \
+    ";
+
+    TypeInfoProviderPtr  typeProvider = getTypeInfoProviderFromSource(sourceCode);
+
+    EXPECT_EQ(L"TestStruct<wchar_t>", evalType("TestStruct<wchar_t>", typeProvider)->getName());
+}
