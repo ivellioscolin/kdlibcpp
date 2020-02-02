@@ -1081,6 +1081,11 @@ std::wstring TypedVarUdt::str()
         TypeInfoPtr     fieldType = m_typeInfo->getElement(i);
         TypedVarPtr     fieldVar;
 
+        if (m_typeInfo->isConstMember(i))
+        {
+            continue;
+        }
+        else
         if ( m_typeInfo->isStaticMember(i) )
         {
             MEMOFFSET_64  staticOffset = m_typeInfo->getElementVa(i);

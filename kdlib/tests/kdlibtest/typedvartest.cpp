@@ -554,6 +554,7 @@ TEST_F(TypedVarTest, Str)
     EXPECT_NO_THROW( str = loadTypedVar(L"g_classChild")->str() );
     EXPECT_NO_THROW( str = loadTypedVar(L"CdeclFuncLong")->str() );
     EXPECT_NO_THROW( str = loadTypedVar(L"g_classChild")->getMethod( L"childMethod")->str() );
+
 }
 
 
@@ -726,4 +727,7 @@ TEST_F(TypedVarTest, StructNestedEnum)
 {
     EXPECT_EQ(g_structWithEnum.digit, *loadTypedVar(L"g_structWithEnum")->getElement(L"digit"));
     EXPECT_EQ(g_structWithNested.NestConst, *loadTypedVar(L"g_structWithNested")->getElement(L"NestConst"));
+    
+    std::wstring  s;
+    EXPECT_NO_THROW(s = loadTypedVar(L"g_structWithNested")->str());
 }
