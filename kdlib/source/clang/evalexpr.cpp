@@ -981,18 +981,37 @@ std::string TypeEval::getNestedTemplateName(const parser::DoubleTemplateMatcher&
     if (!templateName.empty())
         templateName += ',';
 
-    templateName += templateMatcher.getNestedTemplateName();
+    auto nestedTemplate = templateMatcher.getNestedTemplateName();
 
-    templateName += '<';
+    nestedTemplate += '<';
 
-    templateName += getTemplateArgs(templateMatcher.getTemplateArgs2());
+    nestedTemplate += getTemplateArgs(templateMatcher.getTemplateArgs2());
+
+    if (nestedTemplate.back() == '>')
+        nestedTemplate += " >";
+    else
+        nestedTemplate += '>';
+
+    auto fullNestedTypeName = m_typeInfoProvider->makeTypeName(strToWStr(nestedTemplate), L"", templateMatcher.isNetstedTemplateConst());
+
+    templateName += wstrToStr(fullNestedTypeName);
+
+    templateName += " >";
 
     templateName.insert(templateName.begin(), '<');
+     
+    //templateName += templateMatcher.getNestedTemplateName();
 
-    if (templateName.back() == '>')
-        templateName.insert(templateName.end(), ' ');
+    //templateName += '<';
 
-    templateName += "> >";
+    //templateName += getTemplateArgs(templateMatcher.getTemplateArgs2());
+
+    //templateName.insert(templateName.begin(), '<');
+
+    //if (templateName.back() == '>')
+    //    templateName.insert(templateName.end(), ' ');
+
+    //templateName += "> >";
 
     return templateName;
 }

@@ -32,6 +32,21 @@ public:
     }
 };
 
+class ConstMatcher : public Matcher
+{
+public:
+
+    MatchResult  match(const TokenRange& matchRange)
+    {
+        auto matcher = all_of(
+            token_is(clang::tok::kw_const),
+            opt(rep(token_is(clang::tok::kw_const)))
+        );
+
+        return matchResult = matcher.match(matchRange);
+    }
+};
+
 class PointerMatcher : public Matcher
 {
 public:
@@ -40,8 +55,7 @@ public:
     {
         auto matcher = all_of(
             token_is(clang::tok::star),
-            opt(constMatcher),
-            opt(rep(token_is(clang::tok::kw_const)))
+            opt(constMatcher)
         );
 
         return matchResult = matcher.match(matchRange);
@@ -54,7 +68,7 @@ public:
 
 private:
 
-    Is<clang::tok::kw_const>  constMatcher;
+    ConstMatcher  constMatcher;
 };
 
 class PointerPointerMatcher : public Matcher
@@ -403,6 +417,7 @@ public:
                         argsMatchers1
                     )
                 ),
+                opt(constMatcher),
                 nestedTemplateName,
                 token_is(clang::tok::less),
                 opt(
@@ -437,12 +452,19 @@ public:
         return nestedTemplateName.getName();
     }
 
+    bool isNetstedTemplateConst() const
+    {
+        assert(nestedTemplateName.getMatchResult().isMatched());
+        return constMatcher.getMatchResult().isMatched();
+    }
+
 
 private:
 
     ListMatcher<TemplateArgMatcher>  argsMatchers1;
     ListMatcher<TemplateArgMatcher>  argsMatchers2;
     CustomNameMatcher  nestedTemplateName;
+    ConstMatcher  constMatcher;
 };
 
 
@@ -565,7 +587,9 @@ public:
     MatchResult  match(const TokenRange& matchRange)
     {
         auto matcher = all_of(
+            opt(constMatcher1),
             typeMatcher,
+            opt(constMatcher2),
             opt(complexMatcher)
         );
         matchResult = matcher.match(matchRange);
@@ -573,8 +597,10 @@ public:
     }
 
     bool isConst() const
-    {
-       return typeMatcher.isBasedType() && typeMatcher.getBaseTypeMatcher().isConst();
+    {        
+        return constMatcher1.getMatchResult().isMatched() ||
+            constMatcher2.getMatchResult().isMatched() ||
+            (typeMatcher.isBasedType() && typeMatcher.getBaseTypeMatcher().isConst());
     }
 
     bool isBasedType() const
@@ -620,6 +646,8 @@ public:
 
 private:
 
+    ConstMatcher  constMatcher1;
+    ConstMatcher  constMatcher2;
     TypeMatcher  typeMatcher;
     ComplexMatcher complexMatcher;
 };
