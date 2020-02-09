@@ -1126,9 +1126,7 @@ std::wstring TypedVarUdt::str()
 
 TypedVarPtr TypedVarPointer::deref()
 {
-    return loadTypedVar( 
-                m_typeInfo->deref(), 
-                m_typeInfo->getPtrSize() == 4 ? m_varData->readDWord() : m_varData->readQWord());
+    return loadTypedVar( m_typeInfo->deref(), getPtrValue());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1169,8 +1167,8 @@ TypedVarPtr TypedVarPointer::getElement(size_t index)
 
     return loadTypedVar(
         elementType,
-        m_typeInfo->getPtrSize() == 4 ? m_varData->readDWord() : m_varData->readQWord() +
-        elementType->getSize()*index);
+        getPtrValue() + elementType->getSize()*index
+    );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

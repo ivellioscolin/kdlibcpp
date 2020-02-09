@@ -81,6 +81,7 @@ struct structTest {
 extern structTest      g_structTest;
 extern structTest      g_structTest1;
 extern structTest      g_testArray[2];
+extern structTest      *g_testArrayPtr;
 extern structTest      *g_structTestPtr;
 extern structTest      **g_structTestPtrPtr;
 

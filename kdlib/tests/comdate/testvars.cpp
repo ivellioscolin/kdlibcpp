@@ -74,6 +74,7 @@ void* voidPtrArray[] = { voidPtr, voidPtr, voidPtr };
 structTest      g_structTest = { 0, 500, true, 1, NULL };
 structTest      g_structTest1 = { 0, 500, true, 1, &g_structTest };
 structTest      g_testArray[2] = { { 0, 500, true, 1 }, { 2, 1500, false, 1 } };
+structTest      *g_testArrayPtr = g_testArray;
 structTest      *g_structTestPtr = &g_structTest;
 structTest      **g_structTestPtrPtr = &g_structTestPtr;
 structTestTypeDef    g_structTypeDef = {};

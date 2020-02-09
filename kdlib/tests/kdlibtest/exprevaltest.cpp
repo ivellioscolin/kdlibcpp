@@ -445,3 +445,8 @@ TEST_F(ExprEvalTarget, TemplateConstCast)
     ASSERT_NO_THROW(evalResult = evalExpr("(std::_Compressed_pair<std::allocator<std::_Tree_node<std::pair<const int, TemplateStruct<int> >, void *> >, std::_Tree_val<std::_Tree_simple_types<std::pair<const int, TemplateStruct<int> > > >, 1>*)nullptr"));
 }
 
+TEST_F(ExprEvalTarget, MultiArray)
+{
+    EXPECT_EQ(intMatrix[1][2], evalExpr(L"intMatrix[1][2]", m_targetModule->getScope()));
+    EXPECT_EQ(intMatrix[0][1], evalExpr(L"intMatrix[0][1]", m_targetModule->getScope()));
+}

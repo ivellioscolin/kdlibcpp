@@ -331,7 +331,7 @@ public:
 public:
 
     virtual NumVariant getValue() const {
-        return NumVariant( addr64(getSize() == 4 ? m_varData->readDWord() : m_varData->readQWord() ) );
+        return NumVariant(getPtrValue());
     }
 
     virtual void setValue(const NumVariant& value) {
@@ -351,6 +351,12 @@ public:
 
 
     std::wstring printValue() const;
+
+private:
+
+    MEMOFFSET_64  getPtrValue() const {
+        return addr64(getSize() == 4 ? m_varData->readDWord() : m_varData->readQWord());
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

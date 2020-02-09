@@ -52,15 +52,23 @@ TEST_F( TypedVarTest, BaseTypeVars2 )
 }
 
 
-TEST_F( TypedVarTest, TypedVarPtr )
+TEST_F(TypedVarTest, TypedVarPtr)
 {
     TypedVarPtr     ptr;
-    MEMOFFSET_64    ptrAddr = m_targetModule->getSymbolVa( L"g_structTestPtr" );
+    MEMOFFSET_64    ptrAddr = m_targetModule->getSymbolVa(L"g_structTestPtr");
 
-    ASSERT_NO_THROW( ptr = loadTypedVar(L"g_structTestPtr") );
-    EXPECT_EQ( ptrPtr( ptrAddr ), *ptr );
-    EXPECT_EQ( ptrAddr, ptr->getAddress() );
+    ASSERT_NO_THROW(ptr = loadTypedVar(L"g_structTestPtr"));
+    EXPECT_EQ(ptrPtr(ptrAddr), *ptr);
+    EXPECT_EQ(ptrAddr, ptr->getAddress());
+}
 
+TEST_F(TypedVarTest, TypedVarPtrIndex)
+{
+    TypedVarPtr     ptr;
+  
+    ASSERT_NO_THROW(ptr = loadTypedVar(L"g_testArrayPtr"));
+    EXPECT_EQ(g_testArray[0].m_field1, *ptr->getElement(0)->getElement(L"m_field1"));
+    EXPECT_EQ(g_testArray[1].m_field1, *ptr->getElement(1)->getElement(L"m_field1"));
 }
 
 TEST_F( TypedVarTest, TypedVarArray )
@@ -70,7 +78,7 @@ TEST_F( TypedVarTest, TypedVarArray )
 
     ASSERT_NO_THROW( var = loadTypedVar(L"g_testArray") );
     EXPECT_EQ( varAddr, *var);
-    EXPECT_EQ( varAddr, var->getAddress() );
+    EXPECT_EQ( varAddr, var->getAddress() );   
 }
 
 TEST_F( TypedVarTest, BitFields )
@@ -720,7 +728,7 @@ TEST_F(TypedVarTest, GetSource)
 
     ASSERT_NO_THROW(funcptr = loadTypedVar(L"classChild::childMethod"));
     funcptr->getSourceLine(funcptr->getAddress(), fileName, lineNo);
-    EXPECT_EQ(287, lineNo);
+    EXPECT_EQ(288, lineNo);
 }
 
 TEST_F(TypedVarTest, StructNestedEnum)
