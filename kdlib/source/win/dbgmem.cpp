@@ -336,5 +336,39 @@ kdlib::MemoryProtect getVaProtect( kdlib::MEMOFFSET_64 offset )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+kdlib::MemoryState getVaState(kdlib::MEMOFFSET_64 offset)
+{
+    offset = addr64(offset);
+
+    HRESULT  hres;
+    MEMORY_BASIC_INFORMATION64  meminfo = {};
+
+    hres = g_dbgMgr->dataspace->QueryVirtual(offset, &meminfo);
+
+    if (FAILED(hres))
+        throw MemoryException(offset);
+
+    return static_cast<MemoryState>(meminfo.State);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+kdlib::MemoryType getVaType(kdlib::MEMOFFSET_64  offset)
+{
+    offset = addr64(offset);
+
+    HRESULT  hres;
+    MEMORY_BASIC_INFORMATION64  meminfo = {};
+
+    hres = g_dbgMgr->dataspace->QueryVirtual(offset, &meminfo);
+
+    if (FAILED(hres))
+        throw MemoryException(offset);
+
+    return static_cast<MemoryType>(meminfo.Type);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 

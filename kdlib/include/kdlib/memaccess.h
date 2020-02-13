@@ -19,6 +19,9 @@ bool compareMemory( MEMOFFSET_64 addr1, MEMOFFSET_64 addr2, size_t length, bool 
 MEMOFFSET_64 searchMemory( MEMOFFSET_64 beginOffset, unsigned long length, const std::vector<char>& pattern );
 MEMOFFSET_64 findMemoryRegion( MEMOFFSET_64 beginOffset, MEMOFFSET_64& regionOffset, unsigned long long &regionLength );
 kdlib::MemoryProtect getVaProtect( kdlib::MEMOFFSET_64 offset );
+kdlib::MemoryState getVaState( kdlib::MEMOFFSET_64 offset );
+kdlib::MemoryType getVaType( kdlib::MEMOFFSET_64  offset );
+
 
 void writeMemory( MEMOFFSET_64 offset, const void* buffer, size_t length, bool phyAddr = false, unsigned long *written = 0 );
 

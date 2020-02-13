@@ -134,7 +134,6 @@ enum FileFlag {
 };
 
 enum MemoryProtect {
-
     PageNoAccess            = 0x00000001,
     PageReadOnly            = 0x00000002,
     PageReadWrite           = 0x00000004,
@@ -145,6 +144,17 @@ enum MemoryProtect {
     PageExecuteWriteCopy    = 0x00000080
 };
 
+enum MemoryState {
+    MemCommit               = 0x1000,
+    MemReserve              = 0x2000,
+    MemFree                 = 0x10000
+};
+
+enum MemoryType {
+    MemPrivate              = 0x20000,
+    MemMapped               = 0x40000,
+    MemImage                = 0x1000000    
+};
 
 enum ProcessExitReason {
     ProcessExit,
