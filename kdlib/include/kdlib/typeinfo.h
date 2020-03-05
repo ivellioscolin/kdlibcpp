@@ -154,7 +154,6 @@ protected:
 
     static bool isBaseType( const std::wstring &typeName );
     static bool isComplexType( const std::wstring &typeName );
-    static TypeInfoPtr getTypeInfoFromCache(const std::wstring &typeName );
 
     static TypeInfoPtr getBaseTypeInfo( const std::wstring &typeName, size_t ptrSize = 0);
     static TypeInfoPtr getBaseTypeInfo( const SymbolPtr &symbolScope );

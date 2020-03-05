@@ -25,8 +25,11 @@ public:
     void insertModule( ModulePtr& module);
     void removeModule(MEMOFFSET_64  offset );
 
-    TypeInfoPtr getTypeInfo(const std::wstring& name);
-    void insertTypeInfo(const TypeInfoPtr& typeInfo);
+    MEMOFFSET_64 getModuleBaseBySymbol(const std::wstring& sym);
+    void insertModuleBaseBySymbol(const std::wstring& sym, MEMOFFSET_64 module_base);
+
+    TypeInfoPtr getTypeInfo(const SymbolPtr& sym);
+    void insertTypeInfo(const SymbolPtr& sym, const TypeInfoPtr& typeInfo);
 
     void insertBreakpoint(const BreakpointPtr& breakpoint);
     void removeBreakpoint(const BreakpointPtr& breakpoint);
@@ -41,10 +44,14 @@ private:
     ModuleMap  m_moduleMap;
     boost::recursive_mutex  m_moduleLock;
 
-    typedef std::map<std::wstring, TypeInfoPtr>  TypeInfoMap;
-    TypeInfoMap  m_typeInfoMap;
-    boost::recursive_mutex  m_typeInfoLock;
-    
+    typedef std::map<std::wstring, MEMOFFSET_64> SymbolMap;
+    SymbolMap m_symbolMap;
+    boost::recursive_mutex m_symbolLock;
+
+    typedef std::map<std::pair<std::wstring, Symbol::SymIndexId>, TypeInfoPtr> TypeInfoMap;
+    TypeInfoMap m_typeInfoMap;
+    boost::recursive_mutex m_typeInfoLock;
+
     typedef std::map<BREAKPOINT_ID, BreakpointPtr>  BreakpointIdMap;
     BreakpointIdMap  m_breakpointMap;
     boost::recursive_mutex  m_breakpointLock;
@@ -89,14 +96,17 @@ public:
     ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id );
     void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id );
 
-    TypeInfoPtr getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id = -1);
-    void insertTypeInfo(const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id = -1);
+    MEMOFFSET_64 getModuleBaseBySymbol(const std::wstring& sym, PROCESS_DEBUG_ID id);
+    void insertModuleBaseBySymbol(const std::wstring& sym, MEMOFFSET_64 module_base, PROCESS_DEBUG_ID id);
 
     void registerEventsCallback(DebugEventsCallback *callback);
     void removeEventsCallback(DebugEventsCallback *callback);
 
     void registerBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
     void removeBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
+
+    TypeInfoPtr getTypeInfo(const SymbolPtr& sym, PROCESS_DEBUG_ID id = -1);
+    void insertTypeInfo(const SymbolPtr& sym, const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id = -1);
 
 private:
 
@@ -190,6 +200,26 @@ void ProcessMonitor::removeBreakpoint( const BreakpointPtr& breakpoint, PROCESS_
         id = getCurrentProcessId();
 
     g_procmon->removeBreakpoint(breakpoint, id);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr ProcessMonitor::getTypeInfo(const SymbolPtr& sym, PROCESS_DEBUG_ID id)
+{
+    if (id == -1)
+        id = getCurrentProcessId();
+
+    return g_procmon->getTypeInfo(sym, id);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitor::insertTypeInfo(const SymbolPtr& sym, const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id)
+{
+    if (id == -1)
+        id = getCurrentProcessId();
+
+    return g_procmon->insertTypeInfo(sym, typeInfo, id);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -347,22 +377,22 @@ void ProcessMonitor::insertModule( ModulePtr& module, PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr ProcessMonitor::getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id)
+MEMOFFSET_64 ProcessMonitor::getModuleBaseBySymbol(const std::wstring& sym, PROCESS_DEBUG_ID id)
 {
     if (id == -1)
         id = getCurrentProcessId();
 
-    return g_procmon->getTypeInfo(name, id);
+    return g_procmon->getModuleBaseBySymbol(sym, id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitor::insertTypeInfo(const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id)
+void ProcessMonitor::insertModuleBaseBySymbol(const std::wstring& sym, MEMOFFSET_64 module_base, PROCESS_DEBUG_ID id)
 {
     if (id == -1)
         id = getCurrentProcessId();
 
-    return g_procmon->insertTypeInfo(typeInfo, id);
+    return g_procmon->insertModuleBaseBySymbol(sym, module_base, id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -716,22 +746,42 @@ void ProcessMonitorImpl::insertModule( ModulePtr& module, PROCESS_DEBUG_ID id )
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr ProcessMonitorImpl::getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id)
+MEMOFFSET_64 ProcessMonitorImpl::getModuleBaseBySymbol(const std::wstring& sym, PROCESS_DEBUG_ID id)
 {
     ProcessInfoPtr  processInfo = getProcess(id);
-    if ( processInfo )
-        return processInfo->getTypeInfo(name);
+    if (processInfo)
+        return processInfo->getModuleBaseBySymbol(sym);
+
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessMonitorImpl::insertModuleBaseBySymbol(const std::wstring& sym, MEMOFFSET_64 module_base, PROCESS_DEBUG_ID id)
+{
+    ProcessInfoPtr  processInfo = getProcess(id);
+    if (processInfo)
+        return processInfo->insertModuleBaseBySymbol(sym, module_base);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr ProcessMonitorImpl::getTypeInfo(const SymbolPtr& sym, PROCESS_DEBUG_ID id)
+{
+    ProcessInfoPtr  processInfo = getProcess(id);
+    if (processInfo)
+        return processInfo->getTypeInfo(sym);
 
     return TypeInfoPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessMonitorImpl::insertTypeInfo(const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id)
+void ProcessMonitorImpl::insertTypeInfo(const SymbolPtr& sym, const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id)
 {
     ProcessInfoPtr  processInfo = getProcess(id);
     if (processInfo)
-        return processInfo->insertTypeInfo(typeInfo);
+        return processInfo->insertTypeInfo(sym, typeInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -826,19 +876,78 @@ void ProcessInfo::insertModule( ModulePtr& module)
 
 void ProcessInfo::removeModule(MEMOFFSET_64  offset )
 {
-    boost::recursive_mutex::scoped_lock l(m_moduleLock);
-    m_moduleMap.erase(offset);
+    ModulePtr module;
+    {
+        boost::recursive_mutex::scoped_lock l(m_moduleLock);
+        ModuleMap::iterator it = m_moduleMap.find(offset);
+
+        if(it != m_moduleMap.end())
+        {
+            module = it->second;
+            m_moduleMap.erase(it);
+        }
+    }
+
+    // clear symbol cache for this module
+    {
+        boost::recursive_mutex::scoped_lock l(m_symbolLock);
+        SymbolMap::iterator it = m_symbolMap.begin();
+        while (it != m_symbolMap.end())
+        {
+            if(it->second == offset)
+                it = m_symbolMap.erase(it);
+            else
+                ++it;
+        }
+    }
+
+    // clear TypeInfo cache for this module
+    if(module)
+    {
+        std::wstring scope = module->getSymbolScope()->getScopeName();
+        boost::recursive_mutex::scoped_lock l(m_typeInfoLock);
+        TypeInfoMap::iterator it = m_typeInfoMap.begin();
+        while (it != m_typeInfoMap.end())
+        {
+            if (it->first.first == scope)
+                it = m_typeInfoMap.erase(it);
+            else
+                ++it;
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeInfoPtr ProcessInfo::getTypeInfo(const std::wstring& name)
+MEMOFFSET_64 ProcessInfo::getModuleBaseBySymbol(const std::wstring& sym)
 {
+    boost::recursive_mutex::scoped_lock l(m_symbolLock);
+    SymbolMap::iterator it = m_symbolMap.find(sym);
+
+    if(it != m_symbolMap.end())
+        return it->second;
+
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ProcessInfo::insertModuleBaseBySymbol(const std::wstring& sym, MEMOFFSET_64 module_base)
+{
+    boost::recursive_mutex::scoped_lock l(m_symbolLock);
+    m_symbolMap[sym] = module_base;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+TypeInfoPtr ProcessInfo::getTypeInfo(const SymbolPtr& sym)
+{
+    TypeInfoMap::key_type key{ sym->getScopeName(), sym->getSymIndexId() };
+
     boost::recursive_mutex::scoped_lock l(m_typeInfoLock);
+    TypeInfoMap::iterator it = m_typeInfoMap.find(key);
 
-    TypeInfoMap::iterator  it = m_typeInfoMap.find(name);
-
-    if (it != m_typeInfoMap.end())
+    if(it != m_typeInfoMap.end())
         return it->second;
 
     return TypeInfoPtr();
@@ -846,11 +955,15 @@ TypeInfoPtr ProcessInfo::getTypeInfo(const std::wstring& name)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ProcessInfo::insertTypeInfo(const TypeInfoPtr& typeInfo)
+void ProcessInfo::insertTypeInfo(const SymbolPtr& sym, const TypeInfoPtr& typeInfo)
 {
-    boost::recursive_mutex::scoped_lock l(m_typeInfoLock);
+    TypeInfoMap::key_type key{ sym->getScopeName(), sym->getSymIndexId() };
 
-    m_typeInfoMap.insert(std::make_pair(typeInfo->getName(), typeInfo));
+    if (key.second != Symbol::InvalidId)
+    {
+        boost::recursive_mutex::scoped_lock l(m_typeInfoLock);
+        m_typeInfoMap[key] = typeInfo;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
