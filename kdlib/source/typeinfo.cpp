@@ -284,12 +284,18 @@ TypeInfoPtr loadType( const std::wstring &typeName )
 
     splitSymName( typeName, moduleName, symName );
 
+    ModulePtr  module;
+
     if ( moduleName.empty() )
     {
-        return TypeInfo::getTypeInfoFromCache(symName);
+        MEMOFFSET_64 moduleOffset = findModuleBySymbol(symName);
+        module = loadModule(moduleOffset);
+    }
+    else
+    {
+        module = loadModule(moduleName);
     }
 
-    ModulePtr  module = loadModule(moduleName);
 
     SymbolPtr  symbolScope = module->getSymbolScope();
 
@@ -326,7 +332,9 @@ TypeInfoPtr loadType( const SymbolPtr &symbolScope, const std::wstring &symbolNa
 TypeInfoPtr loadType( const SymbolPtr &symbol )
 {
     unsigned long symTag = symbol->getSymTag();
-    TypeInfoPtr  ptr;
+    TypeInfoPtr  ptr = ProcessMonitor::getTypeInfo(symbol);
+    if (ptr)
+        return ptr;
 
     switch( symTag )
     {
@@ -350,20 +358,25 @@ TypeInfoPtr loadType( const SymbolPtr &symbol )
             break;
         }
 
-       return loadType( symbol->getType() );
+        ptr = loadType(symbol->getType());
+        break;
 
     case SymTagBaseType:
-        return TypeInfo::getBaseTypeInfo( symbol );
+        ptr = TypeInfo::getBaseTypeInfo(symbol);
+        break;
 
     case SymTagUDT:
     case SymTagBaseClass:
-       return TypeInfoPtr( new TypeInfoUdt( symbol ) );
+        ptr = TypeInfoPtr(new TypeInfoUdt(symbol));
+        break;
 
     case SymTagArrayType:
-       return TypeInfoPtr( new TypeInfoSymbolArray( symbol ) );
+        ptr = TypeInfoPtr(new TypeInfoSymbolArray(symbol));
+        break;
 
     case SymTagPointerType:
-        return TypeInfoPtr( new TypeInfoSymbolPointer( symbol ) );
+        ptr = TypeInfoPtr(new TypeInfoSymbolPointer(symbol));
+        break;
 
     case SymTagVTable:
         ptr = TypeInfoPtr( new TypeInfoSymbolPointer( symbol->getType() ) );
@@ -404,6 +417,7 @@ TypeInfoPtr loadType( const SymbolPtr &symbol )
     //if ( ptr )
     //    ptr->m_ptrSize = getTypePointerSize(typeSym);
 
+    ProcessMonitor::insertTypeInfo(symbol, ptr);
     return ptr;
 }
 
@@ -747,23 +761,6 @@ TypeInfoPtr TypeInfo::getRecursiveComplexType( const std::wstring &typeName, Typ
         return getRecursiveComplexType( typeName, lowestType, bracketExpr, ptrSize );
 
     return lowestType;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypeInfoPtr TypeInfo::getTypeInfoFromCache(const std::wstring &typeName)
-{
-    TypeInfoPtr  cachedType = ProcessMonitor::getTypeInfo(typeName);
-    if (cachedType)
-        return cachedType;
-
-    MEMOFFSET_64 moduleOffset = findModuleBySymbol(typeName);
-
-    TypeInfoPtr  typeInfo = loadModule(moduleOffset)->getTypeByName(typeName);;
-
-    ProcessMonitor::insertTypeInfo(typeInfo);
-
-    return typeInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
