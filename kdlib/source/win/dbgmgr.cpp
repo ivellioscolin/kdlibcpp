@@ -40,7 +40,7 @@ DebugManager::DebugManager()
     client->SetOutputCallbacksWide(this);
     client->SetInputCallbacks(this);
 
-    client->SetOutputMask(DEBUG_OUTPUT_NORMAL);
+    client->SetOutputMask(DEBUG_OUTPUT_NORMAL | DEBUG_OUTPUT_ERROR | DEBUG_OUTPUT_WARNING);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ DebugManager::DebugManager( const std::wstring& remoteOptions )
 
     client->SetOutputCallbacksWide(this);
 
-    client->SetOutputMask(DEBUG_OUTPUT_NORMAL);
+    client->SetOutputMask(DEBUG_OUTPUT_NORMAL | DEBUG_OUTPUT_ERROR | DEBUG_OUTPUT_WARNING);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -461,10 +461,7 @@ HRESULT STDMETHODCALLTYPE OutputReader::Output(
         __in ULONG Mask,
         __in PCSTR Text )
 {
-    if (Mask == DEBUG_OUTPUT_NORMAL)
-    {
-        m_readLine += _bstr_t(Text);
-    }
+    m_readLine += _bstr_t(Text);
 
     return S_OK;
 }
