@@ -35,7 +35,7 @@ PROCESS_DEBUG_ID attachKernel( const std::wstring &connectOptions = L"" );
 bool isDumpAnalyzing();
 bool isKernelDebugging();
 
-std::wstring debugCommand(const std::wstring &command, bool suppressOutput=false);
+std::wstring debugCommand(const std::wstring &command, bool suppressOutput = false, const OutputFlagsSet& captureFlags = OutputFlag::Normal);
 NumVariant evaluate( const std::wstring  &expression, bool cplusplus=false );
 
 DebugOptionsSet getDebugOptions();

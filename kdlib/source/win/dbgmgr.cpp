@@ -461,13 +461,12 @@ HRESULT STDMETHODCALLTYPE OutputReader::Output(
         __in ULONG Mask,
         __in PCSTR Text )
 {
-    m_readLine += _bstr_t(Text);
+    if ( ( Mask & m_mask ) != 0 )
+        m_readLine += _bstr_t(Text);
 
     return S_OK;
 }
 
 ///////////////////////////////////////////////////////////////////
-
-
 
 } //kdlib namespace end

@@ -80,6 +80,9 @@
     <ClCompile Include="syntest.cpp">
       <Filter>testcases</Filter>
     </ClCompile>
+    <ClCompile Include="dbgenginetest.cpp">
+      <Filter>testcases</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

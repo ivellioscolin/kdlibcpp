@@ -196,6 +196,7 @@
     <ClCompile Include="clangtest.cpp" />
     <ClCompile Include="cputest.cpp" />
     <ClCompile Include="crttest.cpp" />
+    <ClCompile Include="dbgenginetest.cpp" />
     <ClCompile Include="disasmtest.cpp" />
     <ClCompile Include="eventhandlertest.cpp" />
     <ClCompile Include="exprevaltest.cpp" />
