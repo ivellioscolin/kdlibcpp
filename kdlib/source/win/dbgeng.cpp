@@ -39,6 +39,8 @@ bool initialize()
 
     ClrDebugManager::init();
 
+    g_dbgMgr->control->ExecuteWide(DEBUG_OUTCTL_THIS_CLIENT, L".echo", 0);
+
     return true;
 }
 
@@ -54,6 +56,8 @@ bool remote_initialize( const std::wstring& remoteOptions )
     ProcessMonitor::init();
 
     ClrDebugManager::init();
+
+    g_dbgMgr->control->ExecuteWide(DEBUG_OUTCTL_THIS_CLIENT, L".echo", 0);
 
     return true;
 }
@@ -525,18 +529,18 @@ bool isKernelDebugging()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
+std::wstring debugCommand( const std::wstring &command, bool suppressOutput, const OutputFlagsSet& captureFlags)
 {
     HRESULT         hres;
 
     if ( suppressOutput )
     {
-        OutputReader    outReader( g_dbgMgr->client );
+        OutputReader  outReader( g_dbgMgr->client, static_cast<ULONG>(captureFlags));
 
-        hres =  g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
+        hres = g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_THIS_CLIENT, command.c_str(), 0 );
 
         if ( FAILED( hres ) )
-            throw  DbgEngException( L"IDebugControl::ExecuteWide", hres ); 
+            throw  DbgEngException( L"IDebugControl::ExecuteWide", hres );
 
         waitForEvent();
 
@@ -546,7 +550,7 @@ std::wstring debugCommand( const std::wstring &command, bool suppressOutput )
     hres = g_dbgMgr->control->ExecuteWide( DEBUG_OUTCTL_ALL_CLIENTS, command.c_str(), 0 );
 
     if ( FAILED( hres ) )
-        throw  DbgEngException( L"IDebugControl::ExecuteWide", hres ); 
+        throw  DbgEngException( L"IDebugControl::ExecuteWide", hres );
 
     waitForEvent();
 

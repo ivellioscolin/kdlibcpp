@@ -238,20 +238,23 @@ class OutputReader : public IDebugOutputCallbacks, private boost::noncopyable {
 
 public:
 
-    explicit OutputReader(IDebugClient5*  client)
+    explicit OutputReader(IDebugClient5* client, ULONG outputMask = DEBUG_OUTPUT_NORMAL)
     {
         HRESULT  hres;
 
         m_callbacks = NULL;
         m_client = client;
+        m_mask = outputMask;
 
         hres = m_client->GetOutputCallbacks(&m_callbacks);
         if ( FAILED( hres ) )
             throw DbgEngException( L"IDebugClient::GetOutputCallbacks", hres);
 
-        hres = m_client->SetOutputCallbacks(this );
+        hres = m_client->SetOutputCallbacks(this);
         if ( FAILED( hres ) )
             throw DbgEngException( L"IDebugClient::SetOutputCallbacks", hres);
+
+        m_client->FlushCallbacks();
     }
 
     ~OutputReader() 
@@ -297,6 +300,8 @@ private:
     CComPtr<IDebugClient5>              m_client;
 
     PDEBUG_OUTPUT_CALLBACKS             m_callbacks;
+
+    ULONG                               m_mask;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
