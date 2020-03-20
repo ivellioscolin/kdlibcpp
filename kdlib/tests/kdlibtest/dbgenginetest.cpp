@@ -1,5 +1,4 @@
-#include <stdafx.h>
-
+﻿#include <stdafx.h>
 #include "procfixture.h"
 #include "kdlib/dbgengine.h"
 
@@ -21,4 +20,9 @@ TEST_F(DbgEngineTest, DbgCommandSuppress)
     EXPECT_EQ(L"error", kdlib::debugCommand(L".printf /oe \"error\"", true, OutputFlag::Error));
 
     EXPECT_EQ(L"", kdlib::debugCommand(L".printf /os \"symbols\"", true, OutputFlag::Normal | OutputFlag::Warning));
+}
+
+TEST_F(DbgEngineTest, DbgCommandUnicode)
+{
+    EXPECT_EQ(L"💩", kdlib::debugCommand(kdlib::debugCommand(L".printf \"💩\""), true));
 }

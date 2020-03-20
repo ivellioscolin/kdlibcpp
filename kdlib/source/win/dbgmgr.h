@@ -234,7 +234,7 @@ extern DebugManagerWrapper   g_dbgMgr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class OutputReader : public IDebugOutputCallbacks, private boost::noncopyable {
+class OutputReader : public IDebugOutputCallbacksWide, private boost::noncopyable {
 
 public:
 
@@ -246,11 +246,11 @@ public:
         m_client = client;
         m_mask = outputMask;
 
-        hres = m_client->GetOutputCallbacks(&m_callbacks);
+        hres = m_client->GetOutputCallbacksWide(&m_callbacks);
         if ( FAILED( hres ) )
             throw DbgEngException( L"IDebugClient::GetOutputCallbacks", hres);
 
-        hres = m_client->SetOutputCallbacks(this);
+        hres = m_client->SetOutputCallbacksWide(this);
         if ( FAILED( hres ) )
             throw DbgEngException( L"IDebugClient::SetOutputCallbacks", hres);
 
@@ -259,7 +259,7 @@ public:
 
     ~OutputReader() 
     {
-        m_client->SetOutputCallbacks(m_callbacks);
+        m_client->SetOutputCallbacksWide(m_callbacks);
     }
 
     const std::wstring&
@@ -291,7 +291,7 @@ private:
 
    STDMETHOD(Output)(
         __in ULONG Mask,
-        __in PCSTR Text );
+        __in PCWSTR Text );
 
 private:
 
@@ -299,7 +299,7 @@ private:
 
     CComPtr<IDebugClient5>              m_client;
 
-    PDEBUG_OUTPUT_CALLBACKS             m_callbacks;
+    PDEBUG_OUTPUT_CALLBACKS_WIDE        m_callbacks;
 
     ULONG                               m_mask;
 };

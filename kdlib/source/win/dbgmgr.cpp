@@ -459,10 +459,10 @@ HRESULT STDMETHODCALLTYPE DebugManager::EndInput(
 
 HRESULT STDMETHODCALLTYPE OutputReader::Output(
         __in ULONG Mask,
-        __in PCSTR Text )
+        __in PCWSTR Text )
 {
     if ( ( Mask & m_mask ) != 0 )
-        m_readLine += _bstr_t(Text);
+        m_readLine += Text;
 
     return S_OK;
 }
