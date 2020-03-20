@@ -403,7 +403,7 @@ PROCESS_DEBUG_ID loadDump( const std::wstring &fileName )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugSystemObjects::GetCurrentProcessId", hres );
 
-   // ProcessMonitor::processStart(processId);
+    ProcessMonitor::processStart(processId);
 
     return processId;
 }
@@ -422,11 +422,11 @@ void closeDump( PROCESS_DEBUG_ID processId )
             throw DbgEngException( L"IDebugSystemObjects::SetCurrentProcessId", hres );
     }
 
+    ProcessMonitor::processStop(processId, ProcessDetach, 0);
+
     hres = g_dbgMgr->client->TerminateCurrentProcess();
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugClient::TerminateCurrentProcess", hres );
-
-   // ProcessMonitor::processStop(processId, ProcessDetach, 0);
 
     if ( ProcessMonitor::getNumberProcesses() == 0 )
         g_dbgMgr->ChangeEngineState( DEBUG_CES_EXECUTION_STATUS, DEBUG_STATUS_NO_DEBUGGEE);

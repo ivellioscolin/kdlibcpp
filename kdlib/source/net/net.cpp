@@ -187,9 +187,13 @@ DebugCallbackResult ClrDebugManagerImpl::onProcessStart(PROCESS_DEBUG_ID process
 {
     boost::recursive_mutex::scoped_lock  lock(m_processLock);
 
-    PROCESS_ID  pid = TargetProcess::getById(processid)->getSystemId();
+    auto process = TargetProcess::getById(processid);
 
-    m_processMap[pid] = 0;
+    if (!process->isKernelDebugging())
+    {
+        PROCESS_ID  pid = TargetProcess::getById(processid)->getSystemId();
+        m_processMap[pid] = 0;
+    }
 
     return DebugCallbackNoChange;
 }
@@ -198,9 +202,13 @@ DebugCallbackResult ClrDebugManagerImpl::onProcessStart(PROCESS_DEBUG_ID process
 
 DebugCallbackResult ClrDebugManagerImpl::onProcessExit( PROCESS_DEBUG_ID processid, ProcessExitReason  reason, unsigned long exitCode )
 {
-    PROCESS_ID  pid = TargetProcess::getById(processid)->getSystemId();
+    auto process = TargetProcess::getById(processid);
 
-    m_processMap.erase(pid);
+    if (!process->isKernelDebugging())
+    {
+        PROCESS_ID  pid = TargetProcess::getById(processid)->getSystemId();
+        m_processMap.erase(pid);
+    }
 
     return DebugCallbackNoChange;
 }
