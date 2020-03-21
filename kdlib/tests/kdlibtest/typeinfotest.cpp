@@ -197,6 +197,10 @@ TEST_F( TypeInfoTest, Enum )
     EXPECT_TRUE( loadType(L"enumType")->isEnum() );
     EXPECT_EQ( TWO, *loadType(L"enumType")->getElement(L"TWO") );
     EXPECT_TRUE( (NumVariant)*loadType(L"enumType")->getElement(L"TWO") == TWO );
+
+    EXPECT_EQ(ONE, *loadType(L"enumType")->getElement(0));
+    EXPECT_EQ(TWO, *loadType(L"enumType")->getElement(1));
+    EXPECT_EQ(THREE, *loadType(L"enumType")->getElement(2));
 }
 
 TEST_F( TypeInfoTest, BitField )
