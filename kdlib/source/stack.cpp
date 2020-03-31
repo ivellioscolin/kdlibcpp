@@ -441,7 +441,12 @@ bool StackFrameImpl::findStaticVar(const std::wstring& varName)
 
 TypedVarPtr StackFrameImpl::getFunction()
 {
-    auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
+    MEMDISPLACEMENT displacement;
+
+    auto module = loadModule(m_ip);
+    module->getSymbolByVa(m_ip, SymTagFunction, &displacement);
+    auto funcPtr = module->getTypedVarByAddr(m_ip - displacement);
+
     if (m_inlineIndex == 0 )
         return funcPtr;
 
@@ -465,17 +470,10 @@ std::wstring StackFrameImpl::findSymbol(MEMDISPLACEMENT &displacement)
     if (m_inlineIndex == 0)
         return kdlib::findSymbol(m_ip, displacement);
 
-    auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
 
-    for (MEMDISPLACEMENT i = 0; i <= 1; ++i)
-    {
-        const auto& inlineFunctions = funcPtr->getInlineFunctions(m_ip - i);
-
-        if (inlineFunctions.size() >= m_inlineIndex)
-            return (*std::next(inlineFunctions.rbegin(), m_inlineIndex - 1))->getName();
-    }
-
-    throw TypeException(L"failed to find inline function");
+    auto func = getFunction();
+    displacement = (MEMDISPLACEMENT)((long long)m_ip - (long long)func->getAddress());
+    return func->getName();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -489,7 +487,11 @@ void StackFrameImpl::getSourceLine(std::wstring& fileName, unsigned long& lineNo
         return;
     }
 
-    auto funcPtr = loadTypedVar(kdlib::findSymbol(m_ip));
+    MEMDISPLACEMENT displacement;
+
+    auto module = loadModule(m_ip);
+    module->getSymbolByVa(m_ip, SymTagFunction, &displacement);
+    auto funcPtr = module->getTypedVarByAddr(m_ip - displacement);
 
     for (MEMDISPLACEMENT i = 0; i <= 1; ++i)
     {
