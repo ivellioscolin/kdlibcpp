@@ -904,7 +904,7 @@ void ProcessInfo::removeModule(MEMOFFSET_64  offset )
     // clear TypeInfo cache for this module
     if(module)
     {
-        std::wstring scope = module->getSymbolScope()->getScopeName();
+        std::wstring scope = module->getName();
         boost::recursive_mutex::scoped_lock l(m_typeInfoLock);
         TypeInfoMap::iterator it = m_typeInfoMap.begin();
         while (it != m_typeInfoMap.end())
