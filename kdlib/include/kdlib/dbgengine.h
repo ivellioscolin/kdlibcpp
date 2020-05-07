@@ -33,6 +33,8 @@ bool isLocalKernelDebuggerEnabled();
 PROCESS_DEBUG_ID attachKernel( const std::wstring &connectOptions = L"" );
 
 bool isDumpAnalyzing();
+DumpType getDumpType();
+
 bool isKernelDebugging();
 
 std::wstring debugCommand(const std::wstring &command, bool suppressOutput = false, const OutputFlagsSet& captureFlags = OutputFlag::Normal);

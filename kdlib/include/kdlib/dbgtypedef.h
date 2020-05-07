@@ -239,6 +239,17 @@ enum OutputFlag
 
 typedef unsigned long  OutputFlagsSet;
 
+enum DumpType
+{
+    Small = 1024,
+    Default = 1025,
+    Full = 1026,
+    Image = 1027,
+    KernelSmall = Small,
+    Kernel = Default,
+    KernelFull = Full
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end
