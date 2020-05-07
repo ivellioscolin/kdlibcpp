@@ -514,6 +514,27 @@ bool isDumpAnalyzing()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+DumpType getDumpType()
+{
+    HRESULT         hres;
+    ULONG           debugClass, debugQualifier;
+
+    hres = g_dbgMgr->control->GetDebuggeeType(&debugClass, &debugQualifier);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetDebuggeeType", hres);
+
+    if (debugQualifier < DEBUG_DUMP_SMALL)
+        throw DbgException("Target is not a dump");
+
+    if (debugQualifier > DEBUG_DUMP_IMAGE_FILE)
+        throw DbgException("Unsupported dump type");
+
+    return static_cast<DumpType>(debugQualifier);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
 bool isKernelDebugging()
 {
     HRESULT     hres;

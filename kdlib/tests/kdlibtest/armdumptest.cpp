@@ -78,3 +78,10 @@ TEST_F(ARMKernelMiniDump, Test)
     }
 }
 
+TEST_F(ARMKernelMiniDump, DumpType)
+{
+    EXPECT_TRUE(isDumpAnalyzing());
+    EXPECT_TRUE(isKernelDebugging());
+    EXPECT_EQ(DumpType::KernelSmall, getDumpType());
+}
+

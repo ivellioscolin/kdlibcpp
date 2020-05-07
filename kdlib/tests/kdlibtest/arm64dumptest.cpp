@@ -89,3 +89,10 @@ TEST_F(ARM64KernelMiniDump, Test)
         }
     }
 }
+
+TEST_F(ARM64KernelMiniDump, DumpType)
+{
+    EXPECT_TRUE(isDumpAnalyzing());
+    EXPECT_TRUE(isKernelDebugging());
+    EXPECT_EQ(DumpType::KernelSmall, getDumpType());
+}
