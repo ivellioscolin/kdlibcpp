@@ -535,6 +535,21 @@ DumpType getDumpType()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+DumpFormatFlagsSet getDumpFormat()
+{
+    HRESULT         hres;
+    ULONG           formatFlags;
+
+    hres = g_dbgMgr->control->GetDumpFormatFlags(&formatFlags);
+
+    if (FAILED(hres))
+        throw DbgEngException(L"IDebugControl::GetDumpFormatFlags", hres);
+
+    return formatFlags;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
 bool isKernelDebugging()
 {
     HRESULT     hres;

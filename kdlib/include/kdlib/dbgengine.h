@@ -34,6 +34,7 @@ PROCESS_DEBUG_ID attachKernel( const std::wstring &connectOptions = L"" );
 
 bool isDumpAnalyzing();
 DumpType getDumpType();
+DumpFormatFlagsSet getDumpFormat();
 
 bool isKernelDebugging();
 

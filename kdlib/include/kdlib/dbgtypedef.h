@@ -250,6 +250,32 @@ enum DumpType
     KernelFull = Full
 };
 
+enum DumpFormat
+{
+    UserSmallFullMemory = 0x1,
+    UserSmallHandleData = 0x2,
+    UserSmallUnloadedModules = 0x4,
+    UserSmallIndirectMemory = 0x8,
+    UserSmallDataSegments = 0x10,
+    UserSmallFilterMemory = 0x20,
+    UserSmallFilterPaths = 0x40,
+    UserSmallProcessThreadData = 0x80,
+    UserSmallPrivateReadWriteMemory = 0x100,
+    UserSmallNoOptionalData = 0x200,
+    UserSmallFullMemoryInfo = 0x400,
+    UserSmallThreadInfo = 0x800,
+    UserSmallCodeSegments = 0x1000,
+    UserSmallNoAuxiliaryState = 0x2000,
+    UserSmallFullAuxiliaryState = 0x4000,
+    UserSmallModuleHeaders = 0x8000,
+    UserSmallFilterTriage = 0x10000,
+    UserSmallAddAvxXStateContext = 0x20000,
+    UserSmallIptTrace = 0x40000,
+    UserSmallIgnoreInaccessibleMem = 0x08000000
+};
+
+typedef unsigned long  DumpFormatFlagsSet;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // kdlib namespace end

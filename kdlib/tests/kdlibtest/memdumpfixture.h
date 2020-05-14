@@ -20,6 +20,7 @@ public:
     static constexpr wchar_t*  WIN10_ARM64 = L"win10_arm64_mem";
     static constexpr wchar_t*  WIN10_ARM = L"win10_arm_rpi3_mem";
     static constexpr wchar_t*  WIN8_X64 = L"win8_x64_mem";
+    static constexpr wchar_t*  MINIDUMP = L"targetapp_minidump";
 };
 
 inline std::wstring makeDumpDirName(const wchar_t* dumpName)
