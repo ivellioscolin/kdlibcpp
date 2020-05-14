@@ -107,6 +107,8 @@ bool getArrayExpression( std::wstring &suffix, size_t &arraySize )
 
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+
 } // end nameless namespace
 
 namespace kdlib {
@@ -560,6 +562,153 @@ bool isPrototypeMatch(TypeInfoPtr&  methodType, const std::wstring& methodProtot
     }
 
     return args == sargs.str();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::vector<TypeFieldPtr> enumFields(
+    const SymbolPtr &rootSym,
+    const SymbolPtr &parentSym,
+    MEMOFFSET_32 startOffset = 0,
+    MEMOFFSET_32 virtualBasePtr = 0,
+    size_t virtualDispIndex = 0,
+    size_t virtualDispSize = 0)
+{
+    std::vector<TypeFieldPtr>  fields;
+
+    bool  firstVtbl = true;
+
+    size_t   childCount = parentSym->getChildCount();
+
+    for (unsigned long i = 0; i < childCount; ++i)
+    {
+        SymbolPtr  childSym = parentSym->getChildByIndex(i);
+        SymTags  symTag = childSym->getSymTag();
+
+        if (symTag == SymTagBaseClass)
+        {
+            if (childSym->isVirtualBaseClass() )
+            {
+                if (rootSym != parentSym)
+                    continue;
+
+                auto childFields = enumFields(
+                    rootSym,
+                    childSym, 
+                    0,
+                    childSym->getVirtualBasePointerOffset(),
+                    childSym->getVirtualBaseDispIndex(),
+                    childSym->getVirtualBaseDispSize());
+
+                for (const auto& childField : childFields)
+                {
+                    fields.push_back(childField);
+                }
+            }
+            else
+            {
+                auto childFields = enumFields(
+                    rootSym, 
+                    childSym,
+                    startOffset + childSym->getOffset(), 
+                    virtualBasePtr, 
+                    virtualDispIndex,
+                    virtualDispSize);
+            
+                for (const auto& childField : childFields)
+                {
+                    if (childField->isVtbl() && firstVtbl)
+                    {
+                        firstVtbl = false;
+                        auto  vtblField = SymbolUdtField::getVtblField(
+                            parentSym->getVirtualTableShape(),
+                            L"__VFN_table",
+                            startOffset + childSym->getOffset(),
+                            virtualBasePtr,
+                            virtualDispIndex,
+                            virtualDispSize);
+
+                        fields.push_back(vtblField);
+                    }
+                    else
+                    {
+                        fields.push_back(childField);
+                    }
+                }
+            }
+        }
+        else
+        if (symTag == SymTagData)
+        {
+            TypeFieldPtr  fieldPtr;
+
+            auto dataKind = childSym->getDataKind();
+
+            switch (dataKind)
+            {
+
+            case DataIsMember:
+                fieldPtr = SymbolUdtField::getField(
+                    childSym,
+                    childSym->getName(),
+                    startOffset + childSym->getOffset(), 
+                    virtualBasePtr, 
+                    virtualDispIndex,
+                    virtualDispSize);
+                break;
+
+            case DataIsStaticMember:
+                {
+                    MEMOFFSET_64  staticOffset = 0L;
+                    try
+                    {
+                        staticOffset = childSym->getVa();
+                    }
+                    catch (SymbolException&)
+                    {
+                    }
+                    fieldPtr = SymbolUdtField::getStaticField(childSym, childSym->getName(), staticOffset);
+                }
+                break;
+
+            case DataIsConstant:
+                fieldPtr = SymbolUdtField::getConstField(childSym, childSym->getName());
+                break;
+
+            default:
+                continue;
+            }
+
+            if (rootSym != parentSym)
+                fieldPtr->setMemberInherited();
+
+            fields.push_back(fieldPtr);
+        }
+        else
+        if (symTag == SymTagVTable)
+        {
+            TypeFieldPtr  fieldPtr;
+
+            fieldPtr = SymbolUdtField::getVtblField(
+                parentSym->getVirtualTableShape(), 
+                L"__VFN_table", 
+                startOffset + childSym->getOffset(), 
+                virtualBasePtr,
+                virtualDispIndex, 
+                virtualDispSize);
+
+            fields.push_back( fieldPtr );
+        }
+        else
+        if (symTag == SymTagEnum)
+        {
+            auto childFields = enumFields(rootSym, childSym, startOffset);
+            for (const auto& childField : childFields)
+                fields.push_back(childField);
+        }
+    }
+
+    return fields;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1047,8 +1196,14 @@ TypeInfoPtr TypeInfoFields::getElement( const std::wstring &name )
 
     TypeInfoPtr  fieldType = m_fields.lookup( std::wstring( name, 0, pos) )->getTypeInfo();
 
-    if ( pos == std::wstring::npos )
+    if (pos == std::wstring::npos)
+    {
+        if (fieldType->isVtbl())
+        {
+            return fieldType->ptrTo(fieldType->getPtrSize());
+        }
         return fieldType;
+    }
 
     return fieldType->getElement( std::wstring( name, pos + 1 ) );
 }
@@ -1059,7 +1214,12 @@ TypeInfoPtr TypeInfoFields::getElement(size_t index )
 {
     checkFields();
 
-    return m_fields.lookup(index)->getTypeInfo();
+    auto typeInfo = m_fields.lookup(index)->getTypeInfo();
+    if (typeInfo->isVtbl())
+    {
+        return typeInfo->ptrTo(typeInfo->getPtrSize());
+    }
+    return typeInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1542,135 +1702,10 @@ TypeInfoPtr TypeInfoUdt::getVTBL()
 
 void TypeInfoUdt::getFields()
 {
-    getFields( m_symbol, SymbolPtr() );
-    getVirtualFields();
-}
+    auto fields = kdlib::enumFields(m_symbol, m_symbol);
 
-///////////////////////////////////////////////////////////////////////////////
-
-void TypeInfoUdt::getFields( 
-        const SymbolPtr &rootSym, 
-        const SymbolPtr &baseVirtualSym,
-        MEMOFFSET_32 startOffset,
-        MEMOFFSET_32 virtualBasePtr,
-        size_t virtualDispIndex,
-        size_t virtualDispSize )
-{
-    size_t   childCount = rootSym->getChildCount();
-
-    for ( unsigned long  i = 0; i < childCount; ++i )
-    {
-        SymbolPtr  childSym = rootSym->getChildByIndex( i );
-
-        SymTags  symTag = childSym->getSymTag();
-
-        if ( symTag == SymTagBaseClass )
-        {
-            if ( !childSym->isVirtualBaseClass() )
-            {
-                getFields( childSym, SymbolPtr(), startOffset + childSym->getOffset() );
-            }
-        }
-        else
-        if ( symTag == SymTagData )
-        {
-            TypeFieldPtr  fieldPtr;
-
-            auto dataKind = childSym->getDataKind();
-
-            switch (dataKind )
-            {
-            case DataIsMember:
-                if ( baseVirtualSym )
-                {
-                    fieldPtr = SymbolUdtField::getVirtualField( childSym, childSym->getName(), startOffset + childSym->getOffset(), virtualBasePtr, virtualDispIndex, virtualDispSize );
-                }
-                else
-                {
-                    fieldPtr = SymbolUdtField::getField( childSym, childSym->getName(), startOffset + childSym->getOffset() );
-                }
-                break;
-
-            case DataIsStaticMember:
-                {
-                    std::wstring  fieldName = childSym->getName();
-                    MEMOFFSET_64  staticOffset = 0L;
-
-                    try
-                    {
-                        staticOffset = childSym->getVa();
-                    }
-                    catch (SymbolException&)
-                    {
-                    }
-
-                    fieldPtr = SymbolUdtField::getStaticField(childSym, fieldName, staticOffset);
-                }
-
-                break;
-
-            case DataIsConstant:
-                fieldPtr = SymbolUdtField::getConstField(childSym, childSym->getName());
-                break;
-
-            default:
-
-                throw TypeException(m_name, L"Unsupported field type");
-            }
-
-            if (rootSym != m_symbol)
-                fieldPtr->setMemberInherited();
-
-            m_fields.push_back( fieldPtr );
-        }
-        else
-        if ( symTag == SymTagVTable )
-        {
-            TypeFieldPtr  fieldPtr;
-
-            if ( baseVirtualSym )
-            {
-                fieldPtr = SymbolUdtField::getVirtualField( childSym,  L"__VFN_table", startOffset + childSym->getOffset(), virtualBasePtr, virtualDispIndex, virtualDispSize );
-            }
-            else
-            {
-                fieldPtr = SymbolUdtField::getField( childSym, L"__VFN_table", startOffset + childSym->getOffset() );
-            }
-
-            m_fields.push_back( fieldPtr );
-        }
-        else
-        if (symTag == SymTagEnum)
-        {
-            getFields(childSym, SymbolPtr(), startOffset);
-        }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void TypeInfoUdt::getVirtualFields()
-{
-
-    SymbolPtrList  baseClasses = m_symbol->findChildren(SymTagBaseClass);
-
-    for ( SymbolPtrList::iterator  baseClass = baseClasses.begin(); baseClass != baseClasses.end(); ++baseClass)
-    {
-         SymbolPtr  childSym = *baseClass;
-
-         std::wstring  baseClassName = childSym->getName();
-
-        if ( !childSym->isVirtualBaseClass() )
-            continue;
-
-        getFields( 
-            childSym,
-            childSym,
-            0,
-            childSym->getVirtualBasePointerOffset(),
-            childSym->getVirtualBaseDispIndex(),
-            childSym->getVirtualBaseDispSize() );
-    }
+    for (auto& field : fields)
+        m_fields.push_back(field);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

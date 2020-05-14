@@ -303,16 +303,67 @@ TEST_F( TypedVarTest, FunctionDebugRange )
     ASSERT_LE(std::ptrdiff_t(funcptr->getDebugEnd()), static_cast<std::ptrdiff_t>(std::ptrdiff_t(funcptr->getAddress()) + funcptr->getSize()));
 }
 
-
-TEST_F(TypedVarTest, DISABLED_getVTBL)
+TEST_F(TypedVarTest, getVTBL)
 {
-    TypedVarPtr  vtbl;
-    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
-    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtChildMethod"));
+    // vtbl#1:
+    // classProBase1::virtMethod1 ( int virtMethod1(float a)
+    // classChild::virtMethod1  ( inherited from classBase1  int virtMethod1(int a) )
+    // classBase1::virtMethod2 
 
+    TypedVarPtr  var;
+    ASSERT_NO_THROW(var = loadTypedVar(L"g_classChild"));
+
+    ASSERT_TRUE(var->getElement(0)->getType()->deref()->isVtbl());
+    TypedVarPtr  vtbl = var->getElement(0)->deref();
+
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"classProBase1"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(1)).find(L"virtMethod1"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(2)).find(L"virtMethod2"));
+    EXPECT_THROW(vtbl->getElement(3), kdlib::IndexException);
+}
+
+TEST_F(TypedVarTest, getVTBLByName)
+{
+    TypedVarPtr  var;
+    ASSERT_NO_THROW(var = loadTypedVar(L"g_classChild"));
+
+    ASSERT_TRUE(var->getElement(L"__VFN_table")->getType()->deref()->isVtbl());
+    ASSERT_EQ(3, var->getElement(L"__VFN_table")->getType()->deref()->getElementCount());
+}
+
+TEST_F(TypedVarTest, getSecondVTBL)
+{
+    // vtbl #2
+    // classChild::virtMethod3
+    // classChild::virtMethod4
+
+    TypedVarPtr  var;
+    ASSERT_NO_THROW(var = loadTypedVar(L"g_classChild"));
+
+    ASSERT_TRUE(var->getElement(2)->getType()->deref()->isVtbl());
+    TypedVarPtr  vtbl = var->getElement(2)->deref();
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtMethod3"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(1)).find(L"virtMethod4"));
+    EXPECT_THROW(vtbl->getElement(2), kdlib::IndexException);
+}
+
+TEST_F(TypedVarTest, getVirtualVTBL)
+{
+    TypedVarPtr  var;
+    ASSERT_NO_THROW(var = loadTypedVar(L"g_virtChild"));
+
+    auto s = var->str();
+
+    TypedVarPtr  vtbl;
     ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(4)->deref());
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtChildMethod"));
+    EXPECT_THROW(vtbl->getElement(1), kdlib::IndexException);
+
+    ASSERT_NO_THROW(vtbl = loadTypedVar(L"g_virtChild")->getElement(2)->deref());
     EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(0)).find(L"virtMethod1"));
-    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(1)).find(L"virtMethod2"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(1)).find(L"virtMethod1"));
+    EXPECT_NE(std::wstring::npos, findSymbol((MEMOFFSET_64)*vtbl->getElement(2)).find(L"virtMethod2"));
+    EXPECT_THROW(vtbl->getElement(3), kdlib::IndexException);
 }
 
 TEST_F(TypedVarTest, FunctionCall)

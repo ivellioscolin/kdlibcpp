@@ -542,17 +542,6 @@ protected:
     virtual void getVirtualDisplacement( const std::wstring& fieldName, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
 
     virtual void getVirtualDisplacement( size_t fieldIndex, MEMOFFSET_32 &virtualBasePtr, size_t &virtualDispIndex, size_t &virtualDispSize );
-
-    void getFields( 
-        const SymbolPtr &rootSym, 
-        const SymbolPtr &baseVirtualSym,
-        MEMOFFSET_32 startOffset = 0,
-        MEMOFFSET_32 virtualBasePtr = 0,
-        size_t virtualDispIndex = 0,
-        size_t m_virtualDispSize = 0 );
-
-    void getVirtualFields();
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
