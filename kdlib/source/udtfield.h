@@ -88,6 +88,11 @@ public:
         return m_inheritedMember;
     }
 
+    bool isVtbl() const
+    {
+        return m_vtblMember;
+    }
+
     void setMemberInherited() 
     {
         m_inheritedMember = true;
@@ -130,7 +135,8 @@ protected:
          m_virtualMember( false ),
          m_methodMember(false),
          m_constMember(false),
-         m_inheritedMember(false)
+         m_inheritedMember(false),
+         m_vtblMember(false)
          {}
 
     std::wstring  m_name;
@@ -150,6 +156,7 @@ protected:
     bool  m_methodMember;
     bool  m_constMember;
     bool  m_inheritedMember;
+    bool  m_vtblMember;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -161,10 +168,18 @@ public:
     static TypeFieldPtr getField( 
         const SymbolPtr &sym, 
         const std::wstring& name,
-        MEMOFFSET_32 offset )
+        MEMOFFSET_32 offset,
+        MEMOFFSET_32 virtualBasePtr,
+        size_t virtualDispIndex,
+        size_t virtualDispSize)
     {
         SymbolUdtField *p = new SymbolUdtField( sym, name );
         p->m_offset = offset;
+        p->m_virtualBasePtr = virtualBasePtr;
+        p->m_virtualDispIndex = virtualDispIndex;
+        p->m_virtualDispSize = virtualDispSize;
+        p->m_virtualMember = virtualBasePtr != 0;
+
         return TypeFieldPtr(p);
     }
 
@@ -188,23 +203,6 @@ public:
         return TypeFieldPtr(p);
     }
 
-    static TypeFieldPtr getVirtualField(
-        const SymbolPtr &sym, 
-        const std::wstring& name,
-        MEMOFFSET_32 offset,
-        MEMOFFSET_32 virtualBasePtr, 
-        size_t virtualDispIndex, 
-        size_t virtualDispSize )
-    {
-        SymbolUdtField *p = new SymbolUdtField( sym, name );
-        p->m_offset = offset;
-        p->m_virtualBasePtr = virtualBasePtr;
-        p->m_virtualDispIndex = virtualDispIndex;
-        p->m_virtualDispSize = virtualDispSize;
-        p->m_virtualMember = true;
-        return TypeFieldPtr(p);
-    }
-
     static TypeFieldPtr getVirtualMethodField(
         const SymbolPtr& sym,
         const std::wstring& name 
@@ -216,6 +214,24 @@ public:
         return TypeFieldPtr(p);
     }
 
+    static TypeFieldPtr getVtblField(
+        const SymbolPtr& sym,
+        const std::wstring& name,
+        MEMOFFSET_32 offset,
+        MEMOFFSET_32 virtualBasePtr,
+        size_t virtualDispIndex,
+        size_t virtualDispSize
+    )
+    {
+        SymbolUdtField *p = new SymbolUdtField(sym, name);
+        p->m_vtblMember = true;
+        p->m_offset = offset;
+        p->m_virtualBasePtr = virtualBasePtr;
+        p->m_virtualDispIndex = virtualDispIndex;
+        p->m_virtualDispSize = virtualDispSize;
+        p->m_virtualMember = virtualBasePtr != 0;
+        return TypeFieldPtr(p);
+    }
 
 
 public:

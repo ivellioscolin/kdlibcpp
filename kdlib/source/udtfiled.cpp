@@ -12,8 +12,8 @@ namespace kdlib {
 
 const TypeFieldPtr& FieldCollection::lookup(const std::wstring &name) const
 {
-    FieldList::const_reverse_iterator it;
-    for ( it = m_fields.rbegin(); it !=  m_fields.rend(); ++it )
+    FieldList::const_iterator it;
+    for (it = m_fields.begin(); it != m_fields.end(); ++it)
     {
         if ( (*it)->getName() == name )
             return *it;
