@@ -701,10 +701,6 @@ ScopePtr ModuleImp::getScope()
 
 MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
 {
-    MEMOFFSET_64 module_base = ProcessMonitor::getModuleBaseBySymbol(symbolName);
-    if (module_base)
-        return module_base;
-
     std::vector<MEMOFFSET_64>   moduleList = getModuleBasesList();
 
     std::vector<MEMOFFSET_64>::const_iterator it;
@@ -715,8 +711,7 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
         try {
 
             SymbolPtr typeInfo = module->getSymbolByName( symbolName );
-            module_base = *it;
-            break;
+            return *it;
         } 
         catch( SymbolException& )
         {}
@@ -724,17 +719,10 @@ MEMOFFSET_64 findModuleBySymbol( const std::wstring &symbolName )
         try {
 
             TypeInfoPtr typeInfo = module->getTypeByName( symbolName );
-            module_base = *it;
-            break;
+            return *it;
         } 
         catch( SymbolException& )
         {}
-    }
-
-    if (module_base)
-    {
-        ProcessMonitor::insertModuleBaseBySymbol(symbolName, module_base);
-        return module_base;
     }
 
     std::wstringstream   sstr;

@@ -200,18 +200,6 @@ SymbolPtr DiaSymbol::fromGlobalScope( IDiaSymbol *_symbol, const std::wstring& _
 
 //////////////////////////////////////////////////////////////////////////////////
 
-Symbol::SymIndexId DiaSymbol::getSymIndexId()
-{
-    SymIndexId id;
-    HRESULT hres = m_symbol->get_symIndexId(&id);
-    if(S_OK == hres)
-        return id;
-
-    return Symbol::getSymIndexId();
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
 SymbolPtrList  DiaSymbol::findChildren(
         ULONG symTag,
         const std::wstring &name,
