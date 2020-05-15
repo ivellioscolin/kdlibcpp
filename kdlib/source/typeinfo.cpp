@@ -351,7 +351,7 @@ TypeInfoPtr loadType( const SymbolPtr &symbol )
             NumVariant     constVal;
             symbol->getValue( constVal );  
             
-            ptr = TypeInfo::getBaseTypeInfo(symbol->getType());
+            ptr = loadType( symbol->getType() );
 
             dynamic_cast<TypeInfoImp*>( ptr.get() )->setConstant( constVal );
 
