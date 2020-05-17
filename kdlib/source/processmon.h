@@ -48,9 +48,6 @@ public: // module manipulation
     static ModulePtr getModule( MEMOFFSET_64  offset, PROCESS_DEBUG_ID id = -1 );
     static void insertModule( ModulePtr& module, PROCESS_DEBUG_ID id = -1 );
 
-    static MEMOFFSET_64 getModuleBaseBySymbol(const std::wstring& sym, PROCESS_DEBUG_ID id = -1);
-    static void insertModuleBaseBySymbol(const std::wstring& sym, MEMOFFSET_64 module_base, PROCESS_DEBUG_ID id = -1);
-
 public: //breakpoint callbacks
 
     static void registerBreakpoint( const BreakpointPtr& breakpoint, PROCESS_DEBUG_ID id = -1 );
@@ -60,9 +57,10 @@ public: //callbacks
     static void registerEventsCallback(DebugEventsCallback *callback);
     static void removeEventsCallback(DebugEventsCallback *callback);
 
-public: // TypeInfo cache
-    static TypeInfoPtr getTypeInfo(const SymbolPtr& sym, PROCESS_DEBUG_ID id = -1);
-    static void insertTypeInfo(const SymbolPtr& sym, const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id = -1);
+public: // 
+
+    static TypeInfoPtr getTypeInfo(const std::wstring& name, PROCESS_DEBUG_ID id = -1);
+    static void insertTypeInfo( const TypeInfoPtr& typeInfo, PROCESS_DEBUG_ID id = -1);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

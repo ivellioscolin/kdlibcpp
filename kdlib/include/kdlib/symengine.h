@@ -171,10 +171,7 @@ enum CallingConventionType
 class Symbol {
 
 public:
-    typedef unsigned long SymIndexId;
-    static const SymIndexId InvalidId = -1;
 
-    virtual SymIndexId getSymIndexId() { return InvalidId; }
     virtual SymbolPtrList findChildren( unsigned long symTag, const std::wstring &name = L"", bool caseSensitive = false ) = 0;
     virtual SymbolPtrList findChildrenByRVA(unsigned long symTag, unsigned long rva) = 0;
     virtual unsigned long getBaseType() = 0;

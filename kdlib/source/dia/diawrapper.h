@@ -59,8 +59,6 @@ public:
 
     static SymbolPtr fromGlobalScope( IDiaSymbol *_symbol, const std::wstring &_scope );
 
-    SymIndexId getSymIndexId() override;
-
     SymbolPtr getChildByName(const std::wstring &_name ) override;
 
     ULONG getRva() override;
