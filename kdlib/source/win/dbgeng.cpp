@@ -394,9 +394,8 @@ PROCESS_DEBUG_ID loadDump( const std::wstring &fileName )
     if ( FAILED( hres ) )
         throw DbgEngException( L"IDebugControl::WaitForEvent", hres );
 
-    hres = g_dbgMgr->control->OutputCurrentState(DEBUG_OUTCTL_IGNORE, DEBUG_CURRENT_SYMBOL);
-    if (FAILED(hres))
-      throw DbgEngException(L"IDebugControl::OutputCurrentState", hres);
+    //skip error checking
+    g_dbgMgr->control->OutputCurrentState(DEBUG_OUTCTL_IGNORE, DEBUG_CURRENT_SYMBOL);
 
     ULONG processId = -1;
     hres = g_dbgMgr->system->GetCurrentProcessId( &processId );
