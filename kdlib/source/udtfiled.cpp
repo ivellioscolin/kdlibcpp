@@ -15,7 +15,13 @@ const TypeFieldPtr& FieldCollection::lookup(const std::wstring &name) const
     FieldList::const_iterator it;
     for (it = m_fields.begin(); it != m_fields.end(); ++it)
     {
-        if ( (*it)->getName() == name )
+        if ( !(*it)->isInheritedMember() && (*it)->getName() == name)
+            return *it;
+    }
+
+    for (it = m_fields.begin(); it != m_fields.end(); ++it)
+    {
+        if ( (*it)->isInheritedMember() && (*it)->getName() == name )
             return *it;
     }
 

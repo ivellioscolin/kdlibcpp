@@ -221,6 +221,13 @@ TEST_F( TypedVarTest, DISABLED_StaticMember )
     EXPECT_EQ( g_classChild.m_staticConst, *var->getElement(L"m_staticConst") );
 }
 
+TEST_F(TypedVarTest, AmbiguiousFields)
+{
+    TypedVarPtr   var;
+    ASSERT_NO_THROW(var = loadTypedVar(L"g_virtChild"));
+
+    EXPECT_EQ(g_virtChild.m_member, *var->getElement(L"m_member"));
+}
 
 TEST_F( TypedVarTest, VirtualMember )
 {
