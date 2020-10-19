@@ -213,6 +213,7 @@ public:
     virtual unsigned long getVirtualBaseOffset() = 0;
     virtual SymbolPtrList findInlineFramesByVA(MEMOFFSET_64) = 0;
     virtual void getInlineSourceLine(MEMOFFSET_64, std::wstring &fileName, unsigned long &lineNo) = 0;
+    virtual SymbolPtr getLexicalParent() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

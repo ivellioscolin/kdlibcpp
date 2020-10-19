@@ -826,6 +826,14 @@ void DiaSymbol::getInlineSourceLine(MEMOFFSET_64 offset, std::wstring &fileName,
 
 //////////////////////////////////////////////////////////////////////////////
 
+SymbolPtr DiaSymbol::getLexicalParent()
+{
+    DiaSymbolPtr diaSymbol(callSymbol(get_lexicalParent));
+    return SymbolPtr(new DiaSymbol(diaSymbol, m_scope, m_machineType));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 std::wstring DiaSession::getScopeName( IDiaSession* session, IDiaSymbol *globalScope )
 {
   std::wstring scopeName;

@@ -596,25 +596,30 @@ void ModuleImp::getFileVersion(unsigned long& majorVersion, unsigned long& minor
 void ModuleImp::findSymSessionSymbol(MEMOFFSET_64 offset, std::wstring &name, MEMDISPLACEMENT &displacement)
 {
     displacement = 0;
+    name.clear();
     offset = addr64(offset);
+
     try
     {
-        while ( name.empty() )
-        {
-            SymbolPtr sym = getSymSession()->findByRva( (MEMDISPLACEMENT)(offset - m_base), SymTagNull, &displacement );
-            name = sym->getName();
-            if ( !name.empty() )
-                break;
+        long  tempdisp;
+        SymbolPtr sym = getSymSession()->findByRva( static_cast<MEMDISPLACEMENT>(offset - m_base), SymTagNull, &tempdisp );
 
-            offset = offset - displacement - 1;
+        auto tag = sym->getSymTag();
+
+        while (tag == SymTagBlock)
+        {
+            sym = sym->getLexicalParent();
+            tag = sym->getSymTag();
         }
+
+        name = sym->getName();
+
+        displacement = static_cast<MEMDISPLACEMENT>(offset - m_base) - sym->getRva();
     }
     catch (const DbgException &)
     {
-        name.clear();
     }
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

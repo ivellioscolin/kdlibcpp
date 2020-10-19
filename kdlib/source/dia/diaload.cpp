@@ -544,6 +544,11 @@ public:
     {
         NOT_IMPLEMENTED();
     }
+
+    SymbolPtr getLexicalParent() override
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 

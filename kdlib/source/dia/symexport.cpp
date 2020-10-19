@@ -267,6 +267,11 @@ class ExportSymbolBase : public Symbol
     {
         NOT_IMPLEMENTED();
     }
+
+    SymbolPtr getLexicalParent() override
+    {
+        NOT_IMPLEMENTED();
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

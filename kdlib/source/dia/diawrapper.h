@@ -152,6 +152,8 @@ public:
 
     void getInlineSourceLine(MEMOFFSET_64, std::wstring &fileName, unsigned long &lineNo) override;
 
+    SymbolPtr getLexicalParent() override;
+
 public:
     typedef std::pair<ULONG, const wchar_t *> ValueNameEntry;
     static const ValueNameEntry basicTypeName[];
