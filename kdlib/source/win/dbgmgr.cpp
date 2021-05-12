@@ -53,7 +53,7 @@ DebugManager::DebugManager( const std::wstring& remoteOptions )
 
     CoInitialize(NULL);
 
-    HRESULT  hres = DebugConnectWide( remoteOptions.c_str(), __uuidof(IDebugClient4), (void **)&client );
+    HRESULT  hres = DebugConnectWide( remoteOptions.c_str(), __uuidof(IDebugClient5), (void **)&client );
     if ( FAILED( hres ) )
         throw DbgEngException(L"DebugConnectWide", hres);
 
