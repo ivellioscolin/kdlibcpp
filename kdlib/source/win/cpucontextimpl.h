@@ -180,16 +180,16 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CPUContextArm64 : public CPUContextImpl<CONTEXT_ARM64>
+class CPUContextArm64 : public CPUContextImpl<CONTEXT_ARM_64>
 {
-    typedef CPUContextImpl<CONTEXT_ARM64> Base;
+    typedef CPUContextImpl<CONTEXT_ARM_64> Base;
 public:
     CPUContextArm64() :
         Base{ CPU_ARM64, CPU_ARM64 }
     {
     }
 
-    explicit CPUContextArm64(const CONTEXT_ARM64 &context) :
+    explicit CPUContextArm64(const CONTEXT_ARM_64 &context) :
         Base{ CPU_ARM64, CPU_ARM64, &context }
     {
     }

@@ -371,12 +371,12 @@ typedef struct DECLSPEC_ALIGN(16) _CONTEXT_ARM64 {
     /* +0x378 */ DWORD Wcr[ARM64_MAX_WATCHPOINTS];
     /* +0x380 */ DWORD64 Wvr[ARM64_MAX_WATCHPOINTS];
 
-} CONTEXT_ARM64;
+} CONTEXT_ARM_64;
 
 #include "poppack.h"
 
-static_assert(FIELD_OFFSET(CONTEXT_ARM64, Fp)  == 0x0f0, "FIELD_OFFSET(CONTEXT_ARM64, Fp)  == 0x0f0");
-static_assert(FIELD_OFFSET(CONTEXT_ARM64, Wvr) == 0x380, "FIELD_OFFSET(CONTEXT_ARM64, Wvr) == 0x380");
+static_assert(FIELD_OFFSET(CONTEXT_ARM_64, Fp)  == 0x0f0, "FIELD_OFFSET(CONTEXT_ARM_64, Fp)  == 0x0f0");
+static_assert(FIELD_OFFSET(CONTEXT_ARM_64, Wvr) == 0x380, "FIELD_OFFSET(CONTEXT_ARM_64, Wvr) == 0x380");
 
 ///////////////////////////////////////////////////////////////////////////////
 
