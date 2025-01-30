@@ -248,42 +248,42 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|Win32'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|Win32'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|x64'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|x64'">
     <OutDir>$(SolutionDir)Out\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(DotNetSdk_IncludePath);$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)Obj\$(ProjectName)$(Platform)\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
