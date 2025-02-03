@@ -72,19 +72,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)\..\..\..\Out\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\..\..\..\Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)\..\..\..\Out\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\..\..\..\Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)\..\..\..\Out\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\..\..\..\Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)out\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)\..\..\..\Out\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)\..\..\..\Obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -233,14 +237,14 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(ProjectDir)\..\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
-    <Import Project="$(ProjectDir)\..\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets" Condition="Exists('$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" />
+    <Import Project="$(ProjectDir)\..\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(ProjectDir)\..\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
+    <Import Project="$(ProjectDir)\..\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets" Condition="Exists('$(ProjectDir)\..\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(ProjectDir)\..\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets'))" />
-    <Error Condition="!Exists('$(ProjectDir)\..\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets'))" />
+    <Error Condition="!Exists('$(ProjectDir)\..\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(ProjectDir)\..\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets'))" />
+    <Error Condition="!Exists('$(ProjectDir)\..\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(ProjectDir)\..\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets'))" />
   </Target>
 </Project>
