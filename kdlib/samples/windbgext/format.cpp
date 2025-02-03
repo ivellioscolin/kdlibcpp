@@ -25,12 +25,12 @@ public:
     {
         TypedVarPtr tp = loadTypedVar( wstdStringName, offset );
 
-        if ( *tp->getElement(L"_Mysize") <= 10 )
+        /*if ( *tp->getElement(L"_Mysize") <= 10 )
         {
-             loadChars( tp->getElement(L"_Bx._Buf")->getAddress(), *tp->getElement(L"_Mysize") );
-        }
+             loadChars( tp->getElement(L"_Bx._Buf")->getAddress(), *tp->getElement(L"_Mysize"));
+        }*/
 
-        return loadChars( *tp->getElement(L"_Bx._Ptr"), *tp->getElement(L"_Mysize") );
+        return loadChars(tp->getElement(L"_Bx._Ptr")->getAddress(), tp->getElement(L"_Mysize")->getElementCount(), false);
     }
 };
 

@@ -291,7 +291,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -303,6 +303,13 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=32 runtime-debugging=on variant=debug
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|Win32'">
     <ClCompile>
@@ -310,7 +317,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
@@ -323,6 +330,13 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=32 runtime-debugging=on variant=debug
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -330,7 +344,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -342,6 +356,13 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=64 runtime-debugging=on variant=debug
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|x64'">
     <ClCompile>
@@ -349,7 +370,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
@@ -362,6 +383,13 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=64 runtime-debugging=on variant=debug
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -371,7 +399,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -385,6 +413,13 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=32 runtime-debugging=off variant=release
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|Win32'">
     <ClCompile>
@@ -394,7 +429,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
@@ -409,6 +444,13 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=32 runtime-debugging=off variant=release
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -418,7 +460,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -432,6 +474,13 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=64 runtime-debugging=off variant=release
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|x64'">
     <ClCompile>
@@ -441,7 +490,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);"$(VCInstallDir)..\DIA SDK\include";$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
@@ -456,31 +505,24 @@
       <AdditionalDependencies>diaguids.lib;dbgeng.lib;comsuppw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
+pushd $(ProjectDir)..\..\boost\
+call $(ProjectDir)..\..\boost\bootstrap.bat
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=64 runtime-debugging=off variant=release
+popd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
-    <Import Project="$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets" Condition="Exists('$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" />
-    <Import Project="$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets" Condition="Exists('$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets')" />
-    <Import Project="$(SolutionDir)\packages\boost_atomic-src.1.67.0.0\build\boost_atomic-src.targets" Condition="Exists('$(SolutionDir)\packages\boost_atomic-src.1.67.0.0\build\boost_atomic-src.targets')" />
-    <Import Project="$(SolutionDir)\packages\boost_chrono-src.1.67.0.0\build\boost_chrono-src.targets" Condition="Exists('$(SolutionDir)\packages\boost_chrono-src.1.67.0.0\build\boost_chrono-src.targets')" />
-    <Import Project="$(SolutionDir)\packages\boost_date_time-src.1.67.0.0\build\boost_date_time-src.targets" Condition="Exists('$(SolutionDir)\packages\boost_date_time-src.1.67.0.0\build\boost_date_time-src.targets')" />
-    <Import Project="$(SolutionDir)\packages\boost_regex-src.1.67.0.0\build\boost_regex-src.targets" Condition="Exists('$(SolutionDir)\packages\boost_regex-src.1.67.0.0\build\boost_regex-src.targets')" />
-    <Import Project="$(SolutionDir)\packages\boost_system-src.1.67.0.0\build\boost_system-src.targets" Condition="Exists('$(SolutionDir)\packages\boost_system-src.1.67.0.0\build\boost_system-src.targets')" />
-    <Import Project="$(SolutionDir)\packages\boost_thread-src.1.67.0.0\build\boost_thread-src.targets" Condition="Exists('$(SolutionDir)\packages\boost_thread-src.1.67.0.0\build\boost_thread-src.targets')" />
+    <Import Project="$(ProjectDir)\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
+    <Import Project="$(ProjectDir)\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets" Condition="Exists('$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost.1.67.0.0\build\boost.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost_atomic-src.1.67.0.0\build\boost_atomic-src.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_atomic-src.1.67.0.0\build\boost_atomic-src.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost_chrono-src.1.67.0.0\build\boost_chrono-src.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_chrono-src.1.67.0.0\build\boost_chrono-src.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost_date_time-src.1.67.0.0\build\boost_date_time-src.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_date_time-src.1.67.0.0\build\boost_date_time-src.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost_regex-src.1.67.0.0\build\boost_regex-src.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_regex-src.1.67.0.0\build\boost_regex-src.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost_system-src.1.67.0.0\build\boost_system-src.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_system-src.1.67.0.0\build\boost_system-src.targets'))" />
-    <Error Condition="!Exists('$(SolutionDir)\packages\boost_thread-src.1.67.0.0\build\boost_thread-src.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\boost_thread-src.1.67.0.0\build\boost_thread-src.targets'))" />
+    <Error Condition="!Exists('$(ProjectDir)\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets'))" />
+    <Error Condition="!Exists('$(ProjectDir)\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets'))" />
   </Target>
 </Project>

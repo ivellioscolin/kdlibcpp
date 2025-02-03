@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="commands.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="format.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="skdlib.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="WinDbgSDK">
+      <UniqueIdentifier>{ecbe6010-935f-4f0d-9371-c1bf1d662c1f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

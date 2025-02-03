@@ -8,7 +8,7 @@
 #include <windows.h>
 #include <atlbase.h>
 
-#include <boost/thread/recursive_mutex.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #include "kdlib/dbgcallbacks.h"
 
