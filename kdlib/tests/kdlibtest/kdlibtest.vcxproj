@@ -96,7 +96,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_VARIADIC_MAX=10;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\googletest\include;$(ProjectDir)\googletest;$(ProjectDir)\googlemock\include;$(ProjectDir)\googlemock</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\..\..\..\googletest\googletest;$(ProjectDir)\..\..\..\googletest\googletest\include;$(ProjectDir)\..\..\..\googletest\googlemock;$(ProjectDir)\..\..\..\googletest\googlemock\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,7 +116,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_VARIADIC_MAX=10;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\googletest\include;$(ProjectDir)\googletest;$(ProjectDir)\googlemock\include;$(ProjectDir)\googlemock</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\..\..\..\googletest\googletest;$(ProjectDir)\..\..\..\googletest\googletest\include;$(ProjectDir)\..\..\..\googletest\googlemock;$(ProjectDir)\..\..\..\googletest\googlemock\include</AdditionalIncludeDirectories>
       <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
@@ -139,7 +139,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_VARIADIC_MAX=10;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\googletest\include;$(ProjectDir)\googletest;$(ProjectDir)\googlemock\include;$(ProjectDir)\googlemock</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\..\..\..\googletest\googletest;$(ProjectDir)\..\..\..\googletest\googletest\include;$(ProjectDir)\..\..\..\googletest\googlemock;$(ProjectDir)\..\..\..\googletest\googlemock\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,7 +163,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_VARIADIC_MAX=10;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\googletest\include;$(ProjectDir)\googletest;$(ProjectDir)\googlemock\include;$(ProjectDir)\googlemock</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\..\..\..\kdlib\include;$(ProjectDir)\..\..\..\boost;$(ProjectDir)\..\..\..\googletest\googletest;$(ProjectDir)\..\..\..\googletest\googletest\include;$(ProjectDir)\..\..\..\googletest\googlemock;$(ProjectDir)\..\..\..\googletest\googlemock\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -193,6 +193,18 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\googletest\googlemock\src\gmock-all.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\googletest\googletest\src\gtest-all.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\comdate\testfunc.cpp" />
     <ClCompile Include="..\comdate\testvars.cpp" />
     <ClCompile Include="arm64dumptest.cpp" />
@@ -205,12 +217,6 @@
     <ClCompile Include="disasmtest.cpp" />
     <ClCompile Include="eventhandlertest.cpp" />
     <ClCompile Include="exprevaltest.cpp" />
-    <ClCompile Include="googlemock\src\gmock-all.cc">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="googletest\src\gtest-all.cc">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="kdlibtest.cpp" />
     <ClCompile Include="memorytest.cpp" />
     <ClCompile Include="moduletest.cpp" />

@@ -9,8 +9,6 @@
     <ClCompile Include="..\comdate\testfunc.cpp">
       <Filter>testdata</Filter>
     </ClCompile>
-    <ClCompile Include="googletest\src\gtest-all.cc" />
-    <ClCompile Include="googlemock\src\gmock-all.cc" />
     <ClCompile Include="breakhandler.cpp">
       <Filter>testcases</Filter>
     </ClCompile>
@@ -83,6 +81,12 @@
     <ClCompile Include="dbgenginetest.cpp">
       <Filter>testcases</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\googletest\googlemock\src\gmock-all.cc">
+      <Filter>googletest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\googletest\googletest\src\gtest-all.cc">
+      <Filter>googletest</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -115,6 +119,9 @@
     </Filter>
     <Filter Include="testdata">
       <UniqueIdentifier>{617ec5ef-8b76-49d2-b598-1ffc78b37637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="googletest">
+      <UniqueIdentifier>{af55217e-d53d-420c-b300-4fd0b7b52733}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
