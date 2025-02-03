@@ -9,11 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "targetapp", "kdlib\tests\ta
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kdlibtest", "kdlib\tests\kdlibtest\kdlibtest.vcxproj", "{32CB9F5C-E114-40C1-8416-ACCC7CF5B0A1}"
 	ProjectSection(ProjectDependencies) = postProject
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00} = {90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}
 		{0E4CC688-F2F5-499F-9C07-0F2CAEE0D3EF} = {0E4CC688-F2F5-499F-9C07-0F2CAEE0D3EF}
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "managedapp", "kdlib\tests\managedapp\managedapp.csproj", "{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "skdlib", "kdlib\samples\windbgext\windbgext.vcxproj", "{DD6EC442-26EE-4EC5-A66D-B03D0B7D1B8F}"
 EndProject
@@ -49,14 +46,6 @@ Global
 		{32CB9F5C-E114-40C1-8416-ACCC7CF5B0A1}.Release|Win32.Build.0 = Release|Win32
 		{32CB9F5C-E114-40C1-8416-ACCC7CF5B0A1}.Release|x64.ActiveCfg = Release|x64
 		{32CB9F5C-E114-40C1-8416-ACCC7CF5B0A1}.Release|x64.Build.0 = Release|x64
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Debug|Win32.ActiveCfg = Debug|x86
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Debug|Win32.Build.0 = Debug|x86
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Debug|x64.ActiveCfg = Debug|x64
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Debug|x64.Build.0 = Debug|x64
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Release|Win32.ActiveCfg = Release|x86
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Release|Win32.Build.0 = Release|x86
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Release|x64.ActiveCfg = Release|x64
-		{90C5EC1B-602A-4BF5-B45A-6E99AA6E3B00}.Release|x64.Build.0 = Release|x64
 		{DD6EC442-26EE-4EC5-A66D-B03D0B7D1B8F}.Debug|Win32.ActiveCfg = Debug|Win32
 		{DD6EC442-26EE-4EC5-A66D-B03D0B7D1B8F}.Debug|Win32.Build.0 = Debug|Win32
 		{DD6EC442-26EE-4EC5-A66D-B03D0B7D1B8F}.Debug|x64.ActiveCfg = Debug|x64
