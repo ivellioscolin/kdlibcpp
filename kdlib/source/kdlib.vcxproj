@@ -304,8 +304,7 @@
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=32 runtime-debugging=on variant=debug
 popd</Command>
@@ -331,8 +330,7 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=32 runtime-debugging=on variant=debug
 popd</Command>
@@ -357,8 +355,7 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=64 runtime-debugging=on variant=debug
 popd</Command>
@@ -384,8 +381,7 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=64 runtime-debugging=on variant=debug
 popd</Command>
@@ -414,8 +410,7 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=32 runtime-debugging=off variant=release
 popd</Command>
@@ -445,8 +440,7 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=32 runtime-debugging=off variant=release
 popd</Command>
@@ -475,8 +469,7 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=64 runtime-debugging=off variant=release
 popd</Command>
@@ -506,8 +499,7 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>git -C "$(ProjectDir)..\..\boost" submodule update --init --recursive
-pushd $(ProjectDir)..\..\boost\
+      <Command>pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
 $(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=64 runtime-debugging=off variant=release
 popd</Command>
