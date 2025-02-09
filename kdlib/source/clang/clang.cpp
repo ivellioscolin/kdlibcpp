@@ -4,16 +4,14 @@
 
 #include "boost/tokenizer.hpp"
 
-#include "clang/AST/ASTConsumer.h"
 #include "clang/AST/RecursiveASTVisitor.h"
-
 #include "clang/AST/RecordLayout.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/FrontendAction.h"
+
+#include "clang/Frontend/ASTUnit.h"
+
 #include "clang/Tooling/Tooling.h"
-#include "clang/Parse/ParseAST.h"
-#include "clang/Lex/PreprocessorOptions.h"
-#include "clang/Driver/Driver.h"
+
+#include "llvm/Support/raw_ostream.h"
 
 #include "kdlib/typeinfo.h"
 #include "kdlib/exceptions.h"
@@ -36,7 +34,7 @@ std::string getFunctionNameFromDecl(FunctionDecl* funcDec)
     pp.SuppressTagKeyword = true;
     pp.MSVCFormatting = true;
     funcDec->getNameForDiagnostic(stream, pp, true);
-    return stream.str();
+    return stream.str().str();
 }
 
 std::string getRecordNameFromDecl(CXXRecordDecl* decl)
@@ -51,7 +49,7 @@ std::string getRecordNameFromDecl(CXXRecordDecl* decl)
         pp.SuppressTagKeyword = true;
         pp.MSVCFormatting = true;
         templateSpecialization->getNameForDiagnostic(stream, pp, true);
-        return stream.str();
+        return stream.str().str();
     }
 
     return decl->getQualifiedNameAsString();
@@ -230,7 +228,7 @@ TypeInfoPtr TypeFieldClangField::getTypeInfo()
         {
             TypeInfoPtr   bitType = getTypeForClangType(m_astSession, qualType);
 
-            unsigned int bitWidth = fieldDecl->getBitWidthValue(m_astSession->getASTContext());
+            unsigned int bitWidth = fieldDecl->getBitWidthValue();
 
             const ASTRecordLayout  &typeLayout = fieldDecl->getASTContext().getASTRecordLayout(m_recordDecl);
 
@@ -778,12 +776,16 @@ public:
         FileManager *Files,
         std::shared_ptr<PCHContainerOperations> PCHContainerOps,
         DiagnosticConsumer *DiagConsumer) override {
+        clang::CompilerInstance CI;
+        llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> vfs = llvm::vfs::getRealFileSystem();
+        CI.createDiagnostics(*vfs, DiagConsumer, false);
+        if (!CI.hasDiagnostics()) {
+            llvm::errs() << "Failed to create diagnostics engine.\n";
+            return false;
+        }
+
         std::unique_ptr<ASTUnit> AST = ASTUnit::LoadFromCompilerInvocation(
-            Invocation, std::move(PCHContainerOps),
-            CompilerInstance::createDiagnostics(&Invocation->getDiagnosticOpts(),
-                DiagConsumer,
-                /*ShouldOwnClient=*/false),
-            Files);
+            Invocation, PCHContainerOps, CI.getDiagnosticsPtr(), Files);
 
         if (!AST)
             return false;
@@ -797,10 +799,10 @@ TypeInfoProviderClang::TypeInfoProviderClang( const std::string& sourceCode, con
 {
     std::vector<std::unique_ptr<ASTUnit>> ASTs;
     ASTBuilderAction Action(ASTs);
-    llvm::IntrusiveRefCntPtr<vfs::OverlayFileSystem> OverlayFileSystem(
-        new vfs::OverlayFileSystem(vfs::getRealFileSystem()));
-    llvm::IntrusiveRefCntPtr<vfs::InMemoryFileSystem> InMemoryFileSystem(
-        new vfs::InMemoryFileSystem);
+    llvm::IntrusiveRefCntPtr<llvm::vfs::OverlayFileSystem> OverlayFileSystem(
+        new llvm::vfs::OverlayFileSystem(llvm::vfs::getRealFileSystem()));
+    llvm::IntrusiveRefCntPtr<llvm::vfs::InMemoryFileSystem> InMemoryFileSystem(
+        new llvm::vfs::InMemoryFileSystem);
     OverlayFileSystem->pushOverlay(InMemoryFileSystem);
     llvm::IntrusiveRefCntPtr<FileManager> Files(
         new FileManager(FileSystemOptions(), OverlayFileSystem));
@@ -928,10 +930,10 @@ SymbolProviderClang::SymbolProviderClang(const std::string&  sourceCode, const s
 {
     std::vector<std::unique_ptr<ASTUnit>> ASTs;
     ASTBuilderAction Action(ASTs);
-    llvm::IntrusiveRefCntPtr<vfs::OverlayFileSystem> OverlayFileSystem(
-        new vfs::OverlayFileSystem(vfs::getRealFileSystem()));
-    llvm::IntrusiveRefCntPtr<vfs::InMemoryFileSystem> InMemoryFileSystem(
-        new vfs::InMemoryFileSystem);
+    llvm::IntrusiveRefCntPtr<llvm::vfs::OverlayFileSystem> OverlayFileSystem(
+        new llvm::vfs::OverlayFileSystem(llvm::vfs::getRealFileSystem()));
+    llvm::IntrusiveRefCntPtr<llvm::vfs::InMemoryFileSystem> InMemoryFileSystem(
+        new llvm::vfs::InMemoryFileSystem);
     OverlayFileSystem->pushOverlay(InMemoryFileSystem);
     llvm::IntrusiveRefCntPtr<FileManager> Files(
         new FileManager(FileSystemOptions(), OverlayFileSystem));

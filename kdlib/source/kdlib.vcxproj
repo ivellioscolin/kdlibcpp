@@ -161,28 +161,28 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <LLVM_USE_CRT_DEBUG>MDd</LLVM_USE_CRT_DEBUG>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <LLVM_USE_CRT_DEBUG>MTd</LLVM_USE_CRT_DEBUG>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <LLVM_USE_CRT_DEBUG>MDd</LLVM_USE_CRT_DEBUG>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Static|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <LLVM_USE_CRT_DEBUG>MTd</LLVM_USE_CRT_DEBUG>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -190,7 +190,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <LLVM_USE_CRT_RELEASE>MD</LLVM_USE_CRT_RELEASE>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -198,15 +198,15 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <LLVM_USE_CRT_RELEASE>MT</LLVM_USE_CRT_RELEASE>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <LLVM_USE_CRT_RELEASE>MD</LLVM_USE_CRT_RELEASE>
     <PlatformToolset>v143</PlatformToolset>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Static|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -214,7 +214,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
-    <LLVM_USE_CRT_RELEASE>MTd</LLVM_USE_CRT_RELEASE>
+    <PythonVersion>3.13.2</PythonVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -290,10 +290,11 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -304,9 +305,34 @@
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=32 runtime-debugging=on variant=debug
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=$(PlatformArchitecture) runtime-debugging=on variant=debug
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Debug -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=ON -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Debug /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -315,11 +341,12 @@ popd</Command>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -330,9 +357,34 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=32 runtime-debugging=on variant=debug
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=$(PlatformArchitecture) runtime-debugging=on variant=debug
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Debug -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=ON -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Debug /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -341,10 +393,11 @@ popd</Command>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -355,9 +408,34 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=64 runtime-debugging=on variant=debug
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=$(PlatformArchitecture) runtime-debugging=on variant=debug
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Debug -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Debug /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -366,11 +444,12 @@ popd</Command>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -381,9 +460,34 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=64 runtime-debugging=on variant=debug
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=$(PlatformArchitecture) runtime-debugging=on variant=debug
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Debug -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Debug /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -394,10 +498,11 @@ popd</Command>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -410,9 +515,34 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=32 runtime-debugging=off variant=release
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=$(PlatformArchitecture) runtime-debugging=off variant=release
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=ON -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Release /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -423,11 +553,12 @@ popd</Command>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -440,9 +571,34 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=32 runtime-debugging=off variant=release
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=$(PlatformArchitecture) runtime-debugging=off variant=release
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=ON -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Release /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -453,10 +609,11 @@ popd</Command>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -469,9 +626,34 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=64 runtime-debugging=off variant=release
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=shared address-model=$(PlatformArchitecture) runtime-debugging=off variant=release
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Release /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -482,11 +664,12 @@ popd</Command>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;CLANG_BUILD_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir);$(ProjectDir)\..\..\boost;$(ProjectDir)\..\..\llvm-project\install\$(Platform)\$(Configuration)\include;$(VCInstallDir)..\DIA SDK\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <AdditionalOptions>/Zc:referenceBinding /Zc:rvalueCast %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -499,22 +682,43 @@ popd</Command>
       <AdditionalLibraryDirectories>$(VCInstallDir)..\DIA SDK\lib\amd64</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
-      <Command>pushd $(ProjectDir)..\..\boost\
+      <Command>echo "Build Boost"
+
+pushd $(ProjectDir)..\..\boost\
 call $(ProjectDir)..\..\boost\bootstrap.bat
-$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=64 runtime-debugging=off variant=release
+$(ProjectDir)..\..\boost\b2.exe --with-headers --with-atomic --with-chrono --with-thread link=static runtime-link=static address-model=$(PlatformArchitecture) runtime-debugging=off variant=release
+popd
+
+echo "Build llvm-project"
+
+$(ProjectDir)..\..\.nuget\nuget.exe install python -OutputDirectory $(ProjectDir)..\..\packages -Version $(PythonVersion)
+$(ProjectDir)..\..\packages\python.$(PythonVersion)\tools\python.exe $(ProjectDir)select_llvm_library.py $(ProjectDir)..\..\llvm-project
+
+set "VSVer=$(VisualStudioVersion)"
+for /f "tokens=1,2 delims=." %%a in ("%VSVer%") do (
+    set "VSVerMajor=%%a"
+    set "VSVerMinor=%%b"
+)
+
+if not exist "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)" (
+    mkdir "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)"
+)
+
+pushd $(ProjectDir)..\..\llvm-project\
+
+cmake.exe -G "Visual Studio %VSVerMajor%" -A $(Platform) -S ".\llvm" -B ".\build\$(Platform)\$(Configuration)" -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DCMAKE_INSTALL_PREFIX=".\install\$(Platform)\$(Configuration)" -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_STATIC=ON -DBUILD_SHARED_LIBS=OFF -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_TARGET_ARCH=X86 -DLLVM_BUILD_32_BITS=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF -DLLVM_BUILD_BENCHMARKS=OFF -DLLVM_INCLUDE_DOCS=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_BUILD_INSTRUMENTED_COVERAGE=OFF -DLLVM_BUILD_LLVM_C_DYLIB=OFF -DLLVM_INCLUDE_RUNTIMES=ON -DLLVM_BUILD_RUNTIME=ON -DLLVM_BUILD_RUNTIMES=ON -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_UTILS=OFF -DLLVM_BUILD_UTILS=OFF -DLLVM_ENABLE_OCAMLDOC=OFF -DLLVM_ENABLE_BINDINGS=OFF -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_LIBEDIT=OFF -DLLVM_ENABLE_LIBPFM=OFF -DLLVM_ENABLE_LIBXML2=OFF -DLLVM_ENABLE_BACKTRACES=OFF -DLLVM_ADD_NATIVE_VISUALIZERS_TO_SOLUTION=OFF -DLLVM_ENABLE_CRASH_OVERRIDES=OFF -DCPACK_SOURCE_7Z=OFF -DCPACK_SOURCE_ZIP=OFF -DLLVM_TOOL_BUGPOINT_BUILD=OFF -DLLVM_TOOL_BUGPOINT_PASSES_BUILD=OFF -DLLVM_TOOL_DSYMUTIL_BUILD=OFF -DLLVM_TOOL_DXIL_DIS_BUILD=OFF -DLLVM_TOOL_GOLD_BUILD=OFF -DLLVM_TOOL_LLC_BUILD=OFF -DLLVM_TOOL_LLI_BUILD=OFF -DLLVM_TOOL_LLVM_AR_BUILD=OFF -DLLVM_TOOL_LLVM_AS_BUILD=OFF -DLLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_BCANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_CAT_BUILD=OFF -DLLVM_TOOL_LLVM_CFI_VERIFY_BUILD=OFF -DLLVM_TOOL_LLVM_CGDATA_BUILD=OFF -DLLVM_TOOL_LLVM_CONFIG_BUILD=OFF -DLLVM_TOOL_LLVM_COV_BUILD=OFF -DLLVM_TOOL_LLVM_CTXPROF_UTIL_BUILD=OFF -DLLVM_TOOL_LLVM_CVTRES_BUILD=OFF -DLLVM_TOOL_LLVM_CXXDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_CXXFILT_BUILD=OFF -DLLVM_TOOL_LLVM_CXXMAP_BUILD=OFF -DLLVM_TOOL_LLVM_C_TEST_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFOD_FIND_BUILD=OFF -DLLVM_TOOL_LLVM_DEBUGINFO_ANALYZER_BUILD=OFF -DLLVM_TOOL_LLVM_DIFF_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_BUILD=OFF -DLLVM_TOOL_LLVM_DIS_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DLANG_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_DWARFUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_DWP_BUILD=OFF -DLLVM_TOOL_LLVM_EXEGESIS_BUILD=OFF -DLLVM_TOOL_LLVM_EXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_GSYMUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_IFS_BUILD=OFF -DLLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ITANIUM_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_JITLINK_BUILD=OFF -DLLVM_TOOL_LLVM_JITLISTENER_BUILD=OFF -DLLVM_TOOL_LLVM_LIBTOOL_DARWIN_BUILD=OFF -DLLVM_TOOL_LLVM_LINK_BUILD=OFF -DLLVM_TOOL_LLVM_LIPO_BUILD=OFF -DLLVM_TOOL_LLVM_LTO2_BUILD=OFF -DLLVM_TOOL_LLVM_LTO_BUILD=OFF -DLLVM_TOOL_LLVM_MCA_BUILD=OFF -DLLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MC_BUILD=OFF -DLLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_MICROSOFT_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_ML_BUILD=OFF -DLLVM_TOOL_LLVM_MODEXTRACT_BUILD=OFF -DLLVM_TOOL_LLVM_MT_BUILD=OFF -DLLVM_TOOL_LLVM_NM_BUILD=OFF -DLLVM_TOOL_LLVM_OBJCOPY_BUILD=OFF -DLLVM_TOOL_LLVM_OBJDUMP_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_OPT_REPORT_BUILD=OFF -DLLVM_TOOL_LLVM_PDBUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_PROFDATA_BUILD=OFF -DLLVM_TOOL_LLVM_PROFGEN_BUILD=OFF -DLLVM_TOOL_LLVM_RC_BUILD=OFF -DLLVM_TOOL_LLVM_READOBJ_BUILD=OFF -DLLVM_TOOL_LLVM_READTAPI_BUILD=OFF -DLLVM_TOOL_LLVM_REDUCE_BUILD=OFF -DLLVM_TOOL_LLVM_REMARKUTIL_BUILD=OFF -DLLVM_TOOL_LLVM_RTDYLD_BUILD=OFF -DLLVM_TOOL_LLVM_RUST_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SHLIB_BUILD=OFF -DLLVM_TOOL_LLVM_SIM_BUILD=OFF -DLLVM_TOOL_LLVM_SIZE_BUILD=OFF -DLLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_SPLIT_BUILD=OFF -DLLVM_TOOL_LLVM_STRESS_BUILD=OFF -DLLVM_TOOL_LLVM_STRINGS_BUILD=OFF -DLLVM_TOOL_LLVM_SYMBOLIZER_BUILD=OFF -DLLVM_TOOL_LLVM_TLI_CHECKER_BUILD=OFF -DLLVM_TOOL_LLVM_UNDNAME_BUILD=OFF -DLLVM_TOOL_LLVM_XRAY_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_NUMERIC_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LLVM_YAML_PARSER_FUZZER_BUILD=OFF -DLLVM_TOOL_LTO_BUILD=OFF -DLLVM_TOOL_OBJ2YAML_BUILD=OFF -DLLVM_TOOL_OPT_BUILD=OFF -DLLVM_TOOL_OPT_VIEWER_BUILD=OFF -DLLVM_TOOL_REDUCE_CHUNK_LIST_BUILD=OFF -DLLVM_TOOL_REMARKS_SHLIB_BUILD=OFF -DLLVM_TOOL_SANCOV_BUILD=OFF -DLLVM_TOOL_SANSTATS_BUILD=OFF -DLLVM_TOOL_SPIRV_TOOLS_BUILD=OFF -DLLVM_TOOL_VERIFY_USELISTORDER_BUILD=OFF -DLLVM_TOOL_VFABI_DEMANGLE_FUZZER_BUILD=OFF -DLLVM_TOOL_XCODE_TOOLCHAIN_BUILD=OFF -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_INCLUDE_TOOLS=ON -DLLVM_BUILD_TOOLS=ON -DLLVM_TOOL_CLANG_BUILD=ON -DCLANG_BUILD_TOOLS=OFF -DCLANG_TOOL_AMDGPU_ARCH_BUILD=OFF -DCLANG_TOOL_APINOTES_TEST_BUILD=OFF -DCLANG_TOOL_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_CHECK_BUILD=OFF -DCLANG_TOOL_CLANG_DIFF_BUILD=OFF -DCLANG_TOOL_CLANG_EXTDEF_MAPPING_BUILD=OFF -DCLANG_TOOL_CLANG_FORMAT_BUILD=OFF -DCLANG_TOOL_CLANG_FUZZER_BUILD=OFF -DCLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF -DCLANG_TOOL_CLANG_INSTALLAPI_BUILD=OFF -DCLANG_TOOL_CLANG_LINKER_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_NVLINK_WRAPPER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF -DCLANG_TOOL_CLANG_OFFLOAD_PACKAGER_BUILD=OFF -DCLANG_TOOL_CLANG_REFACTOR_BUILD=OFF -DCLANG_TOOL_CLANG_REPL_BUILD=OFF -DCLANG_TOOL_CLANG_SCAN_DEPS_BUILD=OFF -DCLANG_TOOL_CLANG_SHLIB_BUILD=OFF -DCLANG_TOOL_CLANG_SYCL_LINKER_BUILD=OFF -DCLANG_TOOL_C_ARCMT_TEST_BUILD=OFF -DCLANG_TOOL_C_INDEX_TEST_BUILD=OFF -DCLANG_TOOL_DIAGTOOL_BUILD=OFF -DCLANG_TOOL_DRIVER_BUILD=OFF -DCLANG_TOOL_HANDLE_CXX_BUILD=OFF -DCLANG_TOOL_HANDLE_LLVM_BUILD=OFF -DCLANG_TOOL_LIBCLANG_BUILD=OFF -DCLANG_TOOL_NVPTX_ARCH_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_BUILD=OFF -DCLANG_TOOL_SCAN_BUILD_PY_BUILD=OFF -DCLANG_TOOL_SCAN_VIEW_BUILD=OFF -DCLANG_ENABLE_CLANGD=OFF -DCLANG_INSTALL_SCANBUILD=OFF -DCLANG_INSTALL_SCANVIEW=OFF
+
+MSBuild.exe "$(ProjectDir)..\..\llvm-project\build\$(Platform)\$(Configuration)\INSTALL.vcxproj" /t:Build /property:Configuration=Release /property:Platform="$(Platform)"
+
 popd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(ProjectDir)\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets" Condition="Exists('$(ProjectDir)\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" />
-    <Import Project="$(ProjectDir)\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets" Condition="Exists('$(ProjectDir)\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(ProjectDir)\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(ProjectDir)\..\..\packages\llvm-cmake.6.0.0.1\build\native\llvm-cmake.targets'))" />
-    <Error Condition="!Exists('$(ProjectDir)\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(ProjectDir)\..\..\packages\clang-cmake.6.0.0.1\build\native\clang-cmake.targets'))" />
   </Target>
 </Project>

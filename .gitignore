@@ -1,5 +1,5 @@
 .vs
 Out/
 Obj/
-packages/
+/packages/
 *.vcxproj.user

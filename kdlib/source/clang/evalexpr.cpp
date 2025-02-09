@@ -3,17 +3,17 @@
 #include <memory>
 #include <regex>
 
-#include "clang/Basic/MemoryBufferCache.h"
 #include "clang/Basic/TargetOptions.h"
 #include "clang/Basic/TargetInfo.h"
 
-#include "clang/Lex/Preprocessor.h"
 #include "clang/Lex/PreprocessorOptions.h"
-#include "clang/Lex/HeaderSearch.h"
-#include "clang/Lex/HeaderSearchOptions.h"
 
 #include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/TextDiagnosticPrinter.h"
+
+#include "llvm/TargetParser/Host.h"
+
+#include "llvm/Support/Error.h"
+#include "llvm/Support/VirtualFileSystem.h"
 
 #include "kdlib/typedvar.h"
 #include "kdlib/exceptions.h"
@@ -59,7 +59,7 @@ TypedValue evalExpr(const std::string& expr, const ScopePtr& scope, const TypeIn
 
     clang::LangOptions  langOptions;
 
-    llvm::IntrusiveRefCntPtr<clang::vfs::InMemoryFileSystem>  memoryFileSystem(new clang::vfs::InMemoryFileSystem());
+    llvm::IntrusiveRefCntPtr<llvm::vfs::InMemoryFileSystem>  memoryFileSystem(new llvm::vfs::InMemoryFileSystem());
 
     memoryFileSystem->addFile("<input>", 0, llvm::MemoryBuffer::getMemBuffer(expr));
 
@@ -67,11 +67,11 @@ TypedValue evalExpr(const std::string& expr, const ScopePtr& scope, const TypeIn
     clang::FileManager  fileManager(fileSystemOptions, memoryFileSystem);
     clang::SourceManager  sourceManager(diagnosticEngine, fileManager);
 
-    const clang::FileEntry *pFile = fileManager.getFile("<input>");
+    llvm::Expected<clang::FileEntryRef> fileOrErr = fileManager.getFileRef("<input>");
+    clang::FileEntryRef pFile = *fileOrErr;
+
     clang::FileID  fileID = sourceManager.getOrCreateFileID(pFile, clang::SrcMgr::C_User);
     sourceManager.setMainFileID(fileID);
-
-    clang::MemoryBufferCache  memoryBufferCache;
 
     auto headerSearchOptions = std::make_shared<clang::HeaderSearchOptions>();
     auto targetOptions = std::make_shared<clang::TargetOptions>();
@@ -86,7 +86,6 @@ TypedValue evalExpr(const std::string& expr, const ScopePtr& scope, const TypeIn
         diagnosticEngine,
         langOptions,
         sourceManager,
-        memoryBufferCache,
         headerSearch,
         compilerInstance
     );
@@ -144,18 +143,17 @@ TypeInfoPtr evalType(const std::string& expr, const TypeInfoProviderPtr typeInfo
 
     clang::LangOptions  langOptions;
 
-    llvm::IntrusiveRefCntPtr<clang::vfs::InMemoryFileSystem>  memoryFileSystem(new clang::vfs::InMemoryFileSystem());
+    llvm::IntrusiveRefCntPtr<llvm::vfs::InMemoryFileSystem>  memoryFileSystem(new llvm::vfs::InMemoryFileSystem);
     memoryFileSystem->addFile("<input>", 0, llvm::MemoryBuffer::getMemBuffer(expr.c_str()));
 
     clang::FileSystemOptions  fileSystemOptions;
     clang::FileManager  fileManager(fileSystemOptions, memoryFileSystem);
     clang::SourceManager  sourceManager(diagnosticEngine, fileManager);
 
-    const clang::FileEntry *pFile = fileManager.getFile("<input>");
+    llvm::Expected<clang::FileEntryRef> fileOrErr = fileManager.getFileRef("<input>");
+    clang::FileEntryRef pFile = *fileOrErr;
     clang::FileID  fileID = sourceManager.getOrCreateFileID(pFile, clang::SrcMgr::C_User);
     sourceManager.setMainFileID(fileID);
-
-    clang::MemoryBufferCache  memoryBufferCache;
 
     auto headerSearchOptions = std::make_shared<clang::HeaderSearchOptions>();
     auto targetOptions = std::make_shared<clang::TargetOptions>();
@@ -170,7 +168,6 @@ TypeInfoPtr evalType(const std::string& expr, const TypeInfoProviderPtr typeInfo
         diagnosticEngine,
         langOptions,
         sourceManager,
-        memoryBufferCache,
         headerSearch,
         compilerInstance
     );
@@ -1180,7 +1177,7 @@ TypedValue  getNumericConst(const clang::Token& token)
 {
     if (token.is(clang::tok::identifier))
     {
-        std::string  strVal = token.getIdentifierInfo()->getName();
+        std::string  strVal = token.getIdentifierInfo()->getName().str();
 
         if (strVal == "false")
             return TypedValue(false);
