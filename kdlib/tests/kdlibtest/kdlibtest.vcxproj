@@ -105,7 +105,8 @@
       <AdditionalDependencies>ntdll.lib;Version.lib;clangAnalysis.lib;clangAPINotes.lib;clangAST.lib;clangASTMatchers.lib;clangBasic.lib;clangDriver.lib;clangEdit.lib;clangFrontend.lib;clangLex.lib;clangParse.lib;clangSema.lib;clangSerialization.lib;clangSupport.lib;clangTooling.lib;LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitstreamReader.lib;LLVMCore.lib;LLVMDebugInfoDWARF.lib;LLVMDemangle.lib;LLVMFrontendAtomic.lib;LLVMFrontendOffloading.lib;LLVMFrontendOpenMP.lib;LLVMIRReader.lib;LLVMMC.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMOption.lib;LLVMProfileData.lib;LLVMRemarks.lib;LLVMScalarOpts.lib;LLVMSupport.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTransformUtils.lib;LLVMWindowsDriver.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y  "$(ProjectDir)../../../bin/x86" "$(ProjectDir)../../../out/Win32/Debug"</Command>
+      <Command>xcopy /Y "$(ProjectDir)..\..\..\WinDbgExt\bin\$(PlatformTarget)\*.dll" "$(OutDir)"
+xcopy /Y "$(VCInstallDir)..\DIA SDK\bin\msdia140.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
@@ -127,7 +128,8 @@
       <AdditionalDependencies>ntdll.lib;Version.lib;clangAnalysis.lib;clangAPINotes.lib;clangAST.lib;clangASTMatchers.lib;clangBasic.lib;clangDriver.lib;clangEdit.lib;clangFrontend.lib;clangLex.lib;clangParse.lib;clangSema.lib;clangSerialization.lib;clangSupport.lib;clangTooling.lib;LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitstreamReader.lib;LLVMCore.lib;LLVMDebugInfoDWARF.lib;LLVMDemangle.lib;LLVMFrontendAtomic.lib;LLVMFrontendOffloading.lib;LLVMFrontendOpenMP.lib;LLVMIRReader.lib;LLVMMC.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMOption.lib;LLVMProfileData.lib;LLVMRemarks.lib;LLVMScalarOpts.lib;LLVMSupport.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTransformUtils.lib;LLVMWindowsDriver.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(ProjectDir)../../../bin/x64" "$(ProjectDir)../../../out/x64/Debug"</Command>
+      <Command>xcopy /Y "$(ProjectDir)..\..\..\WinDbgExt\bin\$(PlatformTarget)\*.dll" "$(OutDir)"
+xcopy /Y "$(VCInstallDir)..\DIA SDK\bin\amd64\msdia140.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
@@ -152,7 +154,8 @@
       <AdditionalDependencies>ntdll.lib;Version.lib;clangAnalysis.lib;clangAPINotes.lib;clangAST.lib;clangASTMatchers.lib;clangBasic.lib;clangDriver.lib;clangEdit.lib;clangFrontend.lib;clangLex.lib;clangParse.lib;clangSema.lib;clangSerialization.lib;clangSupport.lib;clangTooling.lib;LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitstreamReader.lib;LLVMCore.lib;LLVMDebugInfoDWARF.lib;LLVMDemangle.lib;LLVMFrontendAtomic.lib;LLVMFrontendOffloading.lib;LLVMFrontendOpenMP.lib;LLVMIRReader.lib;LLVMMC.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMOption.lib;LLVMProfileData.lib;LLVMRemarks.lib;LLVMScalarOpts.lib;LLVMSupport.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTransformUtils.lib;LLVMWindowsDriver.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y  "$(ProjectDir)../../../bin/x86" "$(ProjectDir)../../../out/Win32/Release"</Command>
+      <Command>xcopy /Y "$(ProjectDir)..\..\..\WinDbgExt\bin\$(PlatformTarget)\*.dll" "$(OutDir)"
+xcopy /Y "$(VCInstallDir)..\DIA SDK\bin\msdia140.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
@@ -178,7 +181,8 @@
       <AdditionalDependencies>ntdll.lib;Version.lib;clangAnalysis.lib;clangAPINotes.lib;clangAST.lib;clangASTMatchers.lib;clangBasic.lib;clangDriver.lib;clangEdit.lib;clangFrontend.lib;clangLex.lib;clangParse.lib;clangSema.lib;clangSerialization.lib;clangSupport.lib;clangTooling.lib;LLVMAnalysis.lib;LLVMAsmParser.lib;LLVMBinaryFormat.lib;LLVMBitReader.lib;LLVMBitstreamReader.lib;LLVMCore.lib;LLVMDebugInfoDWARF.lib;LLVMDemangle.lib;LLVMFrontendAtomic.lib;LLVMFrontendOffloading.lib;LLVMFrontendOpenMP.lib;LLVMIRReader.lib;LLVMMC.lib;LLVMMCParser.lib;LLVMObject.lib;LLVMOption.lib;LLVMProfileData.lib;LLVMRemarks.lib;LLVMScalarOpts.lib;LLVMSupport.lib;LLVMTargetParser.lib;LLVMTextAPI.lib;LLVMTransformUtils.lib;LLVMWindowsDriver.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(ProjectDir)../../../bin/x64" "$(ProjectDir)../../../out/x64/Release"</Command>
+      <Command>xcopy /Y "$(ProjectDir)..\..\..\WinDbgExt\bin\$(PlatformTarget)\*.dll" "$(OutDir)"
+xcopy /Y "$(VCInstallDir)..\DIA SDK\bin\amd64\msdia140.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <ProjectReference>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
